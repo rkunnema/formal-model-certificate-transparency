@@ -1,0 +1,71 @@
+{
+	"config": {
+		"global_max_cores": 10,
+		"global_max_memory": "max",
+		"default_timeout": 300,
+		"output_directory": "./results/accountability/acc_transparency/"
+	},
+  "tamarin_versions": {
+    "default": {
+      "path": "tamarin-prover"
+    }
+  },
+  "tasks": {
+    "autoprove": {
+      "theory_file": "../ct.spthy",
+			"tamarin_versions": ["stable"],
+      "output_file_prefix": "",
+			"tamarin_options": ["--derivcheck-timeout=0"],
+            "resources": {
+				"max_cores": 10,
+				"max_memory": 6,
+				"timeout": 500
+			},
+      "lemmas": [
+        {"name": "T_CT_1_verif_empty"},
+        {"name": "T_CT_1_client_inclusionViol_verif_nonempty"},
+        {"name": "T_CT_1_client_inclusionViol_min"},
+        {"name": "T_CT_1_client_inclusionViol_uniq"},
+        {"name": "T_CT_1_client_inclusionViol_inj"},
+        {"name": "T_CT_2"},
+        {"name": "T_CT_3"},
+        {"name": "T_Audit"},
+        {"name": "T_Gossip_verif_empty"},
+        {"name": "T_Gossip_gossip_inclusionViol_verif_nonempty"},
+        {"name": "T_Gossip_gossip_inclusionViol_min"},
+        {"name": "T_Gossip_gossip_inclusionViol_uniq"},
+        {"name": "T_Gossip_gossip_inclusionViol_inj"}
+      ]
+    },
+    "specialized": {
+      "theory_file": "../ct.spthy",
+			"tamarin_versions": ["stable"],
+      "output_file_prefix": "",
+			"tamarin_options": ["--derivcheck-timeout=0", "--defines=SUFFICIENCY"],
+            "resources": {
+				"max_cores": 10,
+				"max_memory": 6,
+				"timeout": 500
+			},
+      "lemmas": [
+        {"name": "T_CT_1_client_inclusionViol_suff"},
+        {"name": "T_CT_1_client_inclusionViol_single"},
+        {"name": "T_Gossip_gossip_inclusionViol_suff"},
+        {"name": "T_Gossip_gossip_inclusionViol_single"}
+      ]
+    },
+    "helper": {
+      "theory_file": "../ct.spthy",
+			"tamarin_versions": ["stable"],
+      "output_file_prefix": "",
+			"tamarin_options": ["--derivcheck-timeout=0"],
+            "resources": {
+				"max_cores": 10,
+				"max_memory": 6,
+				"timeout": 500
+			},
+      "lemmas": [
+      ]
+    }
+  }
+}

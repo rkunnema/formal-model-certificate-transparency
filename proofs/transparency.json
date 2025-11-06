@@ -1,0 +1,47 @@
+{
+	"config": {
+		"global_max_cores": 10,
+		"global_max_memory": "max",
+		"default_timeout": 300,
+		"output_directory": "./results/transparency/"
+	},
+  "tamarin_versions": {
+    "default": {
+      "path": "tamarin-prover"
+    }
+  },
+  "tasks": {
+    "autoprove": {
+      "theory_file": "../ct.spthy",
+			"tamarin_versions": ["stable"],
+      "output_file_prefix": "",
+			"tamarin_options": ["--derivcheck-timeout=0"],
+            "resources": {
+				"max_cores": 10,
+				"max_memory": 6,
+				"timeout": 500
+			},
+      "lemmas": [
+        {"name": "transparency_w_MMD"},
+        {"name": "transparency_CT_honest_logger"},
+        {"name": "transparency_SCT_Auditing"}
+      ]
+    },
+    "manual": {
+      "theory_file": "../ct.spthy",
+			"tamarin_versions": ["stable"],
+      "output_file_prefix": "",
+			"tamarin_options": ["--derivcheck-timeout=0", "--defines=SUFFICIENCY_PROOF"],
+            "resources": {
+				"max_cores": 10,
+				"max_memory": 6,
+				"timeout": 500
+			},
+      "lemmas": [
+        {"name": "transparency_CT_w_o_MMD"},
+        {"name": "transparency_Gossip_w_o_client_proof"},
+        {"name": "transparency_Gossip_w_client_proof"}
+      ]
+    }
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "recipe": "acc_authenticity_receipt.json",
+  "config": {
+    "global_max_cores": 10,
+    "global_max_memory": 128,
+    "default_timeout": 300,
+    "output_directory": "results/accountability/acc_authenticity_receipt"
+  },
+  "tamarin_versions": {
+    "default": {
+      "path": "tamarin-prover",
+      "version": "v1.10.0"
+    }
+  },
+  "execution_metadata": {
+    "total_tasks": 0,
+    "total_successes": 0,
+    "total_failures": 0,
+    "total_cache_hit": 0,
+    "total_runtime": 0.0,
+    "total_memory": 0.0,
+    "max_runtime": 0.0,
+    "max_memory": 0.0
+  },
+  "tasks": {}
+}

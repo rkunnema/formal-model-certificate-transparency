@@ -1,0 +1,36 @@
+{
+  "config": {
+    "global_max_cores": 10,
+    "global_max_memory": 128,
+    "default_timeout": 300,
+    "output_directory": "results/sanity/all-san/rerun"
+  },
+  "tamarin_versions": {
+    "default": {
+      "path": "tamarin-prover",
+      "version": "v1.10.0"
+    }
+  },
+  "tasks": {
+    "autoprove": {
+      "theory_file": "../ct.spthy",
+      "tamarin_versions": [
+        "default"
+      ],
+      "output_file_prefix": "autoprove",
+      "lemmas": [
+        {
+          "name": "san_CTAudit_monitorAudit_CA_Viol",
+          "tamarin_options": [
+            "--derivcheck-timeout=0"
+          ],
+          "resources": {
+            "max_cores": 10,
+            "max_memory": 5,
+            "timeout": 200
+          }
+        }
+      ]
+    }
+  }
+}

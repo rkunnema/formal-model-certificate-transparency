@@ -1,0 +1,112 @@
+{
+	"config": {
+		"global_max_cores": 10,
+		"global_max_memory": "max",
+		"default_timeout": 300,
+		"output_directory": "./results/sanity/misc/"
+	},
+  "tamarin_versions": {
+    "default": {
+      "path": "tamarin-prover"
+    }
+  },
+  "tasks": {
+    "autoprove": {
+      "theory_file": "../ct.spthy",
+			"tamarin_versions": ["stable"],
+      "output_file_prefix": "",
+			"tamarin_options": ["--derivcheck-timeout=0"],
+            "resources": {
+				"max_cores": 10,
+				"max_memory": 6,
+				"timeout": 500
+			},
+      "lemmas": [
+        {
+          "name": "append_only_guarantee_helper1",
+          "tamarin_versions": ["default"]
+        },
+        {
+          "name": "append_only_guarantee_helper2",
+          "tamarin_versions": ["default"]
+        },
+        {
+          "name": "append_only_guarantee_helper3",
+          "tamarin_versions": ["default"]
+        },
+        {
+          "name": "append_only_guarantee",
+          "tamarin_versions": ["default"]
+        },
+        {
+          "name": "gossiped_appendOnly_log_id",
+          "tamarin_versions": ["default"]
+        },
+        {
+          "name": "CA_auth_w_compromise",
+          "tamarin_versions": ["default"]
+        },
+        {
+          "name": "authenticity",
+          "tamarin_versions": ["default"]
+        },
+        {
+          "name": "cert_auth",
+          "tamarin_versions": ["default"]
+        },
+        {
+          "name": "cert_sct_auth",
+          "tamarin_versions": ["default"]
+        },
+        {
+          "name": "sct_auth",
+          "tamarin_versions": ["default"]
+        },
+        {
+          "name": "AppendOnlyViolation_Guarantee",
+          "tamarin_versions": ["default"]
+        },
+        {
+          "name": "incl_proof_auth",
+          "tamarin_versions": ["default"]
+        },
+        {
+          "name": "RogueCertFound_Guarantee",
+          "tamarin_versions": ["default"]
+        },
+        {
+          "name": "Violation_with_CA_Guarantee",
+          "tamarin_versions": ["default"]
+        },
+        {
+          "name": "_____",
+          "tamarin_versions": ["default"]
+        },
+        {
+          "name": "_____",
+          "tamarin_versions": ["default"]
+        },
+        {
+          "name": "_____",
+          "tamarin_versions": ["default"]
+        },
+        {
+          "name": "_____",
+          "tamarin_versions": ["default"]
+        },
+        {
+          "name": "_____",
+          "tamarin_versions": ["default"]
+        },
+        {
+          "name": "_____",
+          "tamarin_versions": ["default"]
+        },
+        {
+          "name": "_____",
+          "tamarin_versions": ["default"]
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,290 @@
+#!/usr/bin/python3
+import sys
+import re
+
+lines = sys.stdin.readlines()
+l = []
+
+
+lemma = sys.argv[1]
+for line in lines:
+    num = line.split(':')[0]
+    # Autoprove for uniqueness where the CA cert is legitimate but the CA corrupted, struggle a lot. Unless the first three steps are chosen according to this heuristic, then it is immediately proven; otherwise the proof takes (too) long
+    if ((lemma == "A_CTExt_1_ca_rogue_monitorExt_uniq")
+    or (lemma == "A_CTAudit_1_ca_rogue_audit_uniq")
+    or (lemma == "A_CTExt_2_ca_rogue_client_inclusion_verif_uniq")
+    or (lemma == "A_CTAudit_2_ca_rogue_audit_logger_honest_uniq")
+    or (lemma == "A_CT_1_root_ca_auth_on_log_uniq")
+    or (lemma == "A_CT_2_ca_rogue_honest_log_uniq")
+    or (lemma == "A_CTExt_3_ca_rogue_logger_benign_uniq")
+    or (lemma == "A_Receipt_1_ca_rogue_receipt_uniq")
+    or (lemma == "A_Receipt_1_ca_rogue_receipt_monitor_rogue_uniq")
+    or (lemma == "A_Receipt_2_root_ca_auth_on_log_mon_benign_uniq")
+    or (lemma == "todo")):
+        if re.match('.*LegitimacyProof.*', line):
+            l.append(num)
+        elif re.match(".*'pubKey'.*", line):
+            l.append(num)
+        elif re.match(".*!KU(~skCA.)*", line):
+            l.append(num)
+        else:
+            continue
+    
+
+    # I currently hardcode the first three steps of the proof, afterwards the smart heuristic is best. I do not want to influence any steps afterwards but these rules need to be up-to-date with the model
+    elif lemma == "A_CTExt_2_ca_rogue_client_inclusion_viol_uniq":
+        if "!LegitimacyProof( $rootCA, $idCA,                  <$rootCA, $idCA, pk(x), 'pubKey-CA', snCA, $i0, $j0>,                  sign(<$rootCA, $idCA, pk(x), 'pubKey-CA', snCA, $i0, $j0>, x.2)) ▶₃ #t1" in line:
+            l.append(num)
+        elif "!KU( sign(<$idCA, $id, pkID, 'pubKey', sn.1, $i.1, $j.1, sct1, sct2          >,          ~skCA)) @ #vk.24" in line:
+            l.append(num)
+        elif "!KU( ~skCA ) @ #vk.58" in line:
+            l.append(num)
+        else:
+            continue
+
+    elif lemma == "T_Gossip_verif_empty":
+        if "LoggerComputesAddLogTime(" in line:
+            l.append(num)
+        elif "Gos_MonInclCheck(" in line:
+            l = [num] + l
+        elif "Gos_AppendOnlyCheck(" in line:
+            l = [num] + l
+        elif "LoggerPresentsView(" in line:
+            l = [num] + l
+        
+        else:
+            continue
+
+    elif lemma == "A_Receipt_2_root_ca_auth_on_log_mon_viol_uniq":
+        if "!LegitimacyProof( $rootCA, $idCA,                  <$rootCA, $idCA, pk(x.1), 'pubKey-CA', snCA, $i0, $j0>,                  sign(<$rootCA, $idCA, pk(x.1), 'pubKey-CA', snCA, $i0, $j0>, x.4)) ▶₃ #t3" in line:
+            l.append(num)
+        elif "!KU( sign(<$idCA, $id, pkID, 'pubKey', sn.2, $i.1, $j.1,            <$idL1, 'SCT', $sct1,             sign(<$idL1, 'SCT', $sct1, $idCA, $id, pkID, sn.2, $i.1, $j.1>,                 x.1)           >,            $idL2, 'SCT', $sct2,            sign(<$idL2, 'SCT', $sct2, $idCA, $id, pkID, sn.2, $i.1, $j.1>,                x.2)          >,          ~skCA)) @ #vk.44" in line:
+            l.append(num)
+        elif "!KU( ~skCA ) @ #vk.46" in line:
+            l.append(num)
+        else:
+            continue
+
+    elif ((lemma == "A_Receipt_1_ca_rogue_receipt_verif_nonempty") 
+    or (lemma == "A_Receipt_2_root_ca_auth_on_log_mon_benign_verif_nonempty")):
+        if re.match('.*DO_MonitorBenign.*', line):
+            l.append(num)
+        else:
+            continue
+
+    elif ((lemma == "A_Receipt_1_verif_empty")):
+        if re.match('.*DomainOwnerChecksReceipt.*', line):
+            l.append(num)
+        else:
+            continue
+
+    elif ((lemma == "A_CTExt_2_verif_empty")):
+        if re.match('.*MonExtFakeCheck.*', line):
+            l.append(num)
+        elif re.match('.*LegitimateCheck.*', line):
+            l.append(num)
+        elif re.match('.*ClientChecksInclusion.*', line):
+            l.append(num)
+        elif re.match('.*SomeoneFetchesLogView.*', line):
+            l.append(num)
+        else:
+            continue
+
+    elif ((lemma == "A_CTExt_3_verif_empty")):
+        if re.match('.*MonExtFakeCheck.*', line):
+            l.append(num)
+        elif re.match('.*LegitimateCheck.*', line):
+            l.append(num)
+        elif re.match('.*MonitorChecksInclusion.*', line):
+            l.append(num)
+        elif re.match('.*SomeoneFetchesLogView.*', line):
+            l.append(num)
+        else:
+            continue
+
+    elif ((lemma == "A_CTExt_2_ca_rogue_client_inclusion_viol_min")):
+        if '(∃ idL.1 rootCA idC idL1 idL2 fields fields_CA idCA.1 commit    session #t0 #t1 #t2 #t3 #t4.   (CAFakesCert( idCA.1, fields, fields_CA ) @ #t0) ∧   (IllegalCA( rootCA, idCA.1, fields_CA ) @ #t1) ∧   (ClientAcceptsChain( idL1, idL2, rootCA, fields_CA, idCA.1, fields    ) @ #t2) ∧   (SomeoneFetchesLogView( idC, idL.1, session ) @ #t3) ∧   (ClientFindsInclusionViol( idL.1, fields, commit,' in line:
+            l = [num] + l
+        elif '($idL.1 = $idCA)  ∥ ($idL.1 = $idL)' in line:
+            l = [num] + l
+        elif "($rootCA.2 = $idCA)  ∥ ($rootCA.2 = $idL)" in line:
+            l = [num] + l
+        elif "!Root_CA( $idL, pk(x.7), root_self_tbs.2, root_self_sig.2) ▶₄ #t0.1" in line:
+            l = [num] + l
+        elif "($idCA.1 = $idCA)  ∥ ($idCA.1 = $idL)" in line:
+            l = [num] + l
+        elif "($idL.1 = $idCA)  ∥ ($idL.1 = $idL)" in line:
+            l = [num] + l
+        elif "($rootCA.2 = $idCA)  ∥ ($rootCA.2 = $idL)" in line:
+            l = [num] + l
+        elif "!Root_CA( $idCA, pk(x.7), root_self_tbs.2, root_self_sig.2) ▶₄ #t0.1" in line:
+            l = [num] + l
+        elif "!LegitimacyProof( $rootCA, $idCA,                  <$rootCA, $idCA, pk(x), 'pubKey-CA', snCA, $i0, $j0>,                  sign(<$rootCA, $idCA, pk(x), 'pubKey-CA', snCA, $i0, $j0>, x.2)) ▶₃ #t1" in line:
+            l.append(num)
+        elif "!Root_CA( $idL, pk(x.5), root_self_tbs.2, root_self_sig.2)" in line:
+            l = [num] + l
+        elif "($idCA.1 = $idCA)  ∥ ($idCA.1 = $idL)" in line:
+            l = [num] + l
+        # elif "($idL = $idL1)  ∥ ($idL = $idL2)" in line:
+        #     l.append(num)
+        elif "($idL.1 = $idL1)  ∥ ($idL.1 = $idL2.1)" in line:
+            l = [num] + l
+        elif "($idL.1 = $idL1.1)  ∥ ($idL.1 = $idL2)" in line:
+            l = [num] + l
+        else:
+            continue
+
+    elif ((lemma == "A_CTExt_3_ca_rogue_logger_blamed_min")):
+        if "(∃ idCA.1 fields fields_CA rootCA idM idL.1 idL1 idL2 commit    session #t0 #t1 #t2 #t3 #t4.   (CAFakesCert( idCA.1, fields, fields_CA ) @ #t0) ∧   (Ext_LegitimateCA( rootCA, fields_CA, idCA.1 ) @ #t1) ∧   (ClientAcceptsChain( idL1, idL2, rootCA, fields_CA, idCA.1, fields    ) @ #t2) ∧   (SomeoneFetchesLogView( idM, idL.1, session ) @ #t3) ∧   (MonitorFindsCert( idM, idL.1, fields, commit, session ) @ #t4)  ∧   (((idL.1 = idL1) ∨ (idL.1 = idL2))) ∧   (∀ IdFetcher log_id time #t1.1.     (LoggerPresentsView( idL.1, IdFetcher, log_id, time, commit,                          session      ) @ #t1.1)    ⇒ " in line:
+            l = [num] + l
+        elif "($idCA.1 = $idCA)  ∥ ($idCA.1 = $idL)" in line:
+            l = [num] + l
+        elif "($idL.1 = $idL1.1)  ∥ ($idL.1 = $idL2.1)" in line:
+            l = [num] + l
+        elif "($idL.1 = $idCA)  ∥ ($idL.1 = $idL)" in line:
+            l = [num] + l
+        elif "!Logger( $idCA, pkL.1 ) ▶₃ #t4.1" in line:
+            l = [num] + l
+        elif "($idCA.1 = $idCA) ∥ ($idCA.1 = $idL)" in line:
+            l = [num] + l
+        elif "!LegitimacyProof( $rootCA.3, $idL,                  <$rootCA.3, $idL, pk(x.6), 'pubKey-CA', snCA.1, $i0.1, $j0.1>,                  sign(<$rootCA.3, $idL, pk(x.6), 'pubKey-CA', snCA.1, $i0.1, $j0.1>,                       x.8)) ▶₃ #t1.1" in line:
+            l = [num] + l
+        elif "!Logger( $idL, pkL ) ▶₃ #t4" in line:
+            l.append(num)
+        elif "($rootCA.2 = $idCA)  ∥ ($rootCA.2 = $idL)" in line:
+            l = [num] + l
+        elif "!Root_CA( $idCA, pk(x.7), root_self_tbs.2, root_self_sig.2) ▶₄ #t0.1" in line:
+            l = [num] + l
+        elif "!Root_CA( $idL, pk(x.7), root_self_tbs.2, root_self_sig.2) ▶₄ #t0.1" in line:
+            l = [num] + l
+        elif "!Root_CA( $idCA, pk(x.7), root_self_tbs.2, root_self_sig.2) ▶₄ #t0.1" in line:
+            l = [num] + l
+        elif "!Root_CA( $idL, pk(x.7), root_self_tbs.2, root_self_sig.2) ▶₄ #t0.1" in line:
+            l = [num] + l
+        else:
+            continue
+
+    
+    
+
+
+    elif ((lemma == "A_CTAudit_2_ca_rogue_audit_logger_rogue_min")):
+        if "(∃ idCA.1 fields_CA rootCA fields idM idL.1 commit session #t0 #t1    #t2 #t3.   (Audit_CAFakesCert_Fields( idCA.1, idL.1, fields_CA, fields    ) @ #t0) ∧   (SomeoneFetchesLogView( idM, idL.1, session ) @ #t1) ∧   (MonitorFindsCert( idM, idL.1, fields, commit, session ) @ #t2) ∧   (Ext_LegitimateCA( rootCA, fields_CA, idCA.1 ) @ #t3)  ∧   (#t0 < #t1) ∧   (∀ IdFetcher log_id time #t1.1.     (LoggerPresentsView( idL.1, IdFetcher, log_id, time, commit,                          session      ) @ #t1.1)    ⇒     ∀ #t0.1. (Time( time ) @ #t0.1) ⇒ ¬(#t0.1 < #t1.1)) ∧   (((idCA.1 = $idCA) ∨ (idCA.1 = $idL))) ∧   (((¬($idCA = idCA.1))" in line:
+            l.append(num)
+        elif "($idCA.1 = $idCA)  ∥ ($idCA.1 = $idL)" in line:
+            l.append(num)
+        elif "($idL.1 = $idCA)  ∥ ($idL.1 = $idL)" in line:
+            l.append(num)
+        elif "!Logger( $idCA, pk(x.4) ) ▶₃ #t0.1" in line:
+            l = [num] + l
+        elif "!LegitimacyProof( $rootCA.3, $idL,                  <$rootCA.3, $idL, pk(x.6), 'pubKey-CA', sn.3, $i0.1, $j0.1>,                  sign(<$rootCA.3, $idL, pk(x.6), 'pubKey-CA', sn.3, $i0.1, $j0.1>,                       x.7)) ▶₃ #t3.1" in line:
+            l = [num] + l
+        elif "!Logger( $idL, pk(x) ) ▶₃ #t0" in line:
+            l.append(num)
+        elif "($rootCA.2 = $idCA)  ∥ ($rootCA.2 = $idL)" in line:
+            l.append(num)
+        elif "!Root_CA( $idCA, pk(x" in line:
+            l.append(num)
+        elif "!Root_CA( $idL, pk(x" in line:
+            l.append(num)
+        elif "($idL.1 = $idCA)  ∥ ($idL.1 = $idL)" in line:
+            l.append(num)
+        elif "!Logger( $idCA, pk(x.4) ) ▶₃ #t0.1" in line:
+            l.append(num)
+        elif "($rootCA.2 = $idCA)  ∥ ($rootCA.2 = $idL)" in line:
+            l.append(num)
+        else:
+            continue
+
+
+
+
+
+    elif lemma == "A_CTExt_3_ca_rogue_logger_blamed_uniq":
+        if "!LegitimacyProof( $rootCA, $idCA,                  <$rootCA, $idCA, pk(x), 'pubKey-CA', snCA, $i0, $j0>,                  sign(<$rootCA, $idCA, pk(x), 'pubKey-CA', snCA, $i0, $j0>, x.2)) ▶₃ #t1" in line:
+            l.append(num)
+        elif "!KU( sign(<$idCA, $id, pkID, 'pubKey', sn.2, $i.1, $j.1, sct1, sct2          >,          ~skCA)) @ #vk.27" in line:
+            l.append(num)
+        elif "!KU( ~skCA ) @ #vk.60" in line:
+            l.append(num)
+        else:
+            continue
+
+
+
+
+
+
+
+
+
+
+
+    elif lemma == "A_CTAudit_2_ca_rogue_audit_logger_rogue_uniq":
+        if "!LegitimacyProof( $rootCA, $idCA,                  <$rootCA, $idCA, pk(x.2), 'pubKey-CA', sn, $i0, $j0>,                  sign(<$rootCA, $idCA, pk(x.2), 'pubKey-CA', sn, $i0, $j0>, x.3)) ▶₃ #t3" in line:
+            l.append(num)
+        elif "!KU( sign(<$idCA, $id, pkID, 'pubKey', ~sn, $i.1, $j.1, sct1, sct2          >,          ~skCA)) @ #vk.31" in line:
+            l.append(num)
+        elif "!KU( ~skCA ) @ #vk.41" in line:
+            l.append(num)
+        else:
+            continue
+
+
+
+    elif lemma == "A_Receipt_1_ca_rogue_receipt_monitor_rogue_min":
+        if "(∃ rootCA idM.2 fields idCA.1 fields_CA commit session #t0 #t1 #t2.   (CAFakesCert( idCA.1, fields, fields_CA ) @ #t0) ∧   (IllegalCA( rootCA, idCA.1, fields_CA ) @ #t1) ∧   (DO_MonitorBenign( idM.2, fields, commit, session ) @ #t2)  ∧   (((rootCA = $idCA) ∨ (rootCA = $idM.1))) ∧   (((¬($idCA = rootCA)) ∨ (¬($idM.1 = rootCA)))))  ∥" in line:
+            l.append(num)
+        elif "($rootCA.2 = $idCA)  ∥ ($rootCA.2 = $idM.1)" in line:
+            l.append(num)
+        elif "!Root_CA( $idCA, pk(x.5), root_self_tbs.1, root_self_sig.1) ▶₄ #t0.1" in line:
+            l = [num] + l
+        elif "!Root_CA( $idM.1, pk(x.6), root_tbs.2, root_sig.2 ) ▶₂ #t1.1" in line:
+            l = [num] + l
+        elif "!MonitorKey( $idM.1, pk(x.3) ) ▶₁ #t2" in line:
+            l.append(num)
+        elif "($idM.3 = $idCA)  ∥ ($idM.3 = $idM.1)" in line:
+            l.append(num)
+        elif "!Root_CA( $idM.1, pk(x.5), root_self_tbs.1, root_self_sig.1) ▶₄ #t0.1" in line:
+            l.append(num)
+        elif "!MonitorKey( $idM.1, pk(x.3) ) ▶₁ #t2" in line:
+            l.append(num)
+        elif "($idCA.1 = $idCA)  ∥ ($idCA.1 = $idM.1)" in line:
+            l.append(num)
+        else:
+            continue
+
+    
+
+    elif (lemma == "A_Receipt_2_root_ca_auth_on_log_mon_viol_min"):
+        if "(∃ idM.2 rootCA idL fields idL1 idL2 fields_CA idCA.1 commit    session #t0 #t1 #t2 #t3 #t4.   (ClientAcceptsChain( idL1, idL2, rootCA, fields_CA, idCA.1, fields    ) @ #t0) ∧   (SomeoneFetchesLogView( idM.2, idL, session ) @ #t1) ∧   (Monitor_CAFakesCertInLogEntry_Fields( idCA.1, idL, fields, commit,                                          session    ) @ #t2) ∧   (IllegalCA( rootCA, idCA.1, fields_CA ) @ #t3) ∧   (DO_MonitorBlame( idM.2, fields, commit, session ) @ #t4)  ∧" in line:
+            l.append(num)
+        elif "($idM.3 = $idCA)  ∥ ($idM.3 = $idM.1)" in line:
+            l.append(num)
+        elif "($rootCA.2 = $idCA)  ∥ ($rootCA.2 = $idM.1)" in line:
+            l.append(num)
+        elif "!Root_CA( $idM.1, pk(x.5), root_self_tbs.1, root_self_sig.1) ▶₀ #t0.1" in line:
+            l.append(num)
+        elif "!MonitorKey( $idM.1, pk(x.5) ) ▶₁ #t4" in line:
+            l.append(num)
+        elif "($idCA.1 = $idCA)  ∥ ($idCA.1 = $idM.1)" in line:
+            l.append(num)
+        elif "!Root_CA( $idCA, pk(x.6), root_self_tbs.1, root_self_sig.1) ▶₀ #t0.1" in line:
+            l = [num] + l
+        elif "!Root_CA( $idM.1, pk(x.6), root_self_tbs.1, root_self_sig.1) ▶₀ #t0.1" in line:
+            l = [num] + l
+        else:
+            continue
+
+    else:
+        exit(0) # instead then use default heuristic (o or O)
+
+    # Add custom behavior here for other lemmas here
+    # elif lemma == "OTHER_LEMMA_NAME":
+    #     if re.match('SOME_REGEX', line):
+    #         l.append(num)
+    #     else:
+    #         exit(0)
+
+for i in l:
+    print(i)

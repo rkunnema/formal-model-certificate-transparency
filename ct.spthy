@@ -1,0 +1,3071 @@
+/*
+ * Protocol: Certficate Transparency with additions for SCT Auditing, STH Gossiping, and, accountability with naive revocation
+ * Modeler:  anonymized
+ * Date:     July 2025
+ * Sources:  RFC6962, RFC 9162, "Opt-in SCT Auditing", Emily Stark and Chris Thompson, and partly rooted on "Provable Security for PKI Schemes" by Wrótniak et al.
+ * Status:   working
+ * Notes:    Run with --defines=REVOCATION to activate naive revocation checks. Receipt model uses --defines=RECEIPT.
+ */
+
+theory ct
+begin
+
+functions:
+    pk/1,
+    sign/2,
+    verify/3[destructor], /* sign + verify */
+
+
+    /*Structure of a certificate as tuple with
+    
+    + Normal certificate 
+    <Issuer, Subject, Key, Type, serial number, issued timestamp, valid until timestamp>
+    + SCTs
+    <Logger Identity, 'SCT', timestamp, signature>
+    + Public Key certificate with embedded SCTs
+    <Issuer, Subject, Key, Type, serial number, issued timestamp, valid until timestamp, sct1, sct2>
+
+    Different types are: 
+    1. 'pre-cert'
+    2. 'SCT': Signed Certificate Timestamp
+    3. 'pubKey': Public Key Certificate (finished certificate after issued as PreCert)
+        3.1 'pubKey-CA': Public Key Certificate of a CA
+    4. 'selfCert': Certificate is self signed, usually root of trust
+        4.1 'selfCert-log': Logger's self-signed certificate
+
+    */
+
+    true/0
+
+equations:
+
+    verify(       sign(fields, sk), fields, pk(sk)           ) = true()
+
+/** Specification **/
+
+/* Register a root CA that will later sign other intermediate CA certificates. */
+rule Root_CA_Init [color= #620c97]:
+    let 
+        fields = <$idCA, $idCA, pk(~skCA), 'selfCert', ~sn, $now, $j>
+        self_sig = sign(fields, ~skCA)
+    in
+    [ Fr(~skCA), Fr(~sn) ]
+    --[ 
+        CA_Registered($idCA, ~skCA, pk(~skCA)), 
+        Root_CA_Init($idCA),
+        Time($now)
+    ]->
+    [   Out(fields), Out(self_sig), 
+        Out(<$idCA, pk(~skCA)>), /* publicly announce the public key and certificate on the network */
+        !Root_CA_s0($idCA, ~skCA, pk(~skCA)), 
+        !Root_CA($idCA, pk(~skCA)) ]
+
+/* Register a CA that will later sign other certificates. This CA is assumed to be non-root and has its own certificate signed by a root CA.
+Intermediate CAs created by this rule are defined as legitimate. See later discussions for legitimacy checks that require the !CA_Documentation fact.
+*/
+rule CA_Init [color= #c871ff]:
+    let 
+        fields = <$rootCA, $idCA, pk(~skCA), 'pubKey-CA', ~sn, $now, $j>
+        self_sig = sign(fields, skRootCA)
+    in
+    [ Fr(~skCA), Fr(~sn), !Root_CA_s0($rootCA, skRootCA, pkRootCA) /* Root CA that signs this CA */  ]
+    --[ 
+        CA_Registered($idCA, ~skCA, pk(~skCA)), /* restrictions on CA registrations apply to both CAs and Root CAs */
+        NonRoot_CA_Init($idCA),
+        DocumentedCA($rootCA, $idCA, fields),
+        Time($now)
+    ]->
+    [   Out(fields), Out(self_sig), 
+        Out(<$idCA, pk(~skCA)>), /* publicly announce the public key and certificate on the network */
+        !CA_s0($idCA, ~skCA, pk(~skCA), fields, self_sig), !CA_Documentation($rootCA, $idCA, fields, self_sig) ]
+
+/* The domain owner represents the party in the web, running and website with some domain / Common Name (CN) with a key pair that needs certification by some CA. It is equivalent to a HTTPS server that needs a certificate in order to hand it out to visiting clients and performing a key exchange subsequently. */
+rule Domain_Owner_Init [color= #c6c6c6]:
+    let
+        pubK = pk(~sk)
+    in
+    [ Fr(~sk) ]
+    --[ 
+        Time($now)
+    ]->
+    [ !DomainOwner($idServer, pubK), /* The DomainOwner fact serves as a proof of identity: If this fact is later used for issuing a certificate, we say that it is honestly issued (i.e., on behalf of the domain owner). see honest rules for issuing a pre-certificate for instace. */ 
+    Out(pubK) /* Public key is announced on the network */ ]
+
+
+/* Initialize a Monitor. A Monitor will later oversee the loggers. Monitoring is either conducted by the domain owner themselves or outsourced to a dedicated entity. */
+rule Monitor_Init:
+    [  ]
+    --[ 
+        Monitor_Registered($idM),
+        Time($now)
+     ]->
+    [ !Monitor($idM) ]
+
+/* Monitor can choose a logger and start the monitoring process of it. Only these known loggers will later be considered when exploring new certificates. */
+rule StartMonitoring [color= #ffdc4e]:
+    [ !Monitor($idM), !Logger($idL, pkL) ]
+    --[ 
+        Time($now)
+    ]->
+    [ !LoggerDict($idM, $idL) ]
+
+/* This rule can trigger if the logger violates the append-only property and the monitor checks for it. 
+see restriction for 'AppendOnlyViolation'
+In CT, usually this check is not necessary to run by the monitor as they explore all entries */ 
+rule monitorFindsAppendOnlyViolation [color= #e65208]:
+    [ !LoggerDict($idM, $idL), !TLS_L_to_M($idL, $idM, $snapshot, sth, session) ]
+    --[
+        MonitorAppendOnlyViol($idM, $idL, $now, sth, session),
+        AppendOnlyViolation($idM, $idL, sth, session),
+        Time($now)
+    ]->
+    [ ]
+
+rule monitorVerifiesAppendOnly [color= #e65208]:
+    [ !LoggerDict($idM, $idL), !TLS_L_to_M($idL, $idM, $snapshot, sth, session) ]
+    --[
+        MonitorAppendOnlyVerified($idM, $idL, $now, sth, session),
+        AppendOnlyVerified($idM, $idL, sth, session),
+        Time($now)
+    ]->
+    [ ]
+
+/* A Monitor receives a subject that it should track which means that if a certificate with this subject is contained in a log, it will compare it to the known key. */
+rule monitorTrackSubject [color= #fac800]:
+    [ !Monitor($idM), !DomainOwner(su, pubK) ]
+    --[ Time($now) ]->
+    [ !TrackSubject($idM, su) /* from here on the monitor tracks the subject 'su'. We implicitly include that during their contract the domain owner shares honestly issued certificates with this monitor. The monitor will subsequently in authenticity checks make use of this ground truth knowledge. The checks are formalized below in the restrictions rogueCert and benignCert. */ ]
+
+restriction rogueCert:
+    "All idCA stmt #t1. RogueCert(idCA, stmt)@t1 ==> not (Ex #t0. GroundTruth(idCA, stmt)@t0 & #t0 < #t1)"
+
+restriction benignCert:
+    "All idCA stmt #t1. BenignCert(idCA, stmt)@t1 ==> (Ex #t0. GroundTruth(idCA, stmt)@t0 & #t0 < #t1)"
+
+/******** CT Monitor Log Exploration ********/
+
+/* We use these rules to axiomatically assert later in inclusion proof whether a chain on the log is valid or not */
+rule ChainValidator_Valid:
+    let
+        ca_fields = <$rootCA, $idCA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
+        cert_fields = <$idCA, $subj, ke, 'pre-cert', sn, $i, $j>
+        chain = <<cert_fields, cert_sig>, <ca_fields, ca_sig>>
+    in
+    [ In(cert_fields), In(cert_sig), In(ca_fields), In(ca_sig), !Root_CA($rootCA, pkRootCA) ]
+    --[
+        Eq(verify(cert_sig, cert_fields, pkCA), true()),
+        Eq(verify(ca_sig, ca_fields, pkRootCA), true()),
+
+        ChainCheck(chain),
+        ChainValid(chain)
+    ]->
+    [ ]
+
+rule ChainValidator_Invalid:
+    let
+        ca_fields = <$rootCA, $idCA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
+        cert_fields = <$idCA, $subj, ke, 'pre-cert', sn, $i, $j>
+        chain = <<cert_fields, cert_sig>, <ca_fields, ca_sig>>
+    in
+    [ In(cert_fields), In(cert_sig), In(ca_fields), In(ca_sig), !Root_CA($rootCA, pkRootCA) ]
+    --[
+        _restrict(not (
+            (verify(cert_sig, cert_fields, pkCA) = true()) 
+            & 
+            (verify(ca_sig, ca_fields, pkRootCA) = true())
+          ) /* chain does not verify */
+        ),
+
+        ChainCheck(chain),
+        ChainInvalid(chain)
+    ]->
+    [ ]
+
+/* 
+The following rules cover monitor exploration via the log to find potentially rogue certificates. When looking for a certificate, there are different outcomes that are encoded in different rules here:
+    1. The monitor finds a rogue certificate in a log, this is reachable as soon as a rogue certificate is contained in the snapshot shared by the logger.
+    2. The monitor finds a benign certificate. No further action is needed
+    3. The monitor does not find any (rogue) certificate. No further action is needed
+    4. The monitor finds a rogue certificate but is itself malicious: It will ignore the finding and not alert the customer. We say that a monitor sleeps on a rogue entry in this case. 
+*/
+
+rule monitorFindsRogueCertificate [color= #f3d664]:
+    let
+        ca_fields = <$rootCA, $idCA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
+        cert_fields = <$idCA, $subj, ke, 'pre-cert', sn, $i, $j>
+        chain = <<cert_fields, cert_sig>, <ca_fields, ca_sig>>
+        stmt = <$idCA, $subj, ke, sn>
+    in
+    [ !LoggerDict($idM, $idL), !TrackSubject($idM, su), In(cert_fields), In(cert_sig), In(ca_fields), In(ca_sig), !TLS_L_to_M($idL, $idM, $snapshot, sth, session), !Root_CA($rootCA, pkRootCA) ]
+    --[ 
+        Eq(verify(cert_sig, cert_fields, pkCA), true()),
+        Eq(verify(ca_sig, ca_fields, pkRootCA), true()),
+        MonitorFindsCert($idM, $idL, stmt, sth, session),
+        MonitorBlamesCA($idCA, $idL, stmt, ca_fields, sth, session),
+        MonitorObservesEntry($idM, $idL, chain, sth, session), /* see restriction */
+        RogueCert($idCA, stmt), /* see restriction */
+        MonitorInspectsLog($idM, $idL, stmt, ca_fields, sth, session), /* monitor explores log entries */
+        MonitorInspectsLog_noTrust($idL, stmt, sth, session), /* monitor explores log entries + allowed to sleep */
+
+        Revoked(stmt), /* [in Revocation model] Monitor initiates revocation */
+        Time($now)
+    ]->
+    [ ]
+
+rule monitorCanFindCertificate [color= #f3d664]:
+    let
+        ca_fields = <$rootCA, $idCA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
+        cert_fields = <$idCA, $subj, ke, 'pre-cert', sn, $i, $j>
+        chain = <<cert_fields, cert_sig>, <ca_fields, ca_sig>>
+        stmt = <$idCA, $subj, ke, sn>
+    in
+    [ !LoggerDict($idM, $idL), !TrackSubject($idM, $subj), In(cert_fields), In(cert_sig), In(ca_fields), In(ca_sig), !TLS_L_to_M($idL, $idM, $snapshot, sth, session), !Root_CA($rootCA, pkRootCA) ]
+    --[
+        Eq(verify(cert_sig, cert_fields, pkCA), true()),
+        Eq(verify(ca_sig, ca_fields, pkRootCA), true()),
+        MonitorFindsCert($idM, $idL, stmt, sth, session),
+        MonitorObservesEntry($idM, $idL, chain, sth, session), /* see restriction */
+        BenignCert($iss, stmt), /* cert is found benign, see restriction */
+        MonitorInspectsLog($idM, $idL, stmt, ca_fields, sth, session), /* monitor explores log entries */
+        MonitorInspectsLog_noTrust($idL, stmt, sth, session), /* monitor explores log entries + allowed to sleep */
+
+        Time($now)
+    ]->
+    [ ]
+
+rule monitorCannotFindCertificate [color= #f3d664]:
+    let
+        ca_fields = <$rootCA, $idCA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
+        cert_fields = <$idCA, $subj, ke, 'pre-cert', sn, $i, $j>
+        chain = <<cert_fields, cert_sig>, <ca_fields, ca_sig>>
+        stmt = <$idCA, $subj, ke, sn>
+    in
+    [ !LoggerDict($idM, $idL), !TrackSubject($idM, su), In(cert_fields), In(cert_sig), In(ca_fields), In(ca_sig), !TLS_L_to_M($idL, $idM, $snapshot, sth, session), !Root_CA($rootCA, pkRootCA) ]
+    --[ 
+        CannotFindCert($idM, stmt, $idL, sth, session),
+        MonitorCannotFind($idM, $idL, stmt, sth, session),
+        NothingObserved($idM, $idL, cert_fields, sth, session), /* see restriction */
+        MonitorInspectsLog_noTrust($idL, stmt, sth, session), /* auth check with sleep */
+        MonitorInspectsLog($idM, $idL, stmt, ca_fields, sth, session), /* monitor looks for stmt in log and checks authenticity if found, but here it is not found */
+
+        Time($now),
+        Debug3()
+    ]->
+    [ ]
+
+rule monitorFindsRogueCertificate_Sleep [color= #af2828]:
+    let
+        ca_fields = <$rootCA, $idCA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
+        cert_fields = <$idCA, $subj, ke, 'pre-cert', sn, $i, $j>
+        chain = <<cert_fields, cert_sig>, <ca_fields, ca_sig>>
+        stmt = <$idCA, $subj, ke, sn>
+    in
+    [ !LoggerDict($idM, $idL), !St_bad_Monitor($idM), !TrackSubject($idM, su), In(cert_fields), In(cert_sig), In(ca_fields), In(ca_sig), !TLS_L_to_M($idL, $idM, $snapshot, sth, session), !Root_CA($rootCA, pkRootCA) ]
+    --[
+        Eq(verify(cert_sig, cert_fields, pkCA), true()),
+        Eq(verify(ca_sig, ca_fields, pkRootCA), true()), /* only if it is a correctly signed and rogue cert, sleeping is considered a violation (+ we cannot check for other cases) */
+        MonitorSleeps($idM, stmt),
+        MonitorObservesEntry($idM, $idL, chain, sth, session), /* see restriction */
+        RogueCert($iss, stmt), /* see restriction */
+        MonitorInspectsLogSleep($idM, stmt, sth), /* but monitor sleeps on the rogue entry: not informing the server, no revocation issued, ... */
+        MonitorInspectsLog_noTrust($idL, stmt, sth, session),
+
+        Time($now)
+    ]->
+    [ ]
+
+/*** Monitor-side inclusion proofs ***/
+
+rule MonitorVerifiesInclusion [color= #c1ff3c]:
+    let
+        preC_fields = <$idCA, $id, pkID, 'pre-cert', sn, $i, $j>
+        stmt = <$idCA, $id, pkID, sn>
+    in
+    [ !TLS_L_to_M($idL, $idC, $snapshot, sth, session), !Logger($idL, pkL),In(preC_fields), /* entry to check for */ !Monitor($idM) ]
+    --[
+        MonitorSideInclusionProved($idL, stmt, sth, session),
+        InclusionProofSucceeds($idL, preC_fields, sth, session), /* entry is contained in the snapshot, see restriction */
+        MonitorChecksInclusion($idM, $idL, preC_fields, sth, session),
+        InclusionProof($idM, $idL, preC_fields, sth, session),
+
+        
+        Time($now)
+    ]->
+    [ ]
+
+rule MonitorFindsInclusionViolation [color= #e65208]:
+    let
+        
+        preC_fields = <$idCA, $id, pkID, 'pre-cert', sn, $i, $j>
+        stmt = <$idCA, $id, pkID, sn>
+    in
+    [ !TLS_L_to_M($idL, $idC, $snapshot, sth, session), !Logger($idL, pkL),In(preC_fields), /* entry to check for */ !Monitor($idM) ]
+    --[
+        InclusionProofFailed($idL, stmt),
+        MonitorChecksInclusion($idM, $idL, preC_fields, sth, session),
+        MonitorFindsInclusionViol($idL, stmt, sth, session),
+
+        InclusionProofFails($idM, $idL, preC_fields, sth, session), /* entry is not contained in the snapshot */
+        InclusionProof($idM, $idL, preC_fields, sth, session),
+        
+        Time($now)
+    ]->
+    []
+
+/***** SCT Auditing  *****/
+
+/*
+In SCT Auditing, a monitor receives a certificate along with its embedded SCTs. Each of the following rules considers one of the two SCTs at a time. 
+The SCT is then used together with the certificate to determine whether the certificate is rogue or benign, using the same techniques as seen for the external check (below) or in the CT model (above). There are 3 possible outcomes:
+    1. The certificate received is rogue. The monitor informs the domain owner about it.
+    2. The certificate received is benign. No further action is needed.
+    3. The monitor is itself malicious and sleeps on the rogue certificate instead of informing the domain owner.
+*/
+
+rule monitorAudit_CA_Viol:
+    let
+        audit_stmt = <$idCA, $id, pkID, sn>
+
+        pub_fields = <$idCA, $id, pkID, 'pubKey', sn, $i, $j, sct1, sct2>
+        sct_fields = <$idL, 'SCT', $sct, <$idCA, $id, pkID, sn, $i, $j>>
+        ca_fields = <$rootCA, $idCA, pkCA, 'pubKey-CA', sn, $i0, $j0>
+        chain = <<pub_fields, pub_sig>, <ca_fields, ca_sig>>
+        pre_fields = <$idCA, $id, pkID, 'pre-cert', sn, $i, $j> /* reconstructed from the actual certificate */
+
+        pubkey_cert = <pub_fields, pub_sig>
+        sct_to_audit = <$idL, 'SCT', $sct, sct_sig>
+    in
+    [ !LoggerDict($idM, $idL), !TrackSubject($idM, $id), !Logger($idL, pkL), !Root_CA($rootCA, pkRootCA),
+    !TLS_to_M($idM, chain, sct_to_audit) ]
+    --[ Eq(verify(pub_sig, pub_fields, pkCA), true()),
+        Eq(verify(sct_sig, sct_fields, pkL), true()),
+        Eq(verify(ca_sig, ca_fields, pkRootCA), true()),
+        _restrict((sct_to_audit = sct1) | (sct_to_audit = sct2)),
+        RogueCert($idCA, audit_stmt), /* see restriction */
+        MonitorLearns(pre_fields),
+        Revoked(audit_stmt), /* [in Revocation model] Monitor initiates revocation */
+        MonitorInformsServer($idM, audit_stmt), /* referenced in receipt model */
+
+        AuditedSCT($idM, $idL, pre_fields, audit_stmt),
+        AuditAuthCheck($idL, ca_fields, audit_stmt),
+        AuditAuthCheck_noTrust($idL, ca_fields, audit_stmt),
+        AuditCertFake($idCA, $idL, ca_fields, audit_stmt),
+
+        Time($now)
+    ]->
+    [ CraftReceipt($idM, chain) ]
+
+rule monitorAudit_no_viol:
+    let
+        audit_stmt = <$idCA, $id, pkID, sn>
+
+        pub_fields = <$idCA, $id, pkID, 'pubKey', sn, $i, $j, sct1, sct2>
+        sct_fields = <$idL, 'SCT', $sct, <$idCA, $id, pkID, sn, $i, $j>>
+        ca_fields = <$rootCA, $idCA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
+        chain = <<pub_fields, pub_sig>, <ca_fields, ca_sig>>
+        pre_fields = <$idCA, $id, pkID, 'pre-cert', sn, $i, $j> /* reconstructed from the actual certificate */
+
+        sct_to_audit = <$idL, 'SCT', $sct, sct_sig>
+    in
+    [ !LoggerDict($idM, $idL), !TrackSubject($idM, $id), !Logger($idL, pkL), !Root_CA($rootCA, pkRootCA),
+    !TLS_to_M($idM, chain, sct_to_audit)
+    ]
+    --[ Eq(verify(pub_sig, pub_fields, pkCA), true()),        
+        Eq(verify(sct_sig, sct_fields, pkL), true()),
+        Eq(verify(ca_sig, ca_fields, pkRootCA), true()),
+        _restrict((sct_to_audit = sct1) | (sct_to_audit = sct2)), /* only one sct at a time is considered */
+        BenignCert($idCA, audit_stmt), /* see restriction */
+
+        MonitorLearns(pre_fields),
+        AuditedSCT($idM, $idL, pre_fields, audit_stmt),
+        AuditAuthCheck($idL, ca_fields, audit_stmt),
+        AuditAuthCheck_noTrust($idL, ca_fields, audit_stmt),
+        Time($now)
+    ]->
+    [ CraftReceipt($idM, chain)   ]
+
+rule monitorAudit_Sleep [color= #af2828]: 
+    let
+        audit_stmt = <$idCA, $id, pkID, sn>
+
+        pub_fields = <$idCA, $id, pkID, 'pubKey', sn, $i, $j, sct1, sct2>
+        sct_fields = <$idL, 'SCT', $sct, <$idCA, $id, pkID, sn, $i, $j>>
+        ca_fields = <$rootCA, $idCA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
+        chain = <<pub_fields, pub_sig>, <ca_fields, ca_sig>>
+        pre_fields = <$idCA, $id, pkID, 'pre-cert', sn, $i, $j> /* reconstructed from the actual certificate */
+
+        pubkey_cert = <pub_fields, pub_sig>
+        sct_to_audit = <$idL, 'SCT', $sct, sct_sig>
+    in
+    [ !LoggerDict($idM, $idL), !St_bad_Monitor($idM), !TrackSubject($idM, $id), !Logger($idL, pkL), !Root_CA($rootCA, pkRootCA),
+    !TLS_to_M($idM, chain, sct_to_audit) ]
+    --[ Eq(verify(pub_sig, pub_fields, pkCA), true()),        
+        Eq(verify(sct_sig, sct_fields, pkL), true()),
+        Eq(verify(ca_sig, ca_fields, pkRootCA), true()),
+        _restrict((sct_to_audit = sct1) | (sct_to_audit = sct2)), /* only one sct at a time is considered */
+        RogueCert($idCA, audit_stmt), /* see restriction */    
+
+        MonitorLearns(pre_fields),
+        AuditedSCT($idM, $idL, pre_fields, audit_stmt),
+        
+        AuditAuthCheck_noTrust($idL, ca_fields, audit_stmt),
+        AuditCertFake_Sleep($idCA, $idL, ca_fields, audit_stmt),
+        MonitorSleeps($idM, audit_stmt),
+        MonitorAuditSleeps($idCA, $idM, audit_stmt),
+
+        Time($now)
+    ]->
+    [ CraftReceipt($idM, chain)   ]
+
+/***** External check conducted by the monitor *****/
+
+/* The external check starting from CT can be delegated to the monitor. We assume as before that the monitor has access to the ground truth of its subject in order to distinguish between benign and rogue certificates (as before). */
+
+rule monitor_externalCheck_Fake:
+    let
+        stmt = <$idCA, $id, pkID, sn>
+        pub_fields = <$idCA, $id, pkID, 'pubKey', sn, $i, $j, sct1, sct2>
+        ca_fields = <$rootCA, $idCA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
+    in
+    [   In(pub_fields), In(pub_sig), In(ca_fields), In(ca_sig),
+        !Root_CA($rootCA, pkRootCA), !TrackSubject($idM, $id), 
+    ]
+    --[ Eq(verify(pub_sig, pub_fields, pkCA), true()),
+        Eq(verify(ca_sig, ca_fields, pkRootCA), true()),
+        RogueCert($idCA, stmt), /* see restriction */
+        CAFakesCert($idCA, stmt, ca_fields),
+        MonExtFakeCheck(ca_fields, stmt),
+        Time($now)
+    ]->
+    [ ]
+
+rule monitor_externalCheck_Verified:
+    let
+        stmt = <$idCA, $id, pkID, sn>
+        pub_fields = <$idCA, $id, pkID, 'pubKey', sn, $i, $j, sct1, sct2>
+        ca_fields = <$rootCA, $idCA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
+    in
+    [   In(pub_fields), In(pub_sig), In(ca_fields), In(ca_sig),
+        !TrackSubject($idM, $id), !Root_CA($rootCA, pkRootCA)
+    ]
+    --[ 
+        Eq(verify(pub_sig, pub_fields, pkCA), true()),
+        Eq(verify(ca_sig, ca_fields, pkRootCA), true()),
+        BenignCert($idCA, stmt), /* see restriction */
+        MonExtCheckVerified($idCA, stmt, ca_fields),
+        MonExtFakeCheck(ca_fields, stmt),
+        Time($now)
+    ]->
+    [ ]
+
+
+/* ----- Logger rules ----- */
+
+/* Initialize a Logger role. It will later be used to give out SCTs and STHs to others. The CT standard does not further define how authenticity of the loggers keys is ensured, e.g. Wrotniak's model uses self-signed certificates here.
+In general it is senseful to treat loggers like root CAs which we also just trust in this model. In practice, root CA keys are hardcoded in browser, the same holds for loggers. */
+rule Logger_Init [color= #08a358]:
+    [ Fr(~skL)  ]
+    --[ 
+        Logger_Registered($idL),
+        Time($now)
+    ]->
+    [ !Logger_s($idL, ~skL, pk(~skL)), !Logger($idL, pk(~skL)) ]
+
+
+/* We use this rule to start a new log for a Logger. In the honest case, we assume that this only happens once. We distinguish between a 'log' and a 'logger'. A logger maintains 1 or more logs. 'logs' contain the entries and can be inspected. Honest loggers maintain exactly one log, not more. */
+rule Start_Log [color= #08a358]:
+    [ !Logger_s($idL, ~skL, pk(~skL)) ]
+    --[ 
+        StartedLog($idL, $log_id), 
+        HonestStartedLog($idL, $log_id),
+        Time($now)
+    ]->
+    [ !Log($idL, $log_id) ]
+
+/* Honest loggers start a log only once ==> no partition and equivocation possible */
+restriction honestStartLogOnlyOnce: 
+    "All IdL lid1 lid2 #t1 #t2. HonestStartedLog(IdL, lid1)@t1 & HonestStartedLog(IdL, lid2)@t2 ==> #t1 = #t2"
+
+/* when starting a different log, it must have a distinct (although public) log_id, to distinguish the different logs */
+restriction uniqueLogId:
+    "All IdL log_id #t1 #t2. StartedLog(IdL, log_id)@t1 & StartedLog(IdL, log_id)@t2 ==> #t1 = #t2"
+
+/* ...for the dishonest case, this might happen more often, can be seen in the trace then as additional rogue start. */
+rule Start_Log_malicious [color= #d83b0b]:
+    [ !Corrupted_Logger($idL, ~skL, pk(~skL)) ]
+    --[ StartedLog($idL, $log_id),
+        StartedLogMalicious($idL, $log_id),
+        Time($now)
+    ]->
+    [  ]
+
+/*
+pre-certificate is added to log along with the chain (signer of the precert, and certificate of the intermediate and rootCA). Includes whether the certificate is actually signed by the CA and whether it is still valid (relevant)
+- does NOT include: any checks whether the certificate should be issued, loggers rely on monitors to do that work
+*/
+rule add_preC_to_log [color= #08a358]:
+    let
+        preC_fields = <$idCA, $id, pkID, 'pre-cert', sn, $i, $j> 
+        ca_fields = <$rootCA, $idCA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
+
+        sct_fields = <$idL, 'SCT', $now, <$idCA, $id, pkID, sn, $i, $j>>
+        sct_sig = sign(sct_fields, skL)
+        sct = <$idL, 'SCT', $now, sct_sig>
+
+        chain = <<preC_fields, preC_sig>, <ca_fields, ca_sig>>
+    in
+    [ 
+        In(preC_fields), In(preC_sig), In(ca_fields), In(ca_sig), /* incoming pre-cert chain */ 
+        !Logger_s($idL, skL, pk(skL)),
+        !Root_CA($rootCA, pkRootCA),
+        !Log($idL, $log_id)
+    ]
+    --[
+        Eq(verify(preC_sig, preC_fields, pkCA), true()),
+        Eq(verify(ca_sig, ca_fields, pkRootCA), true()),
+        LoggerComputesAddLogStmt($idL, $log_id, <$idCA, $id, pkID, sn>, $now),
+        LoggerComputesAddLog($idL, $log_id, preC_fields, chain, $now),
+        LoggerAsserts($idL, sct),
+
+        Time($now),
+        CheckIssuedTime($now, $i),
+        CheckValidUntil($now, $j)
+    ]->
+    [ Out(sct) ]
+
+
+/* adds an arbitrary certificate to the log with $log_id; considered dishonest  */
+rule forge_log_view [color= #d40808]: 
+    let
+        preC_fields = <$idCA, $id, pkID, 'pre-cert', sn, $i, $j> 
+
+        ca_fields = <$rootCA, $idCA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
+
+    in
+    [ In(preC_fields), In(preC_sig), In(ca_fields), In(ca_sig),
+      /* Incoming certificate that is added */ 
+      !Corrupted_Logger($idL, skL, pk(skL)) ]
+    --[
+        LoggerComputesAddLogStmt($idL, $log_id, <$idCA, $id, pkID, sn>, $now),
+        LoggerComputesAddLog($idL, $log_id, preC_fields, <<preC_fields, preC_sig>, <ca_fields, ca_sig>>, $now),
+        LoggerForgesAdd($idL),
+        Time($now)
+    ]->
+    [ ]
+
+
+/* ----- Certification ----- */
+
+/* 
+Invoked by a domain owner (DO): DO wants to have a certificate for its public key signed by CA, 
+CA "checks" identity and then creates a pre certificate to hand out to loggers tmt, sth, session
+The DomainOwner fact serves as a proof of identity, so we assume that invoking this always happens on DO's behalf. 
+Rogue certificates are not issued using this fact but instead by the network attacker using the CA's key (requires CA corruption).
+*/
+rule PreCertify [color= #c871ff]: 
+    let
+        preC_fields = <$idCA, $id, pkID, 'pre-cert', ~sn, $now, $j>
+        preC_sig = sign(preC_fields, skCA)
+        preC = <preC_fields, preC_sig>
+    in
+    [ !DomainOwner($id, pkID), /* public key to sign. Using this rule includes an "identity check" which is simplified: There is a DomainOwner fact with this public key. */
+     !CA_s0($idCA, skCA, pkCA, ca_fields, ca_sig), Fr(~sn) ]
+    --[ PreCertified($idCA, preC), 
+        GroundTruth($idCA, <$idCA, $id, pkID, ~sn>), /* used for ground truth comparisons */
+        Asserts_PKI($idCA, <$idCA, $id, pkID, ~sn>), /* used for naive external check in PKI */
+        
+        Time($now)
+    ]->
+    [ Out(preC_fields), Out(preC_sig), Certificate_Store($idCA, preC), Out(ca_fields), Out(ca_sig) ]
+
+/*
+This rule is invoked by the CA again. It takes the issued pre-certificate and generates a corresponding 'pubKey' certificate, after two loggers claimed that they have added the certificate to its logs (given the two SCTs)
+*/
+rule PubKeyCertify [color= #c871ff]:
+    let 
+    preC_fields = <$idCA, $id, pkID, 'pre-cert', sn, $i, $j>
+
+    sct1_fields = <$idL1, 'SCT', $sct1, <$idCA, $id, pkID, sn, $i, $j>>
+    sct2_fields = <$idL2, 'SCT', $sct2, <$idCA, $id, pkID, sn, $i, $j>>
+
+    sct1 = <$idL1, 'SCT', $sct1, sct1_sig>
+    sct2 = <$idL2, 'SCT', $sct2, sct2_sig>
+
+    pub_fields = <$idCA, $id, pkID, 'pubKey', sn, $i, $j, sct1, sct2>
+    pub_sig = sign(pub_fields, skCA)
+    in 
+    [ 
+        !CA_s0($idCA, skCA, pkCA, ca_fields, CA_sig), 
+        /* 2 SCTs: */  In(sct1), In(sct2), 
+        !Logger($idL1, pkL1),
+        !Logger($idL2, pkL2),
+        Certificate_Store($idCA, <preC_fields, sig_preC>)
+    ] 
+    --[ Eq(verify(sct1_sig, sct1_fields, pkL1), true()), 
+        Eq(verify(sct2_sig, sct2_fields, pkL2), true()), 
+        Eq(verify(sig_preC, preC_fields, pkCA), true()), 
+        _restrict( not ($idL1 = $idL2) ), /* the 2 SCTs were from distinct loggers */
+
+        Certified($idCA, $idL1, sct1, $idL2, sct2), 
+        CAAsserts($idCA, <$idCA, $id, pkID, sn>),
+
+        Time($now),
+        CheckIssuedTime($now, $i),
+        CheckValidUntil($now, $j)
+    ]-> 
+    [ Out(pub_fields), Out(pub_sig) /* outgoing pubKey cert */ ]
+    
+/* Used in SCT Auditing Model, client received a certificate chain with incorporated SCTs and forwards them via a secure channel to the monitor. We leave out signature checks here and move them to the monitor to leave out implicit assumptions about the content that is delivered to the monitor via auditing */
+rule ClientInitiatesAuditing:
+    let
+        chain = <<pub_fields, pub_sig>, <ca_fields, ca_sig>>
+    in
+    [ In(ca_fields), In(ca_sig), In(pub_fields), In(pub_sig), In(sct) ]
+    --[]->
+    [ !TLS_to_M($idM, <<pub_fields, pub_sig>, <ca_fields, ca_sig>>, sct), Client_Receipt_Val($idM, chain) ]
+
+/*
+A client receives a certificate and now validates it. This includes:
+- verifying the signature on the certificate
+- verifying every cert in the chain, which here is just the certificate of the intermediate CA signed by a root CA
+- verifying two SCTs that should correspond to the incoming certificate and come from distinct loggers
+
+verifying always includes validity checks of the timepoints in the certificate
+*/
+rule ClientValidate [color= #f2ce03]:
+    let
+        ca_fields = <$rootCA, $idCA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
+        sct1_fields = <$idL1, 'SCT', $sct1, <$idCA, $id, pkID, sn, $i, $j>>
+        sct2_fields = <$idL2, 'SCT', $sct2, <$idCA, $id, pkID, sn, $i, $j>>
+        sct1 = <$idL1, 'SCT', $sct1, sct1_sig>
+        sct2 = <$idL2, 'SCT', $sct2, sct2_sig>
+        pub_fields = <$idCA, $id, pkID, 'pubKey', sn, $i, $j, sct1, sct2>
+
+        chain = <<pub_fields, pub_sig>, <ca_fields, ca_sig>>
+        stmt = <$idCA, $id, pkID, sn>
+    in
+    [   !Root_CA($rootCA, pkRootCA),
+        In(ca_fields),
+        In(ca_sig),
+        In(pub_fields),
+        In(pub_sig), /* incoming certificate (intermediate CA + pubKey certificate) */
+
+        !Logger($idL1, pkL1),
+        !Logger($idL2, pkL2)
+    ]
+    --[ ClientAcceptsChain($idL1, $idL2, $rootCA, ca_fields, $idCA, stmt),
+        ClientAcceptsCert($idL1, $idL2, <$idCA, $id, pkID, 'pre-cert', sn, $i, $j>), /* we use this to formulate transparency lemmas: on the log we only consider pre-certificates. See how it can be reconstructed from the pubKey certificate easily */
+        Eq(verify(pub_sig, pub_fields, pkCA), true()), 
+        Eq(verify(sct1_sig, sct1_fields, pkL1), true()), 
+        Eq(verify(sct2_sig, sct2_fields, pkL2), true()),
+        Eq(verify(ca_sig, ca_fields, pkRootCA), true()),
+        _restrict( not($idL1 = $idL2) ), /* SCTs from distinct loggers */
+
+        Time($now),
+        CheckIssuedTime($now, $i),
+        CheckValidUntil($now, $j),
+        CheckIssuedTime($now, $i0),
+        CheckValidUntil($now, $j0),
+    ]->
+    [ !Check(pkL1, pub_fields), !Check(pkL2, pub_fields) /* each SCT and statement is stored to later run client-side auditing checks, e.g. inclusion proofs */
+    ]
+
+#ifdef REVOCATION // use --defines=REVOCATION in Tamarin's CLI
+
+/* 
+If makro is used: clients will check for revocation prior to validating (accepting) a cert, only relevant for a bunch of acc lemmas where revocation is assumed. This is idealized as we omit a way how the client learns about revocation (e.g. OCSP, CRL, ...) and also assume that revocation becomes effective immediately.
+*/
+restriction onlyValidateNonRevoked:
+    "All idL1 idL2 rootCA ca_fields idCA stmt #i. ClientAcceptsChain(idL1, idL2, rootCA, ca_fields, idCA, stmt)@i ==> not (Ex #j. Revoked(stmt)@j & #j < #i)"
+
+#endif
+
+/* ---------- Interaction with the log to verify its properties ---------- */
+
+/*
+After validating a certificate, a client 'may' also inspect the SCTs further and request a proof of inclusion by the loggers for the underlying certificate. We again (like with monitors) distinguish between two kinds here:
+a) The client already checked before AND stored a copy of the log before AND finds a violation (below: rule ClientFindsAppendOnlyViolation, stored via ClientStoresSnapshot prior)
+b) The client may or may not have checked before (this version) and creates a copy locally (ClientStoresSnapshot)
+
+This rule is also used for the monitor to just fetch a view and use the copy later to verify the append-only property.
+*/
+rule MonitorStoresSnapshot:
+    [ !Logger($idL, pkL), !Monitor($idM), !TLS_L_to_M($idL, $idM, $snapshot, sth, session) ]
+    --[ 
+        SnapshotStored($idM, $idL, session, sth),
+        MonitorSnapshotStored($idM, $idL, session, sth),
+        Time($now)
+    ]->
+    [  ]
+
+rule ClientStoresSnapshot:
+    [ !Logger($idL, pkL), !TLS_L_to_C($idL, $idC, $snapshot, sth, session) ]
+    --[ 
+        SnapshotStored($idC, $idL, session, sth),
+        ClientSnapshotStored($idC, $idL, session, sth),
+
+        Time($now)
+    ]->
+    [  ]
+
+/* Client can find a violation, if
+(1) conflicting view for given snapshots (given and one in the past) ==> append-only violated (here)
+(2) a given SCT is not contained in the log (inclusion proof failed, rule below)
+*/
+rule ClientFindsAppendOnlyViolation [color= #e65208]:
+    [ !Logger($idL, pkL), !TLS_L_to_C($idL, $idC, $snapshot, sth, session) ]
+    --[
+        ClientFindsAppendOnlyViolation($idL),
+        AppendOnlyCheck($idC, sth, session),
+        AppendOnlyViolation($idC, $idL, sth, session), /* formalizes that the append-only proof would fail (see restriction) */
+        
+        Time($now)
+    ]->
+    []
+
+/* We formalize whether a snapshot presented contains an entry or not using predicates. */
+predicate: ChainVisible(Logger, chain, log_id, #time, sth_time) <=> 
+    (Ex preC_fields different_time #t.
+        LoggerComputesAddLog(Logger, log_id, preC_fields, chain, different_time)@t /* there has been an addition to log_id prior to #time */
+        & not(sth_time = different_time) /* ...that addition was visible */
+        & #t < #time
+        )
+
+predicate: NoChainVisible(Logger, stmt, log_id, #time, sth_time) <=>
+    not (Ex different_time #t. 
+            LoggerComputesAddLogStmt(Logger, log_id, stmt, different_time)@t
+            & not (sth_time = different_time) /* or there has never been a visible addition to the log */
+            & #t < #time
+        )
+        /* OR: for all additions with cert_fields, the chain is invalid (equally bad, and this makes the visible and invisible cases disjoint again) */
+        | ((All preC_fields different_time stmt chain #t2 #t.
+            LoggerComputesAddLogStmt(Logger, log_id, stmt, different_time)@t
+            & LoggerComputesAddLog(Logger, log_id, preC_fields, chain, different_time)@t
+            & #t < #time
+            & ChainCheck(chain)@t2
+            ==> ChainInvalid(chain)@t2
+        ) & (All different_time preC_fields chain #t.
+            LoggerComputesAddLog(Logger, log_id, preC_fields, chain, different_time)@t
+            & #t < #time
+            ==> (Ex #t2. ChainCheck(chain)@t2)
+        ))
+
+/* EntryMissing is similar to EntryNotVisible, but is not concerned with validity of the certificate chain of the entry. We deem append-only violated if entries disappear independent of whether they were valid submissions. According to the standard, there are only valid chains allowed on the log, thus this only covers more potential misbehavior of the log */
+predicate: EntryMissing(Logger, preC_fields, log_id, #time, sth_time) <=>
+    not (Ex different_time chain #t. 
+            LoggerComputesAddLog(Logger, log_id, preC_fields, chain, different_time)@t
+            & not (sth_time = different_time) /* or there has never been a visible addition to the log */
+            & #t < #time
+        )
+    
+predicate: EntryVisible(Logger, preC_fields, log_id, #time, sth_time) <=> 
+    (Ex different_time chain #t.
+        LoggerComputesAddLog(Logger, log_id, preC_fields, chain, different_time)@t /* there has been an addition to log_id with the preC_fields prior to #time */
+        & not(sth_time = different_time) /* ...that addition was visible */
+        & #t < #time
+        )
+
+/* the monitor or client can observe a violation of the append-only property:
+
+- if the log gets manipulated 'between' two STH requests, the signatures will not match anymore and the logger will exactly find that 
+- specific to client: client can check whether the certificate it currently checks is in the log (CheckNotContained), this corresponds to the idea of an inclusion proof
+*/
+restriction AppendOnlyFails:
+   "All sth session id IdL #t6. 
+    AppendOnlyViolation(id, IdL, sth, session)@t6
+    /* Append-only violation found by id with violating IdL is only possible if a counterexample is found */
+        ==> (Ex preC_fields chain time t log_id1 log_id2 time2 sth2 session2 #t0 #t1 #t2 #t3 #t4 #t5. 
+                LoggerComputesAddLog(IdL, log_id1, preC_fields, chain, t)@t0
+                & EntryVisible(IdL, preC_fields, log_id1, #t2, time) 
+                /* there is an entry in the log that is visible at #t2 and time period time in log_id1 */
+                & FetchLogSnapshot(id, IdL, session2)@t1 
+                /* someone starts fetching a log view */
+                & LoggerPresentsView(IdL, id, log_id1, time, sth2, session2)@t2 
+                /* The Logger presents the view for log_id1 */
+                & SnapshotStored(id, IdL, session2, sth2)@t3 
+                /* this view is received stored by id */
+                & FetchLogSnapshot(id, IdL, session)@t4
+                /* a second view is fetched by id (later) */
+                & LoggerPresentsView(IdL, id, log_id2, time2, sth, session)@t5
+                /* the logger presents the view of a possibly different log (log_id2) */
+                & EntryMissing(IdL, preC_fields, log_id2, #t5, time2)
+                /* one entry that was visible in the past is now not visible anymore -> clear append-only violation */
+                & #t0 < #t1 & #t1 < #t2 & #t2 < #t3 
+                & #t2 < #t4 
+                & #t4 < #t5 & #t3 < #t5
+                & #t5 < #t6
+            )"
+
+/* Positive outcome of the append-only check: All old snapshots the client has do not contradict themselves */
+rule ClientVerifiesAppendOnly [color= #c1ff3c]:
+    [ !TLS_L_to_C($idL, $idC, $snapshot, sth, session), !Logger($idL, pkL), In($idUser) ]
+    --[
+        AppendOnlyCheck($idUser, sth, session),
+        Client_AppendOnlyVerified($idUser, $idL, $now, sth),
+        AppendOnlyVerified($idUser, $idL, sth, session),
+        
+        Time($now)
+    ]->
+    [ ]
+
+restriction appendOnlyWorks:
+   "(All id IdL sth session time1 t log_id log_id2 preC_fields chain sth2 session2 time2 #t0 #t1 #t2 #t4 #t5.
+        AppendOnlyVerified(id, IdL, sth, session)@t5 
+        /* If an append-only proof is verified, we know that ... */
+        & LoggerComputesAddLog(IdL, log_id, preC_fields, chain, t)@t0
+        & EntryVisible(IdL, preC_fields, log_id, #t1, time1) 
+        /* all entries that have been visible at some point */
+        & LoggerPresentsView(IdL, id, log_id, time1, sth2, session2)@t1
+        & SnapshotStored(id, IdL, session2, sth2)@t2 
+        /* every snapshot processed in the past by that client */
+        & LoggerPresentsView(IdL, id, log_id2, time2, sth, session)@t4 
+        /* and every view handed out after these */
+        & #t0 < #t1 & #t1 < #t2 & #t2 < #t4 & #t4 < #t5
+            ==> EntryVisible(IdL, preC_fields, log_id2, #t4, time2) 
+            /* then this entry is also visible in the newest snapshot */
+    )
+    &
+    (All id IdL sth session #t5.
+        AppendOnlyVerified(id, IdL, sth, session)@t5 
+        /* An append-only proof is only valid if all these pre-conditions are satisfied. */
+            ==> 
+                (Ex time1 t log_id log_id2 preC_fields chain sth2 session2 time2 #t0 #t1 #t2 #t4. 
+                    LoggerComputesAddLog(IdL, log_id, preC_fields, chain, t)@t0
+                    & EntryVisible(IdL, preC_fields, log_id, #t1, time1)
+                    & LoggerPresentsView(IdL, id, log_id, time1, sth2, session2)@t1
+                    & SnapshotStored(id, IdL, session2, sth2)@t2
+                    & LoggerPresentsView(IdL, id, log_id2, time2, sth, session)@t4
+                    & #t0 < #t1 & #t1 < #t2 & #t2 < #t4 & #t4 < #t5
+                )
+    )"
+
+/* Monitor requests a current snapshot of the log */
+rule ProofFetching_M [color= #10bcc5]:
+    [ Fr(~session), !Monitor($idM), /* Identity who fetches */ !Logger($idL, pkL) ] 
+    --[ 
+        FetchLogSnapshot($idM, $idL, ~session),
+        MonitorFetchesLogSnapshot($idM, $idL, ~session),
+        Time($now),
+    ]->
+    [ !TLS_M_to_L($idM, $idL, ~session) ]
+
+/* A client requests a current view of the log */
+rule ProofFetching_C [color= #10bcc5]:
+    [ Fr(~session), In($idC), /* could be fetched by anyone */ !Logger($idL, pkL) ] 
+    --[ 
+        FetchLogSnapshot($idC, $idL, ~session),
+        ClientFetchesLogSnapshot($idC, $idL, ~session),
+        Time($now)
+    ]->
+    [ !TLS_C_to_L($idC, $idL, ~session) ]
+
+/*
+Logger issues a new snapshot of its maintained log. 
+This exact snapshot is relatively abstract, as the log operations are too. We assume that this generates an honest STH which is verifiable, depending on the context it also represents all entries that a monitor can explore then. 
+It is crucial for the outcome of these later checks when a certain snapshot has been created. If it was early in an execution, there might not be any entries yet contained. When going through the lemmas later, you will observe that a party can partly control this by restricting when to request to snapshot.
+*/
+rule LoggerSnapshot_M [color= #22d6d6]:
+    [ !Logger_s($idL, skL, pk(skL)), Fr(~sthment) /* abstract representation of the STH/sthment */, !TLS_M_to_L($idM, $idL, session) ]
+    --[ 
+        LoggerPresentsView($idL, $idM, $log_id, $now, ~sthment, session),
+        LoggerHandsOutSTH($idL, ~sthment, session),
+
+        Time($now)
+    ]->
+    [ !TLS_L_to_M($idL, $idM, $snapshot, ~sthment, session) ]
+
+rule LoggerSnapshot_C [color= #22d6d6]:
+    [ !Logger_s($idL, skL, pk(skL)), Fr(~sthment) /* abstract representation of the STH/sthment */, !TLS_C_to_L($idC, $idL, session) ]
+    --[ 
+        LoggerPresentsView($idL, $idC, $log_id, $now, ~sthment, session),
+        LoggerHandsOutSTH($idL, ~sthment, session),
+
+        Time($now)
+    ]->
+    [ !TLS_L_to_C($idL, $idC, $snapshot, ~sthment, session)
+    ]
+
+/* the $log_id's used when handing out a proof must exist, i.e. started as log prior to handing out a view. In the logger section we imposed further restrictions on the log_id's depending on whether the logger is honest. */
+restriction only_existing_log_ids:
+    "All IdL idR log_id time sth session #t1. LoggerPresentsView(IdL, idR, log_id, time, sth, session)@t1 ==> (Ex #t0. StartedLog(IdL, log_id)@t0 & #t0 < #t1)"
+
+
+rule ClientFindsInclusionViolation [color= #e65208]:
+    let
+        pub_fields = <$idCA, $id, pkID, 'pubKey', sn, $i, $j, sct1, sct2>
+        stmt = <$idCA, $id, pkID, sn>
+        preC_fields = <$idCA, $id, pkID, 'pre-cert', sn, $i, $j>
+    in
+    [ !TLS_L_to_C($idL, $idC, $snapshot, sth, session), !Logger($idL, pkL), In($idClient), /* could be any client */ !Check(pkL, pub_fields) ]
+    --[
+        InclusionProofFailed($idL, stmt),
+        ClientChecksInclusion($idL, stmt, sth, session),
+        ClientFindsInclusionViol($idL, stmt, sth, session),
+
+        InclusionProofFails($idClient, $idL, preC_fields, sth, session), /* corresponding preCert entry is not contained in the log -> log violation as the client just accepted an SCT signed by that logger */
+        InclusionProof($idClient, $idL, preC_fields, sth, session),
+        
+        Time($now)
+    ]->
+    []
+
+
+/* Good case: Monitor was able to find the entry on the log */
+restriction logExplorationSucceeds:
+    "All IdM IdL chain sth session #t5. 
+    MonitorObservesEntry(IdM, IdL, chain, sth, session)@t5
+    ==> (Ex log_id time #t2. 
+        LoggerPresentsView(IdL, IdM, log_id, time, sth, session)@t2 
+            /* Logger handed out an STH to the recipient... */
+        & #t2 < #t5 /* ...prior to the check */
+        & ChainVisible(IdL, chain, log_id, #t2, time) 
+            /* ...and the entry is visible in that view */
+        )"
+
+/* There is no entry on the log that is valid and has stmt in it. By construction, if the other case occurs and we assume that the monitor explores the log, we force that one case is reachable which then ends up with a succeeding exploration for exactly the certificate that is matching on the log */
+restriction logExplorationFails:
+    "All IdM IdL stmt sth session #t1. 
+    NothingObserved(IdM, IdL, stmt, sth, session)@t1
+    ==> (Ex log_id time #t0. 
+        LoggerPresentsView(IdL, IdM, log_id, time, sth, session)@t0 
+            /* Logger handed out an STH to the recipient... */
+        & #t0 < #t1 /* ...prior to the check */
+        & NoChainVisible(IdL, stmt, log_id, #t0, time) 
+            /* ...and the entry is not visible in that view */
+        )"
+
+restriction inclusionProofFails:
+    "All IdFetcher IdL preC_fields sth session #t1. 
+    InclusionProofFails(IdFetcher, IdL, preC_fields, sth, session)@t1
+    ==> (Ex log_id time #t0. 
+        LoggerPresentsView(IdL, IdFetcher, log_id, time, sth, session)@t0 
+            /* Logger handed out an STH to the recipient... */
+        & #t0 < #t1 /* ...prior to the check */
+        & EntryMissing(IdL, preC_fields, log_id, #t0, time) 
+            /* ...and the entry is not visible in that view */
+        )"
+
+rule ClientVerifiesInclusion [color= #c1ff3c]:
+    let
+        pub_fields = <$idCA, $id, pkID, 'pubKey', sn, $i, $j, sct1, sct2>
+        stmt = <$idCA, $id, pkID, sn>
+        preC_fields = <$idCA, $id, pkID, 'pre-cert', sn, $i, $j>
+    in
+    [ !TLS_L_to_C($idL, $idC, $snapshot, sth, session), !Logger($idL, pkL), !Check(pkL, pub_fields), In($idClient) /* could be any client */ ]
+    --[
+        ClientSideInclusionProved($idL, stmt, sth, session),
+        InclusionProofSucceeds($idL, preC_fields, sth, session), /* entry is visible in fetched proof, see restriction */
+        ClientChecksInclusion($idL, stmt, sth, session),
+        InclusionProof($idClient, $idL, preC_fields, sth, session),
+
+        
+        Time($now)
+    ]->
+    [ ]
+
+restriction inclusionProofWorks:
+    "All IdL preC_fields sth session #t5. InclusionProofSucceeds(IdL, preC_fields, sth, session)@t5
+    ==> (Ex id log_id time #t2. 
+        LoggerPresentsView(IdL, id, log_id, time, sth, session)@t2 
+            /* Logger handed out a snapshot to the recipient... */
+        & #t2 < #t5 
+            /* ...prior to the check */
+        & EntryVisible(IdL, preC_fields, log_id, #t2, time) 
+            /* and the entry is visible in that view */
+        )"
+
+/* ---------- STH Gossiping ---------- */
+
+/*
+Instead of monitors receiving SCTs, they now receive the snapshots in the form of STH's issued by loggers and called sthments here.
+They will be used in the same way as SCT Auditing (for authenticity checks) and we investigate resulting changes here. 
+As in SCT Auditing we have different rules that formalize how monitors use the gossiped knowledge when combined with an additional snapshot fetch conducted by the monitor.
+Note that we cannot assume the same outcome of proofs for the shared snapshots, as this would be too strong: Loggers can still (malciously) refuse to open their own sthments that they handed out earlier and did proofs on. 
+Assuming that the proofs have the same results would mean that the gossip also contains the proof itself, including the certificate.
+
+We limit ourselves to gossip between the client and monitor.
+*/
+
+rule clientGossipsToMonitor:
+    [ !TLS_L_to_C($idL, $idC, $snapshot, sth, session) ]
+    --[ Time($now) ]-> [ !TLS_C_to_M($idC, $idM, $snapshot, sth, session) ]
+
+
+// rule monitorFindsRogueCert_Gossiped [color= #501755]:
+//     let
+//         ca_fields = <$rootCA, $idCA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
+//         cert_fields = <$idCA, $subj, ke, 'pre-cert', sn, $i, $j>
+//         chain = <<cert_fields, cert_sig>, <ca_fields, ca_sig>>
+//         stmt = <$iss, $subj, ke, sn>
+//     in
+//     [ !LoggerDict($idM, $idL), !TrackSubject($idM, $subj), In(cert_fields), In(cert_sig), In(ca_fields), In(ca_sig), !TLS_C_to_M($idC, $idM, $gos_snapshot, gossiped_sth, gossiped_session), !TLS_L_to_M($idL, $idM, $snapshot, sth, session), !Root_CA($rootCA, pkRootCA) ]
+//     --[ 
+//         Eq(verify(cert_sig, cert_fields, pkCA), true()),
+//         Eq(verify(ca_sig, ca_fields, pkRootCA), true()),
+//         Gos_MonInclCheck($idM, $idL, stmt, ca_fields, gossiped_sth, gossiped_session, sth, session),
+//         MonitorObservesEntry($idM, $idL, chain, sth, session), /* entry is visible in fetched proof */
+//         GosInclusionProofWorks($idM, $idL, stmt, sth, session), /* visible in fetched proof */
+//         Gossiped($idM, $idL, stmt, gossiped_sth, gossiped_session, sth, session),
+//         RogueCert($iss, stmt), /* found certificate contradicts the known ground truth, then may take further actions like revocation */
+
+//         GossipedCertFake($iss, $idL, stmt, ca_fields, gossiped_sth, gossiped_session, sth, session), /* alarm raised */
+//         Revoked(stmt), /* revocation [if makro is set] */
+
+//         Time($now)
+//     ]->
+//     [ ]
+
+// rule monitorFindsCert_Gossiped [color= #501755]:
+//     let
+//         ca_fields = <$rootCA, $idCA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
+//         cert_fields = <$idCA, $subj, ke, 'pre-cert', sn, $i, $j>
+//         chain = <<cert_fields, cert_sig>, <ca_fields, ca_sig>>
+//         stmt = <$idCA, $subj, ke, sn>
+//     in
+//     [ !LoggerDict($idM, $idL), !TrackSubject($idM, su), In(cert_fields), In(cert_sig), In(ca_fields), In(ca_sig), !TLS_C_to_M($idC, $idM, $gos_snapshot, gossiped_sth, gossiped_session), !TLS_L_to_M($idL, $idM, $snapshot, sth, session), !Root_CA($rootCA, pkRootCA) ]
+//     --[
+//         Eq(verify(cert_sig, cert_fields, pkCA), true()),
+//         Eq(verify(ca_sig, ca_fields, pkRootCA), true()),
+//         Gos_MonInclCheck($idM, $idL, stmt, ca_fields, gossiped_sth, gossiped_session, sth, session),
+//         MonitorObservesEntry($idM, $idL, chain, sth, session), /* entry is visible in fetched snapshot */
+//         GosInclusionProofWorks($idM, $idL, stmt, sth, session),
+//         Gossiped($idM, $idL, stmt, gossiped_sth, gossiped_session, sth, session),
+//         BenignCert($iss, stmt), /* found certificate is fine, no action needed */
+
+//         Time($now)
+//     ]->
+//     [ ]
+
+// rule monitorCannotFindCert_Gossiped [color= #501755]:
+//     let
+//         ca_fields = <$rootCA, $idCA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
+//         cert_fields = <$idCA, $subj, ke, 'pre-cert', sn, $i, $j>
+//         chain = <<cert_fields, cert_sig>, <ca_fields, ca_sig>>
+//         stmt = <$idCA, $subj, ke, sn>
+//     in
+//     [ !LoggerDict($idM, $idL), !TrackSubject($idM, su), In(cert_fields), In(cert_sig), In(ca_fields), In(ca_sig), !TLS_C_to_M($idC, $idM, $gos_snapshot, gossiped_sth, gossiped_session), !TLS_L_to_M($idL, $idM, $snapshot, sth, session), !Root_CA($rootCA, pkRootCA)  ]
+//     --[ 
+//         Gos_MonInclCheck($idM, $idL, stmt, ca_fields, gossiped_sth, gossiped_session, sth, session),
+//         NothingObserved($idM, $idL, stmt, sth, session), /* certificate with this statement is not contained in the presented snapshot */
+//         Gossiped($idM, $idL, stmt, gossiped_sth, gossiped_session, sth, session),
+//         Gos_CannotFindCert($idM, stmt, sth, session, gossiped_sth, gossiped_session),
+
+//         Time($now)
+//     ]->
+//     [ ]
+
+// rule monitorFindsRogueCert_Gossiped_Sleep [color= #d40808]:
+//     let
+//         ca_fields = <$rootCA, $idCA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
+//         cert_fields = <$idCA, $subj, ke, 'pre-cert', sn, $i, $j>
+//         chain = <<cert_fields, cert_sig>, <ca_fields, ca_sig>>
+//         stmt = <$idCA, $subj, ke, sn>
+//     in
+//     [ !LoggerDict($idM, $idL), !St_bad_Monitor($idM), !TrackSubject($idM, su), In(cert_fields), In(cert_sig), In(ca_fields), In(ca_sig), !TLS_C_to_M($idC, $idM, $gos_snapshot, gossiped_sth, gossiped_session), !TLS_L_to_M($idL, $idM, $snapshot, sth, session), !Root_CA($rootCA, pkRootCA) ]
+//     --[
+//         Gos_MonInclCheckSleep($idM, $idL, stmt, ca_fields, gossiped_sth, gossiped_session, sth, session),
+//         MonitorObservesEntry($idM, $idL, stmt, sth, session), /* entry is visible in fetched proof */
+//         Gossiped($idM, $idL, stmt, gossiped_sth, gossiped_session, sth, session),
+//         GosInclusionProofWorks($idM, $idL, stmt, sth, session),
+//         GossipedCertFakeSleep($iss, $idM, stmt, gossiped_sth, gossiped_session, sth, session), /* bad monitor does not act */
+//         RogueCert($iss, stmt), /* found certificate contradicts the known ground truth but further actions are not taken: monitor sleeps */
+
+//         Time($now)
+//     ]->
+//     [ ]
+
+    /* --- Gossip AppendOnly Checks --- */
+    /* In addition to using gossiped snapshots to explore new entries with the help of another fetched snapshot, a different question immediately arises for the monitor: do these snapshots contradict each other? For this, the monitor can use append-only proofs between these two snapshots. The following rules here formalize this and are similar to the append-only proof that we have used in CT with the limitation to just these two snapshots. */
+
+rule monitorFindsAppendOnlyViolation_Gossiped [color= #501755]:
+    [ !LoggerDict($idM, $idL), !TLS_C_to_M($idC, $idM, $gos_snapshot, gossiped_sth, gossiped_session), !TLS_L_to_M($idL, $idM, $snapshot, sth, session) ]
+    --[
+        Gos_AppendOnlyViol($idM, $idL, sth, session, gossiped_sth, gossiped_session), /* see restriction */
+        Gos_AppendOnlyCheck($idM, $idL, sth, session, gossiped_sth, gossiped_session),
+        Time($now)
+    ]->
+    []
+
+/* The gossiped append only proofs assume that both proofs are fixed since we only want to formulate that between gossiped_view -> view there have been no rogue deletions */
+restriction appendOnlyFails_Gossiped:
+   "All idM IdL session sth gossiped_sth gossiped_session #t5. 
+    Gos_AppendOnlyViol(idM, IdL, sth, session, gossiped_sth, gossiped_session)@t5
+        ==> 
+            (Ex id1 preC_fields chain time t time2 log_id log_id2 #t0 #t1 #t2 #t3 #t4.
+                LoggerComputesAddLog(IdL, log_id, preC_fields, chain, t)@t0
+                & EntryVisible(IdL, preC_fields, log_id, #t2, time) /* There is an entry that was visible... */
+                & FetchLogSnapshot(id1, IdL, gossiped_session)@t1
+                & LoggerPresentsView(IdL, id1, log_id, time, gossiped_sth, gossiped_session)@t2 /* ... for a given proof at #t2 */
+                & FetchLogSnapshot(idM, IdL, session)@t3
+                & LoggerPresentsView(IdL, idM, log_id2, time2, sth, session)@t4 /* second view is handed out to the monitor directly (only one of both views is gossiped as assumed) */
+                & EntryMissing(IdL, preC_fields, log_id2, #t4, time2)
+                /* one entry that was visible in the gossiped view is now not visible anymore -> clearly a violation */
+                & #t0 < #t1 & #t1 < #t2 & #t2 < #t3 & #t3 < #t4 & #t4 < #t5
+            )
+    "
+
+rule monitorVerifiesAppendOnly_Gossiped [color= #501755]:
+    [ !LoggerDict($idM, $idL), !TLS_C_to_M($idC, $idM, $gos_snapshot, gossiped_sth, gossiped_session), !TLS_L_to_M($idL, $idM, $snapshot, sth, session) ]
+    --[
+        AppendOnlyVerified_Gossiped($idM, $idL, sth, session, gossiped_sth, gossiped_session), /* see restriction */
+        Monitor_AppendOnlyVerified_Gossiped($idM, $idL, sth, session, gossiped_sth, gossiped_session),
+        Gos_AppendOnlyCheck($idM, $idL, sth, session, gossiped_sth, gossiped_session),
+        Time($now)
+    ]->
+    []
+
+restriction appendOnlyWorks_Gossiped:
+       "(All id1 IdM IdL sth session time1 t log_id log_id2 preC_fields chain gossiped_sth gossiped_session time2 #t0 #t1 #t4 #t5.
+        AppendOnlyVerified_Gossiped(IdM, IdL, sth, session, gossiped_sth, gossiped_session)@t5 
+        /* If an append-only proof is verified, we know that ... */
+        & LoggerComputesAddLog(IdL, log_id, preC_fields, chain, t)@t0
+        & EntryVisible(IdL, preC_fields, log_id, #t1, time1)
+        /* all entries that have been visible at some point */
+        & LoggerPresentsView(IdL, id1, log_id, time1, gossiped_sth, gossiped_session)@t1
+        & LoggerPresentsView(IdL, IdM, log_id2, time2, sth, session)@t4 
+        /* and every view handed out after these */
+        & #t0 < #t1 & #t1 < #t4 & #t4 < #t5
+            ==> EntryVisible(IdL, preC_fields, log_id2, #t4, time2) 
+            /* then this entry is also visible in the newest handout */
+    )
+    &
+    (All IdM IdL sth session gossiped_sth gossiped_session #t5.
+        AppendOnlyVerified_Gossiped(IdM, IdL, sth, session, gossiped_sth, gossiped_session)@t5
+        /* An append-only proof is only valid if all these pre-conditions are satisfied. By this we ensure that the check is done properly (i.e. premise is fulfilled completely) while still keeping the formula guarded. */
+            ==> 
+                (Ex id1 time1 log_id log_id2 preC_fields chain time2 t #t0  #t1 #t4. 
+                    LoggerComputesAddLog(IdL, log_id, preC_fields, chain, t)@t0
+                    & EntryVisible(IdL, preC_fields, log_id, #t1, time1)
+                    & LoggerPresentsView(IdL, id1, log_id, time1, gossiped_sth, gossiped_session)@t1
+                    & LoggerPresentsView(IdL, IdM, log_id2, time2, sth, session)@t4
+                    & #t1 < #t4 & #t4 < #t5
+                )
+    )"
+
+/* ------- External CA Legitimacy Test ------- */
+
+rule RequestLegitimacyProof_Success:
+    let
+        ca_fields = <$rootCA, $idCA, pkCA, 'pubKey-CA', sn, $i, $j>
+    in
+    [ In(ca_fields), In(ca_sig), !Root_CA($rootCA, pkRCA), !CA_Documentation($rootCA, $idCA, ca_fields, ca_sig) /* proof of legitimacy handed out earlier when using the honest issuing process */ ]
+    --[
+        DocumentedIntermediateCA($rootCA, ca_fields, $idCA),
+        Eq(verify(ca_sig, ca_fields, pkRCA), true()), // signed by root CA
+        MonitorChecksCCADB($rootCA, ca_fields),
+        Time($now)
+    ]->
+    [ ]
+
+rule RequestLegitimacyProof_Illegal:
+    let
+        ca_fields = <$rootCA, $idCA, pkCA, 'pubKey-CA', sn, $i, $j>
+    in
+    [ In(ca_fields), In(ca_sig), !Root_CA($rootCA, pkRCA) ]
+    --[
+        UndocumentedIntermediateCA($rootCA, $idCA, ca_fields), // see restriction externalCA_no_proof below
+        Eq(verify(ca_sig, ca_fields, pkRCA), true()), // signed by root CA
+        MonitorChecksCCADB($rootCA, ca_fields),
+        Time($now)
+    ]->
+    [ ]
+
+/* Responsible root CA is not able to present an identity proof of the intermediate CA (-> it is forged) */
+restriction externalCA_no_proof:
+    "All rootCA idCA ca_fields #t1.
+        UndocumentedIntermediateCA(rootCA, idCA, ca_fields)@t1
+            ==> not (Ex #t0. DocumentedCA(rootCA, idCA, ca_fields)@t0 & #t0 < #t1)"
+
+/* ------ External Validator (PKI) */
+
+rule external_check_true:
+    let
+        stmt = <$idCA, $id, pkID, sn>
+        pub_fields = <$idCA, $id, pkID, 'pubKey', sn, $i, $j, sct1, sct2>
+        ca_fields = <$rootCA, $idCA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
+    in
+    [ In(pub_fields), In(pub_sig), In(ca_fields), In(ca_sig),
+      !Root_CA($rootCA, pkRootCA) ] 
+    --[
+        StatementCheckedExternally(ca_fields, stmt),
+        BenignCert($idCA, stmt),
+        Asserts_PKI($idCA, stmt),
+        Eq(verify(pub_sig, pub_fields, pkCA), true()),
+        Eq(verify(ca_sig, ca_fields, pkRootCA), true()),
+        Time($now)
+    ]->
+    [ ] 
+
+rule external_check_false:
+    let
+        stmt = <$idCA, $id, pkID, sn>
+        pub_fields = <$idCA, $id, pkID, 'pubKey', sn, $i, $j, sct1, sct2>
+        ca_fields = <$rootCA, $idCA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
+    in
+    [ In(pub_fields), In(pub_sig), In(ca_fields), In(ca_sig),
+      !Root_CA($rootCA, pkRootCA) ] 
+    --[ 
+        AssertsNot($idCA, stmt, ca_fields),
+        RogueCert($idCA, stmt),
+        StatementCheckedExternally(ca_fields, stmt),
+        Eq(verify(pub_sig, pub_fields, pkCA), true()),
+        Eq(verify(ca_sig, ca_fields, pkRootCA), true()),
+        Time($now)
+    ]->
+    []
+
+/* ----- Restrictions ----- */
+
+/* We require that the main roles in our model are conducted by pairwise distinct entities. This is in accordance with the CT standard as CAs should not act as loggers. Everyone can become a monitor in general, but in order to get meaningful results there actual supervision between these roles happens, we require them to be distinct. */
+
+restriction rootCA_CA_distinct:
+    "All rootCA idCA #t1 #t2. Root_CA_Init(rootCA)@t1 & NonRoot_CA_Init(idCA)@t2 
+    ==> not (rootCA = idCA)"
+
+restriction rootCA_Logger_distinct:
+    "All rootCA idL #t1 #t2. Root_CA_Init(rootCA)@t1 & Logger_Registered(idL)@t2 
+    ==> not (rootCA = idL)"
+
+restriction RootCA_Monitor_distinct:
+    "All rootCA idM #t1 #t2. Root_CA_Init(rootCA)@t1 & Monitor_Registered(idM)@t2 
+    ==> not (rootCA = idM)"
+
+restriction CA_Logger_distinct:
+    "All idCA idL #t1 #t2. NonRoot_CA_Init(idCA)@t1 & Logger_Registered(idL)@t2 
+    ==> not (idCA = idL)"
+
+restriction CA_Monitor_distinct:
+    "All idCA idM #t1 #t2. NonRoot_CA_Init(idCA)@t1 & Monitor_Registered(idM)@t2 
+    ==> not (idCA = idM)"
+
+restriction Logger_Monitor_distinct:
+    "All idL idM #t1 #t2. Logger_Registered(idL)@t1 & Monitor_Registered(idM)@t2 
+    ==> not (idL = idM)"
+
+/* identity of loggers is unique and they only have one key pair */
+restriction LoggersUnique:
+    "All idL #t1 #t2. Logger_Registered(idL)@t1 & Logger_Registered(idL)@t2 ==> #t1 = #t2"
+
+/* identity of CAs is unique, they only have one key pair. Note that this property can be violated by a malicious root CA. */
+restriction CAsUnique:
+    "All IdCA pk1 sk1 pk2 sk2 #t1 #t2. CA_Registered(IdCA, sk1, pk1)@t1 & CA_Registered(IdCA, sk2, pk2)@t2 ==> #t1 = #t2"
+
+restriction eq:
+    " All e1 e2 #t. Eq(e1, e2)@t ==> e1 = e2"
+
+restriction time_monotonicity:
+"All t #t1 #t3. Time(t)@t1
+                & Time(t)@t3
+                & #t1 < #t3
+                ==> ( All tp #t2. Time(tp)@t2
+                                & #t1 < #t2
+                                & #t2 < #t3 ==> tp = t )"
+
+// TODO: Decide on whether to include this restriction. Had performance problems with this in the past, but worth another try in the end.
+// Whenever a party checks the time a cert has been issued, it must have been a time that lies in the past
+// restriction issuedAtValid:
+//     "All currTime issuedAt #t1. CheckIssuedTime(currTime, issuedAt)@t1 ==> (Ex #t2. #t2 < #t1 & Time(issuedAt)@t2)"
+
+
+/* whenever a party checks the validity period of a certificate, that time must not happened before the check, i.e. the time did not pass yet */
+restriction certStillValid:
+    "All currTime valid_till #t1.
+        Time(currTime)@t1 & CheckValidUntil(currTime, valid_till)@t1
+         ==> not (Ex #t2. #t2 < #t1 & Time(valid_till)@t2)"
+
+/* ----------- Compromise Rules ----------- */
+
+/* CA key leakage */
+rule compromiseCA [color= #d40808 ]:
+    [!CA_s0($idCA, ~skCA, pk(~skCA), ca_fields, CA_sig)] 
+    --[ 
+        CompromiseCA($idCA), 
+        Compromise(),
+        Corrupted($idCA),
+        Time($now)
+    ]-> 
+    [ Out(~skCA) ] 
+
+/* Root CA key leakage */
+rule compromiseRootCA [color= #d40808 ]:
+    [ !Root_CA_s0($idCA, skCA, pkCA) ] 
+    --[ 
+        CompromiseRootCA($idCA), 
+        Compromise(),
+        Corrupted($idCA),
+        Time($now)
+    ]-> 
+    [ Out(skCA) ]
+
+/* Logger key leakage. !Corrupted_Logger is later additionally used to perform rogue log modifications. */
+rule compromiseLogger [color= #d40808 ]:
+    [ !Logger_s($idL, ~skL, pk(~skL)) ] 
+    --[ 
+        CompromiseLogger($idL), 
+        CompromiseLoggerUniq(<$idL, ~skL, pk(~skL)>),
+        Compromise(),
+        Corrupted($idL),
+        Time($now)
+    ]-> 
+    [ Out(~skL), !Corrupted_Logger($idL, ~skL, pk(~skL)) ] 
+
+/* !St_bad_Monitor's can sleep when performing checks */
+rule compromiseMonitor [color= #d40808 ]:
+    [ !Monitor($idM) ] 
+    --[ 
+        Compromise(),
+        Corrupted($idM),
+        Time($now)
+    ]-> 
+    [ !St_bad_Monitor($idM) ] 
+
+/* Lemmas */
+
+/* Predicates */
+
+// TODO: this is a relatively strong predicate, (approximates strongly) can/should we weaken this?
+// One approach would be to deliberately remove this from the acc lemmas that do not hold anyways (those with dishonest loggers causing a fail); without this assumption the proof still fails but there is a second variant then. For all lemmas where it worked, we need then a different variant that somehow fuses in the SCT timestamp. Without changing our assumptions, the timestamp availability is currently as follows:
+// - CTExt: timestamp available
+// - CT: not available but needed for the honest logger variant
+// - SCT Auditing: Timestamp available
+// - STH Gossiping: not available, but not strictly needed
+// - Receipt: not needed 
+predicate: ProofRunsAfterMMD(IdL, sth, session) <=> 
+    (All IdFetcher log_id time #t1.
+        LoggerPresentsView(IdL, IdFetcher, log_id, time, sth, session)@t1 
+        ==> 
+        not (Ex #t0. Time(time)@t0 & #t0 < #t1) /* the time of the view of the log has not existed before ==> potential delays due to MMD are excluded */
+    )
+
+/* liveness predicates are used in the acc lemmas with naive certificate revocation. We assume there that the monitor becomes live as soon as there is something interesting on the log (i.e. the certificate with statement has been added). This is of course a simplification, but note that this does not guarantee the monitor to then find that certificate. We do not rule out misbehavior here. */
+predicate: MonitorLiveness(stmt, #validation_time) <=> 
+                (Ex IdL IdM time0 time1 sth session log_id1 log_id2 #j #k #l. 
+                    LoggerComputesAddLogStmt(IdL, log_id1, stmt, time0)@j 
+                        /* SCT exists already */
+                    & LoggerPresentsView(IdL, IdM, log_id2, time1, sth, session)@k 
+                        /* Monitor receives a view from the log after it has been added. Here the logger may be dishonest and is able to use a different view */
+                    & not (time0 = time1)
+                        /* only considered after MMD */
+                    & MonitorInspectsLog_noTrust(IdL, stmt, sth, session)@l
+                    & #j < #k 
+                    & #k < #l 
+                    & #l < #validation_time
+                )
+
+predicate: MonitorLivenessWithHonestLogger(IdL1, IdL2, stmt, #validation_time) <=> 
+                (Ex IdL IdM time0 time1 sth session log_id #j #k #l. 
+                    LoggerComputesAddLogStmt(IdL, log_id, stmt, time0)@j  
+                        /* SCT exists already */
+                    & ((IdL = IdL1) | (IdL = IdL2))
+                    & LoggerPresentsView(IdL, IdM, log_id, time1, sth, session)@k // honest view is shared (same log_id)
+                        /* Monitor receives a view that covers the SCT */
+                    & not (time0 = time1) 
+                        /* only considered after MMD */
+                    & MonitorInspectsLog_noTrust(IdL, stmt, sth, session)@l
+                    & #j < #k 
+                    & #k < #l 
+                    & #l < #validation_time
+                )
+
+/* Sanity Client-Side Proofs (CT) */
+/* all sanity lemmas have the format "san_{model}_{rulename}" */
+
+// inclusion proof fails due to wrong proof timing (e.g. inside MMD or prior to log inclusion)
+lemma san_CT_ClientFindsInclusionViolation_1:
+    exists-trace
+    "Ex rootCA idCA idL stmt #t0 #t1 #t2.
+        Root_CA_Init(rootCA)@t0
+        & NonRoot_CA_Init(idCA)@t1
+        & InclusionProofFailed(idL, stmt)@t2
+        & not (Ex #t. Compromise()@t)
+        & (All rootCA #t. Root_CA_Init(rootCA)@t ==> (#t = #t0))
+        & (All idCA #t. NonRoot_CA_Init(idCA)@t ==> (#t = #t1))
+    "
+
+lemma san_CT_ClientFindsInclusionViolation_2:
+    exists-trace
+    "Ex idL1 idL2 idL stmt rootCA ca_fields idCA IdFetcher log_id time sth session #t1 #t2 #t3 #t5. 
+    ClientAcceptsChain(idL1, idL2, rootCA, ca_fields, idCA, stmt)@t1
+    & ((idL = idL1) | (idL = idL2))
+    & FetchLogSnapshot(IdFetcher, idL, session)@t2
+    & #t1 < #t2
+    & LoggerPresentsView(idL, IdFetcher, log_id, time, sth, session)@t3 
+    & ProofRunsAfterMMD(idL, sth, session)
+    & ClientFindsInclusionViol(idL, stmt, sth, session)@t5
+    & (All idL1 idL2 rootCA ca_fields idCA stmt #t. ClientAcceptsChain(idL1, idL2, rootCA, ca_fields, idCA, stmt)@t ==> (#t = #t1))
+    "
+
+    lemma san_CT_ClientStoresSnapshot:
+    exists-trace
+    "Ex idCA idC l1 l2 lid1 lid2 chain preC rootCA ca_fields stmt preC_fields session1 sth1 session2 sth2 t.0 t.1 #t1 #t2 #t3 #t4 #t5 #t6 #t7.
+    PreCertified(idCA, preC)@t1
+    & LoggerComputesAddLog(l1, lid1, preC_fields, chain, t.0)@t2
+    & LoggerComputesAddLog(l2, lid2, preC_fields, chain, t.1)@t3
+    & CAAsserts(idCA, stmt)@t4
+    & ClientAcceptsChain(l1, l2, rootCA, ca_fields, idCA, stmt)@t5
+    & SnapshotStored(idC, l1, session1, sth1)@t6
+    & SnapshotStored(idC, l2, session2, sth2)@t7
+    & (All idCA preC #t. PreCertified(idCA, preC)@t ==> (#t = #t1))
+    & (All idL lid chain time preC_fields #t. LoggerComputesAddLog(idL, lid, preC_fields, chain, time)@t ==> (#t = #t2 | #t = #t3))
+    &
+    (#t1 < #t2 & #t2 < #t3 & #t3 < #t4 & #t4 < #t5 & #t5 < #t6 & #t6 < #t7)
+    &
+    not(Ex #t1. Compromise()@t1)
+    "
+
+lemma san_CT_ClientVerifiesInclusion:
+    exists-trace
+    "Ex idL stmt sth session #t. 
+    ClientSideInclusionProved(idL, stmt, sth, session)@t
+    & not (Ex #t. Compromise()@t)
+    "
+
+/* Append Only Proofs */
+
+lemma san_CT_ClientFindsAppendOnlyViolation:
+    exists-trace
+    "Ex idL idC session sth #t0 #t1. 
+        ClientSnapshotStored(idC, idL, session, sth)@t0
+        & ClientFindsAppendOnlyViolation(idL)@t1
+        & (All idC idL session sth #t. SnapshotStored(idC, idL, session, sth)@t ==> (#t = #t0))
+    "
+
+lemma san_CT_ClientVerifiesAppendOnly:
+    exists-trace
+    "Ex IdC IdL time sth #t.
+        Client_AppendOnlyVerified(IdC, IdL, time, sth)@t
+        & not (Ex #t. Compromise()@t)
+    "
+
+lemma append_only_guarantee_helper1:
+    "All IdL IdM preC_fields log_id chain id time1 time2 sth2 session2 sth session t.0 #t0 #t1 #t4 #t5.
+        LoggerComputesAddLog(IdL, log_id, preC_fields, chain, t.0)@t0    
+        & EntryVisible(IdL, preC_fields, log_id, #t1, time1)
+        & LoggerPresentsView(IdL, id, log_id, time1, sth2, session2)@t1
+        & LoggerPresentsView(IdL, IdM, log_id, time2, sth, session)@t4
+        & AppendOnlyVerified_Gossiped(IdM, IdL, sth, session, sth2, session2)@t5
+        & #t0 < #t1 & #t1 < #t4 & #t4 < #t5
+        ==> EntryVisible(IdL, preC_fields, log_id, #t4, time2)
+    "
+
+/* Usual protocol flow */
+
+lemma san_CT_PreCertified:
+    exists-trace
+    "Ex idCA preC #t1.
+    PreCertified(idCA, preC)@t1
+    & not(Ex #t. Compromise()@t)
+    "
+
+lemma san_CT_PubKeyCertify:
+    exists-trace
+    "Ex idCA l1 l2 lid1 lid2 chain preC_fields sct1 sct2 preC t.0 t.1 #t1 #t2 #t3 #t4.
+    PreCertified(idCA, preC)@t1
+    & LoggerComputesAddLog(l1, lid1, preC_fields, chain, t.0)@t2
+    & LoggerComputesAddLog(l2, lid2, preC_fields, chain, t.1)@t3
+    & Certified(idCA, l1, sct1, l2, sct2)@t4
+    & (All idCA preC #t. PreCertified(idCA, preC)@t ==> (#t = #t1))
+    & (All idL lid preC_fields chain t.0 #t. LoggerComputesAddLog(idL, lid, preC_fields, chain, t.0)@t ==> (#t = #t2 | #t = #t3))
+    &
+    (#t1 < #t3 & #t2 < #t3 & #t3 < #t4)
+    &
+    not(Ex #t1. Compromise()@t1)
+    "
+
+lemma san_CT_ClientValidate:
+    exists-trace
+    "Ex idCA l1 l2 lid1 lid2 chain preC rootCA preC_fields time1 time2 ca_fields stmt #t1 #t2 #t3 #t4 #t5.
+    PreCertified(idCA, preC)@t1
+    & LoggerComputesAddLog(l1, lid1, preC_fields, chain, time1)@t2
+    & LoggerComputesAddLog(l2, lid2, preC_fields, chain, time2)@t3
+    & CAAsserts(idCA, stmt)@t4
+    & ClientAcceptsChain(l1, l2, rootCA, ca_fields, idCA, stmt)@t5
+    & (All idCA preC #t. PreCertified(idCA, preC)@t ==> (#t = #t1))
+    & (All idL lid chain preC_fields time #t. LoggerComputesAddLog(idL, lid, preC_fields, chain, time)@t ==> (#t = #t2 | #t = #t3))
+    &
+    (#t1 < #t2 & #t2 < #t3 & #t3 < #t4 & #t4 < #t5)
+    &
+    not(Ex #t1. Compromise()@t1)
+    "
+
+// Log activities
+
+lemma san_CT_add_preC_to_log:
+    exists-trace
+    "Ex IdL log_id preC_fields chain time #t. LoggerComputesAddLog(IdL, log_id, preC_fields, chain, time)@t & not(Ex #t1. Compromise()@t1)"
+
+lemma san_CT_forge_log_view:
+    exists-trace
+    "Ex IdL #t. LoggerForgesAdd(IdL)@t"
+
+/* ------------------------------ */
+
+/* Monitor Lemmas */
+
+lemma san_CT_monitorFindsAppendOnlyViolation:
+    exists-trace
+    "Ex IdM IdL time sth1 session1 sth2 session2 #t0 #t1. 
+    MonitorSnapshotStored(IdM, IdL, session1, sth1)@t0
+    & MonitorAppendOnlyViol(IdM, IdL, time, sth2, session2)@t1
+    & (All idC idL session sth #t. SnapshotStored(idC, idL, session, sth)@t ==> (#t = #t0))"
+
+lemma san_CT_monitorVerifiesAppendOnly:
+    exists-trace
+    "Ex IdM IdL time sth1 session1 sth2 session2 #t0 #t1. 
+    MonitorSnapshotStored(IdM, IdL, session1, sth1)@t0
+    & MonitorAppendOnlyVerified(IdM, IdL, time, sth2, session2)@t1
+    & (All idC idL session sth #t. SnapshotStored(idC, idL, session, sth)@t ==> (#t = #t0))"
+
+lemma san_CT_monitorFindsRogueCertificate:
+    exists-trace
+    "Ex idM idL stmt ca_fields session sth #t1. 
+    MonitorInspectsLog(idM, idL, stmt, ca_fields, sth, session)@t1
+    & Revoked(stmt)@t1
+    & MonitorFindsCert(idM, idL, stmt, sth, session)@t1
+    "
+
+lemma san_CT_monitorCanFindCertificate:
+    exists-trace
+    "Ex idM idL stmt ca_fields session sth #t1. 
+    MonitorInspectsLog(idM, idL, stmt, ca_fields, sth, session)@t1
+    & not (Revoked(stmt)@t1)
+    & not (Ex #t. MonitorSleeps(idM, stmt)@t)
+    & MonitorFindsCert(idM, idL, stmt, sth, session)@t1
+    "
+    
+lemma san_CT_monitorFindsRogueCertificate_SLEEP:
+    exists-trace
+    "Ex idM stmt sth #t.
+        MonitorInspectsLogSleep(idM, stmt, sth)@t
+    "
+
+lemma san_CT_monitorCannotFindCertificate:
+    exists-trace
+    "Ex IdM IdL stmt sth session #t. 
+    CannotFindCert(IdM, stmt, IdL, sth, session)@t 
+    & not (Ex #t. Revoked(stmt)@t)
+    & not (Ex #t. Compromise()@t)
+    "
+
+
+/* ------------------------------ */
+
+/* Auditing Lemmas */
+
+lemma san_CTAudit_monitorAudit_CA_Viol:
+    exists-trace
+    "Ex idL ca_fields stmt idCA #t.
+        AuditAuthCheck(idL, ca_fields, stmt)@t
+        & AuditCertFake(idCA, idL, ca_fields, stmt)@t
+    "
+
+lemma san_CTAudit_monitorAudit_no_viol:
+    exists-trace
+    "Ex idL ca_fields stmt #t.
+    AuditAuthCheck(idL, ca_fields, stmt)@t
+    & not (Ex idCA idL ca_fields stmt #t1. AuditCertFake(idCA, idL, ca_fields, stmt)@t1)
+    "
+
+lemma san_CTAudit_monitorAudit_Sleep:
+    exists-trace
+    "Ex idCA idM stmt #t.
+        MonitorAuditSleeps(idCA, idM, stmt)@t
+    "
+
+/* External Check */
+
+lemma san_CTExt_monitor_externalCheck_Fake:
+    exists-trace
+    "Ex RootCA IdCA stmt ca_fields #t0 #t1 #t2.
+    Root_CA_Init(RootCA)@t0
+    & NonRoot_CA_Init(IdCA)@t1
+    & MonExtFakeCheck(ca_fields, stmt)@t2
+    & CAFakesCert(IdCA, stmt, ca_fields)@t2
+    & (All RootCA #t. Root_CA_Init(RootCA)@t ==> (#t = #t0))
+    & (All IdCA #t. NonRoot_CA_Init(IdCA)@t ==> (#t = #t1))
+    "
+
+lemma san_CTExt_monitor_externalCheck_Verified:
+    exists-trace
+    "Ex RootCA IdCA IdL1 IdL2 sct1 sct2 preC stmt ca_fields #t0 #t1 #t2 #t3 #t4.
+    Root_CA_Init(RootCA)@t0
+    & NonRoot_CA_Init(IdCA)@t1
+    & PreCertified(IdCA, preC)@t2
+    & Certified(IdCA, IdL1, sct1, IdL2, sct2)@t3
+    & MonExtFakeCheck(ca_fields, stmt)@t4
+    & not (Ex idCA stmt ca_fields. CAFakesCert(idCA, stmt, ca_fields)@t4)
+    & #t0 < #t1 & #t1 < #t2 & #t2 < #t3 & #t3 < #t4
+    & not (Ex IdCA stmt ca_fields #t. CAFakesCert(IdCA, stmt, ca_fields)@t)
+    & (All IdCA IdL1 IdL2 sct1 sct2 #t. Certified(IdCA, IdL1, sct1, IdL2, sct2)@t ==> (#t = #t3))
+    & (All IdCA preC #t. PreCertified(IdCA, preC)@t ==> (#t = #t2))
+    & (All RootCA #t. Root_CA_Init(RootCA)@t ==> (#t = #t0))
+    & (All IdCA #t. NonRoot_CA_Init(IdCA)@t ==> (#t = #t1))
+    "
+
+lemma san_CTExt_monitor_externalCheck_Verified_simple:
+    exists-trace
+    "Ex ca_fields stmt #t.
+    MonExtFakeCheck(ca_fields, stmt)@t
+    & not (Ex IdCA stmt ca_fields #t. CAFakesCert(IdCA, stmt, ca_fields)@t)
+    "
+
+lemma san_PKIExt_external_check_true:
+    exists-trace
+    "Ex IdCA ca_fields stmt #t.
+        StatementCheckedExternally(ca_fields, stmt)@t
+        & Asserts_PKI(IdCA, stmt)@t
+    "
+
+lemma san_PKIExt_external_check_false:
+    exists-trace
+    "Ex IdCA ca_fields stmt #t.
+        StatementCheckedExternally(ca_fields, stmt)@t
+        & AssertsNot(IdCA, stmt, ca_fields)@t
+    "
+
+/* Gossiping */
+
+// lemma san_CTGossip_monitorFindsRogueCert_Gossiped:
+//     exists-trace
+//     "Ex iss idM idL stmt ca_fields sth session gossiped_sth gossiped_session #t.
+//     Gossiped(idM, idL, stmt, gossiped_sth, gossiped_session, sth, session)@t
+//     & GossipedCertFake(iss, idL, stmt, ca_fields, gossiped_sth, gossiped_session, sth, session)@t"
+
+// lemma san_CTGossip_monitorFindsCert_Gossiped:
+//     exists-trace
+//     "Ex idM idL stmt gossiped_sth gossiped_session sth session #t.
+//     Gossiped(idM, idL, stmt, gossiped_sth, gossiped_session, sth, session)@t
+//     & not (Ex iss ca_fields #t1. GossipedCertFake(iss, idL, stmt, ca_fields, gossiped_sth, gossiped_session, sth, session)@t1)
+//     & GosInclusionProofWorks(idM, idL, stmt, sth, session)@t
+//     & not(Ex #t1. Compromise()@t1)
+//     "
+
+// lemma san_CTGossip_monitorCannotFindCert_Gossiped:
+//     exists-trace
+//     "Ex IdM stmt sth session gossiped_sth gossiped_session #t.
+//     Gos_CannotFindCert(IdM, stmt, sth, session, gossiped_sth, gossiped_session)@t
+//     "
+
+lemma san_CTGossip_monitorFindsAppendOnlyViolation_Gossiped:
+    exists-trace
+    "Ex IdM IdL sth session gossiped_sth gossiped_session #t.
+    Gos_AppendOnlyViol(IdM, IdL, sth, session, gossiped_sth, gossiped_session)@t
+    "
+
+lemma san_CTGossip_monitorVerifiesAppendOnly_Gossiped:
+    exists-trace
+    "Ex IdM IdL sth session gossiped_sth gossiped_session #t.
+    Monitor_AppendOnlyVerified_Gossiped(IdM, IdL, sth, session, gossiped_sth, gossiped_session)@t
+    & not (Ex #t. Compromise()@t)
+    "
+
+// expected result: negative
+lemma gossiped_appendOnly_log_id:
+    "All idC IdL sth session gossiped_sth gossiped_session #t. 
+    Monitor_AppendOnlyVerified_Gossiped(idC, IdL, sth, session, gossiped_sth, gossiped_session)@t ==> 
+    (All id1 id2 time1 time2 lid1 lid2 #t1 #t2. LoggerPresentsView(IdL, id1, lid1, time1, sth, session)@t1 & LoggerPresentsView(IdL, id2, lid2, time2, gossiped_sth, gossiped_session)@t2 
+        ==> (lid1 = lid2))
+    "
+
+/* ------------------------------ */
+
+/* Authenticity */
+
+// autoprovable
+lemma CA_auth_w_compromise:
+    exists-trace
+    "(Ex idL1 idL2 rootCA ca_fields idCA stmt #t. ClientAcceptsChain(idL1, idL2, rootCA, ca_fields, idCA, stmt)@t &
+        not (Ex #t1. CAAsserts(idCA, stmt)@t1))"
+
+lemma authenticity:
+    "All idL1 idL2 rootCA ca_fields idCA stmt #j.
+        ClientAcceptsChain(idL1, idL2, rootCA, ca_fields, idCA, stmt)@j 
+        ==> (Ex #i. GroundTruth(idCA, stmt)@i & #i < #j)"
+
+// autoprovable
+lemma cert_auth:
+    "All idL1 idL2 rootCA ca_fields idCA stmt #t. ClientAcceptsChain(idL1, idL2, rootCA, ca_fields, idCA, stmt)@t ==> 
+                /* If client accepted cert signed by idCA */
+          (Ex #t1. CAAsserts(idCA, stmt)@t1) 
+            /* then idCA asserts this certificate */
+        | (Ex #t2. CompromiseCA(idCA)@t2 & #t2 < #t ) 
+            /* or that particular CA is compromised */
+    "
+
+// autoprovable
+lemma cert_sct_auth:
+    "All #t1 IdCA IdL1 sct1 IdL2 sct2. Certified(IdCA, IdL1, sct1, IdL2, sct2)@t1 
+            /* If a CA asserts a public key certificate with sct1 and sct2 */
+      ==>
+       (Ex #t2 #t3. 
+        LoggerAsserts(IdL1, sct1)@t2 & LoggerAsserts(IdL2, sct2)@t3
+        & not (IdL1 = IdL2)
+        /* then a logger has previously issued them honestly */
+      )
+    |  (Ex #t2. Compromise()@t2 & #t2 < #t1 )
+    /* or there has been corruption going on */
+    "
+    
+// autoproven
+lemma sct_auth:
+    "All l1 l2 rootCA ca_fields idCA stmt #t.
+        ClientAcceptsChain(l1, l2, rootCA, ca_fields, idCA, stmt)@t ==>
+            /* If a client accepts a certificate with SCTs from l1 and l2... */
+            (
+            (Ex lid1 lid2 time1 time2 preC_fields #lt1 #lt2.
+                LoggerComputesAddLog(l1, lid1, preC_fields, stmt, time1)@lt1
+            &   LoggerComputesAddLog(l2, lid2, preC_fields, stmt, time2)@lt2
+            & #lt1 < #t
+            & #lt2 < #t 
+                /* then both loggers have added and entry to their log */
+            ) 
+            | (Ex #c1. CompromiseLogger(l1)@c1)
+            | (Ex #c2. CompromiseLogger(l2)@c2)
+                /* or they are corrupt */
+        )
+        "
+
+/* Miscellaneous */
+
+// lemma append_only_guarantee_helper2:
+//     "All IdL IdM log_id stmt preC_fields ca_fields time sth session #t1 #t2.
+//         LoggerPresentsView(IdL, IdM, log_id, time, sth, session)@t1
+//         & EntryVisible(IdL, preC_fields, log_id, #t1, time)
+//         & MonitorInspectsLog(IdM, IdL, stmt, ca_fields, sth, session)@t2
+//         & #t1 < #t2
+//         ==> InclusionProofSucceeds(IdL, preC_fields, sth, session)@t2
+//     "
+
+// lemma append_only_guarantee_helper3:
+//     "All IdL IdM log_id time1 stmt ca_fields sth2 session2 #t0 #t1. 
+//     LoggerPresentsView(IdL, IdM, log_id, time1, sth2, session2)@t0
+//     & MonitorInspectsLog(IdM, IdL, stmt, ca_fields, sth2, session2)@t1
+//     & InclusionProofSucceeds(IdL, stmt, sth2, session2)@t1
+//     ==> EntryVisible(IdL, stmt, log_id, #t0, time1)
+//     "
+
+//     lemma append_only_guarantee:
+//     "All id IdL IdM sth session time1 log_id stmt ca_fields sth2 session2 time2 time0 #t0 #t1 #t4 #t5 #t6.
+//         LoggerComputesAddLogStmt(IdL, log_id, stmt, time0)@t0   
+//         & EntryVisible(IdL, stmt, log_id, #t1, time1)
+//         & LoggerPresentsView(IdL, id, log_id, time1, sth2, session2)@t1
+//         & LoggerPresentsView(IdL, IdM, log_id, time2, sth, session)@t4
+//         & AppendOnlyVerified_Gossiped(IdM, IdL, sth, session, sth2, session2)@t5
+//         & MonitorInspectsLog(IdM, IdL, stmt, ca_fields, sth, session)@t6
+//         & #t0 < #t1 & #t1 < #t4 & #t4 < #t5
+//         ==> InclusionProofSucceeds(IdL, stmt, sth, session)@t6"
+
+
+lemma AppendOnlyViolation_Guarantee:
+    "All IdM IdL time sth session #t1. MonitorAppendOnlyViol(IdM, IdL, time, sth, session)@t1 ==> (Ex #t0. CompromiseLogger(IdL)@t0 & #t0 < #t1)"
+
+lemma incl_proof_auth:
+    "All idL id idL1 idL2 rootCA ca_fields idCA stmt sth session #t0 #t1 #t2. 
+    ClientAcceptsChain(idL1, idL2, rootCA, ca_fields, idCA, stmt)@t0
+    & ((idL = idL1) | (idL = idL2))
+    & FetchLogSnapshot(id, idL, session)@t1
+    & ClientFindsInclusionViol(idL, stmt, sth, session)@t2
+    & #t0 < #t1 & #t1 < #t2
+    & ProofRunsAfterMMD(idL, sth, session) 
+    ==> (Ex #t0. CompromiseLogger(idL)@t0 & #t0 < #t2)"
+
+lemma Violation_with_CA_Guarantee:
+    "All idCA idL idL1 idL2 stmt id rootCA ca_fields sth session #t0 #t1 #t2 #t3. 
+    ClientAcceptsChain(idL1, idL2, rootCA, ca_fields, idCA, stmt)@t0
+    & ((idL = idL1) | (idL = idL2))
+    & FetchLogSnapshot(id, idL, session)@t1
+    & ClientFindsInclusionViol(idL, stmt, sth, session)@t2
+    & ProofRunsAfterMMD(idL, sth, session)
+    & CAFakesCert(idCA, stmt, ca_fields)@t3
+    & #t0 < #t1
+    ==> (Ex #t0. CompromiseLogger(idL)@t0)
+    & (Ex #t0. Corrupted(idCA)@t0)"
+
+/* ---------------------
+        TRANSPARENCY
+   --------------------- */
+
+/* Inclusion Proofs (run by clients or monitors) can fail due to not respecting MMD. */
+lemma transparency_CT_attempt:
+    "All id idL idL1 idL2 preCert sth session #t1 #t2 #t3.
+        ClientAcceptsCert(idL1, idL2, preCert)@t1 /* preCert fields reconstructed from the accepted pubKey certificate */
+        & FetchLogSnapshot(id, idL, session)@t2
+        & InclusionProof(id, idL, preCert, sth, session)@t3 
+        & ((idL = idL1) | (idL = idL2))
+        & #t1 < #t2 & #t2 < #t3
+            ==> 
+            InclusionProofSucceeds(idL, preCert, sth, session)@t3"
+
+/*
+if we instead assume the MMD (ProofRunsAfterMMD) is respected, transparency can still fail if the considered logger is corrupt.
+*/
+lemma transparency_w_MMD:
+    "
+    All id idL idL1 idL2 preCert sth session #t1 #t2 #t3.
+        ClientAcceptsCert(idL1, idL2, preCert)@t1 /* preCert fields reconstructed from the accepted pubKey certificate */
+        & FetchLogSnapshot(id, idL, session)@t2
+        & InclusionProof(id, idL, preCert, sth, session)@t3 
+        & ((idL = idL1) | (idL = idL2))
+        & #t1 < #t2 & #t2 < #t3
+        & ProofRunsAfterMMD(idL, sth, session)
+            ==>
+        (Ex #t. InclusionProofSucceeds(idL, preCert, sth, session)@t)"
+
+/*
+...but if we assume the logger is honest (not corrupt) and the MMD is respected, transparency holds (trivially).
+*/
+lemma transparency_CT_w_honest_MMD:
+    "
+    All id idL idL1 idL2 preCert sth session #t1 #t2 #t3.
+        ClientAcceptsCert(idL1, idL2, preCert)@t1 /* preCert fields reconstructed from the accepted pubKey certificate */
+        & FetchLogSnapshot(id, idL, session)@t2
+        & InclusionProof(id, idL, preCert, sth, session)@t3 
+        & ((idL = idL1) | (idL = idL2))
+        & #t1 < #t2 & #t2 < #t3
+        & ProofRunsAfterMMD(idL, sth, session) 
+        & not (Ex #t. Corrupted(idL)@t)
+            ==> 
+        (Ex #t. InclusionProofSucceeds(idL, preCert, sth, session)@t)
+    "
+
+/* 
+transparency can be achieved using SCT Auditing, i.e., if a monitor has been given access to the certificate (with fields) that a client has accepted, then that monitor will correctly learn about that certificate (with fields) without the need of the log entirely. 
+
+Trivially holds by construction.
+*/
+lemma transparency_SCT_Auditing:
+    "All idM idL preCert stmt #t0. 
+        AuditedSCT(idM, idL, preCert, stmt)@t0
+            ==> 
+                (Ex #t. MonitorLearns(preCert)@t) 
+                /* then that monitor becomes aware of the cert with contained statement */
+    "
+
+/* Transparency with gossiping cannot be achieved if logger corruptions are allowed. This variant is about any snapshot that has been gossiped. In this example there is no guarantee that the entry of interest was ever contained in the gossiped snapshot. In this sense, transparency is neither guaranteed nor improved by gossiping.
+Result: negative */
+lemma transparency_Gossip_w_o_client_proof:
+    "All idL1 idL2 preCert idL id log_id time idM gos_sth gos_session sth session #t0 #t1 #t2 #t3 #t4. 
+        ClientAcceptsCert(idL1, idL2, preCert)@t0
+        & ((idL = idL1) | (idL = idL2))
+        & LoggerPresentsView(idL, id, log_id, time, gos_sth, gos_session)@t1
+            /* view is after the SCT has been used in a validation -> should be visible modulo MMD */
+        & LoggerPresentsView(idL, idM, log_id, time, sth, session)@t2
+        & #t0 < #t1 & #t1 < #t2
+        & MonitorChecksInclusion(idM, idL, preCert, sth, session)@t3
+        & AppendOnlyVerified_Gossiped(idM, idL, sth, session, gos_sth, gos_session)@t4
+            /* monitor uses gossiped knowledge and verifies append-only */
+            ==> 
+                InclusionProofSucceeds(idL, preCert, sth, session)@t3"
+                    /* then this entry should be visible to the monitor */
+
+/* This variant additionally assumes that the client verifies inclusion in the gossiped snapshot. Transparency still can be violated. This time the gossiped view actually is an improvement. We will later see that it is at least sufficient to achieve accountable transparency.
+Result: negative */
+lemma no_transparency_gossip_with_client_proof:
+    "All idL1 idL2 preCert idL id log_id time idM gos_sth gos_session sth session #t0 #t1 #t2 #t3 #t4 #t5. 
+        ClientAcceptsCert(idL1, idL2, preCert)@t0
+        & ((idL = idL1) | (idL = idL2))
+        & LoggerPresentsView(idL, id, log_id, time, gos_sth, gos_session)@t1
+            /* view is after the SCT has been used in a validation -> should be visible modulo MMD */
+        & LoggerPresentsView(idL, idM, log_id, time, sth, session)@t2
+        & #t0 < #t1 & #t1 < #t2
+        & MonitorChecksInclusion(idM, idL, preCert, sth, session)@t3
+        & AppendOnlyVerified_Gossiped(idM, idL, sth, session, gos_sth, gos_session)@t4
+        & InclusionProofSucceeds(idL, preCert, gos_sth, gos_session)@t5
+            ==> 
+                InclusionProofSucceeds(idL, preCert, sth, session)@t3"
+                    /* then this entry should be visible to the monitor */
+
+/* ------------------------
+    ACCOUNTABILITY LEMMAS
+   ------------------------ */
+
+/* ----- Accountable Transparency ----- */
+
+/*
+The client can hold a misbehaving logger accountable using an inclusion test after the MMD (otherwise no guarantee that the log is corrupted).
+The test is performed after the client has accepted a certificate with stmt and included SCT from that log.
+*/
+test client_inclusionViol:
+    "Ex idL1 idL2 idClient preCert sth session #t0 #t1 #t2. 
+        ClientAcceptsCert(idL1, idL2, preCert)@t0
+        & ((idL = idL1) | (idL = idL2))
+        & ClientFetchesLogSnapshot(idClient, idL, session)@t1
+        & InclusionProofFails(idClient, idL, preCert, sth, session)@t2
+        & ProofRunsAfterMMD(idL, sth, session)
+        & #t0 < #t1
+    "
+/*
+Result: proven (exists-trace manually)
+
+A client can hold a logger accountable for correct inclusion in their log under these conditions:
+the client received and accepted a certificate with an SCT from the respective log (1) and then performs an inclusion check (2.2) on a freshly requested snapshot (2.1) respecting the MMD (3), then the inclusion proof suceeds, i.e., the entry was visible in the snapshot and transparency holds.
+*/
+lemma T_CT_1:
+    client_inclusionViol accounts for
+        "All idL idL1 idL2 preCert sth session idClient #t0 #t1 #t2. 
+        ClientAcceptsCert(idL1, idL2, preCert)@t0 /* (1)*/
+        & ((idL = idL1) | (idL = idL2))
+        & ClientFetchesLogSnapshot(idClient, idL, session)@t1 /* (2.1) */
+        & InclusionProof(idClient, idL, preCert, sth, session)@t2
+            /* (2.2)*/
+        & ProofRunsAfterMMD(idL, sth, session) /* (3) */
+        & #t0 < #t1
+            ==>
+            InclusionProofSucceeds(idL, preCert, sth, session)@t2 
+            /* ...then the inclusion proof must suceed, in other words: the entry is visible in the snapshot and transparency holds. */
+        "
+
+
+
+/* For this test, the monitor side is considered instead and a monitor finds that a logger has inclusion violated. However, the test combines knowledge obtained on the clientside (ClientAcceptsCert) with the monitor check run afterwards */
+test client_monitor_inclusionViol:
+    "Ex idM idL1 idL2 preCert sth session #t0 #t1 #t2. 
+        ClientAcceptsCert(idL1, idL2, preCert)@t0
+        & ((idL = idL1) | (idL = idL2))
+        & MonitorFetchesLogSnapshot(idM, idL, session)@t1
+        & #t0 < #t1
+        & InclusionProofFails(idM, idL, preCert, sth, session)@t2  /* idL is free */
+        & ProofRunsAfterMMD(idL, sth, session)
+    "
+/*
+Result: autoproven
+
+The monitor can hold a logger accountable for correct inclusion in their log under these conditions:
+- A client has accepted a certificate with an SCT from the respective log first (1)
+- After that, the monitor fetches a snapshot from that log (2.1)
+- and request an inclusion proof for the certificate accepted by the client before (2.2)
+- respecting the MMD (3)
+Then, the inclusion proof must succeed, i.e., the entry was visible in the snapshot and transparency holds. Note that here the monitor relies on the knowledge obtained clientside. We show in the next lemma that the property does not hold without this assumption.
+*/
+lemma T_CT_2:
+    client_monitor_inclusionViol accounts for
+    "All idM idL1 idL2 idL preCert sth session #t0 #t1 #t2.
+        ClientAcceptsCert(idL1, idL2, preCert)@t0
+        & ((idL = idL1) | (idL = idL2))
+        & MonitorFetchesLogSnapshot(idM, idL, session)@t1
+        & InclusionProof(idM, idL, preCert, sth, session)@t2 
+        & #t0 < #t1
+        & ProofRunsAfterMMD(idL, sth, session)
+            ==>
+            InclusionProofSucceeds(idL, preCert, sth, session)@t2
+    "
+
+
+
+/* This test leaves out the knowledge aquired on the clientside and solely relies on a monitorside inclusion check. It will not be sufficient to achieve acc transparency. */
+test client_monitor_inclusionViol_wo_validate:
+    "Ex idM preCert sth session #t0 #t1. 
+        MonitorFetchesLogSnapshot(idM, idL, session)@t0
+        & InclusionProofFails(idM, idL, preCert, sth, session)@t1 /* idL is free */
+        & ProofRunsAfterMMD(idL, sth, session)
+    "
+/*
+Result: negative (autoprovable)
+
+Compared to T_CT_2 we now relaxed the assumption and do not assume that a client first accepted a certificate that is later checked for inclusion by the monitor. We find that in this scenario, the monitor does not have sufficient knowledge to correctly blame the logger. Uniqueness is violated meaning that the monitor incorrectly blamed an honest logger.
+*/
+lemma T_CT_3:
+    client_monitor_inclusionViol_wo_validate accounts for
+    "All idM idL preCert sth session #t0 #t1.
+        MonitorFetchesLogSnapshot(idM, idL, session)@t0
+        & InclusionProof(idM, idL, preCert, sth, session)@t1
+        & ProofRunsAfterMMD(idL, sth, session)
+            ==>
+            InclusionProofSucceeds(idL, preCert, sth, session)@t1
+    "
+
+
+
+/*
+In this variant, the monitor performs an audit where it got the SCT externally (e.g., from a client). Then, it fetches a log view and runs the usual inclusion check. If the monitor cannot find the certificate, the logger is blamed.
+*/
+test audit_inclusionViol:
+    "Ex idM stmt preCert sth session #t0 #t1 #t2.
+        AuditedSCT(idM, idL, preCert, stmt)@t0
+        & MonitorFetchesLogSnapshot(idM, idL, session)@t1
+            /* additional proof is run after auditing */
+        & #t0 < #t1
+        & InclusionProofFails(idM, idL, preCert, sth, session)@t2 /* idL free */
+            /* this proof fails */
+        & ProofRunsAfterMMD(idL, sth, session)
+    "
+/* 
+Result: autoprovable
+If a monitor runs the same check as in T_CT_3 but now after it received a certificate to audit from a client, then the monitor can correctly blame the logger if the inclusion proof fails again. This is similar to T_CT_2 where the monitor relied on knowledge from the client, but with auditing there is a defined and existing way to share this knowledge.
+*/
+lemma T_Audit:
+    audit_inclusionViol accounts for
+    "All idM idL stmt preCert sth session #t0 #t1 #t2.
+        AuditedSCT(idM, idL, preCert, stmt)@t0
+            /* If a monitor performs an Audit where it got an SCT externally */
+        & MonitorFetchesLogSnapshot(idM, idL, session)@t1
+        & #t0 < #t1
+        & InclusionProof(idM, idL, preCert, sth, session)@t2
+        & ProofRunsAfterMMD(idL, sth, session)
+            ==>
+            InclusionProofSucceeds(idL, preCert, sth, session)@t2"
+            /* then the monitor can find the certificate in the log too */
+
+
+
+test gossip_inclusionViol:
+    "Ex idM gos_sth gos_session preCert sth session #t1 #t2 #t3 #t4. 
+        MonitorFetchesLogSnapshot(idM, idL, session)@t1 /* Monitor fetches an up-to-date snapshot from the log */
+        & InclusionProofFails(idM, idL, preCert, sth, session)@t2 /* On this snapshot, the inclusion proof of preCert fails */
+        & Gos_AppendOnlyViol(idM, idL, sth, session, gos_sth, gos_session)@t3
+        /* additionally, the monitor finds that append-only between this snapshot and the gossiped_one is violated */
+        & InclusionProofSucceeds(idL, preCert, gos_sth, gos_session)@t4
+        /* as property for the gossiped snapshot we require that the client successfully ran an inclusion proof on it (compare to last lemma that failed because of this) */
+        "
+/*
+Result: proven (exists-trace manually)
+
+Gossip can be used to achieve accountable transparency. Here, the monitor holds an older STH a client has proved inclusion for (gos_sth). Together with a newer fetch (sth) which represents an entire log view, the monitor can verify that it at least sees the same entries as the client by verifying append-only between the two STHs.
+*/
+lemma T_Gossip [heuristic=O "acc_oracle"]:
+    gossip_inclusionViol accounts for
+    "All idM idL preCert sth session gos_sth gos_session #t1 #t2 #t3 #t4.
+        MonitorFetchesLogSnapshot(idM, idL, session)@t1
+        & InclusionProof(idM, idL, preCert, sth, session)@t2
+            /* monitor runs an inclusion proof for preCert (as before with transparency) */
+        & Gos_AppendOnlyCheck(idM, idL, sth, session, gos_sth, gos_session)@t3
+            /* monitor checks append-only between both snapshots (the gossiped one and the one they run an inclusion proof on */
+        & InclusionProofSucceeds(idL, preCert, gos_sth, gos_session)@t4
+            /* client proofs inclusion of stmt in gos_sth */
+            /* append only between gos_sth and sth is checked */
+            ==>
+            InclusionProofSucceeds(idL, preCert, sth, session)@t2"
+            /* then this inclusion proof succeeds */
+
+/*
+## Approach with revocation
+
+If we use Transparency and bring logs into this picture, it is not immediately clear how this will change anything. If a fake cert appears in a log, that does not change the setup. If we consider the appearance of a fake cert in a log that is inspected by a monitor on behalf of the real server, this could change the setup.
+Idea: Consider a mix of the transparency property before with this now -- If the server learns the fake cert, it can take action (outside of CT, e.g. certificate revocation). Then, such a rogue cert would not be accepted anymore and strengthen the claim 'ClientAccepts(idC, stmt)@t ==> (Ex #t0. GroundTruth(idCA, stmt)@t0 & #t0 < #t)'
+
+All lemmas in this section rely on activated naive certificate revocation. Set makro to --defines=REVOCATION to enable it.
+*/
+
+test monitor_sleeps_intm_CA:
+    "Ex stmt idL1 idL2 rootCA ca_fields #t #t1 #t2. /* idM and idCA free */
+        MonitorSleeps(idM, stmt)@t  
+            /* monitor fails to inform server ==> No revocation of the rogue cert happens */
+        & ClientAcceptsChain(idL1, idL2, rootCA, ca_fields, idCA, stmt)@t1
+        & DocumentedIntermediateCA(rootCA, ca_fields, idCA)@t2
+        & not (Ex idL #t. CompromiseLogger(idL)@t) 
+            /* assumed perfect transparency */
+        & MonitorLiveness(stmt, #t1)
+        "
+
+test monitor_sleeps_root_CA:
+    "Ex stmt idL1 idL2 idCA ca_fields #t #t1 #t2. /* idM free */
+        MonitorSleeps(idM, stmt)@t
+            /* monitor fails to inform server ==> No revocation of the rogue cert happens */
+        & ClientAcceptsChain(idL1, idL2, rootCA, ca_fields, idCA, stmt)@t1
+        & UndocumentedIntermediateCA(rootCA, idCA, ca_fields)@t2
+        & not (Ex idL #t. CompromiseLogger(idL)@t) 
+            /* assumed perfect transparency */
+        & MonitorLiveness(stmt, #t1)
+        "
+// autoproven
+lemma A_Revoke_1:
+    monitor_sleeps_intm_CA, monitor_sleeps_root_CA accounts for
+    "All idL1 idL2 rootCA ca_fields idCA stmt #t1 #t2. 
+        MonitorLiveness(stmt, #t1) 
+        & not (Ex idL #t. CompromiseLogger(idL)@t) 
+            /* assumed perfect transparency */
+        & ClientAcceptsChain(idL1, idL2, rootCA, ca_fields, idCA, stmt)@t1
+        & MonitorChecksCCADB(rootCA, ca_fields)@t2
+            ==> 
+                (Ex #t0. GroundTruth(idCA, stmt)@t0 & #t0 < #t1)"
+
+
+
+test monitor_sleeps_cond_intm_CA: /* idM and idCA free */
+    "Ex idL1 idL2 rootCA ca_fields stmt #t #t1 #t2. 
+        MonitorSleeps(idM, stmt)@t 
+        & MonitorLivenessWithHonestLogger(idL1, idL2, stmt, #t1)
+        & ClientAcceptsChain(idL1, idL2, rootCA, ca_fields, idCA, stmt)@t1
+        & DocumentedIntermediateCA(rootCA, ca_fields, idCA)@t2
+        "
+
+test monitor_sleeps_cond_root_CA: /* idM and rootCA free */
+    "Ex idL1 idL2 idCA ca_fields stmt #t #t1 #t2. 
+        MonitorSleeps(idM, stmt)@t
+        & MonitorLivenessWithHonestLogger(idL1, idL2, stmt, #t1)
+        & ClientAcceptsChain(idL1, idL2, rootCA, ca_fields, idCA, stmt)@t1
+        & UndocumentedIntermediateCA(rootCA, idCA, ca_fields)@t2
+        "
+/* one of the two considered SCTs (when Validating) is assumed to be of an honest logger */
+// autoproven
+lemma A_Revoke_2: 
+    monitor_sleeps_cond_intm_CA,
+    monitor_sleeps_cond_root_CA accounts for
+    "All idL1 idL2 rootCA ca_fields idCA stmt #t1 #t2. 
+        MonitorLivenessWithHonestLogger(idL1, idL2, stmt, #t1)
+        & ClientAcceptsChain(idL1, idL2, rootCA, ca_fields, idCA, stmt)@t1
+        & MonitorChecksCCADB(rootCA, ca_fields)@t2
+            ==>
+                (Ex #t0. GroundTruth(idCA, stmt)@t0 & #t0 < #t1)
+    "
+
+
+// helpful for speeding up all A_Revoke_uniq proofs
+lemma A_Revoke_uniq_helper1 [reuse]:
+    "All idL1 idL2 idM rootCA fields_CA idCA stmt #t1 #t2 #t3. 
+    ClientAcceptsChain(idL1, idL2, rootCA, fields_CA, idCA, stmt)@t1
+    & DocumentedIntermediateCA(rootCA, fields_CA, idCA)@t2
+    & MonitorSleeps(idM, stmt)@t3
+    ==> (Ex #t. Corrupted(idCA)@t)"
+
+lemma A_Revoke_uniq_helper2 [reuse]:
+    "All rootCA idCA fields_CA #t1. 
+    UndocumentedIntermediateCA(rootCA, idCA, fields_CA)@t1
+    ==> (Ex #t. Corrupted(rootCA)@t)"
+
+lemma A_Revoke_uniq_helper3 [reuse]:
+    "All idM stmt #t1. 
+    MonitorSleeps(idM, stmt)@t1
+    ==> (Ex #t. Corrupted(idM)@t)"
+
+
+
+// removed restriction on non-corruption of one logger
+test monitor_sleeps_unconditional_intm_CA:
+    "Ex idL1 idL2 rootCA ca_fields stmt #t #t1 #t2. /* idM and idCA free */
+        MonitorSleeps(idM, stmt)@t
+            /* monitor fails to inform server ==> No revocation of the rogue cert happens */
+        & ClientAcceptsChain(idL1, idL2, rootCA, ca_fields, idCA, stmt)@t1
+        & DocumentedIntermediateCA(rootCA, ca_fields, idCA)@t2
+        & MonitorLiveness(stmt, #t1)
+    "
+
+test monitor_sleeps_unconditional_root_CA: /* idM and rootCA free */
+    "Ex idL1 idL2 idCA ca_fields stmt #t #t1 #t2. 
+        MonitorSleeps(idM, stmt)@t 
+            /* monitor fails to inform server ==> No revocation of the rogue cert happens */
+        & ClientAcceptsChain(idL1, idL2, rootCA, ca_fields, idCA, stmt)@t1
+        & UndocumentedIntermediateCA(rootCA, idCA, ca_fields)@t2
+        & MonitorLiveness(stmt, #t1)
+    "
+/* no logger is assumed to be honest
+
+negative result:
+
+- acc_under_unconditional_transparency_verif_empty: does not hold (as expected)
+    -> typical situation: logger hands out snapshot which is verified by the client but fakes the view to the monitor. The example shows this for the given property only for one logger, but the same works if the monitor views both logs and both are corrupted in the same way.
+
+autoprovable
+*/
+lemma A_Revoke_3: 
+    monitor_sleeps_unconditional_intm_CA,
+    monitor_sleeps_unconditional_root_CA accounts for
+    "All idL1 idL2 rootCA ca_fields idCA stmt #t1 #t2. 
+        MonitorLiveness(stmt, #t1)
+        & ClientAcceptsChain(idL1, idL2, rootCA, ca_fields, idCA, stmt)@t1
+        & MonitorChecksCCADB(rootCA, ca_fields)@t2
+            ==> 
+                (Ex idCA #t0. GroundTruth(idCA, stmt)@t0 & #t0 < #t1) 
+    "
+
+
+
+/*
+Now we add SCT Auditing to this scenario: 
+    1. A client can share the seen SCTs prior to accepting them, this opens a frame where an honest monitor + server can revoke the certificate again ==> Client will not accept it even if loggers were dishonest
+        - still possible that a monitor sleeps, still necessary that CA is corrupted
+        - Expectation: the above non-transparency property is provable again if SCT Auditing is added
+    2. Can some party hold loggers accountable too now? A monitor learns what to expect when inspecting the log after getting shared SCTs, thus able to obtain proofs of inclusion violations (new -- this was not possible before). (we will see in the other sections that this is indeed possible)
+*/
+
+test monitor_sleeps_unconditional_audit_intm_CA:
+    "Ex idL1 idL2 rootCA ca_fields stmt #t1 #t2 #t3. /* idM and idCA free */
+        MonitorAuditSleeps(idCA, idM, stmt)@t1
+            /* monitor fails to inform server ==> No revocation of the rogue cert happens. idCA and idM blamed */
+        & ClientAcceptsChain(idL1, idL2, rootCA, ca_fields, idCA, stmt)@t2
+        & #t1 < #t2
+        & DocumentedIntermediateCA(rootCA, ca_fields, idCA)@t3
+        " 
+
+test monitor_sleeps_unconditional_audit_root_CA:
+    "Ex idL1 idL2 idCA ca_fields stmt #t1 #t2 #t3. /* idM and rootCA free */
+        MonitorAuditSleeps(idCA, idM, stmt)@t1
+            /* monitor fails to inform server ==> No revocation of the rogue cert happens. idM blamed */
+        & ClientAcceptsChain(idL1, idL2, rootCA, ca_fields, idCA, stmt)@t2
+        & #t1 < #t2
+        & UndocumentedIntermediateCA(rootCA, idCA, ca_fields)@t3
+        /* rootCA blamed */
+        " 
+
+/* 
+autoproven but no surprise, auditing is quite strong. It is also sufficient to do the auditing for one of both used SCTs (as their claim in 'stmt' is identical)
+
+Auditing here assumes that every client takes part of it and shares their encountered SCTs with a Monitor that is responsible for observing the subject.
+In addition, this assumes a quick reaction by the monitor and that a client first shares the SCTs and then performs the validation.
+In practice, the sharing happens periodically and usually after the client accepted (validated) the certificate along with its SCTs, meaning that only after at least one client fell into the trap and continued working with the rogue certificate, then shared and after some time period has been recognized by the server/the server's monitor, then this statement would hold.
+*/
+lemma A_RevokeAudit_1:
+    monitor_sleeps_unconditional_audit_intm_CA, monitor_sleeps_unconditional_audit_root_CA accounts for
+    "All idM idL1 idL2 idL preCert rootCA ca_fields idCA stmt #t1 #t2 #t3. 
+        AuditedSCT(idM, idL, preCert, stmt)@t1 
+            /* audit happens prior to validation */
+        & #t1 < #t2
+        & ClientAcceptsChain(idL1, idL2, rootCA, ca_fields, idCA, stmt)@t2
+        & MonitorChecksCCADB(rootCA, ca_fields)@t3
+            ==> 
+                (Ex #t0. GroundTruth(idCA, stmt)@t0 & #t0 < #t1)
+    "
+
+
+
+test monitor_blames_log_gossip_intm_CA:
+    "Ex idL1 idL2 rootCA ca_fields idL stmt gos_sth gos_session sth session #t1 #t2 #t3 #t4 #t5. 
+        ClientAcceptsChain(idL1, idL2, rootCA, ca_fields, idCA, stmt)@t1
+        & ClientSideInclusionProved(idL, stmt, gos_sth, gos_session)@t2
+        & MonitorLiveness(stmt, #t1)
+        & DocumentedIntermediateCA(rootCA, ca_fields, idCA)@t3
+        & Gos_AppendOnlyCheck(idM, idL, sth, session, gos_sth, gos_session)@t4
+        & MonitorSleeps(idM, stmt)@t5
+        "
+
+test monitor_blames_log_gossip_root_CA:
+    "Ex idL1 idL2 idCA ca_fields idL stmt gos_sth gos_session sth session #t1 #t2 #t3 #t4 #t5. 
+        ClientAcceptsChain(idL1, idL2, rootCA, ca_fields, idCA, stmt)@t1
+        & ClientSideInclusionProved(idL, stmt, gos_sth, gos_session)@t2
+        & MonitorLiveness(stmt, #t1)
+        & UndocumentedIntermediateCA(rootCA, idCA, ca_fields)@t3
+        & Gos_AppendOnlyCheck(idM, idL, sth, session, gos_sth, gos_session)@t4
+        & MonitorSleeps(idM, stmt)@t5
+        "
+
+// Result: negative (verif_empty does not hold). We find that logger equivocation cannot be prevented with gossiping. We have seen a similar result for accountable authenticity with gossiping before. 
+// Proof details: everything autoprove except verif_empty
+lemma A_RevokeGossip_1:
+    monitor_blames_log_gossip_intm_CA,
+    monitor_blames_log_gossip_root_CA accounts for
+    "All idM idL1 idL2 rootCA ca_fields idCA idL stmt gos_sth gos_session sth session #t1 #t2 #t3 #t4. 
+        ClientAcceptsChain(idL1, idL2, rootCA, ca_fields, idCA, stmt)@t1
+        & MonitorLiveness(stmt, #t1)
+        & MonitorChecksCCADB(rootCA, ca_fields)@t2
+        & ClientSideInclusionProved(idL, stmt, gos_sth, gos_session)@t3
+        & Gos_AppendOnlyCheck(idM, idL, sth, session, gos_sth, gos_session)@t4
+            ==> 
+                (Ex #t0. GroundTruth(idCA, stmt)@#t0 & #t0 < #t3)
+    "
+
+/* ======================================
+       End2End Accountable Authenticity
+   ====================================== */
+
+/* --- Accountable Authenticity with external validator --- */
+
+// auth is violated but intermediate CA cert is not legitimate. Thus only root CA is blamed
+test CAfalseAsserts_rootBlamed: 
+  "Ex idCA stmt ca_fields #t0 #t1. /* rootCA free */
+    AssertsNot(idCA, stmt, ca_fields)@t0
+    // assessment finds the certificate incorrect... 
+    & UndocumentedIntermediateCA(rootCA, idCA, ca_fields)@t1
+    // ...and the involved CA is not legitimate, hence rootCA is blamed.
+    "
+
+// intermediate CA is legitimate, rootCA is not blamed but intermediate is
+test CAfalseAsserts_rootNotBlamed:
+  "Ex rootCA stmt ca_fields #t0 #t1. /* idCA free */
+    /* externally we found that the assertion encoded in the certificate is untrue ... */
+    AssertsNot(idCA, stmt, ca_fields)@t0 // idCA is blamed
+    // assessment finds the certificate incorrect...
+    & DocumentedIntermediateCA(rootCA, ca_fields, idCA)@t1
+    // ...and the involved CA is legitimate, hence blamed.
+    "
+    
+// autoproven
+// Scenario: Accountable authenticity under PKI with external auth check
+lemma A_PKI_Ext:
+  CAfalseAsserts_rootBlamed, CAfalseAsserts_rootNotBlamed accounts for 
+    "All rootCA ca_fields stmt #t0 #t1.
+        StatementCheckedExternally(ca_fields, stmt)@t0
+        // if the certificate's statement is checked externally...
+        & MonitorChecksCCADB(rootCA, ca_fields)@t1
+        // and the involved CA is legitimate...
+        ==>
+          (Ex idCA #t. Asserts_PKI(idCA, stmt)@t)"
+            /* ...the certificate's statement is correct */
+
+
+/***** Accountable Authenticity (CT) *****/
+
+test root_ca_rogue_monitorExt:
+    "Ex stmt idCA ca_fields #t0 #t1.
+        CAFakesCert(idCA, stmt, ca_fields)@t0
+            /* stmt contradict known ground truth of monitor */
+        & UndocumentedIntermediateCA(rootCA, idCA, ca_fields)@t1
+    "
+
+test ca_rogue_monitorExt:
+    "Ex rootCA stmt ca_fields #t0 #t1.
+        CAFakesCert(idCA, stmt, ca_fields)@t0
+            /* stmt contradicts known ground truth of monitor */
+        & DocumentedIntermediateCA(rootCA, ca_fields, idCA)@t1
+    "
+
+/*
+Scenario 2: Accountable authenticity where the monitor performs the authenticity check (and not an external validator)
+
+- bit more realistic (is now a role inside the model) as the magic external check but still major assumptions:
+    * Cert to perform the authenticity check with magically reaches the monitor for that authenticity check
+    * Monitor knows the ground truth (we will not be able to get rid of this: for monitor the situation is a bit better than for the external check, it is either the actual DomainOwner, or the actual domain owner asked the monitor to look for new entries, then alerts them. -> Interaction with the domain owner)
+
+*/
+lemma A_CTExt_1 [heuristic=O "acc_oracle"]:
+    root_ca_rogue_monitorExt, ca_rogue_monitorExt accounts for
+    "All rootCA stmt ca_fields #t0 #t1. 
+        MonExtFakeCheck(ca_fields, stmt)@t0
+            /* Monitor receives the stmt of the certificate */        
+        & MonitorChecksCCADB(rootCA, ca_fields)@t1
+        ==> 
+            (Ex idCA #t. GroundTruth(idCA, stmt)@t & #t < #t0) 
+    "
+
+
+
+test root_ca_rogue_client_inclusion_viol:
+    "Ex idC idL1 idL2 stmt ca_fields idCA sth session #t0 #t1 #t2 #t3 #t4.
+        CAFakesCert(idCA, stmt, ca_fields)@t0
+        & UndocumentedIntermediateCA(rootCA, idCA, ca_fields)@t1 /* rootCA blamed */
+        & ClientAcceptsChain(idL1, idL2, rootCA, ca_fields, idCA, stmt)@t2
+        & ClientFetchesLogSnapshot(idC, idL, session)@t3
+        & ClientFindsInclusionViol(idL, stmt, sth, session)@t4 /* idL blamed */
+        & ((idL = idL1) | (idL = idL2))
+        & #t2 < #t3        
+        & ProofRunsAfterMMD(idL, sth, session)
+        /*&  not [root_ca_rogue_client_inclusion_verif] since these two tests might overlap: there can be an inclusion violation in a trace that also verifies inclusion for a different certificate with same invovled parties (which affects minimality) */
+        & not (Ex idC idL1 idL2 idL stmt ca_fields idCA rootCA sth session #t0 #t1 #t2 #t3 #t4.
+        CAFakesCert(idCA, stmt, ca_fields)@t0
+        & UndocumentedIntermediateCA(rootCA, idCA, ca_fields)@t1
+        & ClientAcceptsChain(idL1, idL2, rootCA, ca_fields, idCA, stmt)@t2
+        & ClientFetchesLogSnapshot(idC, idL, session)@t3
+        & ClientSideInclusionProved(idL, stmt, sth, session)@t4
+        & ((idL = idL1) | (idL = idL2))
+        & #t2 < #t3        
+        & ProofRunsAfterMMD(idL, sth, session))
+    "
+
+test ca_rogue_client_inclusion_viol:
+    "Ex idC idL1 idL2 stmt ca_fields rootCA sth session #t0 #t1 #t2 #t3 #t4.
+        CAFakesCert(idCA, stmt, ca_fields)@t0 /* idCA blamed */
+        & DocumentedIntermediateCA(rootCA, ca_fields, idCA)@t1
+        & ClientAcceptsChain(idL1, idL2, rootCA, ca_fields, idCA, stmt)@t2
+        & ClientFetchesLogSnapshot(idC, idL, session)@t3
+        & ClientFindsInclusionViol(idL, stmt, sth, session)@t4 /* idL blamed */
+        & ((idL = idL1) | (idL = idL2))
+        & #t2 < #t3
+        & ProofRunsAfterMMD(idL, sth, session)
+        /*& not [ca_rogue_client_inclusion_verif] since these two tests might overlap: there can be an inclusion violation in a trace that also verifies inclusion for a different certificate with same invovled parties (which affects minimality) */
+        & not (Ex idC idL1 idL2 idL stmt ca_fields idCA rootCA sth session #t0 #t1 #t2 #t3 #t4.
+        CAFakesCert(idCA, stmt, ca_fields)@t0 /* idCA blamed */
+        & DocumentedIntermediateCA(rootCA, ca_fields, idCA)@t1
+        & ClientAcceptsChain(idL1, idL2, rootCA, ca_fields, idCA, stmt)@t2
+        & ClientFetchesLogSnapshot(idC, idL, session)@t3
+        & ClientSideInclusionProved(idL, stmt, sth, session)@t4
+        & ((idL = idL1) | (idL = idL2))
+        & #t2 < #t3
+        & ProofRunsAfterMMD(idL, sth, session))
+    "
+
+test root_ca_rogue_client_inclusion_verif:
+    "Ex idC idL1 idL2 idL stmt ca_fields idCA sth session #t0 #t1 #t2 #t3 #t4.
+        CAFakesCert(idCA, stmt, ca_fields)@t0
+        & UndocumentedIntermediateCA(rootCA, idCA, ca_fields)@t1 /* rootCA blamed */
+        & ClientAcceptsChain(idL1, idL2, rootCA, ca_fields, idCA, stmt)@t2
+        & ClientFetchesLogSnapshot(idC, idL, session)@t3
+        & ClientSideInclusionProved(idL, stmt, sth, session)@t4
+        & ((idL = idL1) | (idL = idL2))
+        & #t2 < #t3        
+        & ProofRunsAfterMMD(idL, sth, session)
+    "
+
+test ca_rogue_client_inclusion_verif:
+    "Ex idC idL1 idL2 idL stmt ca_fields rootCA sth session #t0 #t1 #t2 #t3 #t4.
+        CAFakesCert(idCA, stmt, ca_fields)@t0 /* idCA blamed */
+        & DocumentedIntermediateCA(rootCA, ca_fields, idCA)@t1
+        & ClientAcceptsChain(idL1, idL2, rootCA, ca_fields, idCA, stmt)@t2
+        & ClientFetchesLogSnapshot(idC, idL, session)@t3
+        & ClientSideInclusionProved(idL, stmt, sth, session)@t4
+        & ((idL = idL1) | (idL = idL2))
+        & #t2 < #t3
+        & ProofRunsAfterMMD(idL, sth, session)
+    "
+
+/*
+Scenario: Monitor performs the authenticity check (as in scenario 1) and simultaneously the client performs an inclusion proof and blames the logger if the proof fails
+proven, exists-trace 1-2: manually
+*/
+lemma A_CTExt_2 [heuristic=O "acc_oracle"]:
+    root_ca_rogue_client_inclusion_viol, 
+    ca_rogue_client_inclusion_viol,
+    root_ca_rogue_client_inclusion_verif,
+    ca_rogue_client_inclusion_verif
+        accounts for
+    "All idC idL idL1 idL2 stmt ca_fields idCA rootCA session sth #t0 #t1 #t2 #t3 #t4.
+        MonExtFakeCheck(ca_fields, stmt)@t0
+        & MonitorChecksCCADB(rootCA, ca_fields)@t1
+        & ClientAcceptsChain(idL1, idL2, rootCA, ca_fields, idCA, stmt)@t2
+        & ClientFetchesLogSnapshot(idC, idL, session)@t3
+        & ClientChecksInclusion(idL, stmt, sth, session)@t4
+        & ((idL = idL1) | (idL = idL2))
+        & #t2 < #t3
+        & ProofRunsAfterMMD(idL, sth, session)
+        
+            ==> 
+                (Ex idCA #t. GroundTruth(idCA, stmt)@t & #t < #t0) 
+    "
+
+// probably also influences A_CTExt_3
+lemma A_CTExt_2_verif_empty_helper1 [reuse]:
+    "All idCA ca_fields stmt #t1.
+    MonExtCheckVerified(idCA, stmt, ca_fields)@t1
+    ==> (Ex #t. GroundTruth(idCA, stmt)@t & #t < #t1)"
+
+lemma A_CTExt_2_root_ca_rogue_client_inclusion_viol_uniq_helper1 [reuse]:
+    "All rootCA stmt idCA ca_fields #t0 #t1.
+        (CAFakesCert(idCA, stmt, ca_fields)@t0
+        & UndocumentedIntermediateCA(rootCA, idCA, ca_fields)@t1) 
+        ==> 
+            (Ex #i. Corrupted(rootCA)@i)"
+
+lemma A_CTExt_2_root_ca_rogue_client_inclusion_viol_uniq_helper2 [reuse]:
+    "All idL idL1 idL2 rootCA ca_fields idCA idC stmt sth session #t0 #t1 #t2.
+        ClientAcceptsChain(idL1, idL2, rootCA, ca_fields, idCA, stmt)@t0
+        & ClientFetchesLogSnapshot(idC, idL, session)@t1
+        & ((idL = idL1) | (idL = idL2))
+        & ClientFindsInclusionViol(idL, stmt, sth, session)@t2
+        & ProofRunsAfterMMD(idL, sth, session)
+        & #t0 < #t1
+        ==> 
+            (Ex #i. Corrupted(idL)@i)"
+
+lemma A_CTExt_2_ca_rogue_client_inclusion_viol_inj_helper1 [reuse]:
+    "All rootCA idCA ca_fields #t1.
+    DocumentedIntermediateCA(rootCA, ca_fields, idCA)@t1
+    ==> (Ex #t. NonRoot_CA_Init(idCA)@t & #t < #t1)
+    "
+
+lemma A_CTExt_2_ca_rogue_client_inclusion_viol_inj_helper2 [reuse]:
+    "All idL stmt sth session #t1.
+    ClientFindsInclusionViol(idL, stmt, sth, session)@t1
+    ==> (Ex #t. Logger_Registered(idL)@t & #t < #t1)
+    "
+
+
+lemma A_CTExt_2_ca_rogue_client_inclusion_viol_inj_helper [reuse]:
+    "All rootCA idCA ca_fields idL stmt sth session #t1 #t2.
+    DocumentedIntermediateCA(rootCA, ca_fields, idCA)@t1
+    & ClientFindsInclusionViol(idL, stmt, sth, session)@t2
+    ==> not (idL = idCA)
+    "
+
+ 
+    
+/* same tests as before but this time the inclusion proof is run monitor-side */
+test ca_rogue_logger_benign:
+    "Ex stmt ca_fields rootCA idM idL idL1 idL2 sth session #t0 #t1 #t2 #t3 #t4. 
+        CAFakesCert(idCA, stmt, ca_fields)@t0 /* idCA blamed */
+        & DocumentedIntermediateCA(rootCA, ca_fields, idCA)@t1
+        & ClientAcceptsChain(idL1, idL2, rootCA, ca_fields, idCA, stmt)@t2
+        & ((idL = idL1) | (idL = idL2))
+        & MonitorFetchesLogSnapshot(idM, idL, session)@t3
+        & MonitorFindsCert(idM, idL, stmt, sth, session)@t4
+        & ProofRunsAfterMMD(idL, sth, session)
+        & #t2 < #t3 /* discussion: this is unrealistic */
+    "
+
+test ca_rogue_logger_blamed:
+    "Ex stmt ca_fields rootCA idM idL1 idL2 sth session #t0 #t1 #t2 #t3 #t4. 
+        CAFakesCert(idCA, stmt, ca_fields)@t0 /* idCA blamed */
+        & DocumentedIntermediateCA(rootCA, ca_fields, idCA)@t1
+        & ClientAcceptsChain(idL1, idL2, rootCA, ca_fields, idCA, stmt)@t2
+        & ((idL = idL1) | (idL = idL2))
+        & MonitorFetchesLogSnapshot(idM, idL, session)@t3
+        & MonitorCannotFind(idM, idL, stmt, sth, session)@t4 /* idL blamed */
+        & ProofRunsAfterMMD(idL, sth, session)
+        & #t2 < #t3 /* discussion: this is unrealistic */
+        //& not [ca_rogue_logger_benign] since these two tests might overlap: there can be a trace where the monitor finds the rogue certificate for a different certificate with same involved parties (which affects minimality)
+        & not (Ex stmt idCA ca_fields rootCA idM idL idL1 idL2 sth session #t0 #t1 #t2 #t3 #t4. 
+        CAFakesCert(idCA, stmt, ca_fields)@t0 /* idCA blamed */
+        & DocumentedIntermediateCA(rootCA, ca_fields, idCA)@t1
+        & ClientAcceptsChain(idL1, idL2, rootCA, ca_fields, idCA, stmt)@t2
+        & ((idL = idL1) | (idL = idL2))
+        & MonitorFetchesLogSnapshot(idM, idL, session)@t3
+        & MonitorFindsCert(idM, idL, stmt, sth, session)@t4
+        & ProofRunsAfterMMD(idL, sth, session)
+        & #t2 < #t3 /* discussion: this is unrealistic */)
+    "
+
+test root_ca_rogue_logger_benign:
+    "Ex stmt ca_fields idCA idM idL idL1 idL2 sth session #t0 #t1 #t2 #t3 #t4. 
+        CAFakesCert(idCA, stmt, ca_fields)@t0 
+        & UndocumentedIntermediateCA(rootCA, idCA, ca_fields)@t1 /* rootCA blamed */
+        & ClientAcceptsChain(idL1, idL2, rootCA, ca_fields, idCA, stmt)@t2
+        & ((idL = idL1) | (idL = idL2))
+        & MonitorFetchesLogSnapshot(idM, idL, session)@t3
+        & MonitorFindsCert(idM, idL, stmt, sth, session)@t4
+        & ProofRunsAfterMMD(idL, sth, session)
+        & #t2 < #t3 /* discussion: this is unrealistic */
+    "
+
+test root_ca_rogue_logger_blamed:
+    "Ex stmt ca_fields idCA idM idL1 idL2 sth session #t0 #t1 #t2 #t3 #t4. 
+        CAFakesCert(idCA, stmt, ca_fields)@t0
+        & UndocumentedIntermediateCA(rootCA, idCA, ca_fields)@t1 /* rootCA blamed */
+        & ClientAcceptsChain(idL1, idL2, rootCA, ca_fields, idCA, stmt)@t2
+        & ((idL = idL1) | (idL = idL2))
+        & MonitorFetchesLogSnapshot(idM, idL, session)@t3
+        & MonitorCannotFind(idM, idL, stmt, sth, session)@t4 /* idL blamed */
+        & ProofRunsAfterMMD(idL, sth, session)
+        & #t2 < #t3 /* discussion: this is unrealistic */
+        // & not [root_ca_rogue_logger_benign] since these two tests might overlap: there can be a trace where the monitor finds the rogue certificate for a different certificate with same involved parties (which affects minimality)
+        & not (Ex rootCA stmt ca_fields idCA idM idL idL1 idL2 sth session #t0 #t1 #t2 #t3 #t4. 
+        CAFakesCert(idCA, stmt, ca_fields)@t0 
+        & UndocumentedIntermediateCA(rootCA, idCA, ca_fields)@t1 /* rootCA blamed */
+        & ClientAcceptsChain(idL1, idL2, rootCA, ca_fields, idCA, stmt)@t2
+        & ((idL = idL1) | (idL = idL2))
+        & MonitorFetchesLogSnapshot(idM, idL, session)@t3
+        & MonitorFindsCert(idM, idL, stmt, sth, session)@t4
+        & ProofRunsAfterMMD(idL, sth, session)
+        & #t2 < #t3 )
+    "
+// Scenario 3: In addition to an authenticity check by the monitor with further distinguishing whether the rootCA or intermediate CA is to be blamed, the monitor checks inclusion of the checked certificate in on of the involved logs. For this, the monitor relies on information provided by a client such as *which* logger is responsible to log the certificate and *when* the certificate must be logged. The tests implicilty assume that the monitor and client collaborate here, which is less realistic in general.
+lemma A_CTExt_3 [heuristic=O "acc_oracle"]:
+    ca_rogue_logger_benign,
+    ca_rogue_logger_blamed,
+    root_ca_rogue_logger_benign,
+    root_ca_rogue_logger_blamed
+    accounts for
+    "All stmt ca_fields idCA rootCA idM idL1 idL2 idL sth session #t0 #t1 #t2 #t3 #t4. 
+        MonExtFakeCheck(ca_fields, stmt)@t0
+        & MonitorChecksCCADB(rootCA, ca_fields)@t1
+        & ClientAcceptsChain(idL1, idL2, rootCA, ca_fields, idCA, stmt)@t2
+        & ((idL = idL1) | (idL = idL2))
+        & MonitorFetchesLogSnapshot(idM, idL, session)@t3
+        & MonitorInspectsLog(idM, idL, stmt, ca_fields, sth, session)@t4
+        & ProofRunsAfterMMD(idL, sth, session)
+        & #t2 < #t3
+        ==> 
+            (Ex #t. GroundTruth(idCA, stmt)@t)
+    "
+
+
+
+
+test ca_auth_on_log:
+    "Ex idL stmt idL1 idL2 idM ca_fields idCA sth session #t0 #t1 #t2 #t3. 
+        ClientAcceptsChain(idL1, idL2, rootCA, ca_fields, idCA, stmt)@t0
+        & MonitorFetchesLogSnapshot(idM, idL, session)@t1
+        & MonitorBlamesCA(idCA, idL, stmt, ca_fields, sth, session)@t2
+        & UndocumentedIntermediateCA(rootCA, idCA, ca_fields)@t3 /* rootCA blamed */
+        & ((idL = idL1) | (idL = idL2))
+        & ProofRunsAfterMMD(idL, sth, session)
+        & #t0 < #t1
+    "
+
+test root_ca_auth_on_log:
+    "Ex idL stmt idL1 idL2 idM ca_fields rootCA sth session #t0 #t1 #t2 #t3. 
+        ClientAcceptsChain(idL1, idL2, rootCA, ca_fields, idCA, stmt)@t0
+        & MonitorFetchesLogSnapshot(idM, idL, session)@t1
+        & MonitorBlamesCA(idCA, idL, stmt, ca_fields, sth, session)@t2 /* idCA blamed */
+        & DocumentedIntermediateCA(rootCA, ca_fields, idCA)@t3
+        & ((idL = idL1) | (idL = idL2))
+        & ProofRunsAfterMMD(idL, sth, session)
+        & #t0 < #t1
+    "
+/* Accountable authenticity for plain CT (without using the external check conducted by the monitor) */
+/*
+Scenario 1: Accountable authenticity where the monitor inspects the logs and scans for rogue certificates. If it finds one, the CA (or root CA, depending on legitimacy) is blamed.
+Result: negative: logger is corrupt and hides the rogue certificate. Thus the monitor is not able to blame the rogue certificate authority. We can simplify some of the assumptions given below like ProofRunsAfterMMD which is not strictly required. We then still have a negative result but for different reasons (MMD not yet passed or log retrieved too early (before it logged anything)...)
+*/
+lemma A_CT_1 [heuristic=O "acc_oracle"]:
+    ca_auth_on_log, root_ca_auth_on_log accounts for
+    "All idL1 idM idL2 rootCA ca_fields idCA stmt idL sth session #t0 #t1 #t2 #t3. 
+        ClientAcceptsChain(idL1, idL2, rootCA, ca_fields, idCA, stmt)@t0
+        & MonitorFetchesLogSnapshot(idM, idL, session)@t1
+        & MonitorInspectsLog(idM, idL, stmt, ca_fields, sth, session)@t2
+        & MonitorChecksCCADB(rootCA, ca_fields)@t3
+        & ((idL = idL1) | (idL = idL2))
+        & ProofRunsAfterMMD(idL, sth, session)
+        & #t0 < #t1
+            ==> (Ex #t. GroundTruth(idCA, stmt)@t)"
+
+
+
+test ca_rogue_honest_log: // idCA free
+    "Ex idM idL1 idL2 idL rootCA ca_fields stmt sth session #t0 #t1 #t2 #t3. 
+        ClientAcceptsChain(idL1, idL2, rootCA, ca_fields, idCA, stmt)@t0
+        & MonitorFetchesLogSnapshot(idM, idL, session)@t1 
+        /* Monitor fetches from the log after a client worked with the certificate (it should be existing by now, acceptable assumption since we do not use this to blame the logger) */
+        & MonitorBlamesCA(idCA, idL, stmt, ca_fields, sth, session)@t2 /* idCA free */
+        & DocumentedIntermediateCA(rootCA, ca_fields, idCA)@t3
+        & ProofRunsAfterMMD(idL, sth, session)
+        & ((idL = idL1) | (idL = idL2))
+        & #t0 < #t1
+        & not (Ex #t. Corrupted(idL)@t) /* considered logger is honest */
+    "
+
+test root_ca_rogue_honest_log: // rootCA free
+    "Ex idM idL1 idL2 idL idCA ca_fields stmt sth session #t0 #t1 #t2 #t3. 
+        ClientAcceptsChain(idL1, idL2, rootCA, ca_fields, idCA, stmt)@t0
+        & MonitorFetchesLogSnapshot(idM, idL, session)@t1 
+        /* Monitor fetches from the log after a client worked with the certificate (it should be existing by now, acceptable assumption since we do not use this to blame the logger) */
+        & MonitorBlamesCA(idCA, idL, stmt, ca_fields,sth, session)@t2
+        & UndocumentedIntermediateCA(rootCA, idCA, ca_fields)@t3
+        & ProofRunsAfterMMD(idL, sth, session)
+        & ((idL = idL1) | (idL = idL2))
+        & #t0 < #t1
+        & not (Ex #t. Corrupted(idL)@t) /* considered logger is honest */
+    "
+
+/* Accountable authenticity under honest logger (transparency) holds */
+/* Scenario 2: Monitor runs authenticity check on log entries (as Scenario 3), but this time the log is assumed to be honest. Given additionally MMD, the following holds: */
+lemma A_CT_2 [heuristic=O "acc_oracle"]:
+    ca_rogue_honest_log, root_ca_rogue_honest_log accounts for
+    "All idM idL1 idL2 idL rootCA ca_fields idCA stmt sth session #t0 #t1 #t2 #t3. 
+        ClientAcceptsChain(idL1, idL2, rootCA, ca_fields, idCA, stmt)@t0
+        & MonitorFetchesLogSnapshot(idM, idL, session)@t1
+        & MonitorInspectsLog(idM, idL, stmt, ca_fields, sth, session)@t2
+        & MonitorChecksCCADB(rootCA, ca_fields)@t3
+        & ProofRunsAfterMMD(idL, sth, session)
+        & ((idL = idL1) | (idL = idL2))
+        & #t0 < #t1
+        & not (Ex #t. Corrupted(idL)@t)
+            ==> 
+                (Ex #i. GroundTruth(idCA, stmt)@i)
+    "
+
+
+/***** Accountable Authenticity (CT + SCT Auditing) *****/
+
+
+test ca_rogue_audit:
+    "Ex ca_fields idL stmt rootCA #t0 #t1. 
+        AuditCertFake(idCA, idL, ca_fields, stmt)@t0 /* idCA free */
+        & DocumentedIntermediateCA(rootCA, ca_fields, idCA)@t1
+    "
+
+test root_ca_rogue_audit:
+    "Ex ca_fields idL stmt idCA #t0 #t1. 
+        AuditCertFake(idCA, idL, ca_fields, stmt)@t0
+        & UndocumentedIntermediateCA(rootCA, idCA, ca_fields)@t1 /* rootCA free */
+    "
+/*
+CTAudit Scenario 1: Monitor receives a certificate via auditing (shared by some client) and checks authenticity on it. Then further distinguishes between the cases where the CA is legitimate or not (wrt the root CA) and blames respectively.
+*/
+lemma A_CTAudit_1 [heuristic=O "acc_oracle"]:
+    ca_rogue_audit, root_ca_rogue_audit accounts for
+    "All ca_fields stmt rootCA idL #t0 #t1. 
+        AuditAuthCheck(idL, ca_fields, stmt)@t0
+        // For every certificate that is audited to the monitor
+        & MonitorChecksCCADB(rootCA, ca_fields)@t1
+            ==> 
+                (Ex idCA #t. GroundTruth(idCA, stmt)@t)"
+
+test ca_rogue_audit_logger_honest:
+    "Ex ca_fields rootCA stmt idM idL sth session #t0 #t1 #t2 #t3. 
+        AuditCertFake(idCA, idL, ca_fields, stmt)@t0 /*  IdCA free */
+        & #t0 < #t1
+        & MonitorFetchesLogSnapshot(idM, idL, session)@t1
+        & MonitorFindsCert(idM, idL, stmt, sth, session)@t2
+        & DocumentedIntermediateCA(rootCA, ca_fields, idCA)@t3
+        & ProofRunsAfterMMD(idL, sth, session)
+    "
+
+test ca_rogue_audit_logger_rogue:
+    "Ex ca_fields rootCA stmt idM sth session #t0 #t1 #t2 #t3. 
+        AuditCertFake(idCA, idL, ca_fields, stmt)@t0 /* IdCA free */
+        & #t0 < #t1
+        & MonitorFetchesLogSnapshot(idM, idL, session)@t1
+        & CannotFindCert(idM, stmt, idL, sth, session)@t2 /* IdL free */
+        & DocumentedIntermediateCA(rootCA, ca_fields, idCA)@t3
+        & ProofRunsAfterMMD(idL, sth, session)
+        // & not [ca_rogue_audit_logger_honest] since these two tests might overlap: there can be a trace where the monitor finds the rogue certificate for a different certificate with same involved parties (which affects minimality)
+        & not (Ex ca_fields idCA rootCA stmt idM idL sth session #t0 #t1 #t2 #t3. 
+        AuditCertFake(idCA, idL, ca_fields, stmt)@t0
+        & #t0 < #t1
+        & MonitorFetchesLogSnapshot(idM, idL, session)@t1
+        & MonitorFindsCert(idM, idL, stmt, sth, session)@t2
+        & DocumentedIntermediateCA(rootCA, ca_fields, idCA)@t3
+        & ProofRunsAfterMMD(idL, sth, session))
+    "
+
+test root_ca_rogue_audit_logger_honest:
+    "Ex ca_fields stmt idCA idM idL sth session #t0 #t1 #t2 #t3. 
+        AuditCertFake(idCA, idL, ca_fields, stmt)@t0
+        & #t0 < #t1
+        & MonitorFetchesLogSnapshot(idM, idL, session)@t1
+        & MonitorFindsCert(idM, idL, stmt, sth, session)@t2
+        & UndocumentedIntermediateCA(rootCA, idCA, ca_fields)@t3 /* rootCA free */
+        & ProofRunsAfterMMD(idL, sth, session)
+    "
+
+test root_ca_rogue_audit_logger_rogue:
+    "Ex ca_fields stmt idCA idM sth session #t0 #t1 #t2 #t3. 
+        AuditCertFake(idCA, idL, ca_fields, stmt)@t0
+        & #t0 < #t1
+        & MonitorFetchesLogSnapshot(idM, idL, session)@t1
+        & CannotFindCert(idM, stmt, idL, sth, session)@t2 /* IdL free */
+        & UndocumentedIntermediateCA(rootCA, idCA, ca_fields)@t3 /* rootCA free */
+        & ProofRunsAfterMMD(idL, sth, session)
+        //& not [root_ca_rogue_audit_logger_honest] since these two tests might overlap: there can be a trace where the monitor finds the rogue certificate for a different certificate with same involved parties (which affects minimality)
+        & not (Ex ca_fields stmt rootCA idCA idM idL sth session #t0 #t1 #t2 #t3. 
+        AuditCertFake(idCA, idL, ca_fields, stmt)@t0
+        & #t0 < #t1
+        & MonitorFetchesLogSnapshot(idM, idL, session)@t1
+        & MonitorFindsCert(idM, idL, stmt, sth, session)@t2
+        & UndocumentedIntermediateCA(rootCA, idCA, ca_fields)@t3
+        & ProofRunsAfterMMD(idL, sth, session))
+    "
+
+// with SCT Auditing and additionally blaming the logger
+// autoprovable
+/*
+CTAudit Scenario 2: In addition to CTAudit Scenario 1, the monitor additionally fetches a log view from a log that was claimed to include the entry later. Based on whether the log is found honest or rogue, the monitor blames them.
+*/
+lemma A_CTAudit_2 [heuristic=O "acc_oracle"]:
+    ca_rogue_audit_logger_honest, 
+    ca_rogue_audit_logger_rogue,
+    root_ca_rogue_audit_logger_honest,
+    root_ca_rogue_audit_logger_rogue
+    accounts for
+    "All stmt ca_fields rootCA idM idL sth session #t0 #t1 #t2 #t3. 
+        AuditAuthCheck(idL, ca_fields, stmt)@t0
+            /* Monitor receives a cert via auditing */
+        & #t0 < #t1
+        & MonitorFetchesLogSnapshot(idM, idL, session)@t1
+        & MonitorInspectsLog(idM, idL, stmt, ca_fields, sth, session)@t2
+            /* then after auditing looks for precisely that entry in the log */
+        & MonitorChecksCCADB(rootCA, ca_fields)@t3
+        & ProofRunsAfterMMD(idL, sth, session)
+            ==> 
+                (Ex idCA #t. GroundTruth(idCA, stmt)@t)"
+
+lemma A_CTAudit_2_ca_rogue_audit_logger_rogue_uniq_helper [reuse]:
+    "All idCA idL ca_fields stmt idM sth session #t0 #t1 #t2.
+         AuditCertFake( idCA, idL, ca_fields, stmt)@t0 
+         & (#t0 < #t1) 
+         & MonitorFetchesLogSnapshot(idM, idL, session)@t1 
+         & CannotFindCert(idM, stmt, idL, sth, session)@t2 
+         & ProofRunsAfterMMD(idL, sth, session) 
+            ==>
+            (Ex #t. Corrupted(idL)@t)"
+
+lemma A_CTAudit_3:
+    ca_rogue_audit, root_ca_rogue_audit accounts for
+    "All ca_fields stmt rootCA idL #t0 #t1. 
+        AuditAuthCheck_noTrust(idL, ca_fields, stmt)@t0
+            /* cert with stmt is audited to monitor */
+        & MonitorChecksCCADB(rootCA, ca_fields)@t1
+            ==> 
+                (Ex idCA #t. GroundTruth(idCA, stmt)@t)"
+
+/***** Accountable Authenticity (CT + Gossiping) *****/
+
+
+// test ca_rogue_gossip:
+//     "Ex ca_fields stmt rootCA idL gos_sth gos_session sth session #t0 #t1 #t2. 
+//         ClientSideInclusionProved(idL, stmt, gos_sth, gos_session)@t0
+//         & GossipedCertFake(idCA, idL, stmt, ca_fields, gos_sth, gos_session, sth, session)@t1 /* idCA free */
+//         & DocumentedIntermediateCA(rootCA, ca_fields, idCA)@t2
+//     "
+
+// test root_ca_rogue_gossip:
+//     "Ex ca_fields stmt idCA idL gos_sth gos_session sth session #t0 #t1 #t2. 
+//         ClientSideInclusionProved(idL, stmt, gos_sth, gos_session)@t0
+//         & GossipedCertFake(idCA, idL, stmt, ca_fields, gos_sth, gos_session, sth, session)@t1
+//         & UndocumentedIntermediateCA(rootCA, idCA, ca_fields)@t2 /* rootCA free */
+//     "
+
+// // negative result: empty does not hold. Inclusion proof by monitor fails (proof fetch is too early). We will not be able to fix this issue which is illustrated by the second version A_CTGossip_2 below.
+// // empty manual, all other lemmas are autoprovable
+// lemma A_CTGossip_1:
+//     ca_rogue_gossip, root_ca_rogue_gossip accounts for
+//     "All idM idL stmt gos_sth gos_session sth session rootCA ca_fields #t0 #t1 #t2. 
+//         ClientSideInclusionProved(idL, stmt, gos_sth, gos_session)@t0
+//         & Gos_MonInclCheck(idM, idL, stmt, ca_fields, gos_sth, gos_session, sth, session)@t1
+//         & MonitorChecksCCADB(rootCA, ca_fields)@t2
+//             ==> (Ex idCA #t. GroundTruth(idCA, stmt)@t)"
+
+test ca_rogue_gossip:
+    "Ex idM ca_fields stmt rootCA idL gos_sth gos_session sth session #t0 #t1 #t2 #t3. 
+        ClientSideInclusionProved(idL, stmt, gos_sth, gos_session)@t0
+        & MonitorFetchesLogSnapshot(idM, idL, session)@t1
+        & MonitorBlamesCA(idCA, idL, stmt, ca_fields, sth, session)@t2 /* idCA free */
+        & DocumentedIntermediateCA(rootCA, ca_fields, idCA)@t3
+        & Gos_AppendOnlyCheck(idM, idL, sth, session, gos_sth, gos_session)@t4
+        & #t0 < #t1
+    "
+
+test root_ca_rogue_gossip:
+    "Ex idM ca_fields stmt idCA idL gos_sth gos_session sth session #t0 #t1 #t2 #t3. 
+        ClientSideInclusionProved(idL, stmt, gos_sth, gos_session)@t0
+        & MonitorFetchesLogSnapshot(idM, idL, session)@t1
+        & MonitorBlamesCA(idCA, idL, stmt, ca_fields, sth, session)@t2
+        & UndocumentedIntermediateCA(rootCA, idCA, ca_fields)@t3 /* rootCA free */
+        & Gos_AppendOnlyCheck(idM, idL, sth, session, gos_sth, gos_session)@t4
+        & #t0 < #t1
+    "
+
+// negative result: empty does not hold. Now we additionally added details on when the monitor should fetch the second proof (after the client inclusion proof s.t. the gossiped proof is the older one). Still the inclusion proof by the monitor fails due to logger misbehavior. 
+// autoprovable
+
+// Actually this is equal to A_CT
+lemma A_CTGossip:
+    ca_rogue_gossip, root_ca_rogue_gossip accounts for
+    "All idM idL stmt gos_sth gos_session sth session rootCA ca_fields #t0 #t1 #t2 #t3 #t4. 
+        ClientSideInclusionProved(idL, stmt, gos_sth, gos_session)@t0
+        & MonitorFetchesLogSnapshot(idM, idL, session)@t1
+        & MonitorInspectsLog(idM, idL, stmt, ca_fields, sth, session)@t2 /* normal log exploration as we have seen in CT already */
+        & MonitorChecksCCADB(rootCA, ca_fields)@t3
+        & Gos_AppendOnlyCheck(idM, idL, sth, session, gos_sth, gos_session)@t4
+        & #t0 < #t1
+            ==> (Ex idCA #t. GroundTruth(idCA, stmt)@t)"
+
+// ===================================================================
+
+
+
+
+
+
+
+
+/* Draft: Monitor blaming, with external auth check */
+
+#ifdef RECEIPT
+
+/* 
+CT does not allow to realistically hold monitors accountable for not raising an alarm when they see a rogue certificate for one major reason: Other parties cannot prove that the monitor has seen the rogue certificate. For instance, a logger can be malicious too and hide the rogue certificate from the monitor. Thinking beyond CT and its extensions, we show that this can be solved by requiring monitors to issue receipts for the snapshots they receive.
+
+In this section we will assume that the domain owner and logger work together to provide this evidence. The loggers task will be to forward the receipt as a malicious monitor could choose to not create evidence of misbehavior. Additionally to check a receipt, the logger needs to provide the domain owner with a matching snapshot such that the domain owner can double check whether the monitor should have reacted to the rogue cert or not. A misbehaving logger could refuse to provide this snapshot list, as seen in gossiping.
+
+We reuse the inclusion proof axioms to state whether an entry is included in the given snapshot or not.
+
+*/
+
+rule DomainOwnerContract [color= #fac800]:
+    [ !TrackSubject($idM, su), Fr(~skM) ]
+    --[ Time($now) ]->
+    [ !TrackSubject_Contract($idM, su), !MonitorKey_s($idM, pk(~skM), ~skM), !MonitorKey($idM, pk(~skM)) ]
+
+rule signReceipt:
+    let
+        receipt = sign(<$idM, chain>, skM)
+    in
+    [ CraftReceipt($idM, chain) , !MonitorKey_s($idM, pkSKM, skM) ]
+    --[  ]->
+    [ !TLS_M_to_C(receipt) /* We already assumed a TLS connection between client and monitor before */ ]
+
+rule clientReceivesReceipt:
+    [ !TLS_M_to_C(receipt), Client_Receipt_Val($idM, chain) ]
+    --[
+        ClientHoldsReceipt($idM, receipt), 
+        Time($now)
+    ]->
+    [ Out(<$idM, receipt, chain>) /* will be used to share with domain owner, logger adds the underlying entries behind the receipt that can be used by the domain owner to (1) verify the receipt and (2) decide whether the monitor acted correctly */ ]
+
+/*
+All variants assume the ground truth to be availabble, which is fine as these tests are performed by the domain owner (DO) themselves.
+
+Variant 1: The audited certificate is rogue but the monitor did not react. In this case the domain owner blames the monitor.
+
+Variant 2: The audited certificate is benign. In this case the monitor did not need to react.
+*/
+rule domainOwnerBlamesMonitor:
+    let
+        ca_fields = <$rootCA, $idCA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
+        pub_fields = <$idCA, $id, pkID, 'pubKey', sn, $i, $j, sct1, sct2>
+        stmt = <$idCA, $id, pkID, sn>
+        chain = <<pub_fields, pub_sig>, <ca_fields, ca_sig>>
+    in
+    [ In(<$idM, receipt, chain>), !MonitorKey($idM, pkSKM), !TrackSubject_Contract($idM, $idServer), !Root_CA($rootCA, pkRootCA) ]
+    --[
+        Eq(verify(receipt, <$idM, chain>, pkSKM), true()), 
+        Eq(verify(pub_sig, pub_fields, pkCA), true()),
+        Eq(verify(ca_sig, ca_fields, pkRootCA), true()), 
+        Time($now),
+        DO_MonitorBlame($idM, $idCA, ca_fields, stmt),
+        DomainOwnerChecksReceipt($idM, ca_fields, stmt),
+        RogueCert($idCA, stmt)
+    ]->
+    [ ]
+
+
+rule domainOwnerVerifiesReceipt_1:
+    let
+        ca_fields = <$rootCA, $idCA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
+        pub_fields = <$idCA, $id, pkID, 'pubKey', sn, $i, $j, sct1, sct2>
+        stmt = <$idCA, $id, pkID, sn>
+        chain = <<pub_fields, pub_sig>, <ca_fields, ca_sig>>
+    in
+    [ In(<$idM, receipt, chain>), !MonitorKey($idM, pkSKM), !TrackSubject_Contract($idM, $idServer), !Root_CA($rootCA, pkRootCA) ]
+    --[
+        Eq(verify(receipt, <$idM, chain>, pkSKM), true()), 
+        Eq(verify(pub_sig, pub_fields, pkCA), true()),
+        Eq(verify(ca_sig, ca_fields, pkRootCA), true()),
+        Time($now),
+        DO_MonitorBenign($idM, ca_fields, stmt),
+        DomainOwnerChecksReceipt($idM, ca_fields, stmt),
+        Monitor_Reacted($idM, stmt),
+        RogueCert($idCA, stmt)
+    ]->
+    [ ]
+
+rule domainOwnerVerifiesReceipt_2:
+    let
+        ca_fields = <$rootCA, $idCA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
+        pub_fields = <$idCA, $id, pkID, 'pubKey', sn, $i, $j, sct1, sct2>
+        stmt = <$idCA, $id, pkID, sn>
+        chain = <<pub_fields, pub_sig>, <ca_fields, ca_sig>>
+    in
+    [ In(<$idM, receipt, chain>), !MonitorKey($idM, pkSKM), !TrackSubject_Contract($idM, $idServer), !Root_CA($rootCA, pkRootCA) ]
+    --[
+        Eq(verify(receipt, <$idM, chain>, pkSKM), true()), 
+        Eq(verify(pub_sig, pub_fields, pkCA), true()),
+        Eq(verify(ca_sig, ca_fields, pkRootCA), true()),
+        Time($now),
+        DO_MonitorBenign($idM, ca_fields, stmt),
+        DomainOwnerChecksReceipt($idM, ca_fields, stmt),
+        BenignCert($idCA, stmt)
+    ]->
+    [ ]
+
+restriction monitor_blame:
+    "All idM idCA ca_fields stmt #t. DO_MonitorBlame(idM, idCA, ca_fields, stmt)@t ==> (Ex #t0. MonitorAuditSleeps(idCA, idM, stmt)@t0 & #t0 < #t)" /* Monitor should have reacted: Domain Owner did not know of the violating cert prior (monitor failed to inform the server and the server also did not issue the cert themselves as implicitly encoded in MonitorSleeps(.)) */
+
+restriction monitor_reacted:
+    "All idM stmt #t. Monitor_Reacted(idM, stmt)@t ==> (Ex #t0. MonitorInformsServer(idM, stmt)@t0 & #t0 < #t)"
+
+test root_ca_rogue:
+    "Ex idM stmt idCA ca_fields #t0 #t1 #t2. 
+        AssertsNot(idCA, stmt, ca_fields)@t0
+            /* stmt contradict known ground truth of monitor */
+        & UndocumentedIntermediateCA(rootCA, idCA, ca_fields)@t1 /* rootCA blamed */
+        & DO_MonitorBenign(idM, ca_fields, stmt)@t2 /* monitor did not need to react */
+    "
+
+test root_ca_rogue_monitor_rogue:
+    "Ex stmt idCA ca_fields #t0 #t1 #t2. 
+        AssertsNot(idCA, stmt, ca_fields)@t0
+            /* stmt contradict known ground truth of monitor */
+        & UndocumentedIntermediateCA(rootCA, idCA, ca_fields)@t1 /* rootCA blamed */
+        & DO_MonitorBlame(idM, idCA, ca_fields, stmt)@t2 /* monitor blamed */
+        //& not [root_ca_rogue]
+        & not (Ex idM stmt rootCA idCA ca_fields #t0 #t1 #t2. 
+        AssertsNot(idCA, stmt, ca_fields)@t0
+        & UndocumentedIntermediateCA(rootCA, idCA, ca_fields)@t1
+        & DO_MonitorBenign(idM, ca_fields, stmt)@t2)
+    "
+
+test ca_rogue_receipt:
+    "Ex idM rootCA stmt ca_fields #t0 #t1 #t2. 
+        AssertsNot(idCA, stmt, ca_fields)@t0 /* idCA blamed */
+            /* stmt contradict known ground truth of monitor */
+        & DocumentedIntermediateCA(rootCA, ca_fields, idCA)@t1
+        & DO_MonitorBenign(idM, ca_fields, stmt)@t2 /* monitor reacted */
+    "
+
+test ca_rogue_receipt_monitor_rogue:
+    "Ex rootCA stmt ca_fields #t0 #t1 #t2.  
+        AssertsNot(idCA, stmt, ca_fields)@t0 /* idCA blamed */
+            /* stmt contradict known ground truth of monitor */
+        & DocumentedIntermediateCA(rootCA, ca_fields, idCA)@t1
+        & DO_MonitorBlame(idM, idCA, ca_fields, stmt)@t2 /* monitor blamed */
+        //& not [ca_rogue_receipt]
+        & not (Ex idM rootCA idCA stmt ca_fields #t0 #t1 #t2. 
+        AssertsNot(idCA, stmt, ca_fields)@t0
+        & DocumentedIntermediateCA(rootCA, ca_fields, idCA)@t1
+        & DO_MonitorBenign(idM, ca_fields, stmt)@t2)
+    "
+
+/*
+Scenario 1: Accoutable Authenticity in CTExt realized via external authenticity check. If the external check fails, the CA is blamed (if it is legitimate, otherwise the rootCA is blamed). [as seen before]
+Two more tests further distinguish whether the monitor is additionally blamed or not based on receipts handed out by the logger to the domain owner.
+- Exists-traces 1,3 manually
+*/
+lemma A_Receipt_1:
+    root_ca_rogue, 
+    root_ca_rogue_monitor_rogue, 
+    ca_rogue_receipt, 
+    ca_rogue_receipt_monitor_rogue 
+    accounts for
+    "All ca_fields stmt rootCA idL idM #t0 #t1 #t2 #t3. 
+        AuditAuthCheck_noTrust(idL, ca_fields, stmt)@t0
+            /* cert with stmt is audited to monitor */
+        & MonitorChecksCCADB(rootCA, ca_fields)@t1
+        & DomainOwnerChecksReceipt(idM, ca_fields, stmt)@t2
+        & StatementCheckedExternally(ca_fields, stmt)@t3 /* checked by domain owner */
+            ==> 
+                (Ex idCA #t. GroundTruth(idCA, stmt)@t)"
+
+/* Sanity receipt checks */
+
+lemma san_receipt_loggerReceivesReceipt:
+    exists-trace
+    "Ex idM receipt #t.
+        ClientHoldsReceipt(idM, receipt)@t
+    "
+
+lemma san_receipt_domainOwnerBlamesMonitor:
+    exists-trace
+    "Ex idM idCA ca_fields stmt #t.
+        DO_MonitorBlame(idM, idCA, ca_fields, stmt)@t
+        & (All idM1 ca_fields1 stmt1 #t1. 
+            DO_MonitorBenign(idM1, ca_fields1, stmt1)@t1 
+            ==> (#t = #t1))
+        & (All idL1 ca_fields1 stmt1 idL2 ca_fields2 stmt2 #t1 #t2. AuditAuthCheck_noTrust(idL1, ca_fields1, stmt1)@t1
+        & AuditAuthCheck_noTrust(idL2, ca_fields2, stmt2)@t2
+            ==> (#t1 = #t2))
+    "
+
+lemma san_receipt_domainOwnerVerifiesReceipt:
+    exists-trace
+    "Ex idM ca_fields stmt #t.
+        DO_MonitorBenign(idM, ca_fields, stmt)@t
+    "
+
+#endif
+
+
+
+
+// ==============================================================================
+
+#ifdef SUFFICIENCY_PROOF
+/* These restrictions are intended to simplify sufficiency proofs for some of the accountability properties. There, we want to show the existence of some specific traces. Limiting the number of certain rules, we can speed up finding traces that fulfill our requirements for sufficiency. These restrictions should not be used in any other lemmas. */
+
+restriction CA_Registr_once:
+    "All rootCA1 #t1 rootCA2 #t2. Root_CA_Init(rootCA1)@t1 & Root_CA_Init(rootCA2)@t2 ==> (#t1 = #t2)"
+
+restriction NonRoot_CA_Registr_once:
+    "All idCA1 #t1 idCA2 #t2. NonRoot_CA_Init(idCA1)@t1 & NonRoot_CA_Init(idCA2)@t2 ==> (#t1 = #t2)"
+
+restriction PreCertified_once:
+    "All idCA1 preC1 idCA2 preC2 #t1 #t2. PreCertified(idCA1, preC1)@t1 & PreCertified(idCA2, preC2)@t2 ==> (#t1 = #t2)"
+
+restriction Certified_once:
+    "All idCA1 fields1 fields2 idCA2 #t1 #t2. CAAsserts(idCA1, fields1)@t1 & CAAsserts(idCA2, fields2)@t2 ==> (#t1 = #t2)"
+
+restriction ChainAccept_once:
+    "All idL11 idL21 rootCA1 ca_fields1 idCA1 stmt1 #t1 idL12 idL22 rootCA2 ca_fields2 idCA2 stmt2 #t2. ClientAcceptsChain( idL11, idL21, rootCA1,ca_fields1, idCA1, stmt1)@t1 & ClientAcceptsChain( idL12, idL22, rootCA2, ca_fields2, idCA2, stmt2)@t2 ==> (#t1 = #t2)"
+
+restriction addtolog_per_logger_once:
+    "All IdL log_id1 chain1 log_id2 preC_fields1 preC_fields2 chain2 time1 time2 #t1 #t2. LoggerComputesAddLog(IdL, log_id1, preC_fields1, chain1, time1)@t1 & LoggerComputesAddLog(IdL, log_id2, preC_fields2, chain2, time2)@t2 ==> (#t1 = #t2)"
+
+restriction time_once:
+    "All i #t1 #t2. Time(i)@t1 & Time(i)@t2 ==> (#t1 = #t2)"
+
+
+
+#endif
+
+
+// ==============================================================================
+
+end

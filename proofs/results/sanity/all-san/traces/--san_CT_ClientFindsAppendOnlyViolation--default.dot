@@ -1,0 +1,127 @@
+digraph "trace_ct_SL2-AS0-CL0-A1-C1-NB_san_CT_ClientFindsAppendOnlyViolation-Logger_Init-LoggerSnapshot_C-Logger_Init-LoggerSnapshot_C-add_preC_to_log-Logger_Init-Root_CA_Init-Start_Log-ProofFetching_C-Logger_Init-LoggerSnapshot_C-Logger_Init-ProofFetching_C-ClientStoresSnapshot-ProofFetching_C-LoggerSnapshot_C-add_preC_to_log-Logger_Init-Root_CA_Init-Start_Log-Start_Log-Start_Log_malicious-compromiseLogger-CA_Init-c_sign-compromiseCA-CA_Init-CA_Init-CA_Init_case_1" {
+nodesep="0.3";
+ranksep="0.3";
+node[fontsize="8",fontname="Helvetica",width="0.3",height="0.2"];
+edge[fontsize="8",fontname="Helvetica"];
+n9[shape="record",label="{{<n0> In( \<$idCA, $id, pkID, \l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'pre-cert', sn, $i, $j\>\l)\l|<n1> In( SI2 )|<n2> In( \<$rootCA, $idCA, \l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pk(~skCA), PU1, ~sn.1, \l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$i0, $j0\>\l)\l|<n3> In( SI1 )|<n4> !Logger_s( $idL,\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~skL, pk(~skL)\l)\l|<n5> !Root_CA( $rootCA,\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PK1\l)\l|<n6> !Log( $idL, $log_id\l)\l}|{<n7> #t : add_preC_to_log[Eq( true, true ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Eq( true, true ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;LoggerComputesAddLogStmt( $idL, $log_id, \<$idCA, $id, pkID, sn\>, $now ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;LoggerComputesAddLog( $idL, $log_id, \<$idCA, $id, pkID, 'pre-cert', sn, $i, $j\>,\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\<\<\<$idCA, $id, pkID, 'pre-cert', sn, $i, $j\>, SI2\>, \l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\<$rootCA, $idCA, pk(~skCA), PU1, ~sn.1, $i0, $j0\>, SI1\>,\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$now\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;LoggerAsserts( $idL,\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\<$idL, 'SCT', $now, sign(\<$idL, 'SCT', $now, $idCA, $id, pkID, sn, $i, $j\>, ~skL)\>\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Time( $now ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CheckIssuedTime( $now, $i ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CheckValidUntil( $now, $j )]\l}|{<n8> Out( \<$idL, 'SCT', $now, sign(\<$idL, 'SCT', $now, $idCA, $id, pkID, sn, $i, $j\>, ~skL)\>\l)\l}}",fillcolor="#08a358",style="filled",fontcolor="white",role="Undefined"];
+n13[shape="record",label="{{<n10> !Logger( $idL, pk(~skL) )|<n11> !TLS_L_to_C( $idL, $idC, $snapshot, ~sthment, ~session )}|{<n12> #t0 : ClientStoresSnapshot[SnapshotStored( $idC, $idL, ~session, ~sthment ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ClientSnapshotStored( $idC, $idL, ~session, ~sthment ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Time( $now.1 )]\l}}",fillcolor="#d2d897",style="filled",fontcolor="black",role="Undefined"];
+n17[shape="record",label="{{<n14> !Logger( $idL, pk(~skL) )|<n15> !TLS_L_to_C( $idL, $idC, SN1, ST1, SE1 )}|{<n16> #t1 : ClientFindsAppendOnlyViolation[ClientFindsAppendOnlyViolation( $idL ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;AppendOnlyCheck( $idC, ST1, SE1 ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;AppendOnlyViolation( $idC, $idL, ST1, SE1 ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Time( $now.2 )]\l}}",fillcolor="#e65208",style="filled",fontcolor="white",role="Undefined"];
+n23[shape="record",label="{{<n18> !Logger_s( $idL, ~skL, pk(~skL) )|<n19> Fr( ~sthment )|<n20> !TLS_C_to_L( $idC, $idL, ~session )}|{<n21> #t2 : LoggerSnapshot_C[LoggerPresentsView( $idL, $idC, $log_id, $now.3, ~sthment,\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~session\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;LoggerHandsOutSTH( $idL, ~sthment, ~session ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Time( $now.3 )]\l}|{<n22> !TLS_L_to_C( $idL, $idC, $snapshot, ~sthment, ~session )}}",fillcolor="#22d6d6",style="filled",fontcolor="black",role="Undefined"];
+n29[shape="record",label="{{<n24> Fr( SE1 )|<n25> In( $idC )|<n26> !Logger( $idL, pk(~skL) )}|{<n27> #t4 : ProofFetching_C[FetchLogSnapshot( $idC, $idL, SE1 ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ClientFetchesLogSnapshot( $idC, $idL, SE1 ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Time( $now.4 )]\l}|{<n28> !TLS_C_to_L( $idC, $idL, SE1 )}}",fillcolor="#10bcc5",style="filled",fontcolor="black",role="Undefined"];
+n35[shape="record",label="{{<n30> !Logger_s( $idL, ~skL, pk(~skL) )|<n31> Fr( ST1 )|<n32> !TLS_C_to_L( $idC, $idL, SE1 )}|{<n33> #t5 : LoggerSnapshot_C[LoggerPresentsView( $idL, $idC, $log_id.1, $now.5, ST1, SE1 ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;LoggerHandsOutSTH( $idL, ST1, SE1 ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Time( $now.5 )]\l}|{<n34> !TLS_L_to_C( $idL, $idC, SN1, ST1, SE1 )}}",fillcolor="#22d6d6",style="filled",fontcolor="black",role="Undefined"];
+n36[label="#vk : coerce[!KU( SI1 )]",shape="ellipse"];
+n41[shape="record",label="{{<n37> Fr( ~skL )}|{<n38> #vr : Logger_Init[Logger_Registered( $idL ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Time( $now.6 )]\l}|{<n39> !Logger_s( $idL, ~skL, pk(~skL) )|<n40> !Logger( $idL, pk(~skL) )}}",fillcolor="#08a358",style="filled",fontcolor="white",role="Undefined"];
+n51[shape="record",label="{{<n42> In( \<$idCA, $id, pkID, \l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'pre-cert', sn, $i, $j\>\l)\l|<n43> In( SI2 )|<n44> In( \<$rootCA, $idCA, \l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pk(~skCA), PU1, ~sn.1, \l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$i0, $j0\>\l)\l|<n45> In( SI1 )|<n46> !Logger_s( $idL,\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~skL, pk(~skL)\l)\l|<n47> !Root_CA( $rootCA,\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PK1\l)\l|<n48> !Log( $idL, $log_id\l)\l}|{<n49> #t0.1 : add_preC_to_log[Eq( true, true ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Eq( true, true ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;LoggerComputesAddLogStmt( $idL, $log_id, \<$idCA, $id, pkID, sn\>, $now.7 ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;LoggerComputesAddLog( $idL, $log_id, \<$idCA, $id, pkID, 'pre-cert', sn, $i, $j\>,\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\<\<\<$idCA, $id, pkID, 'pre-cert', sn, $i, $j\>, SI2\>, \l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\<$rootCA, $idCA, pk(~skCA), PU1, ~sn.1, $i0, $j0\>, SI1\>,\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$now.7\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;LoggerAsserts( $idL,\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\<$idL, 'SCT', $now.7, sign(\<$idL, 'SCT', $now.7, $idCA, $id, pkID, sn, $i, $j\>, ~skL)\>\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Time( $now.7 ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CheckIssuedTime( $now.7, $i ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CheckValidUntil( $now.7, $j )]\l}|{<n50> Out( \<$idL, 'SCT', $now.7, \l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sign(\<$idL, 'SCT', $now.7, $idCA, $id, pkID, sn, $i, $j\>, ~skL)\>\l)\l}}",fillcolor="#08a358",style="filled",fontcolor="white",role="Undefined"];
+n57[shape="record",label="{{<n52> Fr( ~session )|<n53> In( $idC )|<n54> !Logger( $idL, pk(~skL) )}|{<n55> #t1.1 : ProofFetching_C[FetchLogSnapshot( $idC, $idL, ~session ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ClientFetchesLogSnapshot( $idC, $idL, ~session ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Time( $now.8 )]\l}|{<n56> !TLS_C_to_L( $idC, $idL, ~session )}}",fillcolor="#10bcc5",style="filled",fontcolor="black",role="Undefined"];
+n58[label="#vk.1 : c_sign[!KU( SI2 )]",shape="ellipse"];
+n67[shape="record",label="{{<n59> Fr( ~skCA.1 )|<n60> Fr( ~sn.2 )}|{<n61> #vr.1 : Root_CA_Init[CA_Registered( $rootCA, ~skCA.1, PK1 ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Root_CA_Init( $rootCA ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Time( $now.9 )]\l}|{<n62> Out( \<$rootCA, $rootCA, \l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PK1, 'selfCert', ~sn.2, \l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$now.9, $j.1\>\l)\l|<n63> Out( sign(\<$rootCA, $rootCA, \l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PK1, 'selfCert', ~sn.2, \l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$now.9, $j.1\>,\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~skCA.1)\l)\l|<n64> Out( \<$rootCA, PK1\>\l)\l|<n65> !Root_CA_s0( $rootCA,\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~skCA.1, PK1\l)\l|<n66> !Root_CA( $rootCA,\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PK1\l)\l}}",fillcolor="#620c97",style="filled",fontcolor="white",role="Undefined"];
+n71[shape="record",label="{{<n68> !Logger_s( $idL, ~skL, pk(~skL) )}|{<n69> #t0.2 : Start_Log[StartedLog( $idL, $log_id ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;HonestStartedLog( $idL, $log_id ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Time( $now.10 )]\l}|{<n70> !Log( $idL, $log_id )}}",fillcolor="#08a358",style="filled",fontcolor="white",role="Undefined"];
+n72[label="#vk.2 : coerce[!KU( ~skCA )]",shape="ellipse"];
+n73[label="#vl.2 : irecv",shape="ellipse"];
+n78[shape="record",label="{{<n74> !Logger_s( $idL, ~skL, pk(~skL) )}|{<n75> #vr.2 : compromiseLogger[CompromiseLogger( $idL ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CompromiseLoggerUniq( \<$idL, ~skL, pk(~skL)\> ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Compromise( ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Corrupted( $idL ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Time( $now.11 )]\l}|{<n76> Out( ~skL )|<n77> !Corrupted_Logger( $idL, ~skL, pk(~skL) )}}",fillcolor="#d40808",style="filled",fontcolor="white",role="Undefined"];
+n81[shape="record",label="{{<n79> !Corrupted_Logger( $idL, ~skL, pk(~skL) )}|{<n80> #t0.3 : Start_Log_malicious[StartedLog( $idL, $log_id.1 ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;StartedLogMalicious( $idL, $log_id.1 ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Time( $now.12 )]\l}}",fillcolor="#d83b0b",style="filled",fontcolor="white",role="Undefined"];
+n82[label="#vf.3 : isend",shape="ellipse"];
+n83[label="#vk.3 : coerce[!KU( ~sn.1 )]",shape="ellipse"];
+n93[shape="record",label="{{<n84> Fr( ~skCA )|<n85> Fr( ~sn.1 )|<n86> !Root_CA_s0( $rootCA, ~skCA.1, PK1 )}|{<n87> #vr.3 : CA_Init[CA_Registered( $idCA, ~skCA, pk(~skCA) ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NonRoot_CA_Init( $idCA ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DocumentedCA( $rootCA, $idCA, \<$rootCA, $idCA, pk(~skCA), PU1, ~sn.1, $i0, $j0\> ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Time( $i0 )]\l}|{<n88> Out( \<$rootCA, \l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$idCA, pk(~skCA), \l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PU1, ~sn.1, $i0, $j0\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\>\l)\l|<n89> Out( SI1 )|<n90> Out( \<$idCA, \l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pk(~skCA)\>\l)\l|<n91> !CA_s0( $idCA, ~skCA,\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pk(~skCA),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\<$rootCA, $idCA, pk(~skCA), \l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PU1, ~sn.1, $i0, $j0\>,\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SI1\l)\l|<n92> !CA_Documentation( $rootCA,\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$idCA,\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\<$rootCA, $idCA, \l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pk(~skCA), PU1, ~sn.1, \l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$i0, $j0\>,\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SI1\l)\l}}",fillcolor="#c871ff",style="filled",fontcolor="black",role="Undefined"];
+n94[label="#vk.4 : coerce[!KU( pk(~skCA) )]",shape="ellipse"];
+n98[shape="record",label="{{<n95> !CA_s0( $idCA, ~skCA, pk(~skCA), \<$rootCA, $idCA, pk(~skCA), PU1, ~sn.1, $i0, $j0\>, SI1\l)\l}|{<n96> #vr.4 : compromiseCA[CompromiseCA( $idCA ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Compromise( ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Corrupted( $idCA ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Time( $now.13 )]\l}|{<n97> Out( ~skCA )}}",fillcolor="#d40808",style="filled",fontcolor="white",role="Undefined"];
+n99[label="#vr.5 : d_0_snd",shape="ellipse"];
+n100[label="#vf.6 : isend",shape="ellipse"];
+n101[label="#vr.6 : d_0_snd",shape="ellipse"];
+n102[label="#vf.7 : isend",shape="ellipse"];
+n103[label="#vr.7 : d_0_snd",shape="ellipse"];
+n104[label="#vf.8 : isend",shape="ellipse"];
+n105[label="#vr.8 : d_0_snd",shape="ellipse"];
+n106[label="#vf.9 : isend",shape="ellipse"];
+n107[label="#vf.10 : isend",shape="ellipse"];
+n108[label="#vf.13 : isend",shape="ellipse"];
+n109[label="#vf.14 : isend",shape="ellipse"];
+n110[label="#vf.15 : isend",shape="ellipse"];
+n111[label="#vf.16 : isend",shape="ellipse"];
+n112[label="!KU( pkID ) @ #vk.16",shape="ellipse",color="gray"];
+n113[label="!KU( sn ) @ #vk.20",shape="ellipse",color="gray"];
+n23:n22 -> n13:n11[style="bold",weight="10.0",color="gray50"];
+n29:n28 -> n35:n32[style="bold",weight="10.0",color="gray50"];
+n35:n34 -> n17:n15[style="bold",weight="10.0",color="gray50"];
+n41:n39 -> n9:n4[style="bold",weight="10.0",color="gray50"];
+n41:n39 -> n23:n18[style="bold",weight="10.0",color="gray50"];
+n41:n39 -> n35:n30[style="bold",weight="10.0",color="gray50"];
+n41:n39 -> n51:n46[style="bold",weight="10.0",color="gray50"];
+n41:n39 -> n71:n68[style="bold",weight="10.0",color="gray50"];
+n41:n39 -> n78:n74[style="bold",weight="10.0",color="gray50"];
+n41:n40 -> n13:n10[style="bold",weight="10.0",color="gray50"];
+n41:n40 -> n17:n14[style="bold",weight="10.0",color="gray50"];
+n41:n40 -> n29:n26[style="bold",weight="10.0",color="gray50"];
+n41:n40 -> n57:n54[style="bold",weight="10.0",color="gray50"];
+n57:n56 -> n23:n20[style="bold",weight="10.0",color="gray50"];
+n67:n65 -> n93:n86[style="bold",weight="10.0",color="gray50"];
+n67:n66 -> n9:n5[style="bold",weight="10.0",color="gray50"];
+n67:n66 -> n51:n47[style="bold",weight="10.0",color="gray50"];
+n71:n70 -> n9:n6[style="bold",weight="10.0",color="gray50"];
+n71:n70 -> n51:n48[style="bold",weight="10.0",color="gray50"];
+n73 -> n99[color="orangered2"];
+n78:n77 -> n81:n79[style="bold",weight="10.0",color="gray50"];
+n82 -> n57:n53[color="gray30"];
+n93:n88 -> n73[color="gray30"];
+n93:n89 -> n36[color="orangered2"];
+n93:n91 -> n98:n95[style="bold",weight="10.0",color="gray50"];
+n98:n97 -> n72[color="orangered2"];
+n99 -> n101[color="orangered2"];
+n100 -> n29:n25[color="gray30"];
+n101 -> n94[color="orangered2"];
+n101 -> n103[color="orangered2"];
+n102 -> n51:n42[color="gray30"];
+n103 -> n105[color="orangered2"];
+n104 -> n51:n43[color="gray30"];
+n105 -> n83[color="orangered2"];
+n106 -> n51:n44[color="gray30"];
+n107 -> n51:n45[color="gray30"];
+n108 -> n9:n0[color="gray30"];
+n109 -> n9:n1[color="gray30"];
+n110 -> n9:n2[color="gray30"];
+n111 -> n9:n3[color="gray30"];
+n9:n7 -> n23:n21[color="black",style="dashed"];
+n13:n12 -> n35:n33[color="black",style="dashed"];
+n23:n21 -> n29:n27[color="black",style="dashed"];
+n36 -> n107[color="red",style="dashed"];
+n36 -> n111[color="red",style="dashed"];
+n51:n49 -> n57:n55[color="black",style="dashed"];
+n58 -> n104[color="red",style="dashed"];
+n58 -> n109[color="red",style="dashed"];
+n71:n69 -> n23:n21[color="black",style="dashed"];
+n72 -> n58[color="red",style="dashed"];
+n73 -> n106[color="red",style="dashed"];
+n73 -> n110[color="red",style="dashed"];
+n81:n80 -> n35:n33[color="black",style="dashed"];
+n83 -> n106[color="red",style="dashed"];
+n83 -> n110[color="red",style="dashed"];
+n94 -> n106[color="red",style="dashed"];
+n94 -> n110[color="red",style="dashed"];
+n99 -> n106[color="red",style="dashed"];
+n99 -> n110[color="red",style="dashed"];
+n101 -> n106[color="red",style="dashed"];
+n101 -> n110[color="red",style="dashed"];
+n103 -> n106[color="red",style="dashed"];
+n103 -> n110[color="red",style="dashed"];
+n105 -> n106[color="red",style="dashed"];
+n105 -> n110[color="red",style="dashed"];
+n112 -> n58[color="red",style="dashed"];
+n112 -> n102[color="red",style="dashed"];
+n112 -> n108[color="red",style="dashed"];
+n113 -> n58[color="red",style="dashed"];
+n113 -> n102[color="red",style="dashed"];
+n113 -> n108[color="red",style="dashed"];
+{
+rank="sink";
+n114[shape="plain",label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="3" CELLPADDING="1"><TR><TD ALIGN="LEFT" VALIGN="TOP"><FONT COLOR="#000000">PK1</FONT></TD> <TD ALIGN="LEFT" VALIGN="TOP">=</TD> <TD ALIGN="LEFT" VALIGN="TOP">pk(~skCA.1)</TD></TR>
+                                                                 <TR><TD ALIGN="LEFT" VALIGN="TOP"><FONT COLOR="#000000">PU1</FONT></TD> <TD ALIGN="LEFT" VALIGN="TOP">=</TD> <TD ALIGN="LEFT" VALIGN="TOP">'pubKey-CA'</TD></TR>
+                                                                 <TR><TD ALIGN="LEFT" VALIGN="TOP"><FONT COLOR="#000000">SE1</FONT></TD> <TD ALIGN="LEFT" VALIGN="TOP">=</TD> <TD ALIGN="LEFT" VALIGN="TOP">~session.1</TD></TR>
+                                                                 <TR><TD ALIGN="LEFT" VALIGN="TOP"><FONT COLOR="#000000">SI1</FONT></TD> <TD ALIGN="LEFT" VALIGN="TOP">=</TD> <TD ALIGN="LEFT" VALIGN="TOP">sign(&lt;$rootCA, $idCA, pk(~skCA), PU1, ~sn.1, $i0, $j0&gt;, ~skCA.1)</TD></TR>
+                                                                 <TR><TD ALIGN="LEFT" VALIGN="TOP"><FONT COLOR="#000000">SI2</FONT></TD> <TD ALIGN="LEFT" VALIGN="TOP">=</TD> <TD ALIGN="LEFT" VALIGN="TOP">sign(&lt;$idCA, $id, pkID, 'pre-cert', sn, $i, $j&gt;, ~skCA)</TD></TR>
+                                                                 <TR><TD ALIGN="LEFT" VALIGN="TOP"><FONT COLOR="#000000">SN1</FONT></TD> <TD ALIGN="LEFT" VALIGN="TOP">=</TD> <TD ALIGN="LEFT" VALIGN="TOP">$snapshot.1</TD></TR>
+                                                                 <TR><TD ALIGN="LEFT" VALIGN="TOP"><FONT COLOR="#000000">ST1</FONT></TD> <TD ALIGN="LEFT" VALIGN="TOP">=</TD> <TD ALIGN="LEFT" VALIGN="TOP">~sthment.1</TD></TR></TABLE>>];
+
+}
+n17:n16 -> n114[style="invis"];
+
+}

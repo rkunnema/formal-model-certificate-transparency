@@ -1,0 +1,49 @@
+{
+	"config": {
+		"global_max_cores": 10,
+		"global_max_memory": "max",
+		"default_timeout": 300,
+		"output_directory": "./results/accountability/acc_authenticity_revoke/"
+	},
+  "tamarin_versions": {
+    "default": {
+      "path": "tamarin-prover"
+    }
+  },
+  "tasks": {
+    "autoprove": {
+      "theory_file": "../ct.spthy",
+			"tamarin_versions": ["stable"],
+      "output_file_prefix": "",
+			"tamarin_options": ["--derivcheck-timeout=0", "--defines=REVOCATION"],
+            "resources": {
+				"max_cores": 10,
+				"max_memory": 6,
+				"timeout": 500
+			},
+      "lemmas": [
+        {"name": "A_Revoke_1"},
+        {"name": "A_Revoke_2"},
+        {"name": "A_Revoke_3"},
+        {"name": "A_RevokeAudit_1"},
+        {"name": "A_RevokeGossip_1"}
+      ]
+    },
+    "helper": {
+      "theory_file": "../ct.spthy",
+			"tamarin_versions": ["stable"],
+      "output_file_prefix": "",
+			"tamarin_options": ["--derivcheck-timeout=0", "--defines=REVOCATION"],
+            "resources": {
+				"max_cores": 10,
+				"max_memory": 6,
+				"timeout": 500
+			},
+      "lemmas": [
+        {"name": "A_Revoke_uniq_helper1"},
+        {"name": "A_Revoke_uniq_helper2"},
+        {"name": "A_Revoke_uniq_helper3"}
+      ]
+    }
+  }
+}

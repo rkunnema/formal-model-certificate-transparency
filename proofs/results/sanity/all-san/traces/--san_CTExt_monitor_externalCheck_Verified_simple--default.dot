@@ -1,0 +1,85 @@
+digraph "trace_ct_SL2-AS0-CL0-A1-C1-NB_san_CTExt_monitor_externalCheck_Verified_simple-monitor_externalCheck_Verified-monitorTrackSubject-Root_CA_Init-Domain_Owner_Init-CA_Init-c_sign-CA_Init-compromiseCA-PreCertify-CA_Init-CA_Init_case_1-Domain_Owner_Init" {
+nodesep="0.3";
+ranksep="0.3";
+node[fontsize="8",fontname="Helvetica",width="0.3",height="0.2"];
+edge[fontsize="8",fontname="Helvetica"];
+n7[shape="record",label="{{<n0> In( \<$idCA, $id, pk(~sk), \l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'pubKey', ~sn, $i, $j, sct1, \l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sct2\>\l)\l|<n1> In( SI2 )|<n2> In( \<$rootCA, $idCA, \l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pk(~skCA), PU1, ~sn.1, \l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$i0, $j0\>\l)\l|<n3> In( SI1 )|<n4> !TrackSubject( $idM,\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$id\l)\l|<n5> !Root_CA( $rootCA,\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PK1\l)\l}|{<n6> #t : monitor_externalCheck_Verified[Eq( true, true ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Eq( true, true ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;BenignCert( $idCA, \<$idCA, $id, pk(~sk), ~sn\> ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MonExtCheckVerified( $idCA, \<$idCA, $id, pk(~sk), ~sn\>,\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\<$rootCA, $idCA, pk(~skCA), PU1, ~sn.1, $i0, $j0\>\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MonExtFakeCheck( \<$rootCA, $idCA, pk(~skCA), PU1, ~sn.1, $i0, $j0\>,\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\<$idCA, $id, pk(~sk), ~sn\>\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Time( $now )]\l}}",fillcolor="#d5d897",style="filled",fontcolor="black",role="Undefined"];
+n17[shape="record",label="{{<n8> !DomainOwner( $id,\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pk(~sk)\l)\l|<n9> !CA_s0( $idCA, ~skCA, pk(~skCA),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\<$rootCA, $idCA, pk(~skCA), PU1, ~sn.1, $i0, $j0\>, SI1\l)\l|<n10> Fr( ~sn )}|{<n11> #t0 : PreCertify[PreCertified( $idCA,\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\<\<$idCA, $id, pk(~sk), 'pre-cert', ~sn, $now.1, $j.1\>, SI3\>\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GroundTruth( $idCA, \<$idCA, $id, pk(~sk), ~sn\> ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Asserts_PKI( $idCA, \<$idCA, $id, pk(~sk), ~sn\> ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Time( $now.1 )]\l}|{<n12> Out( \<$idCA, $id, \l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pk(~sk), 'pre-cert', \l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~sn, $now.1, $j.1\>\l)\l|<n13> Out( SI3 )|<n14> Certificate_Store( $idCA,\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\<\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\<$idCA, $id, pk(~sk), \l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'pre-cert', ~sn, $now.1, $j.1\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\>, \l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SI3\>\l)\l|<n15> Out( \<$rootCA, $idCA, \l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pk(~skCA), PU1, \l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~sn.1, $i0, $j0\>\l)\l|<n16> Out( SI1 )}}",fillcolor="#c871ff",style="filled",fontcolor="black",role="Undefined"];
+n18[label="#vf : isend",shape="ellipse"];
+n19[label="#vk : c_sign[!KU( SI2 )]",shape="ellipse"];
+n24[shape="record",label="{{<n20> !Monitor( $idM )|<n21> !DomainOwner( $id, pk(~sk.1) )}|{<n22> #vr : monitorTrackSubject[Time( $now.2 )]}|{<n23> !TrackSubject( $idM, $id )}}",fillcolor="#fac800",style="filled",fontcolor="black",role="Undefined"];
+n25[label="#vf.1 : isend",shape="ellipse"];
+n26[label="#vk.1 : coerce[!KU( SI1 )]",shape="ellipse"];
+n29[shape="record",label="{{<n27> #vr.1 : Monitor_Init[Monitor_Registered( $idM ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Time( $now.3 )]\l}|{<n28> !Monitor( $idM )}}",fillcolor="#c1da98",style="filled",fontcolor="black",role="Undefined"];
+n30[label="#vf.2 : isend",shape="ellipse"];
+n31[label="#vk.2 : coerce[!KU( ~skCA )]",shape="ellipse"];
+n36[shape="record",label="{{<n32> Fr( ~sk.1 )}|{<n33> #vr.2 : Domain_Owner_Init[Time( $now.4 )]}|{<n34> !DomainOwner( $id, pk(~sk.1) )|<n35> Out( pk(~sk.1) )}}",fillcolor="#c6c6c6",style="filled",fontcolor="black",role="Undefined"];
+n37[label="#vf.3 : isend",shape="ellipse"];
+n38[label="#vk.3 : coerce[!KU( ~sn )]",shape="ellipse"];
+n39[label="#vl.3 : irecv",shape="ellipse"];
+n48[shape="record",label="{{<n40> Fr( ~skCA.1 )|<n41> Fr( ~sn.2 )}|{<n42> #vr.3 : Root_CA_Init[CA_Registered( $rootCA, ~skCA.1, PK1 ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Root_CA_Init( $rootCA ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Time( $now.5 )]\l}|{<n43> Out( \<$rootCA, $rootCA, \l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PK1, 'selfCert', ~sn.2, \l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$now.5, $j.2\>\l)\l|<n44> Out( sign(\<$rootCA, $rootCA, \l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PK1, 'selfCert', ~sn.2, \l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$now.5, $j.2\>,\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~skCA.1)\l)\l|<n45> Out( \<$rootCA, PK1\>\l)\l|<n46> !Root_CA_s0( $rootCA,\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~skCA.1, PK1\l)\l|<n47> !Root_CA( $rootCA,\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PK1\l)\l}}",fillcolor="#620c97",style="filled",fontcolor="white",role="Undefined"];
+n49[label="#vk.4 : coerce[!KU( ~sn.1 )]",shape="ellipse"];
+n54[shape="record",label="{{<n50> Fr( ~sk )}|{<n51> #vr.4 : Domain_Owner_Init[Time( $now.6 )]}|{<n52> !DomainOwner( $id, pk(~sk) )|<n53> Out( pk(~sk) )}}",fillcolor="#c6c6c6",style="filled",fontcolor="black",role="Undefined"];
+n55[label="#vk.5 : coerce[!KU( pk(~skCA) )]",shape="ellipse"];
+n65[shape="record",label="{{<n56> Fr( ~skCA )|<n57> Fr( ~sn.1 )|<n58> !Root_CA_s0( $rootCA, ~skCA.1, PK1 )}|{<n59> #vr.5 : CA_Init[CA_Registered( $idCA, ~skCA, pk(~skCA) ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NonRoot_CA_Init( $idCA ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DocumentedCA( $rootCA, $idCA, \<$rootCA, $idCA, pk(~skCA), PU1, ~sn.1, $i0, $j0\> ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Time( $i0 )]\l}|{<n60> Out( \<$rootCA, \l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$idCA, pk(~skCA), \l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PU1, ~sn.1, $i0, $j0\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\>\l)\l|<n61> Out( SI1 )|<n62> Out( \<$idCA, \l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pk(~skCA)\>\l)\l|<n63> !CA_s0( $idCA, ~skCA,\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pk(~skCA),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\<$rootCA, $idCA, pk(~skCA), \l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PU1, ~sn.1, $i0, $j0\>,\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SI1\l)\l|<n64> !CA_Documentation( $rootCA,\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$idCA,\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\<$rootCA, $idCA, \l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pk(~skCA), PU1, ~sn.1, \l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$i0, $j0\>,\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SI1\l)\l}}",fillcolor="#c871ff",style="filled",fontcolor="black",role="Undefined"];
+n66[label="#vk.6 : coerce[!KU( pk(~sk) )]",shape="ellipse"];
+n70[shape="record",label="{{<n67> !CA_s0( $idCA, ~skCA, pk(~skCA), \<$rootCA, $idCA, pk(~skCA), PU1, ~sn.1, $i0, $j0\>, SI1\l)\l}|{<n68> #vr.6 : compromiseCA[CompromiseCA( $idCA ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Compromise( ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Corrupted( $idCA ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Time( $now.7 )]\l}|{<n69> Out( ~skCA )}}",fillcolor="#d40808",style="filled",fontcolor="white",role="Undefined"];
+n71[label="#vr.12 : d_0_snd",shape="ellipse"];
+n72[label="#vr.13 : d_0_snd",shape="ellipse"];
+n73[label="#vr.14 : d_0_snd",shape="ellipse"];
+n74[label="#vr.15 : d_0_snd",shape="ellipse"];
+n75[label="!KU( sct1 ) @ #vk.25",shape="ellipse",color="gray"];
+n76[label="!KU( sct2 ) @ #vk.26",shape="ellipse",color="gray"];
+n17:n12 -> n38[color="orangered2"];
+n18 -> n7:n0[color="gray30"];
+n24:n23 -> n7:n4[style="bold",weight="10.0",color="gray50"];
+n25 -> n7:n1[color="gray30"];
+n29:n28 -> n24:n20[style="bold",weight="10.0",color="gray50"];
+n30 -> n7:n2[color="gray30"];
+n36:n34 -> n24:n21[style="bold",weight="10.0",color="gray50"];
+n37 -> n7:n3[color="gray30"];
+n39 -> n71[color="orangered2"];
+n48:n46 -> n65:n58[style="bold",weight="10.0",color="gray50"];
+n48:n47 -> n7:n5[style="bold",weight="10.0",color="gray50"];
+n54:n52 -> n17:n8[style="bold",weight="10.0",color="gray50"];
+n54:n53 -> n66[color="orangered2"];
+n65:n60 -> n39[color="gray30"];
+n65:n61 -> n26[color="orangered2"];
+n65:n63 -> n17:n9[style="bold",weight="10.0",color="gray50"];
+n65:n63 -> n70:n67[style="bold",weight="10.0",color="gray50"];
+n70:n69 -> n31[color="orangered2"];
+n71 -> n72[color="orangered2"];
+n72 -> n55[color="orangered2"];
+n72 -> n73[color="orangered2"];
+n73 -> n74[color="orangered2"];
+n74 -> n49[color="orangered2"];
+n19 -> n25[color="red",style="dashed"];
+n26 -> n37[color="red",style="dashed"];
+n31 -> n19[color="red",style="dashed"];
+n38 -> n18[color="red",style="dashed"];
+n38 -> n19[color="red",style="dashed"];
+n39 -> n30[color="red",style="dashed"];
+n49 -> n30[color="red",style="dashed"];
+n55 -> n30[color="red",style="dashed"];
+n66 -> n18[color="red",style="dashed"];
+n66 -> n19[color="red",style="dashed"];
+n71 -> n30[color="red",style="dashed"];
+n72 -> n30[color="red",style="dashed"];
+n73 -> n30[color="red",style="dashed"];
+n74 -> n30[color="red",style="dashed"];
+n75 -> n18[color="red",style="dashed"];
+n75 -> n19[color="red",style="dashed"];
+n76 -> n18[color="red",style="dashed"];
+n76 -> n19[color="red",style="dashed"];
+{
+rank="sink";
+n77[shape="plain",label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="3" CELLPADDING="1"><TR><TD ALIGN="LEFT" VALIGN="TOP"><FONT COLOR="#000000">PK1</FONT></TD> <TD ALIGN="LEFT" VALIGN="TOP">=</TD> <TD ALIGN="LEFT" VALIGN="TOP">pk(~skCA.1)</TD></TR>
+                                                                 <TR><TD ALIGN="LEFT" VALIGN="TOP"><FONT COLOR="#000000">PU1</FONT></TD> <TD ALIGN="LEFT" VALIGN="TOP">=</TD> <TD ALIGN="LEFT" VALIGN="TOP">'pubKey-CA'</TD></TR>
+                                                                 <TR><TD ALIGN="LEFT" VALIGN="TOP"><FONT COLOR="#000000">SI1</FONT></TD> <TD ALIGN="LEFT" VALIGN="TOP">=</TD> <TD ALIGN="LEFT" VALIGN="TOP">sign(&lt;$rootCA, $idCA, pk(~skCA), PU1, ~sn.1, $i0, $j0&gt;, ~skCA.1)</TD></TR>
+                                                                 <TR><TD ALIGN="LEFT" VALIGN="TOP"><FONT COLOR="#000000">SI2</FONT></TD> <TD ALIGN="LEFT" VALIGN="TOP">=</TD> <TD ALIGN="LEFT" VALIGN="TOP">sign(&lt;$idCA, $id, pk(~sk), 'pubKey', ~sn, $i, $j, sct1, sct2&gt;,<BR ALIGN="LEFT"/> &#32;&#32;&#32;&#32;~skCA)</TD></TR>
+                                                                 <TR><TD ALIGN="LEFT" VALIGN="TOP"><FONT COLOR="#000000">SI3</FONT></TD> <TD ALIGN="LEFT" VALIGN="TOP">=</TD> <TD ALIGN="LEFT" VALIGN="TOP">sign(&lt;$idCA, $id, pk(~sk), 'pre-cert', ~sn, $now.1, $j.1&gt;, ~skCA)</TD></TR></TABLE>>];
+
+}
+n7:n6 -> n77[style="invis"];
+
+}

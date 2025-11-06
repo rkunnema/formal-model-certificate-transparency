@@ -1,0 +1,80 @@
+{
+	"config": {
+		"global_max_cores": 10,
+		"global_max_memory": "max",
+		"default_timeout": 300,
+		"output_directory": "./results/accountability/acc_authenticity_receipt/"
+	},
+  "tamarin_versions": {
+    "default": {
+      "path": "tamarin-prover"
+    }
+  },
+  "tasks": {
+    "autoprove": {
+      "theory_file": "../ct.spthy",
+			"tamarin_versions": ["stable"],
+      "output_file_prefix": "",
+			"tamarin_options": ["--derivcheck-timeout=0", "--defines=RECEIPT"],
+            "resources": {
+				"max_cores": 10,
+				"max_memory": 6,
+				"timeout": 500
+			},
+      "lemmas": [
+        {"name": "A_Receipt_1_root_ca_rogue_suff"},
+        {"name": "A_Receipt_1_ca_rogue_receipt_suff"},
+        {"name": "A_Receipt_1_verif_empty"},
+        {"name": "A_Receipt_1_root_ca_rogue_verif_nonempty"},
+        {"name": "A_Receipt_1_root_ca_rogue_monitor_rogue_verif_nonempty"},
+        {"name": "A_Receipt_1_ca_rogue_receipt_verif_nonempty"},
+        {"name": "A_Receipt_1_ca_rogue_receipt_monitor_rogue_verif_nonempty"},
+        {"name": "A_Receipt_1_root_ca_rogue_min"},
+        {"name": "A_Receipt_1_root_ca_rogue_monitor_rogue_min"},
+        {"name": "A_Receipt_1_ca_rogue_receipt_min"},
+        {"name": "A_Receipt_1_ca_rogue_receipt_monitor_rogue_min"},
+        {"name": "A_Receipt_1_root_ca_rogue_uniq"},
+        {"name": "A_Receipt_1_root_ca_rogue_monitor_rogue_uniq"},
+        {"name": "A_Receipt_1_ca_rogue_receipt_uniq"},
+        {"name": "A_Receipt_1_ca_rogue_receipt_monitor_rogue_uniq"},
+        {"name": "A_Receipt_1_root_ca_rogue_inj"},
+        {"name": "A_Receipt_1_root_ca_rogue_monitor_rogue_inj"},
+        {"name": "A_Receipt_1_ca_rogue_receipt_inj"},
+        {"name": "A_Receipt_1_ca_rogue_receipt_monitor_rogue_inj"},
+        {"name": "A_Receipt_1_root_ca_rogue_single"},
+        {"name": "A_Receipt_1_ca_rogue_receipt_single"}
+      ]
+    },
+    "specialized": {
+      "theory_file": "../ct.spthy",
+			"tamarin_versions": ["stable"],
+      "output_file_prefix": "",
+			"tamarin_options": ["--derivcheck-timeout=0", "--defines=SUFFICIENCY", "--defines=RECEIPT"],
+            "resources": {
+				"max_cores": 10,
+				"max_memory": 6,
+				"timeout": 500
+			},
+      "lemmas": [
+        {"name": "A_Receipt_1_root_ca_rogue_monitor_rogue_suff"},
+        {"name": "A_Receipt_1_ca_rogue_receipt_monitor_rogue_suff"},
+        {"name": "A_Receipt_1_root_ca_rogue_monitor_rogue_single"},
+        {"name": "A_Receipt_1_ca_rogue_receipt_monitor_rogue_single"}
+      ]
+    },
+    "helper": {
+      "theory_file": "../ct.spthy",
+			"tamarin_versions": ["stable"],
+      "output_file_prefix": "",
+			"tamarin_options": ["--derivcheck-timeout=0", "--defines=RECEIPT"],
+            "resources": {
+				"max_cores": 10,
+				"max_memory": 6,
+				"timeout": 500
+			},
+      "lemmas": [
+        {"name": "A_Receipt_1_ca_rogue_receipt_monitor_rogue_inj_helper"}
+      ]
+    }
+  }
+}

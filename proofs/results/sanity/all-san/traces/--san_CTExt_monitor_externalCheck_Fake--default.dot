@@ -1,0 +1,78 @@
+digraph "trace_ct_SL2-AS0-CL0-A1-C1-NB_san_CTExt_monitor_externalCheck_Fake-Root_CA_Init-Root_CA_Init-monitorTrackSubject-monitor_externalCheck_Fake-CA_Init-c_sign-compromiseCA-CA_Init-CA_Init_case_1" {
+nodesep="0.3";
+ranksep="0.3";
+node[fontsize="8",fontname="Helvetica",width="0.3",height="0.2"];
+edge[fontsize="8",fontname="Helvetica"];
+n8[shape="record",label="{{<n0> Fr( ~skCA )|<n1> Fr( ~sn )}|{<n2> #t0 : Root_CA_Init[CA_Registered( $idCA, ~skCA, pk(~skCA) ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Root_CA_Init( $idCA ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Time( $now )]\l}|{<n3> Out( \<$idCA, $idCA, \l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pk(~skCA), 'selfCert', \l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~sn, $now, $j\>\l)\l|<n4> Out( sign(\<$idCA, $idCA, \l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pk(~skCA), 'selfCert', ~sn, \l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$now, $j\>,\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~skCA)\l)\l|<n5> Out( \<$idCA, \l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pk(~skCA)\>\l)\l|<n6> !Root_CA_s0( $idCA,\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~skCA, pk(~skCA)\l)\l|<n7> !Root_CA( $idCA,\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pk(~skCA)\l)\l}}",fillcolor="#620c97",style="filled",fontcolor="white",role="Undefined"];
+n18[shape="record",label="{{<n9> Fr( ~skCA.1 )|<n10> Fr( ~sn.1 )|<n11> !Root_CA_s0( $idCA, ~skCA, pk(~skCA) )}|{<n12> #t1 : CA_Init[CA_Registered( $idCA.1, ~skCA.1, PK1 ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NonRoot_CA_Init( $idCA.1 ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DocumentedCA( $idCA, $idCA.1, \<$idCA, $idCA.1, PK1, PU1, ~sn.1, $i0, $j0\> ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Time( $i0 )]\l}|{<n13> Out( \<$idCA, \l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$idCA.1, PK1, PU1, \l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~sn.1, $i0, $j0\>\l)\l|<n14> Out( SI1 )|<n15> Out( \<$idCA.1, PK1\>\l)\l|<n16> !CA_s0( $idCA.1, ~skCA.1,\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PK1,\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\<$idCA, $idCA.1, PK1, PU1, \l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~sn.1, $i0, $j0\>,\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SI1\l)\l|<n17> !CA_Documentation( $idCA,\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$idCA.1,\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\<$idCA, $idCA.1, PK1, \l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PU1, ~sn.1, $i0, $j0\>,\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SI1\l)\l}}",fillcolor="#c871ff",style="filled",fontcolor="black",role="Undefined"];
+n26[shape="record",label="{{<n19> In( \<$idCA.1, $id, pkID, \l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'pubKey', sn.2, $i, $j.1, \l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sct1, sct2\>\l)\l|<n20> In( SI2 )|<n21> In( \<$idCA, $idCA.1, \l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PK1, PU1, ~sn.1, $i0, $j0\l&nbsp;&nbsp;&nbsp;&nbsp;\>\l)\l|<n22> In( SI1 )|<n23> !Root_CA( $idCA,\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pk(~skCA)\l)\l|<n24> !TrackSubject( $idM,\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$id\l)\l}|{<n25> #t2 : monitor_externalCheck_Fake[Eq( true, true ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Eq( true, true ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;RogueCert( $idCA.1, \<$idCA.1, $id, pkID, sn.2\> ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CAFakesCert( $idCA.1, \<$idCA.1, $id, pkID, sn.2\>,\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\<$idCA, $idCA.1, PK1, PU1, ~sn.1, $i0, $j0\>\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MonExtFakeCheck( \<$idCA, $idCA.1, PK1, PU1, ~sn.1, $i0, $j0\>,\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\<$idCA.1, $id, pkID, sn.2\>\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Time( $now.1 )]\l}}",fillcolor="#cad998",style="filled",fontcolor="black",role="Undefined"];
+n27[label="#vk : coerce[!KU( SI1 )]",shape="ellipse"];
+n32[shape="record",label="{{<n28> !Monitor( $idM )|<n29> !DomainOwner( $id, pk(~sk) )}|{<n30> #vr : monitorTrackSubject[Time( $now.2 )]}|{<n31> !TrackSubject( $idM, $id )}}",fillcolor="#fac800",style="filled",fontcolor="black",role="Undefined"];
+n33[label="#vk.1 : c_sign[!KU( SI2 )]",shape="ellipse"];
+n36[shape="record",label="{{<n34> #vr.1 : Monitor_Init[Monitor_Registered( $idM ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Time( $now.3 )]\l}|{<n35> !Monitor( $idM )}}",fillcolor="#b4db99",style="filled",fontcolor="black",role="Undefined"];
+n37[label="#vk.2 : coerce[!KU( ~skCA.1 )]",shape="ellipse"];
+n38[label="#vl.2 : irecv",shape="ellipse"];
+n43[shape="record",label="{{<n39> Fr( ~sk )}|{<n40> #vr.2 : Domain_Owner_Init[Time( $now.4 )]}|{<n41> !DomainOwner( $id, pk(~sk) )|<n42> Out( pk(~sk) )}}",fillcolor="#c6c6c6",style="filled",fontcolor="black",role="Undefined"];
+n44[label="#vk.3 : coerce[!KU( ~sn.1 )]",shape="ellipse"];
+n48[shape="record",label="{{<n45> !CA_s0( $idCA.1, ~skCA.1, PK1, \<$idCA, $idCA.1, PK1, PU1, ~sn.1, $i0, $j0\>, SI1 )}|{<n46> #vr.3 : compromiseCA[CompromiseCA( $idCA.1 ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Compromise( ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Corrupted( $idCA.1 ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Time( $now.5 )]\l}|{<n47> Out( ~skCA.1 )}}",fillcolor="#d40808",style="filled",fontcolor="white",role="Undefined"];
+n49[label="#vf.4 : isend",shape="ellipse"];
+n50[label="#vk.4 : coerce[!KU( PK1 )]",shape="ellipse"];
+n51[label="#vr.4 : d_0_snd",shape="ellipse"];
+n52[label="#vf.5 : isend",shape="ellipse"];
+n53[label="#vr.5 : d_0_snd",shape="ellipse"];
+n54[label="#vf.6 : isend",shape="ellipse"];
+n55[label="#vr.6 : d_0_snd",shape="ellipse"];
+n56[label="#vf.7 : isend",shape="ellipse"];
+n57[label="#vr.7 : d_0_snd",shape="ellipse"];
+n58[label="!KU( pkID ) @ #vk.15",shape="ellipse",color="gray"];
+n59[label="!KU( sn.2 ) @ #vk.19",shape="ellipse",color="gray"];
+n60[label="!KU( sct1 ) @ #vk.25",shape="ellipse",color="gray"];
+n61[label="!KU( sct2 ) @ #vk.26",shape="ellipse",color="gray"];
+n8:n6 -> n18:n11[style="bold",weight="10.0",color="gray50"];
+n8:n7 -> n26:n23[style="bold",weight="10.0",color="gray50"];
+n18:n13 -> n38[color="gray30"];
+n18:n14 -> n27[color="orangered2"];
+n18:n16 -> n48:n45[style="bold",weight="10.0",color="gray50"];
+n32:n31 -> n26:n24[style="bold",weight="10.0",color="gray50"];
+n36:n35 -> n32:n28[style="bold",weight="10.0",color="gray50"];
+n38 -> n51[color="orangered2"];
+n43:n41 -> n32:n29[style="bold",weight="10.0",color="gray50"];
+n48:n47 -> n37[color="orangered2"];
+n49 -> n26:n19[color="gray30"];
+n51 -> n53[color="orangered2"];
+n52 -> n26:n20[color="gray30"];
+n53 -> n50[color="orangered2"];
+n53 -> n55[color="orangered2"];
+n54 -> n26:n21[color="gray30"];
+n55 -> n57[color="orangered2"];
+n56 -> n26:n22[color="gray30"];
+n57 -> n44[color="orangered2"];
+n27 -> n56[color="red",style="dashed"];
+n33 -> n52[color="red",style="dashed"];
+n37 -> n33[color="red",style="dashed"];
+n38 -> n54[color="red",style="dashed"];
+n44 -> n54[color="red",style="dashed"];
+n50 -> n54[color="red",style="dashed"];
+n51 -> n54[color="red",style="dashed"];
+n53 -> n54[color="red",style="dashed"];
+n55 -> n54[color="red",style="dashed"];
+n57 -> n54[color="red",style="dashed"];
+n58 -> n33[color="red",style="dashed"];
+n58 -> n49[color="red",style="dashed"];
+n59 -> n33[color="red",style="dashed"];
+n59 -> n49[color="red",style="dashed"];
+n60 -> n33[color="red",style="dashed"];
+n60 -> n49[color="red",style="dashed"];
+n61 -> n33[color="red",style="dashed"];
+n61 -> n49[color="red",style="dashed"];
+{
+rank="sink";
+n62[shape="plain",label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="3" CELLPADDING="1"><TR><TD ALIGN="LEFT" VALIGN="TOP"><FONT COLOR="#000000">PK1</FONT></TD> <TD ALIGN="LEFT" VALIGN="TOP">=</TD> <TD ALIGN="LEFT" VALIGN="TOP">pk(~skCA.1)</TD></TR>
+                                                                 <TR><TD ALIGN="LEFT" VALIGN="TOP"><FONT COLOR="#000000">PU1</FONT></TD> <TD ALIGN="LEFT" VALIGN="TOP">=</TD> <TD ALIGN="LEFT" VALIGN="TOP">'pubKey-CA'</TD></TR>
+                                                                 <TR><TD ALIGN="LEFT" VALIGN="TOP"><FONT COLOR="#000000">SI1</FONT></TD> <TD ALIGN="LEFT" VALIGN="TOP">=</TD> <TD ALIGN="LEFT" VALIGN="TOP">sign(&lt;$idCA, $idCA.1, PK1, PU1, ~sn.1, $i0, $j0&gt;, ~skCA)</TD></TR>
+                                                                 <TR><TD ALIGN="LEFT" VALIGN="TOP"><FONT COLOR="#000000">SI2</FONT></TD> <TD ALIGN="LEFT" VALIGN="TOP">=</TD> <TD ALIGN="LEFT" VALIGN="TOP">sign(&lt;$idCA.1, $id, pkID, 'pubKey', sn.2, $i, $j.1, sct1, sct2&gt;,<BR ALIGN="LEFT"/> &#32;&#32;&#32;&#32;~skCA.1)</TD></TR></TABLE>>];
+
+}
+n26:n25 -> n62[style="invis"];
+
+}
