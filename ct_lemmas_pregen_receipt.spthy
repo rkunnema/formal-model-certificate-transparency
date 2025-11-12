@@ -1,0 +1,2173 @@
+/*
+ * Protocol: Certficate Transparency with additions for SCT Auditing, STH Gossiping, and, accountability with naive revocation
+ * Modeler:  anonymized
+ * Date:     July 2025
+ * Sources:  RFC6962, RFC 9162, "Opt-in SCT Auditing", Emily Stark and Chris Thompson, and partly rooted on "Provable Security for PKI Schemes" by Wrótniak et al.
+ * Status:   working
+ * Notes:    consult README for instructions on evaluating this model
+ */ 
+
+theory ct
+begin
+
+functions:
+    pk/1,
+    sign/2,
+    verify/3[destructor], /* sign + verify */
+
+
+    /*Structure of a certificate as tuple with
+    
+    + Normal certificate 
+    <Issuer, Subject, Key, Type, serial number, issued timestamp, valid until timestamp>
+    + SCTs
+    <Logger Identity, 'SCT', timestamp, signature>
+    + Public Key certificate with embedded SCTs
+    <Issuer, Subject, Key, Type, serial number, issued timestamp, valid until timestamp, sct1, sct2>
+
+    Different types are: 
+    1. 'pre-cert'
+    2. 'SCT': Signed Certificate Timestamp
+    3. 'pubKey': Public Key Certificate (finished certificate after issued as PreCert)
+        3.1 'pubKey-CA': Public Key Certificate of a CA
+    4. 'selfCert': Certificate is self signed, usually root of trust
+        4.1 'selfCert-log': Logger's self-signed certificate
+
+    */
+    
+
+    true/0
+
+equations:
+
+    verify(       sign(fields, sk), fields, pk(sk)           ) = true()
+
+/** Specification **/
+
+/* Register a root CA that will later sign other intermediate CA certificates. */
+rule Root_CA_Init [color= #620c97]:
+    let 
+        fields = <$idCA, $idCA, pk(~skCA), 'selfCert', ~sn, $now, $j>
+        self_sig = sign(fields, ~skCA)
+    in
+    [ Fr(~skCA), Fr(~sn) ]
+    --[ 
+        CA_Registered($idCA, ~skCA, pk(~skCA)), 
+        Root_CA_Init($idCA),
+        Time($now)
+    ]->
+    [   Out(fields), Out(self_sig), 
+        Out(<$idCA, pk(~skCA)>), /* publicly announce the public key and certificate on the network */
+        !Root_CA_s0($idCA, ~skCA, pk(~skCA)), 
+        !Root_CA($idCA, pk(~skCA)) ]
+
+/* Register a CA that will later sign other certificates. This CA is assumed to be non-root and has its own certificate signed by a root CA.
+Intermediate CAs created by this rule are defined as legitimate and they are documented by their root CA. See later discussions for checks that require the !CA_Documentation fact.
+*/
+rule Intermediate_CA_Init [color= #c871ff]:
+    let 
+        fields = <$rootCA, $idCA, pk(~skCA), 'pubKey-CA', ~sn, $now, $j>
+        self_sig = sign(fields, skRootCA)
+    in
+    [ Fr(~skCA), Fr(~sn), !Root_CA_s0($rootCA, skRootCA, pkRootCA) /* Root CA that signs this CA */  ]
+    --[ 
+        CA_Registered($idCA, ~skCA, pk(~skCA)), /* restrictions on CA registrations apply to both CAs and Root CAs */
+        NonRoot_CA_Init($idCA),
+        DocumentedCA($rootCA, $idCA, fields),
+        Time($now)
+    ]->
+    [   Out(fields), Out(self_sig), 
+        Out(<$idCA, pk(~skCA)>), /* publicly announce the public key and certificate on the network */
+        !CA_s0($idCA, ~skCA, pk(~skCA), fields, self_sig), !CA_Documentation($rootCA, $idCA, fields, self_sig) ]
+
+/* The domain owner represents the party on the web, running a server with some domain / Common Name (CN) with a key pair that needs certification by some CA. It is equivalent to a HTTPS server that needs a certificate in order to hand it out to visiting clients; performing a key exchange subsequently. */
+rule Domain_Owner_Init [color= #c6c6c6]:
+    let
+        pubK = pk(~sk)
+    in
+    [ Fr(~sk) ]
+    --[ 
+        Time($now)
+    ]->
+    [ !DomainOwner($idServer, pubK), /* The DomainOwner fact serves as a proof of identity: If this fact is later used for issuing a certificate, we say that it is honestly issued (i.e., on behalf of the domain owner). see honest rules for issuing a pre-certificate for instace. */ 
+    Out(pubK) /* Public key is announced on the network */ ]
+
+
+/* Initialize a Monitor. A Monitor will later oversee the loggers. Monitoring is either conducted by the domain owner themselves or outsourced to a dedicated entity. */
+rule Monitor_Init:
+    [  ]
+    --[ 
+        Monitor_Registered($idM),
+        Time($now)
+     ]->
+    [ !Monitor($idM) ]
+
+/* Monitor can choose a logger and start the monitoring process of it. Only these known loggers will later be considered when exploring new certificates. */
+rule StartMonitoring [color= #ffdc4e]:
+    [ !Monitor($idM), !Logger($idL, pkL) ]
+    --[ 
+        Time($now)
+    ]->
+    [ !LoggerDict($idM, $idL) ]
+
+/* This rule can trigger if the logger violates the append-only property and the monitor checks for it. 
+see restriction for 'AppendOnlyViolation'
+In CT, usually this check is not necessary to run by the monitor as they explore all entries and do not rely on STHs that much */ 
+rule monitorFindsAppendOnlyViolation [color= #e65208]:
+    [ !LoggerDict($idM, $idL), !TLS_L_to_M($idL, $idM, $snapshot, sth, session) ]
+    --[
+        MonitorAppendOnlyViol($idM, $idL, $now, sth, session),
+        AppendOnlyViolation($idM, $idL, sth, session),
+        Time($now)
+    ]->
+    [ ]
+
+rule monitorVerifiesAppendOnly [color= #e65208]:
+    [ !LoggerDict($idM, $idL), !TLS_L_to_M($idL, $idM, $snapshot, sth, session) ]
+    --[
+        MonitorAppendOnlyVerified($idM, $idL, $now, sth, session),
+        AppendOnlyVerified($idM, $idL, sth, session),
+        Time($now)
+    ]->
+    [ ]
+
+/* A Monitor receives a subject that it should track which means that if a certificate with this subject is contained in a log, it will compare it to the known truth. */
+rule monitorTrackSubject [color= #fac800]:
+    [ !Monitor($idM), !DomainOwner(su, pubK) ]
+    --[ Time($now) ]->
+    [ !TrackSubject($idM, su) /* from here on the monitor tracks the subject 'su'. We implicitly include that during their contract the domain owner shares honestly issued certificates with this monitor. The monitor will subsequently in authenticity checks make use of this ground truth knowledge. The checks are formalized below in the restrictions rogueCert and benignCert. */ ]
+
+restriction rogueCert:
+    "All idCA stmt #t1. RogueCert(idCA, stmt)@t1 ==> not (Ex #t0. GroundTruth(idCA, stmt)@t0 & #t0 < #t1)"
+
+restriction benignCert:
+    "All idCA stmt #t1. BenignCert(idCA, stmt)@t1 ==> (Ex #t0. GroundTruth(idCA, stmt)@t0 & #t0 < #t1)"
+
+/******** CT Monitor Log Exploration ********/
+
+/* We use these rules to axiomatically assert later in inclusion proof whether a chain on the log is valid or not */
+rule ChainValidator_Valid:
+    let
+        ca_fields = <$rootCA, $idCA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
+        cert_fields = <$idCA, $subj, ke, 'pre-cert', sn, $i, $j>
+        chain = <<cert_fields, cert_sig>, <ca_fields, ca_sig>>
+    in
+    [ In(cert_fields), In(cert_sig), In(ca_fields), In(ca_sig), !Root_CA($rootCA, pkRootCA) ]
+    --[
+        Eq(verify(cert_sig, cert_fields, pkCA), true()),
+        Eq(verify(ca_sig, ca_fields, pkRootCA), true()),
+
+        ChainCheck(chain),
+        ChainValid(chain)
+    ]->
+    [ ]
+
+rule ChainValidator_Invalid:
+    let
+        ca_fields = <$rootCA, $idCA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
+        cert_fields = <$idCA, $subj, ke, 'pre-cert', sn, $i, $j>
+        chain = <<cert_fields, cert_sig>, <ca_fields, ca_sig>>
+    in
+    [ In(cert_fields), In(cert_sig), In(ca_fields), In(ca_sig), !Root_CA($rootCA, pkRootCA) ]
+    --[
+        _restrict(not (
+            (verify(cert_sig, cert_fields, pkCA) = true()) 
+            & 
+            (verify(ca_sig, ca_fields, pkRootCA) = true())
+          ) /* chain does not verify */
+        ),
+
+        ChainCheck(chain),
+        ChainInvalid(chain)
+    ]->
+    [ ]
+
+
+/* 
+The following rules cover monitor exploration via the log to find potentially rogue certificates. When looking for a certificate, there are different outcomes that are encoded in different rules here:
+    1. The monitor finds a rogue certificate in a log, this is reachable as soon as a rogue certificate is contained in the snapshot shared by the logger.
+    2. The monitor finds a benign certificate. No further action is needed
+    3. The monitor does not find any (rogue) certificate. No further action is needed
+    4. The monitor finds a rogue certificate but is itself malicious: It will ignore the finding and not alert the customer. We say that a monitor sleeps on a rogue entry in this case. 
+*/
+
+/* Restrictions formalizing the exploration behavior */
+
+
+/* We formalize whether a snapshot presented contains an entry or not using predicates. */
+predicate: ChainVisible(Logger, chain, log_id, #time, sth_time) <=> 
+    (Ex preC_fields different_time #t.
+        LoggerComputesAddLog(Logger, log_id, preC_fields, chain, different_time)@t /* there has been an addition to log_id prior to #time */
+        & not(sth_time = different_time) /* ...that addition was visible */
+        & #t < #time
+        ) 
+
+predicate: NoChainVisible(Logger, stmt, log_id, #time, sth_time) <=>
+    (not (Ex different_time #t. 
+            LoggerComputesAddLogStmt(Logger, log_id, stmt, different_time)@t
+            & not (sth_time = different_time) /* or there has never been a visible addition to the log */
+            & #t < #time
+        ))
+        /* OR: for all additions with stmt, the chain is invalid. The monitor will only react to correctly signed certificates. Especially as we focus on accountability, wrongly signed certificates do not serve as actionable evidence. */
+        | ((All preC_fields different_time stmt chain #t2 #t.
+            LoggerComputesAddLogStmt(Logger, log_id, stmt, different_time)@t
+            & LoggerComputesAddLog(Logger, log_id, preC_fields, chain, different_time)@t
+            & not (sth_time = different_time)
+            & #t < #time
+            & ChainCheck(chain)@t2
+            ==> ChainInvalid(chain)@t2
+        ) & (All different_time preC_fields chain #t.
+            LoggerComputesAddLog(Logger, log_id, preC_fields, chain, different_time)@t
+            & #t < #time
+            ==> (Ex #t2. ChainCheck(chain)@t2)
+        ))
+
+
+/* Good case: Monitor was able to find the entry on the log. Note how we turn back to the whole chain here: Monitor exploration also covers the supplemental information a log offers. On the monitor side we also check the validity of this chain */
+restriction logExplorationSucceeds:
+    "All IdM IdL chain sth session #t5. 
+    MonitorObservesEntry(IdM, IdL, chain, sth, session)@t5
+    ==> (Ex log_id time #t2. 
+        LoggerPresentsView(IdL, IdM, log_id, time, sth, session)@t2 
+            /* Logger handed out an STH to the recipient... */
+        & #t2 < #t5 /* ...prior to the check */
+        & ChainVisible(IdL, chain, log_id, #t2, time) 
+            /* ...and the entry is visible in that view */
+        )"
+
+/* There is no entry on the log that is valid and has stmt in it. By construction, if the other case occurs and we assume that the monitor explores the log, we force that one case is reachable which then ends up with a succeeding exploration for exactly the certificate that is matching on the log */
+restriction logExplorationFails:
+    "All IdM IdL stmt sth session #t1. 
+    NothingObserved(IdM, IdL, stmt, sth, session)@t1
+    ==> (Ex log_id time #t0. 
+        LoggerPresentsView(IdL, IdM, log_id, time, sth, session)@t0 
+            /* Logger handed out an STH to the recipient... */
+        & #t0 < #t1 /* ...prior to the check */
+        & NoChainVisible(IdL, stmt, log_id, #t0, time) 
+            /* ...and the entry is not visible in that view */
+        )"
+
+
+
+rule monitorFindsRogueCertificate [color= #f3d664]:
+    let
+        ca_fields = <$rootCA, $idCA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
+        cert_fields = <$idCA, $subj, ke, 'pre-cert', sn, $i, $j>
+        chain = <<cert_fields, cert_sig>, <ca_fields, ca_sig>>
+        stmt = <$idCA, $subj, ke, sn>
+    in
+    [ !LoggerDict($idM, $idL), !TrackSubject($idM, su), In(cert_fields), In(cert_sig), In(ca_fields), In(ca_sig), !TLS_L_to_M($idL, $idM, $snapshot, sth, session), !Root_CA($rootCA, pkRootCA) ]
+    --[ 
+        Eq(verify(cert_sig, cert_fields, pkCA), true()),
+        Eq(verify(ca_sig, ca_fields, pkRootCA), true()),
+        MonitorFindsCert($idM, $idL, stmt, ca_fields, sth, session),
+        MonitorBlamesCA($idCA, $idL, stmt, ca_fields, sth, session),
+        MonitorObservesEntry($idM, $idL, chain, sth, session), /* see restriction */
+        RogueCert($idCA, stmt), /* see restriction */
+        MonitorInspectsLog($idM, $idL, stmt, ca_fields, sth, session), /* monitor explores log entries */
+        MonitorInspectsLog_noTrust($idL, stmt, sth, session), /* monitor explores log entries + allowed to sleep */
+
+        Revoked(stmt), /* [in Revocation model] Monitor initiates revocation */
+        Time($now)
+    ]->
+    [ ]
+
+rule monitorCanFindCertificate [color= #f3d664]:
+    let
+        ca_fields = <$rootCA, $idCA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
+        cert_fields = <$idCA, $subj, ke, 'pre-cert', sn, $i, $j>
+        chain = <<cert_fields, cert_sig>, <ca_fields, ca_sig>>
+        stmt = <$idCA, $subj, ke, sn>
+    in
+    [ !LoggerDict($idM, $idL), !TrackSubject($idM, $subj), In(cert_fields), In(cert_sig), In(ca_fields), In(ca_sig), !TLS_L_to_M($idL, $idM, $snapshot, sth, session), !Root_CA($rootCA, pkRootCA) ]
+    --[
+        Eq(verify(cert_sig, cert_fields, pkCA), true()),
+        Eq(verify(ca_sig, ca_fields, pkRootCA), true()),
+        MonitorFindsCert($idM, $idL, stmt, ca_fields, sth, session),
+        MonitorObservesEntry($idM, $idL, chain, sth, session), /* see restriction */
+        BenignCert($iss, stmt), /* cert is found benign, see restriction */
+        MonitorInspectsLog($idM, $idL, stmt, ca_fields, sth, session), /* monitor explores log entries */
+        MonitorInspectsLog_noTrust($idL, stmt, sth, session), /* monitor explores log entries + allowed to sleep */
+
+        Time($now)
+    ]->
+    [ ]
+
+rule monitorCannotFindCertificate [color= #f3d664]:
+    let
+        ca_fields = <$rootCA, $idCA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
+        cert_fields = <$idCA, $subj, ke, 'pre-cert', sn, $i, $j>
+        chain = <<cert_fields, cert_sig>, <ca_fields, ca_sig>>
+        stmt = <$idCA, $subj, ke, sn>
+    in
+    [ !LoggerDict($idM, $idL), !TrackSubject($idM, su), In(cert_fields), In(cert_sig), In(ca_fields), In(ca_sig), !TLS_L_to_M($idL, $idM, $snapshot, sth, session), !Root_CA($rootCA, pkRootCA) ]
+    --[ 
+        CannotFindCert($idM, stmt, $idL, sth, session),
+        MonitorCannotFind($idM, $idL, stmt, ca_fields, sth, session),
+        NothingObserved($idM, $idL, stmt, sth, session), /* see restriction */
+        MonitorInspectsLog_noTrust($idL, stmt, sth, session), /* auth check with sleep */
+        MonitorInspectsLog($idM, $idL, stmt, ca_fields, sth, session), /* monitor looks for stmt in log and checks authenticity if found, but here it is not found */
+
+        Time($now),
+        Debug3()
+    ]->
+    [ ]
+
+rule monitorFindsRogueCertificate_Sleep [color= #af2828]:
+    let
+        ca_fields = <$rootCA, $idCA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
+        cert_fields = <$idCA, $subj, ke, 'pre-cert', sn, $i, $j>
+        chain = <<cert_fields, cert_sig>, <ca_fields, ca_sig>>
+        stmt = <$idCA, $subj, ke, sn>
+    in
+    [ !LoggerDict($idM, $idL), !St_bad_Monitor($idM), !TrackSubject($idM, su), In(cert_fields), In(cert_sig), In(ca_fields), In(ca_sig), !TLS_L_to_M($idL, $idM, $snapshot, sth, session), !Root_CA($rootCA, pkRootCA) ]
+    --[
+        Eq(verify(cert_sig, cert_fields, pkCA), true()),
+        Eq(verify(ca_sig, ca_fields, pkRootCA), true()), /* only if it is a correctly signed and rogue cert, sleeping is considered a violation (+ we cannot check for other cases) */
+        MonitorSleeps($idM, stmt),
+        MonitorObservesEntry($idM, $idL, chain, sth, session), /* see restriction */
+        RogueCert($idCA, stmt), /* see restriction */
+        MonitorInspectsLogSleep($idM, stmt, sth), /* but monitor sleeps on the rogue entry: not informing the server, no revocation issued, ... */
+        MonitorInspectsLog_noTrust($idL, stmt, sth, session),
+
+        Time($now)
+    ]->
+    [ ]
+
+/*** Monitor-side inclusion proofs ***/
+
+rule MonitorVerifiesInclusion [color= #c1ff3c]:
+    let
+        preC_fields = <$idCA, $id, pkID, 'pre-cert', sn, $i, $j>
+        stmt = <$idCA, $id, pkID, sn>
+    in
+    [ !TLS_L_to_M($idL, $idC, $snapshot, sth, session), !Logger($idL, pkL),In(preC_fields), /* entry to check for */ !Monitor($idM) ]
+    --[
+        MonitorSideInclusionProved($idL, stmt, sth, session),
+        InclusionProofSucceeds($idM, $idL, preC_fields, sth, session), /* entry is contained in the snapshot, see restriction */
+        MonitorChecksInclusion($idM, $idL, preC_fields, sth, session),
+        InclusionProof($idM, $idL, preC_fields, sth, session),
+
+        
+        Time($now)
+    ]->
+    [ ]
+
+rule MonitorFindsInclusionViolation [color= #e65208]:
+    let
+        
+        preC_fields = <$idCA, $id, pkID, 'pre-cert', sn, $i, $j>
+        stmt = <$idCA, $id, pkID, sn>
+    in
+    [ !TLS_L_to_M($idL, $idC, $snapshot, sth, session), !Logger($idL, pkL),In(preC_fields), /* entry to check for */ !Monitor($idM) ]
+    --[
+        InclusionProofFailed($idL, stmt),
+        MonitorChecksInclusion($idM, $idL, preC_fields, sth, session),
+        MonitorFindsInclusionViol($idL, stmt, sth, session),
+
+        InclusionProofFails($idM, $idL, preC_fields, sth, session), /* entry is not contained in the snapshot, see restriction */
+        InclusionProof($idM, $idL, preC_fields, sth, session),
+        
+        Time($now)
+    ]->
+    []
+
+/***** SCT Auditing  *****/
+
+/*
+In SCT Auditing, a monitor receives a certificate along with its embedded SCTs. Each of the following rules considers one of the two SCTs at a time. 
+The SCT is then used together with the certificate to determine whether the certificate is rogue or benign, using the same techniques as seen for the external check (below) or in the CT model (above). There are 3 possible outcomes:
+    1. The certificate received is rogue. The monitor informs the domain owner about it.
+    2. The certificate received is benign. No further action is needed.
+    3. The monitor is itself malicious and sleeps on the rogue certificate instead of informing the domain owner.
+*/
+
+rule monitorAudit_CA_Viol:
+    let
+        audit_stmt = <$idCA, $id, pkID, sn>
+
+        pub_fields = <$idCA, $id, pkID, 'pubKey', sn, $i, $j, sct1, sct2>
+        sct_fields = <$idL, 'SCT', $sct, <$idCA, $id, pkID, sn, $i, $j>>
+        ca_fields = <$rootCA, $idCA, pkCA, 'pubKey-CA', sn, $i0, $j0>
+        chain = <<pub_fields, pub_sig>, <ca_fields, ca_sig>>
+        pre_fields = <$idCA, $id, pkID, 'pre-cert', sn, $i, $j> /* reconstructed from the actual certificate */
+
+        pubkey_cert = <pub_fields, pub_sig>
+        sct_to_audit = <$idL, 'SCT', $sct, sct_sig>
+    in
+    [ !LoggerDict($idM, $idL), !TrackSubject($idM, $id), !Logger($idL, pkL), !Root_CA($rootCA, pkRootCA),
+    !TLS_to_M($idM, chain, sct_to_audit) ]
+    --[ Eq(verify(pub_sig, pub_fields, pkCA), true()),
+        Eq(verify(sct_sig, sct_fields, pkL), true()),
+        Eq(verify(ca_sig, ca_fields, pkRootCA), true()),
+        _restrict((sct_to_audit = sct1) | (sct_to_audit = sct2)),
+        RogueCert($idCA, audit_stmt), /* see restriction */
+        MonitorLearns(pre_fields),
+        Revoked(audit_stmt), /* [in Revocation model] Monitor initiates revocation */
+        MonitorInformsServer($idM, audit_stmt), /* referenced in receipt model */
+
+        AuditedSCT($idM, $idL, pre_fields, audit_stmt),
+        AuditAuthCheck($idL, pre_fields, ca_fields, audit_stmt),
+        AuditAuthCheck_noTrust($idL, ca_fields, audit_stmt),
+        AuditCertFake($idCA, $idL, ca_fields, pre_fields, audit_stmt),
+
+        Time($now)
+    ]->
+    [ CraftReceipt($idM, chain) ]
+
+rule monitorAudit_no_viol:
+    let
+        audit_stmt = <$idCA, $id, pkID, sn>
+
+        pub_fields = <$idCA, $id, pkID, 'pubKey', sn, $i, $j, sct1, sct2>
+        sct_fields = <$idL, 'SCT', $sct, <$idCA, $id, pkID, sn, $i, $j>>
+        ca_fields = <$rootCA, $idCA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
+        chain = <<pub_fields, pub_sig>, <ca_fields, ca_sig>>
+        pre_fields = <$idCA, $id, pkID, 'pre-cert', sn, $i, $j> /* reconstructed from the actual certificate */
+
+        sct_to_audit = <$idL, 'SCT', $sct, sct_sig>
+    in
+    [ !LoggerDict($idM, $idL), !TrackSubject($idM, $id), !Logger($idL, pkL), !Root_CA($rootCA, pkRootCA),
+    !TLS_to_M($idM, chain, sct_to_audit)
+    ]
+    --[ Eq(verify(pub_sig, pub_fields, pkCA), true()),        
+        Eq(verify(sct_sig, sct_fields, pkL), true()),
+        Eq(verify(ca_sig, ca_fields, pkRootCA), true()),
+        _restrict((sct_to_audit = sct1) | (sct_to_audit = sct2)), /* only one sct at a time is considered */
+        BenignCert($idCA, audit_stmt), /* see restriction */
+
+        MonitorLearns(pre_fields),
+        AuditedSCT($idM, $idL, pre_fields, audit_stmt),
+        AuditAuthCheck($idL, pre_fields, ca_fields, audit_stmt),
+        AuditAuthCheck_noTrust($idL, ca_fields, audit_stmt),
+        Time($now)
+    ]->
+    [ CraftReceipt($idM, chain)   ]
+
+rule monitorAudit_Sleep [color= #af2828]: 
+    let
+        audit_stmt = <$idCA, $id, pkID, sn>
+
+        pub_fields = <$idCA, $id, pkID, 'pubKey', sn, $i, $j, sct1, sct2>
+        sct_fields = <$idL, 'SCT', $sct, <$idCA, $id, pkID, sn, $i, $j>>
+        ca_fields = <$rootCA, $idCA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
+        chain = <<pub_fields, pub_sig>, <ca_fields, ca_sig>>
+        pre_fields = <$idCA, $id, pkID, 'pre-cert', sn, $i, $j> /* reconstructed from the actual certificate */
+
+        pubkey_cert = <pub_fields, pub_sig>
+        sct_to_audit = <$idL, 'SCT', $sct, sct_sig>
+    in
+    [ !LoggerDict($idM, $idL), !St_bad_Monitor($idM), !TrackSubject($idM, $id), !Logger($idL, pkL), !Root_CA($rootCA, pkRootCA),
+    !TLS_to_M($idM, chain, sct_to_audit) ]
+    --[ Eq(verify(pub_sig, pub_fields, pkCA), true()),        
+        Eq(verify(sct_sig, sct_fields, pkL), true()),
+        Eq(verify(ca_sig, ca_fields, pkRootCA), true()),
+        _restrict((sct_to_audit = sct1) | (sct_to_audit = sct2)), /* only one sct at a time is considered */
+        RogueCert($idCA, audit_stmt), /* see restriction */    
+
+        MonitorLearns(pre_fields),
+        AuditedSCT($idM, $idL, pre_fields, audit_stmt),
+        
+        AuditAuthCheck_noTrust($idL, ca_fields, audit_stmt),
+        AuditCertFake_Sleep($idCA, $idL, ca_fields, audit_stmt),
+        MonitorSleeps($idM, audit_stmt),
+        MonitorAuditSleeps($idCA, $idM, audit_stmt),
+
+        Time($now)
+    ]->
+    [ CraftReceipt($idM, chain)   ]
+
+/***** External check conducted by the monitor *****/
+
+/* The external check starting from CT can be delegated to the monitor. We assume as before that the monitor has access to the ground truth of its subject in order to distinguish between benign and rogue certificates (as before). */
+
+rule monitor_externalCheck_Fake:
+    let
+        stmt = <$idCA, $id, pkID, sn>
+        pub_fields = <$idCA, $id, pkID, 'pubKey', sn, $i, $j, sct1, sct2>
+        ca_fields = <$rootCA, $idCA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
+    in
+    [   In(pub_fields), In(pub_sig), In(ca_fields), In(ca_sig),
+        !Root_CA($rootCA, pkRootCA), !TrackSubject($idM, $id), 
+    ]
+    --[ Eq(verify(pub_sig, pub_fields, pkCA), true()),
+        Eq(verify(ca_sig, ca_fields, pkRootCA), true()),
+        RogueCert($idCA, stmt), /* see restriction */
+        CAFakesCert($idCA, stmt, ca_fields),
+        MonExtFakeCheck(ca_fields, stmt),
+        Time($now)
+    ]->
+    [ ]
+
+rule monitor_externalCheck_Verified:
+    let
+        stmt = <$idCA, $id, pkID, sn>
+        pub_fields = <$idCA, $id, pkID, 'pubKey', sn, $i, $j, sct1, sct2>
+        ca_fields = <$rootCA, $idCA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
+    in
+    [   In(pub_fields), In(pub_sig), In(ca_fields), In(ca_sig),
+        !TrackSubject($idM, $id), !Root_CA($rootCA, pkRootCA)
+    ]
+    --[ 
+        Eq(verify(pub_sig, pub_fields, pkCA), true()),
+        Eq(verify(ca_sig, ca_fields, pkRootCA), true()),
+        BenignCert($idCA, stmt), /* see restriction */
+        MonExtCheckVerified($idCA, stmt, ca_fields),
+        MonExtFakeCheck(ca_fields, stmt),
+        Time($now)
+    ]->
+    [ ]
+
+
+/* ----- Logger rules ----- */
+
+/* Initialize a Logger role. It will later be used to give out SCTs and STHs to others. The CT standard does not further define how authenticity of the loggers keys is ensured, e.g. Wrotniak's model uses self-signed certificates here.
+In general it is senseful to treat loggers like root CAs which we also just trust in this model. In practice, root CA keys are hardcoded in browser, the same holds for loggers. For this reason we also refrain from adding self-signed certificates here. */
+rule Logger_Init [color= #08a358]:
+    [ Fr(~skL)  ]
+    --[ 
+        Logger_Registered($idL),
+        Time($now)
+    ]->
+    [ !Logger_s($idL, ~skL, pk(~skL)), !Logger($idL, pk(~skL)) ]
+
+
+/* We use this rule to start a new log for a Logger. In the honest case, we assume that this only happens once. We distinguish between a 'log' and a 'logger'. A logger maintains 1 or more logs. 'logs' contain the entries and can be inspected. Honest loggers maintain exactly one log, not more. */
+rule Start_Log [color= #08a358]:
+    [ !Logger_s($idL, ~skL, pk(~skL)) ]
+    --[ 
+        StartedLog($idL, $log_id), 
+        HonestStartedLog($idL, $log_id),
+        Time($now)
+    ]->
+    [ !Log($idL, $log_id) ]
+
+/* Honest loggers start a log only once ==> no partition and equivocation possible */
+restriction honestStartLogOnlyOnce: 
+    "All IdL lid1 lid2 #t1 #t2. HonestStartedLog(IdL, lid1)@t1 & HonestStartedLog(IdL, lid2)@t2 ==> #t1 = #t2"
+
+/* when starting a different log, it must have a distinct (although public) log_id, to distinguish the different logs */
+restriction uniqueLogId:
+    "All IdL log_id #t1 #t2. StartedLog(IdL, log_id)@t1 & StartedLog(IdL, log_id)@t2 ==> #t1 = #t2"
+
+/* ...for the dishonest case, this might happen more often, can be seen in the trace then as additional rogue start. */
+rule Start_Log_malicious [color= #d83b0b]:
+    [ !Corrupted_Logger($idL, ~skL, pk(~skL)) ]
+    --[ StartedLog($idL, $log_id),
+        StartedLogMalicious($idL, $log_id),
+        Time($now)
+    ]->
+    [  ]
+
+/*
+pre-certificate is added to log along with the chain (signer of the precert, and certificate of the intermediate and rootCA). Includes whether the certificate is actually signed by the CA and whether it is still valid (relevant). Loggers are obliged to only add log entries of valid certificate chains for auditing purposes.
+- does NOT include: any checks whether the certificate should be issued, loggers rely on monitors to do that work
+*/
+rule add_preC_to_log [color= #08a358]:
+    let
+        preC_fields = <$idCA, $id, pkID, 'pre-cert', sn, $i, $j> 
+        ca_fields = <$rootCA, $idCA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
+
+        sct_fields = <$idL, 'SCT', $now, <$idCA, $id, pkID, sn, $i, $j>>
+        sct_sig = sign(sct_fields, skL)
+        sct = <$idL, 'SCT', $now, sct_sig>
+
+        chain = <<preC_fields, preC_sig>, <ca_fields, ca_sig>>
+    in
+    [ 
+        In(preC_fields), In(preC_sig), In(ca_fields), In(ca_sig), /* incoming pre-cert chain */ 
+        !Logger_s($idL, skL, pk(skL)),
+        !Root_CA($rootCA, pkRootCA),
+        !Log($idL, $log_id)
+    ]
+    --[
+        Eq(verify(preC_sig, preC_fields, pkCA), true()),
+        Eq(verify(ca_sig, ca_fields, pkRootCA), true()),
+        LoggerComputesAddLogStmt($idL, $log_id, <$idCA, $id, pkID, sn>, $now),
+        LoggerComputesAddLog($idL, $log_id, preC_fields, chain, $now),
+        LoggerAsserts($idL, sct),
+
+        Time($now),
+        CheckValidUntil($now, $j)
+    ]->
+    [ Out(sct) ]
+
+
+/* adds an arbitrary certificate to the log with $log_id; considered dishonest. Here we leave out checks and verification of the chain */
+rule forge_log_view [color= #d40808]: 
+    let
+        preC_fields = <$idCA, $id, pkID, 'pre-cert', sn, $i, $j> 
+
+        ca_fields = <$rootCA, $idCA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
+
+    in
+    [ In(preC_fields), In(preC_sig), In(ca_fields), In(ca_sig),
+      /* Incoming certificate that is added */ 
+      !Corrupted_Logger($idL, skL, pk(skL)) ]
+    --[
+        LoggerComputesAddLogStmt($idL, $log_id, <$idCA, $id, pkID, sn>, $now),
+        LoggerComputesAddLog($idL, $log_id, preC_fields, <<preC_fields, preC_sig>, <ca_fields, ca_sig>>, $now),
+        LoggerForgesAdd($idL),
+        Time($now)
+    ]->
+    [ ]
+
+
+/* ----- Certification ----- */
+
+/* 
+Invoked by a domain owner (DO): DO wants to have a certificate for its public key signed by CA, 
+CA "checks" identity and then creates a pre certificate to hand out to loggers tmt, sth, session
+The DomainOwner fact serves as a proof of identity, so we assume that invoking this always happens on DO's behalf. 
+Rogue certificates are not issued using this fact but instead by the network attacker using the CA's key (requires CA corruption).
+*/
+rule PreCertify [color= #c871ff]: 
+    let
+        preC_fields = <$idCA, $id, pkID, 'pre-cert', ~sn, $now, $j>
+        preC_sig = sign(preC_fields, skCA)
+        preC = <preC_fields, preC_sig>
+    in
+    [ !DomainOwner($id, pkID), /* public key to sign. Using this rule includes an "identity check" which is simplified: There is a DomainOwner fact with this public key. */
+     !CA_s0($idCA, skCA, pkCA, ca_fields, ca_sig), Fr(~sn) ]
+    --[ PreCertified($idCA, preC), 
+        GroundTruth($idCA, <$idCA, $id, pkID, ~sn>), /* used for ground truth comparisons */
+        Asserts_PKI($idCA, <$idCA, $id, pkID, ~sn>), /* used for naive external check in PKI */
+        
+        Time($now)
+    ]->
+    [ Out(preC_fields), Out(preC_sig), Certificate_Store($idCA, preC), Out(ca_fields), Out(ca_sig) ]
+
+/*
+This rule is invoked by the CA again. It takes the issued pre-certificate and generates a corresponding 'pubKey' certificate, after two loggers claimed that they have added the certificate to its logs (given the two SCTs)
+*/
+rule PubKeyCertify [color= #c871ff]:
+    let 
+    preC_fields = <$idCA, $id, pkID, 'pre-cert', sn, $i, $j>
+
+    sct1_fields = <$idL1, 'SCT', $sct1, <$idCA, $id, pkID, sn, $i, $j>>
+    sct2_fields = <$idL2, 'SCT', $sct2, <$idCA, $id, pkID, sn, $i, $j>>
+
+    sct1 = <$idL1, 'SCT', $sct1, sct1_sig>
+    sct2 = <$idL2, 'SCT', $sct2, sct2_sig>
+
+    pub_fields = <$idCA, $id, pkID, 'pubKey', sn, $i, $j, sct1, sct2>
+    pub_sig = sign(pub_fields, skCA)
+    in 
+    [ 
+        !CA_s0($idCA, skCA, pkCA, ca_fields, CA_sig), 
+        /* 2 SCTs: */  In(sct1), In(sct2), 
+        !Logger($idL1, pkL1),
+        !Logger($idL2, pkL2),
+        Certificate_Store($idCA, <preC_fields, sig_preC>)
+    ] 
+    --[ Eq(verify(sct1_sig, sct1_fields, pkL1), true()), 
+        Eq(verify(sct2_sig, sct2_fields, pkL2), true()), 
+        Eq(verify(sig_preC, preC_fields, pkCA), true()), 
+        _restrict( not ($idL1 = $idL2) ), /* the 2 SCTs were from distinct loggers */
+
+        Certified($idCA, $idL1, sct1, $idL2, sct2), 
+        CAAsserts($idCA, <$idCA, $id, pkID, sn>),
+
+        Time($now),
+        CheckValidUntil($now, $j)
+    ]-> 
+    [ Out(pub_fields), Out(pub_sig) /* outgoing pubKey cert */ ]
+    
+/* Used in SCT Auditing Model, client received a certificate chain with incorporated SCTs and forwards them via a secure channel to the monitor. We leave out signature checks here and move them to the monitor to leave out implicit assumptions about the content that is delivered to the monitor via auditing */
+rule ClientInitiatesAuditing:
+    let
+        chain = <<pub_fields, pub_sig>, <ca_fields, ca_sig>>
+    in
+    [ In(ca_fields), In(ca_sig), In(pub_fields), In(pub_sig), In(sct) ]
+    --[]->
+    [ !TLS_to_M($idM, <<pub_fields, pub_sig>, <ca_fields, ca_sig>>, sct), Client_Receipt_Val($idM, chain) ]
+
+/*
+A client receives a certificate and now validates it. This includes:
+- verifying the signature on the certificate
+- verifying every cert in the chain, which here is just the certificate of the intermediate CA signed by a root CA
+- verifying two SCTs that should correspond to the incoming certificate and come from distinct loggers
+
+verifying always includes validity checks of the timepoints in the certificate, i.e., whether the certificate is still valid at the current time.
+*/
+rule ClientValidate [color= #f2ce03]:
+    let
+        ca_fields = <$rootCA, $idCA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
+        sct1_fields = <$idL1, 'SCT', $sct1, <$idCA, $id, pkID, sn, $i, $j>>
+        sct2_fields = <$idL2, 'SCT', $sct2, <$idCA, $id, pkID, sn, $i, $j>>
+        sct1 = <$idL1, 'SCT', $sct1, sct1_sig>
+        sct2 = <$idL2, 'SCT', $sct2, sct2_sig>
+        pub_fields = <$idCA, $id, pkID, 'pubKey', sn, $i, $j, sct1, sct2>
+
+        chain = <<pub_fields, pub_sig>, <ca_fields, ca_sig>>
+        stmt = <$idCA, $id, pkID, sn>
+    in
+    [   !Root_CA($rootCA, pkRootCA),
+        In(ca_fields),
+        In(ca_sig),
+        In(pub_fields),
+        In(pub_sig), /* incoming certificate (intermediate CA + pubKey certificate) */
+
+        !Logger($idL1, pkL1),
+        !Logger($idL2, pkL2)
+    ]
+    --[ ClientAcceptsChain($idL1, $idL2, $rootCA, ca_fields, $idCA, stmt),
+        ClientAcceptsCert($idL1, $idL2, <$idCA, $id, pkID, 'pre-cert', sn, $i, $j>), /* we use this to formulate transparency lemmas: on the log we only consider pre-certificates. Note how it can be reconstructed from the pubKey certificate easily */
+        Eq(verify(pub_sig, pub_fields, pkCA), true()), 
+        Eq(verify(sct1_sig, sct1_fields, pkL1), true()), 
+        Eq(verify(sct2_sig, sct2_fields, pkL2), true()),
+        Eq(verify(ca_sig, ca_fields, pkRootCA), true()),
+        _restrict( not($idL1 = $idL2) ), /* SCTs from distinct loggers */
+
+        Time($now),
+        CheckValidUntil($now, $j),
+        CheckValidUntil($now, $j0),
+    ]->
+    [ !Check(pkL1, pub_fields), !Check(pkL2, pub_fields) /* each SCT and statement is stored to later run client-side auditing checks, e.g. inclusion proofs */
+    ]
+
+#ifdef REVOCATION // use --defines=REVOCATION in Tamarin's CLI
+
+/* 
+If makro is used: clients will check for revocation prior to validating (accepting) a cert, only relevant for a bunch of acc lemmas where revocation is assumed. This is idealized as we omit a way how the client learns about revocation (e.g. OCSP, CRL, ...) and also assume that revocation becomes effective immediately.
+*/
+restriction onlyValidateNonRevoked:
+    "All idL1 idL2 rootCA ca_fields idCA stmt #i. ClientAcceptsChain(idL1, idL2, rootCA, ca_fields, idCA, stmt)@i ==> not (Ex #j. Revoked(stmt)@j & #j < #i)"
+
+#endif
+
+/* ---------- Interaction with the log to verify its properties ---------- */
+
+/*
+After validating a certificate, a client 'may' also inspect the SCTs further and request a proof of inclusion by the loggers for the underlying certificate. We again (like with monitors) distinguish between two kinds here:
+a) The client already checked before AND stored a copy of the log before AND finds a violation (below: rule ClientFindsAppendOnlyViolation, stored via ClientStoresSnapshot prior)
+b) The client may or may not have checked before (this version) and creates a copy locally (ClientStoresSnapshot)
+
+This rule is also used for the monitor to just fetch a view and use the copy later to verify the append-only property.
+*/
+rule MonitorStoresSnapshot:
+    [ !Logger($idL, pkL), !Monitor($idM), !TLS_L_to_M($idL, $idM, $snapshot, sth, session) ]
+    --[ 
+        SnapshotStored($idM, $idL, session, sth),
+        MonitorSnapshotStored($idM, $idL, session, sth),
+        Time($now)
+    ]->
+    [  ]
+
+rule ClientStoresSnapshot:
+    [ !Logger($idL, pkL), !TLS_L_to_C($idL, $idC, $snapshot, sth, session) ]
+    --[ 
+        SnapshotStored($idC, $idL, session, sth),
+        ClientSnapshotStored($idC, $idL, session, sth),
+
+        Time($now)
+    ]->
+    [  ]
+
+/* Client can find a violation, if
+(1) conflicting view for given snapshots (given and one in the past) ==> append-only violated (here)
+(2) a given SCT is not contained in the log (inclusion proof failed, rule below)
+*/
+rule ClientFindsAppendOnlyViolation [color= #e65208]:
+    [ !Logger($idL, pkL), !TLS_L_to_C($idL, $idC, $snapshot, sth, session) ]
+    --[
+        ClientFindsAppendOnlyViolation($idL),
+        AppendOnlyCheck($idC, sth, session),
+        AppendOnlyViolation($idC, $idL, sth, session), /* formalizes that the append-only proof would fail (see restriction) */
+        
+        Time($now)
+    ]->
+    []
+
+/* We deem append-only violated if entries disappear independent of whether they were valid submissions. According to the standard, there are only valid chains allowed on the log, thus this only covers more potential misbehavior of the log. We use these predicates for properties of the Merkle Tree, thus only using the preC_fields directly, and ignoring the chain for now. */
+predicate: EntryMissing(Logger, preC_fields, log_id, #time, sth_time) <=>
+    not (Ex different_time chain #t. 
+            LoggerComputesAddLog(Logger, log_id, preC_fields, chain, different_time)@t
+            & not (sth_time = different_time) /* or there has never been a visible addition to the log */
+            & #t < #time
+        )
+    
+predicate: EntryVisible(Logger, preC_fields, log_id, #time, sth_time) <=> 
+    (Ex different_time chain #t.
+        LoggerComputesAddLog(Logger, log_id, preC_fields, chain, different_time)@t /* there has been an addition to log_id with the preC_fields prior to #time */
+        & not(sth_time = different_time) /* ...that addition was visible */
+        & #t < #time
+        )
+
+/* the monitor or client can observe a violation of the append-only property:
+
+- if the log gets manipulated 'between' two STH requests, the signatures will not match anymore and the logger will exactly find that 
+- specific to client: client can check whether the certificate it currently checks is in the log (CheckNotContained), this corresponds to the idea of an inclusion proof
+*/
+restriction AppendOnlyFails:
+   "All sth session id IdL #t6. 
+    AppendOnlyViolation(id, IdL, sth, session)@t6
+    /* Append-only violation found by id with violating IdL is only possible if a counterexample is found */
+        ==> (Ex preC_fields chain time t log_id1 log_id2 time2 sth2 session2 #t0 #t1 #t2 #t3 #t4 #t5. 
+                LoggerComputesAddLog(IdL, log_id1, preC_fields, chain, t)@t0
+                & EntryVisible(IdL, preC_fields, log_id1, #t2, time) 
+                /* there is an entry in the log that is visible at #t2 and time period time in log_id1 */
+                & FetchLogSnapshot(id, IdL, session2)@t1 
+                /* someone starts fetching a log view */
+                & LoggerPresentsView(IdL, id, log_id1, time, sth2, session2)@t2 
+                /* The Logger presents the view for log_id1 */
+                & SnapshotStored(id, IdL, session2, sth2)@t3 
+                /* this view is received stored by id */
+                & FetchLogSnapshot(id, IdL, session)@t4
+                /* a second view is fetched by id (later) */
+                & LoggerPresentsView(IdL, id, log_id2, time2, sth, session)@t5
+                /* the logger presents the view of a possibly different log (log_id2) */
+                & EntryMissing(IdL, preC_fields, log_id2, #t5, time2)
+                /* one entry that was visible in the past is now not visible anymore -> clear append-only violation */
+                & #t0 < #t1 & #t1 < #t2 & #t2 < #t3 
+                & #t2 < #t4 
+                & #t4 < #t5 & #t3 < #t5
+                & #t5 < #t6
+            )"
+
+/* Positive outcome of the append-only check: All old snapshots the client has do not contradict themselves */
+rule ClientVerifiesAppendOnly [color= #c1ff3c]:
+    [ !TLS_L_to_C($idL, $idC, $snapshot, sth, session), !Logger($idL, pkL), In($idUser) ]
+    --[
+        AppendOnlyCheck($idUser, sth, session),
+        Client_AppendOnlyVerified($idUser, $idL, $now, sth),
+        AppendOnlyVerified($idUser, $idL, sth, session),
+        
+        Time($now)
+    ]->
+    [ ]
+
+restriction appendOnlyWorks:
+   "(All id IdL sth session time1 t log_id log_id2 preC_fields chain sth2 session2 time2 #t0 #t1 #t2 #t4 #t5.
+        AppendOnlyVerified(id, IdL, sth, session)@t5 
+        /* If an append-only proof is verified, we know that ... */
+        & LoggerComputesAddLog(IdL, log_id, preC_fields, chain, t)@t0
+        & EntryVisible(IdL, preC_fields, log_id, #t1, time1) 
+        /* all entries that have been visible at some point */
+        & LoggerPresentsView(IdL, id, log_id, time1, sth2, session2)@t1
+        & SnapshotStored(id, IdL, session2, sth2)@t2 
+        /* every snapshot processed in the past by that client */
+        & LoggerPresentsView(IdL, id, log_id2, time2, sth, session)@t4 
+        /* and every view handed out after these */
+        & #t0 < #t1 & #t1 < #t2 & #t2 < #t4 & #t4 < #t5
+            ==> EntryVisible(IdL, preC_fields, log_id2, #t4, time2) 
+            /* then this entry is also visible in the newest snapshot */
+    )
+    &
+    (All id IdL sth session #t5.
+        AppendOnlyVerified(id, IdL, sth, session)@t5 
+        /* An append-only proof is only valid if all these pre-conditions are satisfied. */
+            ==> 
+                (Ex time1 t log_id log_id2 preC_fields chain sth2 session2 time2 #t0 #t1 #t2 #t4. 
+                    LoggerComputesAddLog(IdL, log_id, preC_fields, chain, t)@t0
+                    & EntryVisible(IdL, preC_fields, log_id, #t1, time1)
+                    & LoggerPresentsView(IdL, id, log_id, time1, sth2, session2)@t1
+                    & SnapshotStored(id, IdL, session2, sth2)@t2
+                    & LoggerPresentsView(IdL, id, log_id2, time2, sth, session)@t4
+                    & #t0 < #t1 & #t1 < #t2 & #t2 < #t4 & #t4 < #t5
+                )
+    )"
+
+/* Monitor requests a current snapshot of the log */
+rule ProofFetching_M [color= #10bcc5]:
+    [ Fr(~session), !Monitor($idM), /* Identity who fetches */ !Logger($idL, pkL) ] 
+    --[ 
+        FetchLogSnapshot($idM, $idL, ~session),
+        MonitorFetchesLogSnapshot($idM, $idL, ~session),
+        Time($now),
+    ]->
+    [ !TLS_M_to_L($idM, $idL, ~session) ]
+
+/* A client requests a current view of the log */
+rule ProofFetching_C [color= #10bcc5]:
+    [ Fr(~session), In($idC), /* could be fetched by anyone */ !Logger($idL, pkL) ] 
+    --[ 
+        FetchLogSnapshot($idC, $idL, ~session),
+        ClientFetchesLogSnapshot($idC, $idL, ~session),
+        Time($now)
+    ]->
+    [ !TLS_C_to_L($idC, $idL, ~session) ]
+
+/*
+Logger issues a new snapshot of its maintained log. 
+This exact snapshot is relatively abstract, as the log operations are too. We assume that this generates an honest STH which is verifiable, depending on the context it also represents all entries that a monitor can explore then. 
+It is crucial for the outcome of these later checks when a certain snapshot has been created. If it was early in an execution, there might not be any entries yet contained. When going through the lemmas later, you will observe that a party can partly control this by restricting when to request to snapshot.
+*/
+rule LoggerSnapshot_M [color= #22d6d6]:
+    [ !Logger_s($idL, skL, pk(skL)), Fr(~sth) /* abstract representation of the STH */, !TLS_M_to_L($idM, $idL, session) ]
+    --[ 
+        LoggerPresentsView($idL, $idM, $log_id, $now, ~sth, session),
+        LoggerHandsOutSTH($idL, ~sth, session),
+
+        Time($now)
+    ]->
+    [ !TLS_L_to_M($idL, $idM, $snapshot, ~sth, session) ]
+
+rule LoggerSnapshot_C [color= #22d6d6]:
+    [ !Logger_s($idL, skL, pk(skL)), Fr(~sth) /* abstract representation of the STH/sth */, !TLS_C_to_L($idC, $idL, session) ]
+    --[ 
+        LoggerPresentsView($idL, $idC, $log_id, $now, ~sth, session),
+        LoggerHandsOutSTH($idL, ~sth, session),
+
+        Time($now)
+    ]->
+    [ !TLS_L_to_C($idL, $idC, $snapshot, ~sth, session)
+    ]
+
+/* the $log_id's used when handing out a proof must exist, i.e. started as log prior to handing out a view. In the logger section we imposed further restrictions on the log_id's depending on whether the logger is honest. */
+restriction only_existing_log_ids:
+    "All IdL idR log_id time sth session #t1. LoggerPresentsView(IdL, idR, log_id, time, sth, session)@t1 ==> (Ex #t0. StartedLog(IdL, log_id)@t0 & #t0 < #t1)"
+
+
+rule ClientFindsInclusionViolation [color= #e65208]:
+    let
+        pub_fields = <$idCA, $id, pkID, 'pubKey', sn, $i, $j, sct1, sct2>
+        stmt = <$idCA, $id, pkID, sn>
+        preC_fields = <$idCA, $id, pkID, 'pre-cert', sn, $i, $j>
+    in
+    [ !TLS_L_to_C($idL, $idC, $snapshot, sth, session), !Logger($idL, pkL), In($idClient), /* could be any client */ !Check(pkL, pub_fields) ]
+    --[
+        InclusionProofFailed($idL, stmt),
+        ClientChecksInclusion($idL, stmt, sth, session),
+        ClientFindsInclusionViol($idL, stmt, sth, session),
+
+        InclusionProofFails($idClient, $idL, preC_fields, sth, session), /* corresponding preCert entry is not contained in the log -> log violation as the client just accepted an SCT signed by that logger */
+        InclusionProof($idClient, $idL, preC_fields, sth, session),
+        
+        Time($now)
+    ]->
+    []
+
+restriction inclusionProofFails:
+    "All IdFetcher IdL preC_fields sth session #t1. 
+    InclusionProofFails(IdFetcher, IdL, preC_fields, sth, session)@t1
+    ==> (Ex log_id time #t0. 
+        LoggerPresentsView(IdL, IdFetcher, log_id, time, sth, session)@t0 
+            /* Logger handed out an STH to the recipient... */
+        & #t0 < #t1 /* ...prior to the check */
+        & EntryMissing(IdL, preC_fields, log_id, #t0, time) 
+            /* ...and the entry is not visible in that view */
+        )"
+
+rule ClientVerifiesInclusion [color= #c1ff3c]:
+    let
+        pub_fields = <$idCA, $id, pkID, 'pubKey', sn, $i, $j, sct1, sct2>
+        stmt = <$idCA, $id, pkID, sn>
+        preC_fields = <$idCA, $id, pkID, 'pre-cert', sn, $i, $j>
+    in
+    [ !TLS_L_to_C($idL, $idC, $snapshot, sth, session), !Logger($idL, pkL), !Check(pkL, pub_fields), In($idClient) /* could be any client */ ]
+    --[
+        ClientSideInclusionProved($idL, stmt, sth, session),
+        InclusionProofSucceeds($idClient, $idL, preC_fields, sth, session), /* entry is visible in fetched proof, see restriction */
+        ClientChecksInclusion($idL, stmt, sth, session),
+        InclusionProof($idClient, $idL, preC_fields, sth, session),
+
+        
+        Time($now)
+    ]->
+    [ ]
+
+restriction inclusionProofWorks:
+    "All IdFetcher IdL preC_fields sth session #t5. InclusionProofSucceeds(IdFetcher, IdL, preC_fields, sth, session)@t5
+    ==> (Ex id log_id time #t2. 
+        LoggerPresentsView(IdL, id, log_id, time, sth, session)@t2 
+            /* Logger handed out a snapshot to the recipient... */
+        & #t2 < #t5 
+            /* ...prior to the check */
+        & EntryVisible(IdL, preC_fields, log_id, #t2, time) 
+            /* and the entry is visible in that view */
+        )"
+
+/* ---------- STH Gossiping ---------- */
+
+/*
+Instead of monitors receiving SCTs, they now receive the snapshots in the form of STH's issued by loggers.
+They will be used in the same way as CT (for authenticity checks) and we investigate resulting changes here. 
+We will for authenticity later, in fact, reuse the same rules as for CT again.
+Note that we cannot assume the same outcome of proofs for the shared snapshots, as this would be too strong: Loggers can still (malciously) refuse to open their own STHs that they handed out earlier and did proofs on. 
+Assuming that the proofs have the same results would mean that the gossip also contains the proof itself, including the certificate.
+
+We limit ourselves to gossip between the client and monitor.
+*/
+
+rule clientGossipsToMonitor:
+    [ !TLS_L_to_C($idL, $idC, $snapshot, sth, session) ]
+    --[ Time($now) ]-> [ !TLS_C_to_M($idC, $idM, $snapshot, sth, session) ]
+
+
+    /* --- Gossip AppendOnly Checks --- */
+    /* In addition to using gossiped snapshots to explore new entries with the help of another fetched snapshot, a different question immediately arises for the monitor: do these snapshots contradict each other? For this, the monitor can use append-only proofs between these two snapshots. The following rules here formalize this and are similar to the append-only proof that we have used in CT with the limitation to just these two snapshots and not restricting anymore that the older snapshot has been stored before. */
+
+rule monitorFindsAppendOnlyViolation_Gossiped [color= #501755]:
+    [ !LoggerDict($idM, $idL), !TLS_C_to_M($idC, $idM, $gos_snapshot, gossiped_sth, gossiped_session), !TLS_L_to_M($idL, $idM, $snapshot, sth, session) ]
+    --[
+        Gos_AppendOnlyViol($idM, $idL, sth, session, gossiped_sth, gossiped_session), /* see restriction */
+        Gos_AppendOnlyCheck($idM, $idL, sth, session, gossiped_sth, gossiped_session),
+        Time($now)
+    ]->
+    []
+
+/* The gossiped append only proofs assume that both proofs are fixed since we only want to formulate that between gossiped_view -> view there have been no rogue deletions */
+restriction appendOnlyFails_Gossiped:
+   "All idM IdL session sth gossiped_sth gossiped_session #t5. 
+    Gos_AppendOnlyViol(idM, IdL, sth, session, gossiped_sth, gossiped_session)@t5
+        ==> 
+            (Ex id1 preC_fields chain time t time2 log_id log_id2 #t0 #t1 #t2 #t3 #t4.
+                LoggerComputesAddLog(IdL, log_id, preC_fields, chain, t)@t0
+                & EntryVisible(IdL, preC_fields, log_id, #t2, time) /* There is an entry that was visible... */
+                & FetchLogSnapshot(id1, IdL, gossiped_session)@t1
+                & LoggerPresentsView(IdL, id1, log_id, time, gossiped_sth, gossiped_session)@t2 /* ... for a given proof at #t2 */
+                & FetchLogSnapshot(idM, IdL, session)@t3
+                & LoggerPresentsView(IdL, idM, log_id2, time2, sth, session)@t4 /* second view is handed out to the monitor directly (only one of both views is gossiped as assumed) */
+                & EntryMissing(IdL, preC_fields, log_id2, #t4, time2)
+                /* one entry that was visible in the gossiped view is now not visible anymore -> clearly a violation */
+                & #t0 < #t1 & #t1 < #t2 & #t2 < #t3 & #t3 < #t4 & #t4 < #t5
+            )
+    "
+
+rule monitorVerifiesAppendOnly_Gossiped [color= #501755]:
+    [ !LoggerDict($idM, $idL), !TLS_C_to_M($idC, $idM, $gos_snapshot, gossiped_sth, gossiped_session), !TLS_L_to_M($idL, $idM, $snapshot, sth, session) ]
+    --[
+        AppendOnlyVerified_Gossiped($idM, $idL, sth, session, gossiped_sth, gossiped_session), /* see restriction */
+        Monitor_AppendOnlyVerified_Gossiped($idM, $idL, sth, session, gossiped_sth, gossiped_session),
+        Gos_AppendOnlyCheck($idM, $idL, sth, session, gossiped_sth, gossiped_session),
+        Time($now)
+    ]->
+    []
+
+restriction appendOnlyWorks_Gossiped:
+       "(All id1 IdM IdL sth session time1 t log_id log_id2 preC_fields chain gossiped_sth gossiped_session time2 #t0 #t1 #t4 #t5.
+        AppendOnlyVerified_Gossiped(IdM, IdL, sth, session, gossiped_sth, gossiped_session)@t5 
+        /* If an append-only proof is verified, we know that ... */
+        & LoggerComputesAddLog(IdL, log_id, preC_fields, chain, t)@t0
+        & EntryVisible(IdL, preC_fields, log_id, #t1, time1)
+        /* all entries that have been visible at some point */
+        & LoggerPresentsView(IdL, id1, log_id, time1, gossiped_sth, gossiped_session)@t1
+        & LoggerPresentsView(IdL, IdM, log_id2, time2, sth, session)@t4 
+        /* and every view handed out after these */
+        & #t0 < #t1 & #t1 < #t4 & #t4 < #t5
+            ==> EntryVisible(IdL, preC_fields, log_id2, #t4, time2) 
+            /* then this entry is also visible in the newest handout */
+    )
+    &
+    (All IdM IdL sth session gossiped_sth gossiped_session #t5.
+        AppendOnlyVerified_Gossiped(IdM, IdL, sth, session, gossiped_sth, gossiped_session)@t5
+        /* An append-only proof is only valid if all these pre-conditions are satisfied. By this we ensure that the check is done properly (i.e. premise is fulfilled completely) while still keeping the formula guarded. */
+            ==> 
+                (Ex id1 time1 log_id log_id2 preC_fields chain time2 t #t0  #t1 #t4. 
+                    LoggerComputesAddLog(IdL, log_id, preC_fields, chain, t)@t0
+                    & EntryVisible(IdL, preC_fields, log_id, #t1, time1)
+                    & LoggerPresentsView(IdL, id1, log_id, time1, gossiped_sth, gossiped_session)@t1
+                    & LoggerPresentsView(IdL, IdM, log_id2, time2, sth, session)@t4
+                    & #t1 < #t4 & #t4 < #t5
+                )
+    )"
+
+/* ------- Root CA Documentation Checks (modelled externally, but every participant has access to the DB that contains them -> everyone can run these)
+------- */
+
+rule ConsultDocumentation_Success:
+    let
+        ca_fields = <$rootCA, $idCA, pkCA, 'pubKey-CA', sn, $i, $j>
+    in
+    [ In(ca_fields), In(ca_sig), !Root_CA($rootCA, pkRCA), !CA_Documentation($rootCA, $idCA, ca_fields, ca_sig) /* proof of legitimacy (valid documentation) emitted out earlier when using the honest issuing process */ ]
+    --[
+        DocumentedIntermediateCA($rootCA, ca_fields, $idCA),
+        Eq(verify(ca_sig, ca_fields, pkRCA), true()), // signed by root CA
+        MonitorChecksCCADB($rootCA, ca_fields),
+        Time($now)
+    ]->
+    [ ]
+
+rule ConsultDocumentation_Fails:
+    let
+        ca_fields = <$rootCA, $idCA, pkCA, 'pubKey-CA', sn, $i, $j>
+    in
+    [ In(ca_fields), In(ca_sig), !Root_CA($rootCA, pkRCA) ]
+    --[
+        UndocumentedIntermediateCA($rootCA, $idCA, ca_fields), // see restriction externalCA_no_proof below
+        Eq(verify(ca_sig, ca_fields, pkRCA), true()), // signed by root CA
+        MonitorChecksCCADB($rootCA, ca_fields),
+        Time($now)
+    ]->
+    [ ]
+
+/* Responsible root CA is not able to present an identity proof of the intermediate CA (-> it is forged).
+We obviously rely on the soundness of this documentation check. It is an interesting bit to consider how real-world documentations look like, feel free to consult the CCADB yourself for this. TLDR: they are legal documents with auditor firms involved. We do not go beyond this and consider everything around forging such documents out of scope of this work.*/
+restriction externalCA_no_proof:
+    "All rootCA idCA ca_fields #t1.
+        UndocumentedIntermediateCA(rootCA, idCA, ca_fields)@t1
+            ==> not (Ex #t0. DocumentedCA(rootCA, idCA, ca_fields)@t0 & #t0 < #t1)"
+
+/* ------ External Validator (PKI) */
+
+rule external_check_true:
+    let
+        stmt = <$idCA, $id, pkID, sn>
+        pub_fields = <$idCA, $id, pkID, 'pubKey', sn, $i, $j, sct1, sct2>
+        ca_fields = <$rootCA, $idCA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
+    in
+    [ In(pub_fields), In(pub_sig), In(ca_fields), In(ca_sig),
+      !Root_CA($rootCA, pkRootCA) ] 
+    --[
+        StatementCheckedExternally(ca_fields, stmt),
+        BenignCert($idCA, stmt),
+        Asserts_PKI($idCA, stmt),
+        Eq(verify(pub_sig, pub_fields, pkCA), true()),
+        Eq(verify(ca_sig, ca_fields, pkRootCA), true()),
+        Time($now)
+    ]->
+    [ ] 
+
+rule external_check_false:
+    let
+        stmt = <$idCA, $id, pkID, sn>
+        pub_fields = <$idCA, $id, pkID, 'pubKey', sn, $i, $j, sct1, sct2>
+        ca_fields = <$rootCA, $idCA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
+    in
+    [ In(pub_fields), In(pub_sig), In(ca_fields), In(ca_sig),
+      !Root_CA($rootCA, pkRootCA) ] 
+    --[ 
+        AssertsNot($idCA, stmt, ca_fields),
+        RogueCert($idCA, stmt),
+        StatementCheckedExternally(ca_fields, stmt),
+        Eq(verify(pub_sig, pub_fields, pkCA), true()),
+        Eq(verify(ca_sig, ca_fields, pkRootCA), true()),
+        Time($now)
+    ]->
+    []
+
+/* ----- General Restrictions ----- */
+
+/* We require that the main roles in our model are conducted by pairwise distinct entities. This is in accordance with the CT standard as CAs should not act as loggers. Everyone can become a monitor in general, but in order to get meaningful results there actual supervision between these roles happens, we require them to be distinct. */
+
+restriction rootCA_CA_distinct:
+    "All rootCA idCA #t1 #t2. Root_CA_Init(rootCA)@t1 & NonRoot_CA_Init(idCA)@t2 
+    ==> not (rootCA = idCA)"
+
+restriction rootCA_Logger_distinct:
+    "All rootCA idL #t1 #t2. Root_CA_Init(rootCA)@t1 & Logger_Registered(idL)@t2 
+    ==> not (rootCA = idL)"
+
+restriction RootCA_Monitor_distinct:
+    "All rootCA idM #t1 #t2. Root_CA_Init(rootCA)@t1 & Monitor_Registered(idM)@t2 
+    ==> not (rootCA = idM)"
+
+restriction CA_Logger_distinct:
+    "All idCA idL #t1 #t2. NonRoot_CA_Init(idCA)@t1 & Logger_Registered(idL)@t2 
+    ==> not (idCA = idL)"
+
+restriction CA_Monitor_distinct:
+    "All idCA idM #t1 #t2. NonRoot_CA_Init(idCA)@t1 & Monitor_Registered(idM)@t2 
+    ==> not (idCA = idM)"
+
+restriction Logger_Monitor_distinct:
+    "All idL idM #t1 #t2. Logger_Registered(idL)@t1 & Monitor_Registered(idM)@t2 
+    ==> not (idL = idM)"
+
+/* identity of loggers is unique and they only have one key pair */
+restriction LoggersUnique:
+    "All idL #t1 #t2. Logger_Registered(idL)@t1 & Logger_Registered(idL)@t2 ==> #t1 = #t2"
+
+/* identity of CAs is unique, they only have one key pair. Note that this property can be violated by a malicious root CA. */
+restriction CAsUnique:
+    "All IdCA pk1 sk1 pk2 sk2 #t1 #t2. CA_Registered(IdCA, sk1, pk1)@t1 & CA_Registered(IdCA, sk2, pk2)@t2 ==> #t1 = #t2"
+
+restriction eq:
+    " All e1 e2 #t. Eq(e1, e2)@t ==> e1 = e2"
+
+restriction time_monotonicity:
+"All t #t1 #t3. Time(t)@t1
+                & Time(t)@t3
+                & #t1 < #t3
+                ==> ( All tp #t2. Time(tp)@t2
+                                & #t1 < #t2
+                                & #t2 < #t3 ==> tp = t )"
+
+
+/* whenever a party checks the validity period of a certificate, that time must not happened before the check, i.e. the time did not pass yet */
+restriction certStillValid:
+    "All currTime valid_till #t1.
+        Time(currTime)@t1 & CheckValidUntil(currTime, valid_till)@t1
+         ==> not (Ex #t2. #t2 < #t1 & Time(valid_till)@t2)"
+
+/* ----------- Compromise Rules ----------- */
+
+/* CA key leakage */
+rule compromiseCA [color= #d40808 ]:
+    [!CA_s0($idCA, ~skCA, pk(~skCA), ca_fields, CA_sig)] 
+    --[ 
+        CompromiseCA($idCA), 
+        Compromise(),
+        Corrupted($idCA),
+        Time($now)
+    ]-> 
+    [ Out(~skCA) ] 
+
+/* Root CA key leakage */
+rule compromiseRootCA [color= #d40808 ]:
+    [ !Root_CA_s0($idCA, skCA, pkCA) ] 
+    --[ 
+        CompromiseRootCA($idCA), 
+        Compromise(),
+        Corrupted($idCA),
+        Time($now)
+    ]-> 
+    [ Out(skCA) ]
+
+/* Logger key leakage. !Corrupted_Logger is later additionally used to perform rogue log modifications. */
+rule compromiseLogger [color= #d40808 ]:
+    [ !Logger_s($idL, ~skL, pk(~skL)) ] 
+    --[ 
+        CompromiseLogger($idL), 
+        CompromiseLoggerUniq(<$idL, ~skL, pk(~skL)>),
+        Compromise(),
+        Corrupted($idL),
+        Time($now)
+    ]-> 
+    [ Out(~skL), !Corrupted_Logger($idL, ~skL, pk(~skL)) ] 
+
+/* !St_bad_Monitors can sleep when performing checks */
+rule compromiseMonitor [color= #d40808 ]:
+    [ !Monitor($idM) ] 
+    --[ 
+        Compromise(),
+        Corrupted($idM),
+        Time($now)
+    ]-> 
+    [ !St_bad_Monitor($idM) ] 
+
+/* Lemmas */
+
+/* Predicates */
+
+predicate: ProofRunsAfterMMD(IdL, sth, session) <=> 
+    (All IdFetcher log_id time #t1.
+        LoggerPresentsView(IdL, IdFetcher, log_id, time, sth, session)@t1 
+        ==> 
+        not (Ex #t0. Time(time)@t0 & #t0 < #t1) /* the time of the view of the log has not existed before ==> potential delays due to MMD are excluded */
+    )
+
+/* liveness predicates are used in the acc lemmas with naive certificate revocation. We assume there that the monitor becomes live as soon as there is something interesting on the log (i.e. the certificate with statement has been added). This is of course a simplification, but note that this does not guarantee the monitor to then find that certificate. We do not rule out misbehavior here. */
+predicate: MonitorLiveness(stmt, #validation_time) <=> 
+                (Ex IdL IdM time0 time1 sth session log_id1 log_id2 #j #k #l. 
+                    LoggerComputesAddLogStmt(IdL, log_id1, stmt, time0)@j 
+                        /* SCT exists already */
+                    & LoggerPresentsView(IdL, IdM, log_id2, time1, sth, session)@k 
+                        /* Monitor receives a view from the log after it has been added. Here the logger may be dishonest and is able to use a different view */
+                    & not (time0 = time1)
+                        /* only considered after MMD */
+                    & MonitorInspectsLog_noTrust(IdL, stmt, sth, session)@l
+                    & #j < #k 
+                    & #k < #l 
+                    & #l < #validation_time
+                )
+
+predicate: MonitorLivenessWithHonestLogger(IdL1, IdL2, stmt, #validation_time) <=> 
+                (Ex IdL IdM time0 time1 sth session log_id #j #k #l. 
+                    LoggerComputesAddLogStmt(IdL, log_id, stmt, time0)@j  
+                        /* SCT exists already */
+                    & ((IdL = IdL1) | (IdL = IdL2))
+                    & LoggerPresentsView(IdL, IdM, log_id, time1, sth, session)@k // honest view is shared (same log_id)
+                        /* Monitor receives a view that covers the SCT */
+                    & not (time0 = time1) 
+                        /* only considered after MMD */
+                    & MonitorInspectsLog_noTrust(IdL, stmt, sth, session)@l
+                    & #j < #k 
+                    & #k < #l 
+                    & #l < #validation_time
+                )
+
+/* Receipt model: */
+
+/* Additional proposal: Monitor blaming, with external auth check */
+
+/* 
+CT does not allow to realistically hold monitors accountable for not raising an alarm when they see a rogue certificate for one major reason: Other parties cannot prove that the monitor has seen the rogue certificate. For instance, a logger can be malicious too and hide the rogue certificate from the monitor. Thinking beyond CT and its extensions, we show that this can be solved by requiring monitors to issue receipts for the snapshots they receive.
+
+In this section we will assume that the domain owner and logger work together to provide this evidence. The loggers task will be to forward the receipt as a malicious monitor could choose to not create evidence of misbehavior. Additionally to check a receipt, the logger needs to provide the domain owner with a matching snapshot such that the domain owner can double check whether the monitor should have reacted to the rogue cert or not. A misbehaving logger could refuse to provide this snapshot list, as seen in gossiping.
+
+We reuse the inclusion proof axioms to state whether an entry is included in the given snapshot or not.
+
+*/
+
+rule DomainOwnerContract [color= #fac800]:
+    [ !TrackSubject($idM, su), Fr(~skM) ]
+    --[ Time($now) ]->
+    [ !TrackSubject_Contract($idM, su), !MonitorKey_s($idM, pk(~skM), ~skM), !MonitorKey($idM, pk(~skM)) ]
+
+rule signReceipt:
+    let
+        receipt = sign(<$idM, chain>, skM)
+    in
+    [ CraftReceipt($idM, chain) , !MonitorKey_s($idM, pkSKM, skM) ]
+    --[  ]->
+    [ !TLS_M_to_C(receipt) /* We already assumed a TLS connection between client and monitor before */ ]
+
+rule clientReceivesReceipt:
+    [ !TLS_M_to_C(receipt), Client_Receipt_Val($idM, chain) ]
+    --[
+        ClientHoldsReceipt($idM, receipt), 
+        Time($now)
+    ]->
+    [ Out(<$idM, receipt, chain>) /* will be used to share with domain owner, logger adds the underlying entries behind the receipt that can be used by the domain owner to (1) verify the receipt and (2) decide whether the monitor acted correctly */ ]
+
+/*
+All variants assume the ground truth to be availabble, which is fine as these tests are performed by the domain owner (DO) themselves.
+
+Variant 1: The audited certificate is rogue but the monitor did not react. In this case the domain owner blames the monitor.
+
+Variant 2: The audited certificate is benign. In this case the monitor did not need to react.
+*/
+rule domainOwnerBlamesMonitor:
+    let
+        ca_fields = <$rootCA, $idCA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
+        pub_fields = <$idCA, $id, pkID, 'pubKey', sn, $i, $j, sct1, sct2>
+        stmt = <$idCA, $id, pkID, sn>
+        chain = <<pub_fields, pub_sig>, <ca_fields, ca_sig>>
+    in
+    [ In(<$idM, receipt, chain>), !MonitorKey($idM, pkSKM), !TrackSubject_Contract($idM, $idServer), !Root_CA($rootCA, pkRootCA) ]
+    --[
+        Eq(verify(receipt, <$idM, chain>, pkSKM), true()), 
+        Eq(verify(pub_sig, pub_fields, pkCA), true()),
+        Eq(verify(ca_sig, ca_fields, pkRootCA), true()), 
+        Time($now),
+        DO_MonitorBlame($idM, $idCA, ca_fields, stmt),
+        DomainOwnerChecksReceipt($idM, ca_fields, stmt),
+        RogueCert($idCA, stmt)
+    ]->
+    [ ]
+
+
+rule domainOwnerVerifiesReceipt_1:
+    let
+        ca_fields = <$rootCA, $idCA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
+        pub_fields = <$idCA, $id, pkID, 'pubKey', sn, $i, $j, sct1, sct2>
+        stmt = <$idCA, $id, pkID, sn>
+        chain = <<pub_fields, pub_sig>, <ca_fields, ca_sig>>
+    in
+    [ In(<$idM, receipt, chain>), !MonitorKey($idM, pkSKM), !TrackSubject_Contract($idM, $idServer), !Root_CA($rootCA, pkRootCA) ]
+    --[
+        Eq(verify(receipt, <$idM, chain>, pkSKM), true()), 
+        Eq(verify(pub_sig, pub_fields, pkCA), true()),
+        Eq(verify(ca_sig, ca_fields, pkRootCA), true()),
+        Time($now),
+        DO_MonitorBenign($idM, ca_fields, stmt),
+        DomainOwnerChecksReceipt($idM, ca_fields, stmt),
+        Monitor_Reacted($idM, stmt),
+        RogueCert($idCA, stmt)
+    ]->
+    [ ]
+
+rule domainOwnerVerifiesReceipt_2:
+    let
+        ca_fields = <$rootCA, $idCA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
+        pub_fields = <$idCA, $id, pkID, 'pubKey', sn, $i, $j, sct1, sct2>
+        stmt = <$idCA, $id, pkID, sn>
+        chain = <<pub_fields, pub_sig>, <ca_fields, ca_sig>>
+    in
+    [ In(<$idM, receipt, chain>), !MonitorKey($idM, pkSKM), !TrackSubject_Contract($idM, $idServer), !Root_CA($rootCA, pkRootCA) ]
+    --[
+        Eq(verify(receipt, <$idM, chain>, pkSKM), true()), 
+        Eq(verify(pub_sig, pub_fields, pkCA), true()),
+        Eq(verify(ca_sig, ca_fields, pkRootCA), true()),
+        Time($now),
+        DO_MonitorBenign($idM, ca_fields, stmt),
+        DomainOwnerChecksReceipt($idM, ca_fields, stmt),
+        BenignCert($idCA, stmt)
+    ]->
+    [ ]
+
+restriction monitor_blame:
+    "All idM idCA ca_fields stmt #t. DO_MonitorBlame(idM, idCA, ca_fields, stmt)@t ==> (Ex #t0. MonitorAuditSleeps(idCA, idM, stmt)@t0 & #t0 < #t)" /* Monitor should have reacted: Domain Owner did not know of the violating cert prior (monitor failed to inform the server and the server also did not issue the cert themselves as implicitly encoded in MonitorSleeps(.)) */
+
+restriction monitor_reacted:
+    "All idM stmt #t. Monitor_Reacted(idM, stmt)@t ==> (Ex #t0. MonitorInformsServer(idM, stmt)@t0 & #t0 < #t)"
+
+/* Receipt lemmas */
+
+lemma A_Receipt_1_root_ca_rogue_suff:
+  exists-trace
+  "∃ rootCA idM stmt idCA ca_fields #t0 #t1 #t2.
+         ((((AssertsNot( idCA, stmt, ca_fields ) @ #t0) ∧
+            (UndocumentedIntermediateCA( rootCA, idCA, ca_fields ) @ #t1)) ∧
+           (DO_MonitorBenign( idM, ca_fields, stmt ) @ #t2)) ∧
+          (∀ rootCA.1 idM.1 stmt.1 idCA.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+            (((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+              (UndocumentedIntermediateCA( rootCA.1, idCA.1, ca_fields.1
+               ) @ #t1.1)) ∧
+             (DO_MonitorBenign( idM.1, ca_fields.1, stmt.1 ) @ #t2.1)) ⇒
+            (rootCA.1 = rootCA))) ∧
+         ((∀ a #i. (Corrupted( a ) @ #i) ⇒ (a = rootCA)) ∧
+          ((¬(∃ idM.1 rootCA.1 stmt.1 idCA.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+               (((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+                 (UndocumentedIntermediateCA( rootCA.1, idCA.1, ca_fields.1
+                  ) @ #t1.1)) ∧
+                (DO_MonitorBlame( idM.1, idCA.1, ca_fields.1, stmt.1 ) @ #t2.1)) ∧
+               (¬(∃ idM.2 stmt.2 rootCA.2 idCA.2 ca_fields.2 #t0.2 #t1.2 #t2.2.
+                   ((AssertsNot( idCA.2, stmt.2, ca_fields.2 ) @ #t0.2) ∧
+                    (UndocumentedIntermediateCA( rootCA.2, idCA.2, ca_fields.2
+                     ) @ #t1.2)) ∧
+                   (DO_MonitorBenign( idM.2, ca_fields.2, stmt.2 ) @ #t2.2))))) ∧
+           ((¬(∃ idCA.1 idM.1 rootCA.1 stmt.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+                ((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+                 (DocumentedIntermediateCA( rootCA.1, ca_fields.1, idCA.1
+                  ) @ #t1.1)) ∧
+                (DO_MonitorBenign( idM.1, ca_fields.1, stmt.1 ) @ #t2.1))) ∧
+            (¬(∃ idCA.1 idM.1 rootCA.1 stmt.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+                (((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+                  (DocumentedIntermediateCA( rootCA.1, ca_fields.1, idCA.1
+                   ) @ #t1.1)) ∧
+                 (DO_MonitorBlame( idM.1, idCA.1, ca_fields.1, stmt.1 ) @ #t2.1)) ∧
+                (¬(∃ idM.2 rootCA.2 idCA.2 stmt.2 ca_fields.2 #t0.2 #t1.2 #t2.2.
+                    ((AssertsNot( idCA.2, stmt.2, ca_fields.2 ) @ #t0.2) ∧
+                     (DocumentedIntermediateCA( rootCA.2, ca_fields.2, idCA.2
+                      ) @ #t1.2)) ∧
+                    (DO_MonitorBenign( idM.2, ca_fields.2, stmt.2
+                     ) @ #t2.2))))))))"
+
+
+lemma A_Receipt_1_root_ca_rogue_monitor_rogue_suff:
+  exists-trace
+  "∃ idM rootCA stmt idCA ca_fields #t0 #t1 #t2.
+         (((((AssertsNot( idCA, stmt, ca_fields ) @ #t0) ∧
+             (UndocumentedIntermediateCA( rootCA, idCA, ca_fields ) @ #t1)) ∧
+            (DO_MonitorBlame( idM, idCA, ca_fields, stmt ) @ #t2)) ∧
+           (¬(∃ idM.1 stmt.1 rootCA.1 idCA.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+               ((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+                (UndocumentedIntermediateCA( rootCA.1, idCA.1, ca_fields.1
+                 ) @ #t1.1)) ∧
+               (DO_MonitorBenign( idM.1, ca_fields.1, stmt.1 ) @ #t2.1)))) ∧
+          (∀ idM.1 rootCA.1 stmt.1 idCA.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+            ((((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+               (UndocumentedIntermediateCA( rootCA.1, idCA.1, ca_fields.1
+                ) @ #t1.1)) ∧
+              (DO_MonitorBlame( idM.1, idCA.1, ca_fields.1, stmt.1 ) @ #t2.1)) ∧
+             (¬(∃ idM.2 stmt.2 rootCA.2 idCA.2 ca_fields.2 #t0.2 #t1.2 #t2.2.
+                 ((AssertsNot( idCA.2, stmt.2, ca_fields.2 ) @ #t0.2) ∧
+                  (UndocumentedIntermediateCA( rootCA.2, idCA.2, ca_fields.2
+                   ) @ #t1.2)) ∧
+                 (DO_MonitorBenign( idM.2, ca_fields.2, stmt.2 ) @ #t2.2)))) ⇒
+            (<idM.1, rootCA.1> = <idM, rootCA>))) ∧
+         ((∀ a #i. (Corrupted( a ) @ #i) ⇒ ((a = idM) ∨ (a = rootCA))) ∧
+          ((¬(∃ rootCA.1 idM.1 stmt.1 idCA.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+               ((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+                (UndocumentedIntermediateCA( rootCA.1, idCA.1, ca_fields.1
+                 ) @ #t1.1)) ∧
+               (DO_MonitorBenign( idM.1, ca_fields.1, stmt.1 ) @ #t2.1))) ∧
+           ((¬(∃ idCA.1 idM.1 rootCA.1 stmt.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+                ((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+                 (DocumentedIntermediateCA( rootCA.1, ca_fields.1, idCA.1
+                  ) @ #t1.1)) ∧
+                (DO_MonitorBenign( idM.1, ca_fields.1, stmt.1 ) @ #t2.1))) ∧
+            (¬(∃ idCA.1 idM.1 rootCA.1 stmt.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+                (((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+                  (DocumentedIntermediateCA( rootCA.1, ca_fields.1, idCA.1
+                   ) @ #t1.1)) ∧
+                 (DO_MonitorBlame( idM.1, idCA.1, ca_fields.1, stmt.1 ) @ #t2.1)) ∧
+                (¬(∃ idM.2 rootCA.2 idCA.2 stmt.2 ca_fields.2 #t0.2 #t1.2 #t2.2.
+                    ((AssertsNot( idCA.2, stmt.2, ca_fields.2 ) @ #t0.2) ∧
+                     (DocumentedIntermediateCA( rootCA.2, ca_fields.2, idCA.2
+                      ) @ #t1.2)) ∧
+                    (DO_MonitorBenign( idM.2, ca_fields.2, stmt.2
+                     ) @ #t2.2))))))))"
+
+
+lemma A_Receipt_1_ca_rogue_receipt_suff:
+  exists-trace
+  "∃ idCA idM rootCA stmt ca_fields #t0 #t1 #t2.
+         ((((AssertsNot( idCA, stmt, ca_fields ) @ #t0) ∧
+            (DocumentedIntermediateCA( rootCA, ca_fields, idCA ) @ #t1)) ∧
+           (DO_MonitorBenign( idM, ca_fields, stmt ) @ #t2)) ∧
+          (∀ idCA.1 idM.1 rootCA.1 stmt.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+            (((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+              (DocumentedIntermediateCA( rootCA.1, ca_fields.1, idCA.1
+               ) @ #t1.1)) ∧
+             (DO_MonitorBenign( idM.1, ca_fields.1, stmt.1 ) @ #t2.1)) ⇒
+            (idCA.1 = idCA))) ∧
+         ((∀ a #i. (Corrupted( a ) @ #i) ⇒ (a = idCA)) ∧
+          ((¬(∃ rootCA.1 idM.1 stmt.1 idCA.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+               ((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+                (UndocumentedIntermediateCA( rootCA.1, idCA.1, ca_fields.1
+                 ) @ #t1.1)) ∧
+               (DO_MonitorBenign( idM.1, ca_fields.1, stmt.1 ) @ #t2.1))) ∧
+           ((¬(∃ idM.1 rootCA.1 stmt.1 idCA.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+                (((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+                  (UndocumentedIntermediateCA( rootCA.1, idCA.1, ca_fields.1
+                   ) @ #t1.1)) ∧
+                 (DO_MonitorBlame( idM.1, idCA.1, ca_fields.1, stmt.1 ) @ #t2.1)) ∧
+                (¬(∃ idM.2 stmt.2 rootCA.2 idCA.2 ca_fields.2 #t0.2 #t1.2 #t2.2.
+                    ((AssertsNot( idCA.2, stmt.2, ca_fields.2 ) @ #t0.2) ∧
+                     (UndocumentedIntermediateCA( rootCA.2, idCA.2, ca_fields.2
+                      ) @ #t1.2)) ∧
+                    (DO_MonitorBenign( idM.2, ca_fields.2, stmt.2 ) @ #t2.2))))) ∧
+            (¬(∃ idCA.1 idM.1 rootCA.1 stmt.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+                (((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+                  (DocumentedIntermediateCA( rootCA.1, ca_fields.1, idCA.1
+                   ) @ #t1.1)) ∧
+                 (DO_MonitorBlame( idM.1, idCA.1, ca_fields.1, stmt.1 ) @ #t2.1)) ∧
+                (¬(∃ idM.2 rootCA.2 idCA.2 stmt.2 ca_fields.2 #t0.2 #t1.2 #t2.2.
+                    ((AssertsNot( idCA.2, stmt.2, ca_fields.2 ) @ #t0.2) ∧
+                     (DocumentedIntermediateCA( rootCA.2, ca_fields.2, idCA.2
+                      ) @ #t1.2)) ∧
+                    (DO_MonitorBenign( idM.2, ca_fields.2, stmt.2
+                     ) @ #t2.2))))))))"
+
+
+lemma A_Receipt_1_ca_rogue_receipt_monitor_rogue_suff:
+  exists-trace
+  "∃ idCA idM rootCA stmt ca_fields #t0 #t1 #t2.
+         (((((AssertsNot( idCA, stmt, ca_fields ) @ #t0) ∧
+             (DocumentedIntermediateCA( rootCA, ca_fields, idCA ) @ #t1)) ∧
+            (DO_MonitorBlame( idM, idCA, ca_fields, stmt ) @ #t2)) ∧
+           (¬(∃ idM.1 rootCA.1 idCA.1 stmt.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+               ((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+                (DocumentedIntermediateCA( rootCA.1, ca_fields.1, idCA.1
+                 ) @ #t1.1)) ∧
+               (DO_MonitorBenign( idM.1, ca_fields.1, stmt.1 ) @ #t2.1)))) ∧
+          (∀ idCA.1 idM.1 rootCA.1 stmt.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+            ((((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+               (DocumentedIntermediateCA( rootCA.1, ca_fields.1, idCA.1
+                ) @ #t1.1)) ∧
+              (DO_MonitorBlame( idM.1, idCA.1, ca_fields.1, stmt.1 ) @ #t2.1)) ∧
+             (¬(∃ idM.2 rootCA.2 idCA.2 stmt.2 ca_fields.2 #t0.2 #t1.2 #t2.2.
+                 ((AssertsNot( idCA.2, stmt.2, ca_fields.2 ) @ #t0.2) ∧
+                  (DocumentedIntermediateCA( rootCA.2, ca_fields.2, idCA.2
+                   ) @ #t1.2)) ∧
+                 (DO_MonitorBenign( idM.2, ca_fields.2, stmt.2 ) @ #t2.2)))) ⇒
+            (<idCA.1, idM.1> = <idCA, idM>))) ∧
+         ((∀ a #i. (Corrupted( a ) @ #i) ⇒ ((a = idCA) ∨ (a = idM))) ∧
+          ((¬(∃ rootCA.1 idM.1 stmt.1 idCA.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+               ((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+                (UndocumentedIntermediateCA( rootCA.1, idCA.1, ca_fields.1
+                 ) @ #t1.1)) ∧
+               (DO_MonitorBenign( idM.1, ca_fields.1, stmt.1 ) @ #t2.1))) ∧
+           ((¬(∃ idM.1 rootCA.1 stmt.1 idCA.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+                (((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+                  (UndocumentedIntermediateCA( rootCA.1, idCA.1, ca_fields.1
+                   ) @ #t1.1)) ∧
+                 (DO_MonitorBlame( idM.1, idCA.1, ca_fields.1, stmt.1 ) @ #t2.1)) ∧
+                (¬(∃ idM.2 stmt.2 rootCA.2 idCA.2 ca_fields.2 #t0.2 #t1.2 #t2.2.
+                    ((AssertsNot( idCA.2, stmt.2, ca_fields.2 ) @ #t0.2) ∧
+                     (UndocumentedIntermediateCA( rootCA.2, idCA.2, ca_fields.2
+                      ) @ #t1.2)) ∧
+                    (DO_MonitorBenign( idM.2, ca_fields.2, stmt.2 ) @ #t2.2))))) ∧
+            (¬(∃ idCA.1 idM.1 rootCA.1 stmt.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+                ((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+                 (DocumentedIntermediateCA( rootCA.1, ca_fields.1, idCA.1
+                  ) @ #t1.1)) ∧
+                (DO_MonitorBenign( idM.1, ca_fields.1, stmt.1 ) @ #t2.1))))))"
+
+
+lemma A_Receipt_1_verif_empty:
+  all-traces
+  "(¬((((∃ rootCA idM stmt idCA ca_fields #t0 #t1 #t2.
+               ((AssertsNot( idCA, stmt, ca_fields ) @ #t0) ∧
+                (UndocumentedIntermediateCA( rootCA, idCA, ca_fields ) @ #t1)) ∧
+               (DO_MonitorBenign( idM, ca_fields, stmt ) @ #t2)) ∨
+             (∃ idM rootCA stmt idCA ca_fields #t0 #t1 #t2.
+               (((AssertsNot( idCA, stmt, ca_fields ) @ #t0) ∧
+                 (UndocumentedIntermediateCA( rootCA, idCA, ca_fields ) @ #t1)) ∧
+                (DO_MonitorBlame( idM, idCA, ca_fields, stmt ) @ #t2)) ∧
+               (¬(∃ idM.1 stmt.1 rootCA.1 idCA.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+                   ((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+                    (UndocumentedIntermediateCA( rootCA.1, idCA.1, ca_fields.1
+                     ) @ #t1.1)) ∧
+                   (DO_MonitorBenign( idM.1, ca_fields.1, stmt.1 ) @ #t2.1))))) ∨
+            (∃ idCA idM rootCA stmt ca_fields #t0 #t1 #t2.
+              ((AssertsNot( idCA, stmt, ca_fields ) @ #t0) ∧
+               (DocumentedIntermediateCA( rootCA, ca_fields, idCA ) @ #t1)) ∧
+              (DO_MonitorBenign( idM, ca_fields, stmt ) @ #t2))) ∨
+           (∃ idCA idM rootCA stmt ca_fields #t0 #t1 #t2.
+             (((AssertsNot( idCA, stmt, ca_fields ) @ #t0) ∧
+               (DocumentedIntermediateCA( rootCA, ca_fields, idCA ) @ #t1)) ∧
+              (DO_MonitorBlame( idM, idCA, ca_fields, stmt ) @ #t2)) ∧
+             (¬(∃ idM.1 rootCA.1 idCA.1 stmt.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+                 ((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+                  (DocumentedIntermediateCA( rootCA.1, ca_fields.1, idCA.1
+                   ) @ #t1.1)) ∧
+                 (DO_MonitorBenign( idM.1, ca_fields.1, stmt.1 ) @ #t2.1)))))) ⇒
+        (∀ ca_fields stmt rootCA idL idM #t0 #t1 #t2 #t3.
+          ((((AuditAuthCheck_noTrust( idL, ca_fields, stmt ) @ #t0) ∧
+             (MonitorChecksCCADB( rootCA, ca_fields ) @ #t1)) ∧
+            (DomainOwnerChecksReceipt( idM, ca_fields, stmt ) @ #t2)) ∧
+           (StatementCheckedExternally( ca_fields, stmt ) @ #t3)) ⇒
+          (∃ idCA #t. GroundTruth( idCA, stmt ) @ #t))"
+
+
+lemma A_Receipt_1_root_ca_rogue_verif_nonempty:
+  all-traces
+  "∀ rootCA idM stmt idCA ca_fields #t0 #t1 #t2.
+         (((AssertsNot( idCA, stmt, ca_fields ) @ #t0) ∧
+           (UndocumentedIntermediateCA( rootCA, idCA, ca_fields ) @ #t1)) ∧
+          (DO_MonitorBenign( idM, ca_fields, stmt ) @ #t2)) ⇒
+         (¬(∀ ca_fields.1 stmt.1 rootCA.1 idL idM.1 #t0.1 #t1.1 #t2.1 #t3.
+             ((((AuditAuthCheck_noTrust( idL, ca_fields.1, stmt.1 ) @ #t0.1) ∧
+                (MonitorChecksCCADB( rootCA.1, ca_fields.1 ) @ #t1.1)) ∧
+               (DomainOwnerChecksReceipt( idM.1, ca_fields.1, stmt.1 ) @ #t2.1)) ∧
+              (StatementCheckedExternally( ca_fields.1, stmt.1 ) @ #t3)) ⇒
+             (∃ idCA.1 #t. GroundTruth( idCA.1, stmt.1 ) @ #t)))"
+
+
+lemma A_Receipt_1_root_ca_rogue_monitor_rogue_verif_nonempty:
+  all-traces
+  "∀ idM rootCA stmt idCA ca_fields #t0 #t1 #t2.
+         ((((AssertsNot( idCA, stmt, ca_fields ) @ #t0) ∧
+            (UndocumentedIntermediateCA( rootCA, idCA, ca_fields ) @ #t1)) ∧
+           (DO_MonitorBlame( idM, idCA, ca_fields, stmt ) @ #t2)) ∧
+          (¬(∃ idM.1 stmt.1 rootCA.1 idCA.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+              ((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+               (UndocumentedIntermediateCA( rootCA.1, idCA.1, ca_fields.1
+                ) @ #t1.1)) ∧
+              (DO_MonitorBenign( idM.1, ca_fields.1, stmt.1 ) @ #t2.1)))) ⇒
+         (¬(∀ ca_fields.1 stmt.1 rootCA.1 idL idM.1 #t0.1 #t1.1 #t2.1 #t3.
+             ((((AuditAuthCheck_noTrust( idL, ca_fields.1, stmt.1 ) @ #t0.1) ∧
+                (MonitorChecksCCADB( rootCA.1, ca_fields.1 ) @ #t1.1)) ∧
+               (DomainOwnerChecksReceipt( idM.1, ca_fields.1, stmt.1 ) @ #t2.1)) ∧
+              (StatementCheckedExternally( ca_fields.1, stmt.1 ) @ #t3)) ⇒
+             (∃ idCA.1 #t. GroundTruth( idCA.1, stmt.1 ) @ #t)))"
+
+
+lemma A_Receipt_1_ca_rogue_receipt_verif_nonempty:
+  all-traces
+  "∀ idCA idM rootCA stmt ca_fields #t0 #t1 #t2.
+         (((AssertsNot( idCA, stmt, ca_fields ) @ #t0) ∧
+           (DocumentedIntermediateCA( rootCA, ca_fields, idCA ) @ #t1)) ∧
+          (DO_MonitorBenign( idM, ca_fields, stmt ) @ #t2)) ⇒
+         (¬(∀ ca_fields.1 stmt.1 rootCA.1 idL idM.1 #t0.1 #t1.1 #t2.1 #t3.
+             ((((AuditAuthCheck_noTrust( idL, ca_fields.1, stmt.1 ) @ #t0.1) ∧
+                (MonitorChecksCCADB( rootCA.1, ca_fields.1 ) @ #t1.1)) ∧
+               (DomainOwnerChecksReceipt( idM.1, ca_fields.1, stmt.1 ) @ #t2.1)) ∧
+              (StatementCheckedExternally( ca_fields.1, stmt.1 ) @ #t3)) ⇒
+             (∃ idCA.1 #t. GroundTruth( idCA.1, stmt.1 ) @ #t)))"
+
+
+lemma A_Receipt_1_ca_rogue_receipt_monitor_rogue_verif_nonempty:
+  all-traces
+  "∀ idCA idM rootCA stmt ca_fields #t0 #t1 #t2.
+         ((((AssertsNot( idCA, stmt, ca_fields ) @ #t0) ∧
+            (DocumentedIntermediateCA( rootCA, ca_fields, idCA ) @ #t1)) ∧
+           (DO_MonitorBlame( idM, idCA, ca_fields, stmt ) @ #t2)) ∧
+          (¬(∃ idM.1 rootCA.1 idCA.1 stmt.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+              ((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+               (DocumentedIntermediateCA( rootCA.1, ca_fields.1, idCA.1
+                ) @ #t1.1)) ∧
+              (DO_MonitorBenign( idM.1, ca_fields.1, stmt.1 ) @ #t2.1)))) ⇒
+         (¬(∀ ca_fields.1 stmt.1 rootCA.1 idL idM.1 #t0.1 #t1.1 #t2.1 #t3.
+             ((((AuditAuthCheck_noTrust( idL, ca_fields.1, stmt.1 ) @ #t0.1) ∧
+                (MonitorChecksCCADB( rootCA.1, ca_fields.1 ) @ #t1.1)) ∧
+               (DomainOwnerChecksReceipt( idM.1, ca_fields.1, stmt.1 ) @ #t2.1)) ∧
+              (StatementCheckedExternally( ca_fields.1, stmt.1 ) @ #t3)) ⇒
+             (∃ idCA.1 #t. GroundTruth( idCA.1, stmt.1 ) @ #t)))"
+
+
+lemma A_Receipt_1_root_ca_rogue_min:
+  all-traces
+  "∀ rootCA idM stmt idCA ca_fields #t0 #t1 #t2.
+         (((AssertsNot( idCA, stmt, ca_fields ) @ #t0) ∧
+           (UndocumentedIntermediateCA( rootCA, idCA, ca_fields ) @ #t1)) ∧
+          (DO_MonitorBenign( idM, ca_fields, stmt ) @ #t2)) ⇒
+         ((((¬(∃ rootCA.1 idM.1 stmt.1 idCA.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+                (((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+                  (UndocumentedIntermediateCA( rootCA.1, idCA.1, ca_fields.1
+                   ) @ #t1.1)) ∧
+                 (DO_MonitorBenign( idM.1, ca_fields.1, stmt.1 ) @ #t2.1)) ∧
+                ((rootCA.1 = rootCA) ∧ (¬(rootCA = rootCA.1))))) ∧
+            (¬(∃ idM.1 rootCA.1 stmt.1 idCA.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+                ((((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+                   (UndocumentedIntermediateCA( rootCA.1, idCA.1, ca_fields.1
+                    ) @ #t1.1)) ∧
+                  (DO_MonitorBlame( idM.1, idCA.1, ca_fields.1, stmt.1 ) @ #t2.1)) ∧
+                 (¬(∃ idM.2 stmt.2 rootCA.2 idCA.2 ca_fields.2 #t0.2 #t1.2 #t2.2.
+                     ((AssertsNot( idCA.2, stmt.2, ca_fields.2 ) @ #t0.2) ∧
+                      (UndocumentedIntermediateCA( rootCA.2, idCA.2, ca_fields.2
+                       ) @ #t1.2)) ∧
+                     (DO_MonitorBenign( idM.2, ca_fields.2, stmt.2 ) @ #t2.2)))) ∧
+                (((idM.1 = rootCA) ∧ (rootCA.1 = rootCA)) ∧
+                 ((¬(rootCA = idM.1)) ∧ (¬(rootCA = rootCA.1))))))) ∧
+           (¬(∃ idCA.1 idM.1 rootCA.1 stmt.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+               (((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+                 (DocumentedIntermediateCA( rootCA.1, ca_fields.1, idCA.1
+                  ) @ #t1.1)) ∧
+                (DO_MonitorBenign( idM.1, ca_fields.1, stmt.1 ) @ #t2.1)) ∧
+               ((idCA.1 = rootCA) ∧ (¬(rootCA = idCA.1)))))) ∧
+          (¬(∃ idCA.1 idM.1 rootCA.1 stmt.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+              ((((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+                 (DocumentedIntermediateCA( rootCA.1, ca_fields.1, idCA.1
+                  ) @ #t1.1)) ∧
+                (DO_MonitorBlame( idM.1, idCA.1, ca_fields.1, stmt.1 ) @ #t2.1)) ∧
+               (¬(∃ idM.2 rootCA.2 idCA.2 stmt.2 ca_fields.2 #t0.2 #t1.2 #t2.2.
+                   ((AssertsNot( idCA.2, stmt.2, ca_fields.2 ) @ #t0.2) ∧
+                    (DocumentedIntermediateCA( rootCA.2, ca_fields.2, idCA.2
+                     ) @ #t1.2)) ∧
+                   (DO_MonitorBenign( idM.2, ca_fields.2, stmt.2 ) @ #t2.2)))) ∧
+              (((idCA.1 = rootCA) ∧ (idM.1 = rootCA)) ∧
+               ((¬(rootCA = idCA.1)) ∧ (¬(rootCA = idM.1)))))))"
+
+
+lemma A_Receipt_1_root_ca_rogue_monitor_rogue_min:
+  all-traces
+  "∀ idM rootCA stmt idCA ca_fields #t0 #t1 #t2.
+         ((((AssertsNot( idCA, stmt, ca_fields ) @ #t0) ∧
+            (UndocumentedIntermediateCA( rootCA, idCA, ca_fields ) @ #t1)) ∧
+           (DO_MonitorBlame( idM, idCA, ca_fields, stmt ) @ #t2)) ∧
+          (¬(∃ idM.1 stmt.1 rootCA.1 idCA.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+              ((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+               (UndocumentedIntermediateCA( rootCA.1, idCA.1, ca_fields.1
+                ) @ #t1.1)) ∧
+              (DO_MonitorBenign( idM.1, ca_fields.1, stmt.1 ) @ #t2.1)))) ⇒
+         ((((¬(∃ rootCA.1 idM.1 stmt.1 idCA.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+                (((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+                  (UndocumentedIntermediateCA( rootCA.1, idCA.1, ca_fields.1
+                   ) @ #t1.1)) ∧
+                 (DO_MonitorBenign( idM.1, ca_fields.1, stmt.1 ) @ #t2.1)) ∧
+                (((rootCA.1 = idM) ∨ (rootCA.1 = rootCA)) ∧
+                 ((¬(idM = rootCA.1)) ∨ (¬(rootCA = rootCA.1)))))) ∧
+            (¬(∃ idM.1 rootCA.1 stmt.1 idCA.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+                ((((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+                   (UndocumentedIntermediateCA( rootCA.1, idCA.1, ca_fields.1
+                    ) @ #t1.1)) ∧
+                  (DO_MonitorBlame( idM.1, idCA.1, ca_fields.1, stmt.1 ) @ #t2.1)) ∧
+                 (¬(∃ idM.2 stmt.2 rootCA.2 idCA.2 ca_fields.2 #t0.2 #t1.2 #t2.2.
+                     ((AssertsNot( idCA.2, stmt.2, ca_fields.2 ) @ #t0.2) ∧
+                      (UndocumentedIntermediateCA( rootCA.2, idCA.2, ca_fields.2
+                       ) @ #t1.2)) ∧
+                     (DO_MonitorBenign( idM.2, ca_fields.2, stmt.2 ) @ #t2.2)))) ∧
+                ((((idM.1 = idM) ∨ (idM.1 = rootCA)) ∧
+                  ((rootCA.1 = idM) ∨ (rootCA.1 = rootCA))) ∧
+                 (((¬(idM = idM.1)) ∧ (¬(idM = rootCA.1))) ∨
+                  ((¬(rootCA = idM.1)) ∧ (¬(rootCA = rootCA.1)))))))) ∧
+           (¬(∃ idCA.1 idM.1 rootCA.1 stmt.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+               (((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+                 (DocumentedIntermediateCA( rootCA.1, ca_fields.1, idCA.1
+                  ) @ #t1.1)) ∧
+                (DO_MonitorBenign( idM.1, ca_fields.1, stmt.1 ) @ #t2.1)) ∧
+               (((idCA.1 = idM) ∨ (idCA.1 = rootCA)) ∧
+                ((¬(idM = idCA.1)) ∨ (¬(rootCA = idCA.1))))))) ∧
+          (¬(∃ idCA.1 idM.1 rootCA.1 stmt.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+              ((((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+                 (DocumentedIntermediateCA( rootCA.1, ca_fields.1, idCA.1
+                  ) @ #t1.1)) ∧
+                (DO_MonitorBlame( idM.1, idCA.1, ca_fields.1, stmt.1 ) @ #t2.1)) ∧
+               (¬(∃ idM.2 rootCA.2 idCA.2 stmt.2 ca_fields.2 #t0.2 #t1.2 #t2.2.
+                   ((AssertsNot( idCA.2, stmt.2, ca_fields.2 ) @ #t0.2) ∧
+                    (DocumentedIntermediateCA( rootCA.2, ca_fields.2, idCA.2
+                     ) @ #t1.2)) ∧
+                   (DO_MonitorBenign( idM.2, ca_fields.2, stmt.2 ) @ #t2.2)))) ∧
+              ((((idCA.1 = idM) ∨ (idCA.1 = rootCA)) ∧
+                ((idM.1 = idM) ∨ (idM.1 = rootCA))) ∧
+               (((¬(idM = idCA.1)) ∧ (¬(idM = idM.1))) ∨
+                ((¬(rootCA = idCA.1)) ∧ (¬(rootCA = idM.1))))))))"
+
+
+lemma A_Receipt_1_ca_rogue_receipt_min:
+  all-traces
+  "∀ idCA idM rootCA stmt ca_fields #t0 #t1 #t2.
+         (((AssertsNot( idCA, stmt, ca_fields ) @ #t0) ∧
+           (DocumentedIntermediateCA( rootCA, ca_fields, idCA ) @ #t1)) ∧
+          (DO_MonitorBenign( idM, ca_fields, stmt ) @ #t2)) ⇒
+         ((((¬(∃ rootCA.1 idM.1 stmt.1 idCA.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+                (((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+                  (UndocumentedIntermediateCA( rootCA.1, idCA.1, ca_fields.1
+                   ) @ #t1.1)) ∧
+                 (DO_MonitorBenign( idM.1, ca_fields.1, stmt.1 ) @ #t2.1)) ∧
+                ((rootCA.1 = idCA) ∧ (¬(idCA = rootCA.1))))) ∧
+            (¬(∃ idM.1 rootCA.1 stmt.1 idCA.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+                ((((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+                   (UndocumentedIntermediateCA( rootCA.1, idCA.1, ca_fields.1
+                    ) @ #t1.1)) ∧
+                  (DO_MonitorBlame( idM.1, idCA.1, ca_fields.1, stmt.1 ) @ #t2.1)) ∧
+                 (¬(∃ idM.2 stmt.2 rootCA.2 idCA.2 ca_fields.2 #t0.2 #t1.2 #t2.2.
+                     ((AssertsNot( idCA.2, stmt.2, ca_fields.2 ) @ #t0.2) ∧
+                      (UndocumentedIntermediateCA( rootCA.2, idCA.2, ca_fields.2
+                       ) @ #t1.2)) ∧
+                     (DO_MonitorBenign( idM.2, ca_fields.2, stmt.2 ) @ #t2.2)))) ∧
+                (((idM.1 = idCA) ∧ (rootCA.1 = idCA)) ∧
+                 ((¬(idCA = idM.1)) ∧ (¬(idCA = rootCA.1))))))) ∧
+           (¬(∃ idCA.1 idM.1 rootCA.1 stmt.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+               (((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+                 (DocumentedIntermediateCA( rootCA.1, ca_fields.1, idCA.1
+                  ) @ #t1.1)) ∧
+                (DO_MonitorBenign( idM.1, ca_fields.1, stmt.1 ) @ #t2.1)) ∧
+               ((idCA.1 = idCA) ∧ (¬(idCA = idCA.1)))))) ∧
+          (¬(∃ idCA.1 idM.1 rootCA.1 stmt.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+              ((((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+                 (DocumentedIntermediateCA( rootCA.1, ca_fields.1, idCA.1
+                  ) @ #t1.1)) ∧
+                (DO_MonitorBlame( idM.1, idCA.1, ca_fields.1, stmt.1 ) @ #t2.1)) ∧
+               (¬(∃ idM.2 rootCA.2 idCA.2 stmt.2 ca_fields.2 #t0.2 #t1.2 #t2.2.
+                   ((AssertsNot( idCA.2, stmt.2, ca_fields.2 ) @ #t0.2) ∧
+                    (DocumentedIntermediateCA( rootCA.2, ca_fields.2, idCA.2
+                     ) @ #t1.2)) ∧
+                   (DO_MonitorBenign( idM.2, ca_fields.2, stmt.2 ) @ #t2.2)))) ∧
+              (((idCA.1 = idCA) ∧ (idM.1 = idCA)) ∧
+               ((¬(idCA = idCA.1)) ∧ (¬(idCA = idM.1)))))))"
+
+
+lemma A_Receipt_1_ca_rogue_receipt_monitor_rogue_min:
+  all-traces
+  "∀ idCA idM rootCA stmt ca_fields #t0 #t1 #t2.
+         ((((AssertsNot( idCA, stmt, ca_fields ) @ #t0) ∧
+            (DocumentedIntermediateCA( rootCA, ca_fields, idCA ) @ #t1)) ∧
+           (DO_MonitorBlame( idM, idCA, ca_fields, stmt ) @ #t2)) ∧
+          (¬(∃ idM.1 rootCA.1 idCA.1 stmt.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+              ((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+               (DocumentedIntermediateCA( rootCA.1, ca_fields.1, idCA.1
+                ) @ #t1.1)) ∧
+              (DO_MonitorBenign( idM.1, ca_fields.1, stmt.1 ) @ #t2.1)))) ⇒
+         ((((¬(∃ rootCA.1 idM.1 stmt.1 idCA.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+                (((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+                  (UndocumentedIntermediateCA( rootCA.1, idCA.1, ca_fields.1
+                   ) @ #t1.1)) ∧
+                 (DO_MonitorBenign( idM.1, ca_fields.1, stmt.1 ) @ #t2.1)) ∧
+                (((rootCA.1 = idCA) ∨ (rootCA.1 = idM)) ∧
+                 ((¬(idCA = rootCA.1)) ∨ (¬(idM = rootCA.1)))))) ∧
+            (¬(∃ idM.1 rootCA.1 stmt.1 idCA.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+                ((((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+                   (UndocumentedIntermediateCA( rootCA.1, idCA.1, ca_fields.1
+                    ) @ #t1.1)) ∧
+                  (DO_MonitorBlame( idM.1, idCA.1, ca_fields.1, stmt.1 ) @ #t2.1)) ∧
+                 (¬(∃ idM.2 stmt.2 rootCA.2 idCA.2 ca_fields.2 #t0.2 #t1.2 #t2.2.
+                     ((AssertsNot( idCA.2, stmt.2, ca_fields.2 ) @ #t0.2) ∧
+                      (UndocumentedIntermediateCA( rootCA.2, idCA.2, ca_fields.2
+                       ) @ #t1.2)) ∧
+                     (DO_MonitorBenign( idM.2, ca_fields.2, stmt.2 ) @ #t2.2)))) ∧
+                ((((idM.1 = idCA) ∨ (idM.1 = idM)) ∧
+                  ((rootCA.1 = idCA) ∨ (rootCA.1 = idM))) ∧
+                 (((¬(idCA = idM.1)) ∧ (¬(idCA = rootCA.1))) ∨
+                  ((¬(idM = idM.1)) ∧ (¬(idM = rootCA.1)))))))) ∧
+           (¬(∃ idCA.1 idM.1 rootCA.1 stmt.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+               (((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+                 (DocumentedIntermediateCA( rootCA.1, ca_fields.1, idCA.1
+                  ) @ #t1.1)) ∧
+                (DO_MonitorBenign( idM.1, ca_fields.1, stmt.1 ) @ #t2.1)) ∧
+               (((idCA.1 = idCA) ∨ (idCA.1 = idM)) ∧
+                ((¬(idCA = idCA.1)) ∨ (¬(idM = idCA.1))))))) ∧
+          (¬(∃ idCA.1 idM.1 rootCA.1 stmt.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+              ((((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+                 (DocumentedIntermediateCA( rootCA.1, ca_fields.1, idCA.1
+                  ) @ #t1.1)) ∧
+                (DO_MonitorBlame( idM.1, idCA.1, ca_fields.1, stmt.1 ) @ #t2.1)) ∧
+               (¬(∃ idM.2 rootCA.2 idCA.2 stmt.2 ca_fields.2 #t0.2 #t1.2 #t2.2.
+                   ((AssertsNot( idCA.2, stmt.2, ca_fields.2 ) @ #t0.2) ∧
+                    (DocumentedIntermediateCA( rootCA.2, ca_fields.2, idCA.2
+                     ) @ #t1.2)) ∧
+                   (DO_MonitorBenign( idM.2, ca_fields.2, stmt.2 ) @ #t2.2)))) ∧
+              ((((idCA.1 = idCA) ∨ (idCA.1 = idM)) ∧
+                ((idM.1 = idCA) ∨ (idM.1 = idM))) ∧
+               (((¬(idCA = idCA.1)) ∧ (¬(idCA = idM.1))) ∨
+                ((¬(idM = idCA.1)) ∧ (¬(idM = idM.1))))))))"
+
+
+lemma A_Receipt_1_root_ca_rogue_uniq:
+  all-traces
+  "∀ rootCA idM stmt idCA ca_fields #t0 #t1 #t2.
+         (((AssertsNot( idCA, stmt, ca_fields ) @ #t0) ∧
+           (UndocumentedIntermediateCA( rootCA, idCA, ca_fields ) @ #t1)) ∧
+          (DO_MonitorBenign( idM, ca_fields, stmt ) @ #t2)) ⇒
+         (∃ #i. Corrupted( rootCA ) @ #i)"
+
+
+lemma A_Receipt_1_root_ca_rogue_monitor_rogue_uniq:
+  all-traces
+  "∀ idM rootCA stmt idCA ca_fields #t0 #t1 #t2.
+         ((((AssertsNot( idCA, stmt, ca_fields ) @ #t0) ∧
+            (UndocumentedIntermediateCA( rootCA, idCA, ca_fields ) @ #t1)) ∧
+           (DO_MonitorBlame( idM, idCA, ca_fields, stmt ) @ #t2)) ∧
+          (¬(∃ idM.1 stmt.1 rootCA.1 idCA.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+              ((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+               (UndocumentedIntermediateCA( rootCA.1, idCA.1, ca_fields.1
+                ) @ #t1.1)) ∧
+              (DO_MonitorBenign( idM.1, ca_fields.1, stmt.1 ) @ #t2.1)))) ⇒
+         ((∃ #i. Corrupted( idM ) @ #i) ∧
+          (∃ #i. Corrupted( rootCA ) @ #i))"
+
+
+lemma A_Receipt_1_ca_rogue_receipt_uniq:
+  all-traces
+  "∀ idCA idM rootCA stmt ca_fields #t0 #t1 #t2.
+         (((AssertsNot( idCA, stmt, ca_fields ) @ #t0) ∧
+           (DocumentedIntermediateCA( rootCA, ca_fields, idCA ) @ #t1)) ∧
+          (DO_MonitorBenign( idM, ca_fields, stmt ) @ #t2)) ⇒
+         (∃ #i. Corrupted( idCA ) @ #i)"
+
+
+lemma A_Receipt_1_ca_rogue_receipt_monitor_rogue_uniq:
+  all-traces
+  "∀ idCA idM rootCA stmt ca_fields #t0 #t1 #t2.
+         ((((AssertsNot( idCA, stmt, ca_fields ) @ #t0) ∧
+            (DocumentedIntermediateCA( rootCA, ca_fields, idCA ) @ #t1)) ∧
+           (DO_MonitorBlame( idM, idCA, ca_fields, stmt ) @ #t2)) ∧
+          (¬(∃ idM.1 rootCA.1 idCA.1 stmt.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+              ((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+               (DocumentedIntermediateCA( rootCA.1, ca_fields.1, idCA.1
+                ) @ #t1.1)) ∧
+              (DO_MonitorBenign( idM.1, ca_fields.1, stmt.1 ) @ #t2.1)))) ⇒
+         ((∃ #i. Corrupted( idCA ) @ #i) ∧
+          (∃ #i. Corrupted( idM ) @ #i))"
+
+
+lemma A_Receipt_1_root_ca_rogue_inj:
+  all-traces "⊤"
+
+
+lemma A_Receipt_1_root_ca_rogue_monitor_rogue_inj:
+  all-traces
+  "∀ idM rootCA stmt idCA ca_fields #t0 #t1 #t2.
+         ((((AssertsNot( idCA, stmt, ca_fields ) @ #t0) ∧
+            (UndocumentedIntermediateCA( rootCA, idCA, ca_fields ) @ #t1)) ∧
+           (DO_MonitorBlame( idM, idCA, ca_fields, stmt ) @ #t2)) ∧
+          (¬(∃ idM.1 stmt.1 rootCA.1 idCA.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+              ((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+               (UndocumentedIntermediateCA( rootCA.1, idCA.1, ca_fields.1
+                ) @ #t1.1)) ∧
+              (DO_MonitorBenign( idM.1, ca_fields.1, stmt.1 ) @ #t2.1)))) ⇒
+         ((¬(idM = rootCA)) ∧ (¬(rootCA = idM)))"
+
+
+lemma A_Receipt_1_ca_rogue_receipt_inj:
+  all-traces "⊤"
+
+
+lemma A_Receipt_1_ca_rogue_receipt_monitor_rogue_inj:
+  all-traces
+  "∀ idCA idM rootCA stmt ca_fields #t0 #t1 #t2.
+         ((((AssertsNot( idCA, stmt, ca_fields ) @ #t0) ∧
+            (DocumentedIntermediateCA( rootCA, ca_fields, idCA ) @ #t1)) ∧
+           (DO_MonitorBlame( idM, idCA, ca_fields, stmt ) @ #t2)) ∧
+          (¬(∃ idM.1 rootCA.1 idCA.1 stmt.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+              ((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+               (DocumentedIntermediateCA( rootCA.1, ca_fields.1, idCA.1
+                ) @ #t1.1)) ∧
+              (DO_MonitorBenign( idM.1, ca_fields.1, stmt.1 ) @ #t2.1)))) ⇒
+         ((¬(idCA = idM)) ∧ (¬(idM = idCA)))"
+
+
+lemma A_Receipt_1_root_ca_rogue_single:
+  exists-trace
+  "∃ rootCA idM stmt idCA ca_fields #t0 #t1 #t2.
+         ((((AssertsNot( idCA, stmt, ca_fields ) @ #t0) ∧
+            (UndocumentedIntermediateCA( rootCA, idCA, ca_fields ) @ #t1)) ∧
+           (DO_MonitorBenign( idM, ca_fields, stmt ) @ #t2)) ∧
+          (∀ rootCA.1 idM.1 stmt.1 idCA.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+            (((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+              (UndocumentedIntermediateCA( rootCA.1, idCA.1, ca_fields.1
+               ) @ #t1.1)) ∧
+             (DO_MonitorBenign( idM.1, ca_fields.1, stmt.1 ) @ #t2.1)) ⇒
+            (rootCA.1 = rootCA))) ∧
+         ((¬(∃ idM.1 rootCA.1 stmt.1 idCA.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+              (((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+                (UndocumentedIntermediateCA( rootCA.1, idCA.1, ca_fields.1
+                 ) @ #t1.1)) ∧
+               (DO_MonitorBlame( idM.1, idCA.1, ca_fields.1, stmt.1 ) @ #t2.1)) ∧
+              (¬(∃ idM.2 stmt.2 rootCA.2 idCA.2 ca_fields.2 #t0.2 #t1.2 #t2.2.
+                  ((AssertsNot( idCA.2, stmt.2, ca_fields.2 ) @ #t0.2) ∧
+                   (UndocumentedIntermediateCA( rootCA.2, idCA.2, ca_fields.2
+                    ) @ #t1.2)) ∧
+                  (DO_MonitorBenign( idM.2, ca_fields.2, stmt.2 ) @ #t2.2))))) ∧
+          ((¬(∃ idCA.1 idM.1 rootCA.1 stmt.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+               ((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+                (DocumentedIntermediateCA( rootCA.1, ca_fields.1, idCA.1
+                 ) @ #t1.1)) ∧
+               (DO_MonitorBenign( idM.1, ca_fields.1, stmt.1 ) @ #t2.1))) ∧
+           (¬(∃ idCA.1 idM.1 rootCA.1 stmt.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+               (((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+                 (DocumentedIntermediateCA( rootCA.1, ca_fields.1, idCA.1
+                  ) @ #t1.1)) ∧
+                (DO_MonitorBlame( idM.1, idCA.1, ca_fields.1, stmt.1 ) @ #t2.1)) ∧
+               (¬(∃ idM.2 rootCA.2 idCA.2 stmt.2 ca_fields.2 #t0.2 #t1.2 #t2.2.
+                   ((AssertsNot( idCA.2, stmt.2, ca_fields.2 ) @ #t0.2) ∧
+                    (DocumentedIntermediateCA( rootCA.2, ca_fields.2, idCA.2
+                     ) @ #t1.2)) ∧
+                   (DO_MonitorBenign( idM.2, ca_fields.2, stmt.2
+                    ) @ #t2.2)))))))"
+
+
+lemma A_Receipt_1_root_ca_rogue_monitor_rogue_single:
+  exists-trace
+  "∃ idM rootCA stmt idCA ca_fields #t0 #t1 #t2.
+         (((((AssertsNot( idCA, stmt, ca_fields ) @ #t0) ∧
+             (UndocumentedIntermediateCA( rootCA, idCA, ca_fields ) @ #t1)) ∧
+            (DO_MonitorBlame( idM, idCA, ca_fields, stmt ) @ #t2)) ∧
+           (¬(∃ idM.1 stmt.1 rootCA.1 idCA.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+               ((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+                (UndocumentedIntermediateCA( rootCA.1, idCA.1, ca_fields.1
+                 ) @ #t1.1)) ∧
+               (DO_MonitorBenign( idM.1, ca_fields.1, stmt.1 ) @ #t2.1)))) ∧
+          (∀ idM.1 rootCA.1 stmt.1 idCA.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+            ((((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+               (UndocumentedIntermediateCA( rootCA.1, idCA.1, ca_fields.1
+                ) @ #t1.1)) ∧
+              (DO_MonitorBlame( idM.1, idCA.1, ca_fields.1, stmt.1 ) @ #t2.1)) ∧
+             (¬(∃ idM.2 stmt.2 rootCA.2 idCA.2 ca_fields.2 #t0.2 #t1.2 #t2.2.
+                 ((AssertsNot( idCA.2, stmt.2, ca_fields.2 ) @ #t0.2) ∧
+                  (UndocumentedIntermediateCA( rootCA.2, idCA.2, ca_fields.2
+                   ) @ #t1.2)) ∧
+                 (DO_MonitorBenign( idM.2, ca_fields.2, stmt.2 ) @ #t2.2)))) ⇒
+            (<idM.1, rootCA.1> = <idM, rootCA>))) ∧
+         ((¬(∃ rootCA.1 idM.1 stmt.1 idCA.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+              ((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+               (UndocumentedIntermediateCA( rootCA.1, idCA.1, ca_fields.1
+                ) @ #t1.1)) ∧
+              (DO_MonitorBenign( idM.1, ca_fields.1, stmt.1 ) @ #t2.1))) ∧
+          ((¬(∃ idCA.1 idM.1 rootCA.1 stmt.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+               ((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+                (DocumentedIntermediateCA( rootCA.1, ca_fields.1, idCA.1
+                 ) @ #t1.1)) ∧
+               (DO_MonitorBenign( idM.1, ca_fields.1, stmt.1 ) @ #t2.1))) ∧
+           (¬(∃ idCA.1 idM.1 rootCA.1 stmt.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+               (((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+                 (DocumentedIntermediateCA( rootCA.1, ca_fields.1, idCA.1
+                  ) @ #t1.1)) ∧
+                (DO_MonitorBlame( idM.1, idCA.1, ca_fields.1, stmt.1 ) @ #t2.1)) ∧
+               (¬(∃ idM.2 rootCA.2 idCA.2 stmt.2 ca_fields.2 #t0.2 #t1.2 #t2.2.
+                   ((AssertsNot( idCA.2, stmt.2, ca_fields.2 ) @ #t0.2) ∧
+                    (DocumentedIntermediateCA( rootCA.2, ca_fields.2, idCA.2
+                     ) @ #t1.2)) ∧
+                   (DO_MonitorBenign( idM.2, ca_fields.2, stmt.2
+                    ) @ #t2.2)))))))"
+
+
+lemma A_Receipt_1_ca_rogue_receipt_single:
+  exists-trace
+  "∃ idCA idM rootCA stmt ca_fields #t0 #t1 #t2.
+         ((((AssertsNot( idCA, stmt, ca_fields ) @ #t0) ∧
+            (DocumentedIntermediateCA( rootCA, ca_fields, idCA ) @ #t1)) ∧
+           (DO_MonitorBenign( idM, ca_fields, stmt ) @ #t2)) ∧
+          (∀ idCA.1 idM.1 rootCA.1 stmt.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+            (((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+              (DocumentedIntermediateCA( rootCA.1, ca_fields.1, idCA.1
+               ) @ #t1.1)) ∧
+             (DO_MonitorBenign( idM.1, ca_fields.1, stmt.1 ) @ #t2.1)) ⇒
+            (idCA.1 = idCA))) ∧
+         ((¬(∃ rootCA.1 idM.1 stmt.1 idCA.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+              ((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+               (UndocumentedIntermediateCA( rootCA.1, idCA.1, ca_fields.1
+                ) @ #t1.1)) ∧
+              (DO_MonitorBenign( idM.1, ca_fields.1, stmt.1 ) @ #t2.1))) ∧
+          ((¬(∃ idM.1 rootCA.1 stmt.1 idCA.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+               (((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+                 (UndocumentedIntermediateCA( rootCA.1, idCA.1, ca_fields.1
+                  ) @ #t1.1)) ∧
+                (DO_MonitorBlame( idM.1, idCA.1, ca_fields.1, stmt.1 ) @ #t2.1)) ∧
+               (¬(∃ idM.2 stmt.2 rootCA.2 idCA.2 ca_fields.2 #t0.2 #t1.2 #t2.2.
+                   ((AssertsNot( idCA.2, stmt.2, ca_fields.2 ) @ #t0.2) ∧
+                    (UndocumentedIntermediateCA( rootCA.2, idCA.2, ca_fields.2
+                     ) @ #t1.2)) ∧
+                   (DO_MonitorBenign( idM.2, ca_fields.2, stmt.2 ) @ #t2.2))))) ∧
+           (¬(∃ idCA.1 idM.1 rootCA.1 stmt.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+               (((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+                 (DocumentedIntermediateCA( rootCA.1, ca_fields.1, idCA.1
+                  ) @ #t1.1)) ∧
+                (DO_MonitorBlame( idM.1, idCA.1, ca_fields.1, stmt.1 ) @ #t2.1)) ∧
+               (¬(∃ idM.2 rootCA.2 idCA.2 stmt.2 ca_fields.2 #t0.2 #t1.2 #t2.2.
+                   ((AssertsNot( idCA.2, stmt.2, ca_fields.2 ) @ #t0.2) ∧
+                    (DocumentedIntermediateCA( rootCA.2, ca_fields.2, idCA.2
+                     ) @ #t1.2)) ∧
+                   (DO_MonitorBenign( idM.2, ca_fields.2, stmt.2
+                    ) @ #t2.2)))))))"
+
+
+lemma A_Receipt_1_ca_rogue_receipt_monitor_rogue_single:
+  exists-trace
+  "∃ idCA idM rootCA stmt ca_fields #t0 #t1 #t2.
+         (((((AssertsNot( idCA, stmt, ca_fields ) @ #t0) ∧
+             (DocumentedIntermediateCA( rootCA, ca_fields, idCA ) @ #t1)) ∧
+            (DO_MonitorBlame( idM, idCA, ca_fields, stmt ) @ #t2)) ∧
+           (¬(∃ idM.1 rootCA.1 idCA.1 stmt.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+               ((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+                (DocumentedIntermediateCA( rootCA.1, ca_fields.1, idCA.1
+                 ) @ #t1.1)) ∧
+               (DO_MonitorBenign( idM.1, ca_fields.1, stmt.1 ) @ #t2.1)))) ∧
+          (∀ idCA.1 idM.1 rootCA.1 stmt.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+            ((((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+               (DocumentedIntermediateCA( rootCA.1, ca_fields.1, idCA.1
+                ) @ #t1.1)) ∧
+              (DO_MonitorBlame( idM.1, idCA.1, ca_fields.1, stmt.1 ) @ #t2.1)) ∧
+             (¬(∃ idM.2 rootCA.2 idCA.2 stmt.2 ca_fields.2 #t0.2 #t1.2 #t2.2.
+                 ((AssertsNot( idCA.2, stmt.2, ca_fields.2 ) @ #t0.2) ∧
+                  (DocumentedIntermediateCA( rootCA.2, ca_fields.2, idCA.2
+                   ) @ #t1.2)) ∧
+                 (DO_MonitorBenign( idM.2, ca_fields.2, stmt.2 ) @ #t2.2)))) ⇒
+            (<idCA.1, idM.1> = <idCA, idM>))) ∧
+         ((¬(∃ rootCA.1 idM.1 stmt.1 idCA.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+              ((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+               (UndocumentedIntermediateCA( rootCA.1, idCA.1, ca_fields.1
+                ) @ #t1.1)) ∧
+              (DO_MonitorBenign( idM.1, ca_fields.1, stmt.1 ) @ #t2.1))) ∧
+          ((¬(∃ idM.1 rootCA.1 stmt.1 idCA.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+               (((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+                 (UndocumentedIntermediateCA( rootCA.1, idCA.1, ca_fields.1
+                  ) @ #t1.1)) ∧
+                (DO_MonitorBlame( idM.1, idCA.1, ca_fields.1, stmt.1 ) @ #t2.1)) ∧
+               (¬(∃ idM.2 stmt.2 rootCA.2 idCA.2 ca_fields.2 #t0.2 #t1.2 #t2.2.
+                   ((AssertsNot( idCA.2, stmt.2, ca_fields.2 ) @ #t0.2) ∧
+                    (UndocumentedIntermediateCA( rootCA.2, idCA.2, ca_fields.2
+                     ) @ #t1.2)) ∧
+                   (DO_MonitorBenign( idM.2, ca_fields.2, stmt.2 ) @ #t2.2))))) ∧
+           (¬(∃ idCA.1 idM.1 rootCA.1 stmt.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+               ((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+                (DocumentedIntermediateCA( rootCA.1, ca_fields.1, idCA.1
+                 ) @ #t1.1)) ∧
+               (DO_MonitorBenign( idM.1, ca_fields.1, stmt.1 ) @ #t2.1)))))"
+
+/* Sanity receipt checks */
+
+lemma san_receipt_loggerReceivesReceipt:
+    exists-trace
+    "Ex idM receipt #t.
+        ClientHoldsReceipt(idM, receipt)@t
+    "
+
+lemma san_receipt_domainOwnerBlamesMonitor:
+    exists-trace
+    "Ex idM idCA ca_fields stmt #t.
+        DO_MonitorBlame(idM, idCA, ca_fields, stmt)@t
+        & (All idM1 ca_fields1 stmt1 #t1. 
+            DO_MonitorBenign(idM1, ca_fields1, stmt1)@t1 
+            ==> (#t = #t1))
+        & (All idL1 ca_fields1 stmt1 idL2 ca_fields2 stmt2 #t1 #t2. AuditAuthCheck_noTrust(idL1, ca_fields1, stmt1)@t1
+        & AuditAuthCheck_noTrust(idL2, ca_fields2, stmt2)@t2
+            ==> (#t1 = #t2))
+    "
+
+lemma san_receipt_domainOwnerVerifiesReceipt:
+    exists-trace
+    "Ex idM ca_fields stmt #t.
+        DO_MonitorBenign(idM, ca_fields, stmt)@t
+    "
+
+// ==============================================================================
+
+#ifdef SUFFICIENCY_PROOF
+/* These restrictions are intended to simplify sufficiency proofs for some of the accountability properties. There, we want to show the existence of some specific traces. Limiting the number of certain rules, we can speed up finding traces that fulfill our requirements for sufficiency. These restrictions should not be used in any other lemmas. */
+
+restriction CA_Registr_once:
+    "All rootCA1 #t1 rootCA2 #t2. Root_CA_Init(rootCA1)@t1 & Root_CA_Init(rootCA2)@t2 ==> (#t1 = #t2)"
+
+restriction NonRoot_CA_Registr_once:
+    "All idCA1 #t1 idCA2 #t2. NonRoot_CA_Init(idCA1)@t1 & NonRoot_CA_Init(idCA2)@t2 ==> (#t1 = #t2)"
+
+restriction PreCertified_once:
+    "All idCA1 preC1 idCA2 preC2 #t1 #t2. PreCertified(idCA1, preC1)@t1 & PreCertified(idCA2, preC2)@t2 ==> (#t1 = #t2)"
+
+restriction Certified_once:
+    "All idCA1 fields1 fields2 idCA2 #t1 #t2. CAAsserts(idCA1, fields1)@t1 & CAAsserts(idCA2, fields2)@t2 ==> (#t1 = #t2)"
+
+restriction ChainAccept_once:
+    "All idL11 idL21 rootCA1 ca_fields1 idCA1 stmt1 #t1 idL12 idL22 rootCA2 ca_fields2 idCA2 stmt2 #t2. ClientAcceptsChain( idL11, idL21, rootCA1,ca_fields1, idCA1, stmt1)@t1 & ClientAcceptsChain( idL12, idL22, rootCA2, ca_fields2, idCA2, stmt2)@t2 ==> (#t1 = #t2)"
+
+restriction addtolog_per_logger_once:
+    "All IdL log_id1 chain1 log_id2 preC_fields1 preC_fields2 chain2 time1 time2 #t1 #t2. LoggerComputesAddLog(IdL, log_id1, preC_fields1, chain1, time1)@t1 & LoggerComputesAddLog(IdL, log_id2, preC_fields2, chain2, time2)@t2 ==> (#t1 = #t2)"
+
+restriction time_once:
+    "All i #t1 #t2. Time(i)@t1 & Time(i)@t2 ==> (#t1 = #t2)"
+
+
+
+#endif
+
+
+// ==============================================================================
+
+end

@@ -1,0 +1,495 @@
+theory pki
+begin
+
+functions:
+    pk/1,
+    sign/2,
+    verify/3[destructor], /* sign + verify */
+
+
+    /*Structure of a certificate as tuple with
+    
+    + Normal certificate 
+    <Issuer, Subject, Key, Type, serial number, issued timestamp, valid until timestamp>
+
+    Different types are: 
+    1. 'pubKey': Public Key Certificate
+        1.1 'pubKey-CA': Public Key Certificate of a CA
+    2. 'selfCert': Certificate is self signed, usually root of trust
+
+    */
+
+    true/0
+
+equations:
+
+    verify(       sign(fields, sk), fields, pk(sk)           ) = true()
+
+/** Specification **/
+
+/* Register a root CA that will later sign other intermediate CA certificates. */
+rule Root_CA_Init [color= #620c97]:
+    let 
+        fields = <$idCA, $idCA, pk(~skCA), 'selfCert', ~sn, $now, $j>
+        self_sig = sign(fields, ~skCA)
+    in
+    [ Fr(~skCA), Fr(~sn) ]
+    --[ 
+        CA_Registered($idCA, ~skCA, pk(~skCA)), 
+        Root_CA_Init($idCA),
+        Time($now)
+    ]->
+    [   Out(fields), Out(self_sig), 
+        Out(<$idCA, pk(~skCA)>), /* publicly announce the public key and certificate on the network */
+        !Root_CA_s0($idCA, ~skCA, pk(~skCA)), 
+        !Root_CA($idCA, pk(~skCA)) ]
+
+/* Register a CA that will later sign other certificates. This CA is assumed to be non-root and has its own certificate signed by a root CA.
+Intermediate CAs created by this rule are defined as legitimate. See later discussions for legitimacy checks that require the !CA_Documentation fact.
+*/
+rule CA_Init [color= #c871ff]:
+    let 
+        fields = <$rootCA, $idCA, pk(~skCA), 'pubKey-CA', ~sn, $now, $j>
+        self_sig = sign(fields, skRootCA)
+    in
+    [ Fr(~skCA), Fr(~sn), !Root_CA_s0($rootCA, skRootCA, pkRootCA) /* Root CA that signs this CA */  ]
+    --[ 
+        CA_Registered($idCA, ~skCA, pk(~skCA)), /* restrictions on CA registrations apply to both CAs and Root CAs */
+        NonRoot_CA_Init($idCA),
+        DocumentedCA($rootCA, $idCA, fields),
+        Time($now)
+    ]->
+    [   Out(fields), Out(self_sig), 
+        Out(<$idCA, pk(~skCA)>), /* publicly announce the public key and certificate on the network */
+        !CA_s0($idCA, ~skCA, pk(~skCA), fields, self_sig), !CA_Documentation($rootCA, $idCA, fields, self_sig) ]
+
+/* The domain owner represents the party in the web, running and website with some domain / Common Name (CN) with a key pair that needs certification by some CA. It is equivalent to a HTTPS server that needs a certificate in order to hand it out to visiting clients and performing a key exchange subsequently. */
+rule Domain_Owner_Init [color= #c6c6c6]:
+    let
+        pubK = pk(~sk)
+    in
+    [ Fr(~sk) ]
+    --[ 
+        Time($now)
+    ]->
+    [ !DomainOwner($idServer, pubK), /* The DomainOwner fact serves as a proof of identity: If this fact is later used for issuing a certificate, we say that it is honestly issued (i.e., on behalf of the domain owner). see honest rules for issuing a pre-certificate for instace. */ 
+    Out(pubK) /* Public key is announced on the network */ ]
+
+restriction rogueCert: 
+    "All idCA stmt #t1. RogueCert(idCA, stmt)@t1 ==> not (Ex #t0. GroundTruth(idCA, stmt)@t0 & #t0 < #t1)"
+
+restriction benignCert:
+    "All idCA stmt #t1. BenignCert(idCA, stmt)@t1 ==> (Ex #t0. GroundTruth(idCA, stmt)@t0 & #t0 < #t1)"
+
+
+/* ----- Certification ----- */
+
+/* 
+Invoked by a domain owner (DO): DO wants to have a certificate for its public key signed by CA, 
+CA "checks" identity and then creates a pre certificate to hand out to loggers tmt, commit, session
+The DomainOwner fact serves as a proof of identity, so we assume that invoking this always happens on DO's behalf. 
+Rogue certificates are not issued using this fact but instead by the network attacker using the CA's key (requires CA corruption).
+*/
+rule Certify [color= #c871ff]: 
+    let
+        cert_fields = <$idCA, $id, pkID, 'pubKey', ~sn, $now, $j>
+        cert_sig = sign(cert_fields, skCA)
+        cert = <cert_fields, cert_sig>
+    in
+    [ !DomainOwner($id, pkID), /* public key to sign. Using this rule includes an "identity check" which is simplified: There is a DomainOwner fact with this public key. */
+     !CA_s0($idCA, skCA, pkCA, ca_fields, CA_sig), Fr(~sn) ]
+    --[ Certified($idCA, cert), 
+        GroundTruth($idCA, <$idCA, $id, pkID, ~sn>), /* used for ground truth comparisons */
+        Asserts_PKI($idCA, <$idCA, $id, pkID, ~sn>), /* used for naive external check in PKI */
+
+        CAAsserts($idCA, <$idCA, $id, pkID, ~sn>),
+        
+        Time($now)
+    ]->
+    [ Out(cert_fields), Out(cert_sig), Out(ca_fields), Out(CA_sig) ]
+
+
+/*
+A client receives a certificate and now validates it. This includes:
+- verifying the signature on the certificate
+- verifying every cert in the chain, which here is just the certificate of the intermediate CA signed by a root CA
+
+verifying always includes validity checks of the timepoints in the certificate
+*/
+rule ClientValidate [color= #f2ce03]:
+    let
+        ca_fields = <$rootCA, $idCA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
+        pub_fields = <$idCA, $id, pkID, 'pubKey', sn, $i, $j>
+
+        stmt = <$idCA, $id, pkID, sn>
+    in
+    [   !Root_CA($rootCA, pkRootCA),
+        In(ca_fields),
+        In(ca_sig),
+        In(pub_fields),
+        In(pub_sig), /* incoming certificate (intermediate CA + pubKey certificate) */
+    ]
+    --[ ClientAcceptsChain($rootCA, ca_fields, $idCA, stmt),
+        Eq(verify(pub_sig, pub_fields, pkCA), true()), 
+        Eq(verify(ca_sig, ca_fields, pkRootCA), true()),
+        Time($now),
+        CheckValidUntil($now, $j),
+        CheckValidUntil($now, $j0),
+    ]->
+    [ ]
+
+/* ------- External CA Legitimacy Test ------- */
+
+rule RequestLegitimacyProof_Success:
+    let
+        ca_fields = <$rootCA, $idCA, pkCA, 'pubKey-CA', sn, $i, $j>
+    in
+    [ In(ca_fields), In(ca_sig), !Root_CA($rootCA, pkRCA), !CA_Documentation($rootCA, $idCA, ca_fields, ca_sig) /* proof of legitimacy handed out earlier when using the honest issuing process */ ]
+    --[
+        DocumentedIntermediateCA($rootCA, ca_fields, $idCA),
+        Eq(verify(ca_sig, ca_fields, pkRCA), true()), // signed by root CA
+        RootCADocumented($rootCA, ca_fields),
+        Time($now)
+    ]->
+    [ ]
+
+rule RequestLegitimacyProof_Illegal:
+    let
+        ca_fields = <$rootCA, $idCA, pkCA, 'pubKey-CA', sn, $i, $j>
+    in
+    [ In(ca_fields), In(ca_sig), !Root_CA($rootCA, pkRCA) ]
+    --[
+        UndocumentedIntermediateCA($rootCA, $idCA, ca_fields), // see restriction externalCA_no_proof below
+        Eq(verify(ca_sig, ca_fields, pkRCA), true()), // signed by root CA
+        RootCADocumented($rootCA, ca_fields),
+        Time($now)
+    ]->
+    [ ]
+
+/* Responsible root CA is not able to present an identity proof of the intermediate CA (-> it is forged) */
+restriction externalCA_no_proof:
+    "All rootCA idCA ca_fields #t1.
+        UndocumentedIntermediateCA(rootCA, idCA, ca_fields)@t1
+            ==> not (Ex #t0. DocumentedCA(rootCA, idCA, ca_fields)@t0 & #t0 < #t1)"
+
+/* ------ External Validator (PKI) */
+
+rule external_check_true:
+    let
+        stmt = <$idCA, $id, pkID, sn>
+        pub_fields = <$idCA, $id, pkID, 'pubKey', sn, $i, $j>
+        ca_fields = <$rootCA, $idCA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
+    in
+    [ In(pub_fields), In(pub_sig), In(ca_fields), In(ca_sig),
+      !Root_CA($rootCA, pkRootCA) ] 
+    --[
+        StatementCheckedExternally(ca_fields, stmt),
+        BenignCert($idCA, stmt),
+        Asserts_PKI($idCA, stmt),
+        Eq(verify(pub_sig, pub_fields, pkCA), true()),
+        Eq(verify(ca_sig, ca_fields, pkRootCA), true()),
+        Time($now)
+    ]->
+    [ ] 
+
+rule external_check_false:
+    let
+        stmt = <$idCA, $id, pkID, sn>
+        pub_fields = <$idCA, $id, pkID, 'pubKey', sn, $i, $j>
+        ca_fields = <$rootCA, $idCA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
+    in
+    [ In(pub_fields), In(pub_sig), In(ca_fields), In(ca_sig),
+      !Root_CA($rootCA, pkRootCA) ] 
+    --[ 
+        AssertsNot($idCA, stmt, ca_fields),
+        RogueCert($idCA, stmt),
+        StatementCheckedExternally(ca_fields, stmt),
+        Eq(verify(pub_sig, pub_fields, pkCA), true()),
+        Eq(verify(ca_sig, ca_fields, pkRootCA), true()),
+        Time($now)
+    ]->
+    []
+
+/* ----- Restrictions ----- */
+
+/* We require that the main roles in our model are conducted by pairwise distinct entities. This is in accordance with the CT standard as e.g., CAs should not act as loggers. As this version only considers the plain PKI setting, this only applies to CAs and rootCAs */
+
+restriction rootCA_CA_distinct:
+    "All rootCA idCA #t1 #t2. Root_CA_Init(rootCA)@t1 & NonRoot_CA_Init(idCA)@t2 
+    ==> not (rootCA = idCA)"
+
+/* identity of CAs is unique, they only have one key pair. Note that this property can be violated by a malicious root CA. */
+restriction CAsUnique:
+    "All IdCA pk1 sk1 pk2 sk2 #t1 #t2. CA_Registered(IdCA, sk1, pk1)@t1 & CA_Registered(IdCA, sk2, pk2)@t2 ==> #t1 = #t2"
+
+restriction eq:
+    " All e1 e2 #t. Eq(e1, e2)@t ==> e1 = e2"
+
+restriction time_monotonicity:
+"All t #t1 #t3. Time(t)@t1
+                & Time(t)@t3
+                & #t1 < #t3
+                ==> ( All tp #t2. Time(tp)@t2
+                                & #t1 < #t2
+                                & #t2 < #t3 ==> tp = t )"
+
+/* whenever a party checks the validity period of a certificate, that time must not happened before the check, i.e. the time did not pass yet */
+restriction certStillValid:
+    "All currTime valid_till #t1.
+        Time(currTime)@t1 & CheckValidUntil(currTime, valid_till)@t1
+         ==> not (Ex #t2. #t2 < #t1 & Time(valid_till)@t2)"
+
+/* ----------- Compromise Rules ----------- */
+
+/* CA key leakage */
+rule compromiseCA [color= #d40808 ]:
+    [!CA_s0($idCA, ~skCA, pk(~skCA), ca_fields, CA_sig)] 
+    --[ 
+        CompromiseCA($idCA), 
+        Compromise(),
+        Corrupted($idCA),
+        Time($now)
+    ]-> 
+    [ Out(~skCA) ] 
+
+/* Root CA key leakage */
+rule compromiseRootCA [color= #d40808 ]:
+    [ !Root_CA_s0($idCA, skCA, pkCA) ] 
+    --[ 
+        CompromiseRootCA($idCA), 
+        Compromise(),
+        Corrupted($idCA),
+        Time($now)
+    ]-> 
+    [ Out(skCA) ]
+
+/* Lemmas */
+
+lemma san_PKI_Root_CA_Init:
+  exists-trace "∃ idCA #t. Root_CA_Init( idCA ) @ #t"
+
+
+lemma san_PKI_NonRoot_CA_Init:
+  exists-trace "∃ idCA #t. NonRoot_CA_Init( idCA ) @ #t"
+
+
+lemma san_PKI_Certify:
+  exists-trace
+  "∃ idCA cert #t. Certified( idCA, cert ) @ #t"
+
+
+lemma san_PKI_ClientValidate:
+  exists-trace
+  "∃ rootCA ca_fields idCA stmt #t.
+         ClientAcceptsChain( rootCA, ca_fields, idCA, stmt ) @ #t"
+
+
+lemma san_PKI_RequestLegitimacyProof_Success:
+  exists-trace
+  "∃ rootCA idCA ca_fields #t.
+         DocumentedIntermediateCA( rootCA, ca_fields, idCA ) @ #t"
+
+
+lemma san_PKI_RequestLegitimacyProof_Illegal:
+  exists-trace
+  "∃ rootCA idCA ca_fields #t.
+         UndocumentedIntermediateCA( rootCA, idCA, ca_fields ) @ #t"
+
+
+lemma san_PKIExt_external_check_true:
+  exists-trace
+  "∃ idCA ca_fields stmt #t.
+         (StatementCheckedExternally( ca_fields, stmt ) @ #t) ∧
+         (Asserts_PKI( idCA, stmt ) @ #t)"
+
+
+lemma san_PKIExt_external_check_false:
+  exists-trace
+  "∃ idCA ca_fields stmt #t.
+         (StatementCheckedExternally( ca_fields, stmt ) @ #t) ∧
+         (AssertsNot( idCA, stmt, ca_fields ) @ #t)"
+
+
+lemma CA_auth_w_compromise:
+  exists-trace
+  "∃ rootCA ca_fields idCA stmt #t.
+         (ClientAcceptsChain( rootCA, ca_fields, idCA, stmt ) @ #t) ∧
+         (¬(∃ #t1. CAAsserts( idCA, stmt ) @ #t1))"
+
+
+lemma authenticity:
+  all-traces
+  "∀ rootCA ca_fields idCA stmt #j.
+         (ClientAcceptsChain( rootCA, ca_fields, idCA, stmt ) @ #j) ⇒
+         (∃ #i. (GroundTruth( idCA, stmt ) @ #i) ∧ (#i < #j))"
+
+
+lemma cert_auth:
+  all-traces
+  "∀ rootCA ca_fields idCA stmt #t.
+         (ClientAcceptsChain( rootCA, ca_fields, idCA, stmt ) @ #t) ⇒
+         (((∃ #t1. CAAsserts( idCA, stmt ) @ #t1) ∨
+           (∃ #t2. (CompromiseCA( idCA ) @ #t2) ∧ (#t2 < #t))) ∨
+          (∃ #t2. (CompromiseRootCA( rootCA ) @ #t2) ∧ (#t2 < #t)))"
+
+
+lemma A_PKI_Ext_CAfalseAsserts_rootBlamed_suff:
+  exists-trace
+  "∃ rootCA idCA stmt ca_fields #t0 #t1.
+         (((AssertsNot( idCA, stmt, ca_fields ) @ #t0) ∧
+           (UndocumentedIntermediateCA( rootCA, idCA, ca_fields ) @ #t1)) ∧
+          (∀ rootCA.1 idCA.1 stmt.1 ca_fields.1 #t0.1 #t1.1.
+            ((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+             (UndocumentedIntermediateCA( rootCA.1, idCA.1, ca_fields.1
+              ) @ #t1.1)) ⇒
+            (rootCA.1 = rootCA))) ∧
+         ((∀ a #i. (Corrupted( a ) @ #i) ⇒ (a = rootCA)) ∧
+          (¬(∃ idCA.1 rootCA.1 stmt.1 ca_fields.1 #t0.1 #t1.1.
+              (AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+              (DocumentedIntermediateCA( rootCA.1, ca_fields.1, idCA.1
+               ) @ #t1.1))))"
+
+
+lemma A_PKI_Ext_CAfalseAsserts_rootNotBlamed_suff:
+  exists-trace
+  "∃ idCA rootCA stmt ca_fields #t0 #t1.
+         (((AssertsNot( idCA, stmt, ca_fields ) @ #t0) ∧
+           (DocumentedIntermediateCA( rootCA, ca_fields, idCA ) @ #t1)) ∧
+          (∀ idCA.1 rootCA.1 stmt.1 ca_fields.1 #t0.1 #t1.1.
+            ((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+             (DocumentedIntermediateCA( rootCA.1, ca_fields.1, idCA.1
+              ) @ #t1.1)) ⇒
+            (idCA.1 = idCA))) ∧
+         ((∀ a #i. (Corrupted( a ) @ #i) ⇒ (a = idCA)) ∧
+          (¬(∃ rootCA.1 idCA.1 stmt.1 ca_fields.1 #t0.1 #t1.1.
+              (AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+              (UndocumentedIntermediateCA( rootCA.1, idCA.1, ca_fields.1
+               ) @ #t1.1))))"
+
+
+lemma A_PKI_Ext_verif_empty:
+  all-traces
+  "(¬((∃ rootCA idCA stmt ca_fields #t0 #t1.
+             (AssertsNot( idCA, stmt, ca_fields ) @ #t0) ∧
+             (UndocumentedIntermediateCA( rootCA, idCA, ca_fields ) @ #t1)) ∨
+           (∃ idCA rootCA stmt ca_fields #t0 #t1.
+             (AssertsNot( idCA, stmt, ca_fields ) @ #t0) ∧
+             (DocumentedIntermediateCA( rootCA, ca_fields, idCA ) @ #t1)))) ⇒
+        (∀ rootCA ca_fields stmt #t0 #t1.
+          ((StatementCheckedExternally( ca_fields, stmt ) @ #t0) ∧
+           (RootCADocumented( rootCA, ca_fields ) @ #t1)) ⇒
+          (∃ idCA #t. Asserts_PKI( idCA, stmt ) @ #t))"
+
+
+lemma A_PKI_Ext_CAfalseAsserts_rootBlamed_verif_nonempty:
+  all-traces
+  "∀ rootCA idCA stmt ca_fields #t0 #t1.
+         ((AssertsNot( idCA, stmt, ca_fields ) @ #t0) ∧
+          (UndocumentedIntermediateCA( rootCA, idCA, ca_fields ) @ #t1)) ⇒
+         (¬(∀ rootCA.1 ca_fields.1 stmt.1 #t0.1 #t1.1.
+             ((StatementCheckedExternally( ca_fields.1, stmt.1 ) @ #t0.1) ∧
+              (RootCADocumented( rootCA.1, ca_fields.1 ) @ #t1.1)) ⇒
+             (∃ idCA.1 #t. Asserts_PKI( idCA.1, stmt.1 ) @ #t)))"
+
+
+lemma A_PKI_Ext_CAfalseAsserts_rootNotBlamed_verif_nonempty:
+  all-traces
+  "∀ idCA rootCA stmt ca_fields #t0 #t1.
+         ((AssertsNot( idCA, stmt, ca_fields ) @ #t0) ∧
+          (DocumentedIntermediateCA( rootCA, ca_fields, idCA ) @ #t1)) ⇒
+         (¬(∀ rootCA.1 ca_fields.1 stmt.1 #t0.1 #t1.1.
+             ((StatementCheckedExternally( ca_fields.1, stmt.1 ) @ #t0.1) ∧
+              (RootCADocumented( rootCA.1, ca_fields.1 ) @ #t1.1)) ⇒
+             (∃ idCA.1 #t. Asserts_PKI( idCA.1, stmt.1 ) @ #t)))"
+
+
+lemma A_PKI_Ext_CAfalseAsserts_rootBlamed_min:
+  all-traces
+  "∀ rootCA idCA stmt ca_fields #t0 #t1.
+         ((AssertsNot( idCA, stmt, ca_fields ) @ #t0) ∧
+          (UndocumentedIntermediateCA( rootCA, idCA, ca_fields ) @ #t1)) ⇒
+         ((¬(∃ rootCA.1 idCA.1 stmt.1 ca_fields.1 #t0.1 #t1.1.
+              ((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+               (UndocumentedIntermediateCA( rootCA.1, idCA.1, ca_fields.1
+                ) @ #t1.1)) ∧
+              ((rootCA.1 = rootCA) ∧ (¬(rootCA = rootCA.1))))) ∧
+          (¬(∃ idCA.1 rootCA.1 stmt.1 ca_fields.1 #t0.1 #t1.1.
+              ((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+               (DocumentedIntermediateCA( rootCA.1, ca_fields.1, idCA.1
+                ) @ #t1.1)) ∧
+              ((idCA.1 = rootCA) ∧ (¬(rootCA = idCA.1))))))"
+
+
+lemma A_PKI_Ext_CAfalseAsserts_rootNotBlamed_min:
+  all-traces
+  "∀ idCA rootCA stmt ca_fields #t0 #t1.
+         ((AssertsNot( idCA, stmt, ca_fields ) @ #t0) ∧
+          (DocumentedIntermediateCA( rootCA, ca_fields, idCA ) @ #t1)) ⇒
+         ((¬(∃ rootCA.1 idCA.1 stmt.1 ca_fields.1 #t0.1 #t1.1.
+              ((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+               (UndocumentedIntermediateCA( rootCA.1, idCA.1, ca_fields.1
+                ) @ #t1.1)) ∧
+              ((rootCA.1 = idCA) ∧ (¬(idCA = rootCA.1))))) ∧
+          (¬(∃ idCA.1 rootCA.1 stmt.1 ca_fields.1 #t0.1 #t1.1.
+              ((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+               (DocumentedIntermediateCA( rootCA.1, ca_fields.1, idCA.1
+                ) @ #t1.1)) ∧
+              ((idCA.1 = idCA) ∧ (¬(idCA = idCA.1))))))"
+
+
+lemma A_PKI_Ext_CAfalseAsserts_rootBlamed_uniq:
+  all-traces
+  "∀ rootCA idCA stmt ca_fields #t0 #t1.
+         ((AssertsNot( idCA, stmt, ca_fields ) @ #t0) ∧
+          (UndocumentedIntermediateCA( rootCA, idCA, ca_fields ) @ #t1)) ⇒
+         (∃ #i. Corrupted( rootCA ) @ #i)"
+
+
+lemma A_PKI_Ext_CAfalseAsserts_rootNotBlamed_uniq:
+  all-traces
+  "∀ idCA rootCA stmt ca_fields #t0 #t1.
+         ((AssertsNot( idCA, stmt, ca_fields ) @ #t0) ∧
+          (DocumentedIntermediateCA( rootCA, ca_fields, idCA ) @ #t1)) ⇒
+         (∃ #i. Corrupted( idCA ) @ #i)"
+
+
+lemma A_PKI_Ext_CAfalseAsserts_rootBlamed_inj:
+  all-traces "⊤"
+
+
+lemma A_PKI_Ext_CAfalseAsserts_rootNotBlamed_inj:
+  all-traces "⊤"
+
+
+lemma A_PKI_Ext_CAfalseAsserts_rootBlamed_single:
+  exists-trace
+  "∃ rootCA idCA stmt ca_fields #t0 #t1.
+         (((AssertsNot( idCA, stmt, ca_fields ) @ #t0) ∧
+           (UndocumentedIntermediateCA( rootCA, idCA, ca_fields ) @ #t1)) ∧
+          (∀ rootCA.1 idCA.1 stmt.1 ca_fields.1 #t0.1 #t1.1.
+            ((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+             (UndocumentedIntermediateCA( rootCA.1, idCA.1, ca_fields.1
+              ) @ #t1.1)) ⇒
+            (rootCA.1 = rootCA))) ∧
+         (¬(∃ idCA.1 rootCA.1 stmt.1 ca_fields.1 #t0.1 #t1.1.
+             (AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+             (DocumentedIntermediateCA( rootCA.1, ca_fields.1, idCA.1
+              ) @ #t1.1)))"
+
+
+lemma A_PKI_Ext_CAfalseAsserts_rootNotBlamed_single:
+  exists-trace
+  "∃ idCA rootCA stmt ca_fields #t0 #t1.
+         (((AssertsNot( idCA, stmt, ca_fields ) @ #t0) ∧
+           (DocumentedIntermediateCA( rootCA, ca_fields, idCA ) @ #t1)) ∧
+          (∀ idCA.1 rootCA.1 stmt.1 ca_fields.1 #t0.1 #t1.1.
+            ((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+             (DocumentedIntermediateCA( rootCA.1, ca_fields.1, idCA.1
+              ) @ #t1.1)) ⇒
+            (idCA.1 = idCA))) ∧
+         (¬(∃ rootCA.1 idCA.1 stmt.1 ca_fields.1 #t0.1 #t1.1.
+             (AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+             (UndocumentedIntermediateCA( rootCA.1, idCA.1, ca_fields.1
+              ) @ #t1.1)))"
+
+end
