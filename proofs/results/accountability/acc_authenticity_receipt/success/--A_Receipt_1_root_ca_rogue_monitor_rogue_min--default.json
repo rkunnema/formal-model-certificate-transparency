@@ -1,0 +1,47 @@
+{
+  "task_id": "--A_Receipt_1_root_ca_rogue_monitor_rogue_min--default",
+  "warnings": [],
+  "tamarin_timing": 65.45,
+  "wrapper_measures": {
+    "time": 65.67161965370178,
+    "avg_memory": 425.12559185606057,
+    "peak_memory": 493.9140625
+  },
+  "output_spthy": "results/accountability/acc_authenticity_receipt/proofs/--A_Receipt_1_root_ca_rogue_monitor_rogue_min--default.spthy",
+  "verified_lemma": {
+    "A_Receipt_1_root_ca_rogue_monitor_rogue_min": {
+      "steps": 884,
+      "analysis_type": "all-traces"
+    }
+  },
+  "falsified_lemma": {},
+  "unterminated_lemma": [
+    "A_Receipt_1_root_ca_rogue_suff",
+    "A_Receipt_1_root_ca_rogue_monitor_rogue_suff",
+    "A_Receipt_1_ca_rogue_receipt_suff",
+    "A_Receipt_1_ca_rogue_receipt_monitor_rogue_suff",
+    "A_Receipt_1_verif_empty",
+    "A_Receipt_1_root_ca_rogue_verif_nonempty",
+    "A_Receipt_1_root_ca_rogue_monitor_rogue_verif_nonempty",
+    "A_Receipt_1_ca_rogue_receipt_verif_nonempty",
+    "A_Receipt_1_ca_rogue_receipt_monitor_rogue_verif_nonempty",
+    "A_Receipt_1_root_ca_rogue_min",
+    "A_Receipt_1_ca_rogue_receipt_min",
+    "A_Receipt_1_ca_rogue_receipt_monitor_rogue_min",
+    "A_Receipt_1_root_ca_rogue_uniq",
+    "A_Receipt_1_root_ca_rogue_monitor_rogue_uniq",
+    "A_Receipt_1_ca_rogue_receipt_uniq",
+    "A_Receipt_1_ca_rogue_receipt_monitor_rogue_uniq",
+    "A_Receipt_1_root_ca_rogue_inj",
+    "A_Receipt_1_root_ca_rogue_monitor_rogue_inj",
+    "A_Receipt_1_ca_rogue_receipt_inj",
+    "A_Receipt_1_ca_rogue_receipt_monitor_rogue_inj",
+    "A_Receipt_1_root_ca_rogue_single",
+    "A_Receipt_1_root_ca_rogue_monitor_rogue_single",
+    "A_Receipt_1_ca_rogue_receipt_single",
+    "A_Receipt_1_ca_rogue_receipt_monitor_rogue_single",
+    "san_receipt_loggerReceivesReceipt",
+    "san_receipt_domainOwnerBlamesMonitor",
+    "san_receipt_domainOwnerVerifiesReceipt"
+  ]
+}

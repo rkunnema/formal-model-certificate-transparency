@@ -1,0 +1,1200 @@
+theory pki begin
+
+// Function signature and definition of the equational theory E
+
+functions: fst/1, pair/2, pk/1, sign/2, snd/1, true/0,
+           verify/3[destructor]
+equations:
+    fst(<x.1, x.2>) = x.1,
+    snd(<x.1, x.2>) = x.2,
+    verify(sign(fields, sk), fields, pk(sk)) = true
+
+
+
+
+
+rule (modulo E) Root_CA_Init[color=#620c97]:
+   [ Fr( ~skCA ), Fr( ~sn ) ]
+  --[
+  CA_Registered( $idCA, ~skCA, pk(~skCA) ), Root_CA_Init( $idCA ),
+  Time( $now )
+  ]->
+   [
+   Out( <$idCA, $idCA, pk(~skCA), 'selfCert', ~sn, $now, $j> ),
+   Out( sign(<$idCA, $idCA, pk(~skCA), 'selfCert', ~sn, $now, $j>, ~skCA) ),
+   Out( <$idCA, pk(~skCA)> ), !Root_CA_s0( $idCA, ~skCA, pk(~skCA) ),
+   !Root_CA( $idCA, pk(~skCA) )
+   ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) CA_Init[color=#c871ff]:
+   [ Fr( ~skCA ), Fr( ~sn ), !Root_CA_s0( $rootCA, skRootCA, pkRootCA ) ]
+  --[
+  CA_Registered( $idCA, ~skCA, pk(~skCA) ), NonRoot_CA_Init( $idCA ),
+  DocumentedCA( $rootCA, $idCA,
+                <$rootCA, $idCA, pk(~skCA), 'pubKey-CA', ~sn, $now, $j>
+  ),
+  Time( $now )
+  ]->
+   [
+   Out( <$rootCA, $idCA, pk(~skCA), 'pubKey-CA', ~sn, $now, $j> ),
+   Out( sign(<$rootCA, $idCA, pk(~skCA), 'pubKey-CA', ~sn, $now, $j>,
+             skRootCA)
+   ),
+   Out( <$idCA, pk(~skCA)> ),
+   !CA_s0( $idCA, ~skCA, pk(~skCA),
+           <$rootCA, $idCA, pk(~skCA), 'pubKey-CA', ~sn, $now, $j>,
+           sign(<$rootCA, $idCA, pk(~skCA), 'pubKey-CA', ~sn, $now, $j>, skRootCA)
+   ),
+   !CA_Documentation( $rootCA, $idCA,
+                      <$rootCA, $idCA, pk(~skCA), 'pubKey-CA', ~sn, $now, $j>,
+                      sign(<$rootCA, $idCA, pk(~skCA), 'pubKey-CA', ~sn, $now, $j>, skRootCA)
+   )
+   ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) Domain_Owner_Init[color=#c6c6c6]:
+   [ Fr( ~sk ) ]
+  --[ Time( $now ) ]->
+   [ !DomainOwner( $idServer, pk(~sk) ), Out( pk(~sk) ) ]
+
+  /* has exactly the trivial AC variant */
+
+restriction rogueCert:
+  "∀ idCA stmt #t1.
+    (RogueCert( idCA, stmt ) @ #t1) ⇒
+    (¬(∃ #t0. (GroundTruth( idCA, stmt ) @ #t0) ∧ (#t0 < #t1)))"
+  // safety formula
+
+restriction benignCert:
+  "∀ idCA stmt #t1.
+    (BenignCert( idCA, stmt ) @ #t1) ⇒
+    (∃ #t0. (GroundTruth( idCA, stmt ) @ #t0) ∧ (#t0 < #t1))"
+
+rule (modulo E) Certify[color=#c871ff]:
+   [
+   !DomainOwner( $id, pkID ),
+   !CA_s0( $idCA, skCA, pkCA, ca_fields, CA_sig ), Fr( ~sn )
+   ]
+  --[
+  Certified( $idCA,
+             <<$idCA, $id, pkID, 'pubKey', ~sn, $now, $j>, 
+              sign(<$idCA, $id, pkID, 'pubKey', ~sn, $now, $j>, skCA)>
+  ),
+  GroundTruth( $idCA, <$idCA, $id, pkID, ~sn> ),
+  Asserts_PKI( $idCA, <$idCA, $id, pkID, ~sn> ),
+  CAAsserts( $idCA, <$idCA, $id, pkID, ~sn> ), Time( $now )
+  ]->
+   [
+   Out( <$idCA, $id, pkID, 'pubKey', ~sn, $now, $j> ),
+   Out( sign(<$idCA, $id, pkID, 'pubKey', ~sn, $now, $j>, skCA) ),
+   Out( ca_fields ), Out( CA_sig )
+   ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) ClientValidate[color=#f2ce03]:
+   [
+   !Root_CA( $rootCA, pkRootCA ),
+   In( <$rootCA, $idCA, pkCA, 'pubKey-CA', snCA, $i0, $j0> ), In( ca_sig ),
+   In( <$idCA, $id, pkID, 'pubKey', sn, $i, $j> ), In( pub_sig )
+   ]
+  --[
+  ClientAcceptsChain( $rootCA,
+                      <$rootCA, $idCA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, $idCA,
+                      <$idCA, $id, pkID, sn>
+  ),
+  Eq( verify(pub_sig, <$idCA, $id, pkID, 'pubKey', sn, $i, $j>, pkCA), true
+  ),
+  Eq( verify(ca_sig, <$rootCA, $idCA, pkCA, 'pubKey-CA', snCA, $i0, $j0>,
+             pkRootCA),
+      true
+  ),
+  Time( $now ), CheckValidUntil( $now, $j ), CheckValidUntil( $now, $j0 )
+  ]->
+   [ ]
+
+  /*
+  rule (modulo AC) ClientValidate[color=#f2ce03]:
+     [
+     !Root_CA( $rootCA, pkRootCA ),
+     In( <$rootCA, $idCA, pkCA, 'pubKey-CA', snCA, $i0, $j0> ), In( ca_sig ),
+     In( <$idCA, $id, pkID, 'pubKey', sn, $i, $j> ), In( pub_sig )
+     ]
+    --[
+    ClientAcceptsChain( $rootCA,
+                        <$rootCA, $idCA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, $idCA,
+                        <$idCA, $id, pkID, sn>
+    ),
+    Eq( z, true ), Eq( z.1, true ), Time( $now ),
+    CheckValidUntil( $now, $j ), CheckValidUntil( $now, $j0 )
+    ]->
+     [ ]
+    variants (modulo AC)
+    1. $i    = $i.35
+       $i0   = $i0.36
+       $id   = $id.37
+       $idCA = $idCA.38
+       $j    = $j.39
+       $j0   = $j0.40
+       $rootCA
+             = $rootCA.42
+       ca_sig
+             = ca_sig.43
+       pkCA  = pkCA.44
+       pkID  = pkID.45
+       pkRootCA
+             = pkRootCA.46
+       pub_sig
+             = pub_sig.47
+       sn    = sn.48
+       snCA  = snCA.49
+       z     = verify(pub_sig.47,
+                      <$idCA.38, $id.37, pkID.45, 'pubKey', sn.48, $i.35, $j.39>, pkCA.44)
+       z.1   = verify(ca_sig.43,
+                      <$rootCA.42, $idCA.38, pkCA.44, 'pubKey-CA', snCA.49, $i0.36, $j0.40>,
+                      pkRootCA.46)
+    
+    2. $i    = $i.49
+       $i0   = $i0.50
+       $id   = $id.51
+       $idCA = $idCA.52
+       $j    = $j.53
+       $j0   = $j0.54
+       $rootCA
+             = $rootCA.56
+       ca_sig
+             = ca_sig.57
+       pkCA  = pk(x.96)
+       pkID  = pkID.59
+       pkRootCA
+             = pkRootCA.60
+       pub_sig
+             = sign(<$idCA.52, $id.51, pkID.59, 'pubKey', sn.62, $i.49, $j.53>, x.96)
+       sn    = sn.62
+       snCA  = snCA.63
+       z     = true
+       z.1   = verify(ca_sig.57,
+                      <$rootCA.56, $idCA.52, pk(x.96), 'pubKey-CA', snCA.63, $i0.50, $j0.54>,
+                      pkRootCA.60)
+    
+    3. $i    = $i.49
+       $i0   = $i0.50
+       $id   = $id.51
+       $idCA = $idCA.52
+       $j    = $j.53
+       $j0   = $j0.54
+       $rootCA
+             = $rootCA.56
+       ca_sig
+             = sign(<$rootCA.56, $idCA.52, pkCA.58, 'pubKey-CA', snCA.63, $i0.50, 
+                     $j0.54>,
+                    x.96)
+       pkCA  = pkCA.58
+       pkID  = pkID.59
+       pkRootCA
+             = pk(x.96)
+       pub_sig
+             = pub_sig.61
+       sn    = sn.62
+       snCA  = snCA.63
+       z     = verify(pub_sig.61,
+                      <$idCA.52, $id.51, pkID.59, 'pubKey', sn.62, $i.49, $j.53>, pkCA.58)
+       z.1   = true
+    
+    4. $i    = $i.50
+       $i0   = $i0.51
+       $id   = $id.52
+       $idCA = $idCA.53
+       $j    = $j.54
+       $j0   = $j0.55
+       $rootCA
+             = $rootCA.57
+       ca_sig
+             = sign(<$rootCA.57, $idCA.53, pk(x.96), 'pubKey-CA', snCA.64, $i0.51, 
+                     $j0.55>,
+                    x.98)
+       pkCA  = pk(x.96)
+       pkID  = pkID.60
+       pkRootCA
+             = pk(x.98)
+       pub_sig
+             = sign(<$idCA.53, $id.52, pkID.60, 'pubKey', sn.63, $i.50, $j.54>, x.96)
+       sn    = sn.63
+       snCA  = snCA.64
+       z     = true
+       z.1   = true
+  */
+
+rule (modulo E) RequestLegitimacyProof_Success:
+   [
+   In( <$rootCA, $idCA, pkCA, 'pubKey-CA', sn, $i, $j> ), In( ca_sig ),
+   !Root_CA( $rootCA, pkRCA ),
+   !CA_Documentation( $rootCA, $idCA,
+                      <$rootCA, $idCA, pkCA, 'pubKey-CA', sn, $i, $j>, ca_sig
+   )
+   ]
+  --[
+  DocumentedIntermediateCA( $rootCA,
+                            <$rootCA, $idCA, pkCA, 'pubKey-CA', sn, $i, $j>, $idCA
+  ),
+  Eq( verify(ca_sig, <$rootCA, $idCA, pkCA, 'pubKey-CA', sn, $i, $j>,
+             pkRCA),
+      true
+  ),
+  RootCADocumented( $rootCA,
+                    <$rootCA, $idCA, pkCA, 'pubKey-CA', sn, $i, $j>
+  ),
+  Time( $now )
+  ]->
+   [ ]
+
+  /*
+  rule (modulo AC) RequestLegitimacyProof_Success:
+     [
+     In( <$rootCA, $idCA, pkCA, 'pubKey-CA', sn, $i, $j> ), In( ca_sig ),
+     !Root_CA( $rootCA, pkRCA ),
+     !CA_Documentation( $rootCA, $idCA,
+                        <$rootCA, $idCA, pkCA, 'pubKey-CA', sn, $i, $j>, ca_sig
+     )
+     ]
+    --[
+    DocumentedIntermediateCA( $rootCA,
+                              <$rootCA, $idCA, pkCA, 'pubKey-CA', sn, $i, $j>, $idCA
+    ),
+    Eq( z, true ),
+    RootCADocumented( $rootCA,
+                      <$rootCA, $idCA, pkCA, 'pubKey-CA', sn, $i, $j>
+    ),
+    Time( $now )
+    ]->
+     [ ]
+    variants (modulo AC)
+    1. $i    = $i.13
+       $idCA = $idCA.14
+       $j    = $j.15
+       $rootCA
+             = $rootCA.17
+       ca_sig
+             = ca_sig.18
+       pkCA  = pkCA.19
+       pkRCA = pkRCA.20
+       sn    = sn.21
+       z     = verify(ca_sig.18,
+                      <$rootCA.17, $idCA.14, pkCA.19, 'pubKey-CA', sn.21, $i.13, $j.15>,
+                      pkRCA.20)
+    
+    2. $i    = $i.20
+       $idCA = $idCA.21
+       $j    = $j.22
+       $rootCA
+             = $rootCA.24
+       ca_sig
+             = sign(<$rootCA.24, $idCA.21, pkCA.26, 'pubKey-CA', sn.28, $i.20, $j.22>,
+                    x.38)
+       pkCA  = pkCA.26
+       pkRCA = pk(x.38)
+       sn    = sn.28
+       z     = true
+  */
+
+rule (modulo E) RequestLegitimacyProof_Illegal:
+   [
+   In( <$rootCA, $idCA, pkCA, 'pubKey-CA', sn, $i, $j> ), In( ca_sig ),
+   !Root_CA( $rootCA, pkRCA )
+   ]
+  --[
+  UndocumentedIntermediateCA( $rootCA, $idCA,
+                              <$rootCA, $idCA, pkCA, 'pubKey-CA', sn, $i, $j>
+  ),
+  Eq( verify(ca_sig, <$rootCA, $idCA, pkCA, 'pubKey-CA', sn, $i, $j>,
+             pkRCA),
+      true
+  ),
+  RootCADocumented( $rootCA,
+                    <$rootCA, $idCA, pkCA, 'pubKey-CA', sn, $i, $j>
+  ),
+  Time( $now )
+  ]->
+   [ ]
+
+  /*
+  rule (modulo AC) RequestLegitimacyProof_Illegal:
+     [
+     In( <$rootCA, $idCA, pkCA, 'pubKey-CA', sn, $i, $j> ), In( ca_sig ),
+     !Root_CA( $rootCA, pkRCA )
+     ]
+    --[
+    UndocumentedIntermediateCA( $rootCA, $idCA,
+                                <$rootCA, $idCA, pkCA, 'pubKey-CA', sn, $i, $j>
+    ),
+    Eq( z, true ),
+    RootCADocumented( $rootCA,
+                      <$rootCA, $idCA, pkCA, 'pubKey-CA', sn, $i, $j>
+    ),
+    Time( $now )
+    ]->
+     [ ]
+    variants (modulo AC)
+    1. $i    = $i.13
+       $idCA = $idCA.14
+       $j    = $j.15
+       $rootCA
+             = $rootCA.17
+       ca_sig
+             = ca_sig.18
+       pkCA  = pkCA.19
+       pkRCA = pkRCA.20
+       sn    = sn.21
+       z     = verify(ca_sig.18,
+                      <$rootCA.17, $idCA.14, pkCA.19, 'pubKey-CA', sn.21, $i.13, $j.15>,
+                      pkRCA.20)
+    
+    2. $i    = $i.20
+       $idCA = $idCA.21
+       $j    = $j.22
+       $rootCA
+             = $rootCA.24
+       ca_sig
+             = sign(<$rootCA.24, $idCA.21, pkCA.26, 'pubKey-CA', sn.28, $i.20, $j.22>,
+                    x.38)
+       pkCA  = pkCA.26
+       pkRCA = pk(x.38)
+       sn    = sn.28
+       z     = true
+  */
+
+restriction externalCA_no_proof:
+  "∀ rootCA idCA ca_fields #t1.
+    (UndocumentedIntermediateCA( rootCA, idCA, ca_fields ) @ #t1) ⇒
+    (¬(∃ #t0.
+        (DocumentedCA( rootCA, idCA, ca_fields ) @ #t0) ∧ (#t0 < #t1)))"
+  // safety formula
+
+rule (modulo E) external_check_true:
+   [
+   In( <$idCA, $id, pkID, 'pubKey', sn, $i, $j> ), In( pub_sig ),
+   In( <$rootCA, $idCA, pkCA, 'pubKey-CA', snCA, $i0, $j0> ), In( ca_sig ),
+   !Root_CA( $rootCA, pkRootCA )
+   ]
+  --[
+  StatementCheckedExternally( <$rootCA, $idCA, pkCA, 'pubKey-CA', snCA, 
+                               $i0, $j0>,
+                              <$idCA, $id, pkID, sn>
+  ),
+  BenignCert( $idCA, <$idCA, $id, pkID, sn> ),
+  Asserts_PKI( $idCA, <$idCA, $id, pkID, sn> ),
+  Eq( verify(pub_sig, <$idCA, $id, pkID, 'pubKey', sn, $i, $j>, pkCA), true
+  ),
+  Eq( verify(ca_sig, <$rootCA, $idCA, pkCA, 'pubKey-CA', snCA, $i0, $j0>,
+             pkRootCA),
+      true
+  ),
+  Time( $now )
+  ]->
+   [ ]
+
+  /*
+  rule (modulo AC) external_check_true:
+     [
+     In( <$idCA, $id, pkID, 'pubKey', sn, $i, $j> ), In( pub_sig ),
+     In( <$rootCA, $idCA, pkCA, 'pubKey-CA', snCA, $i0, $j0> ), In( ca_sig ),
+     !Root_CA( $rootCA, pkRootCA )
+     ]
+    --[
+    StatementCheckedExternally( <$rootCA, $idCA, pkCA, 'pubKey-CA', snCA, 
+                                 $i0, $j0>,
+                                <$idCA, $id, pkID, sn>
+    ),
+    BenignCert( $idCA, <$idCA, $id, pkID, sn> ),
+    Asserts_PKI( $idCA, <$idCA, $id, pkID, sn> ), Eq( z, true ),
+    Eq( z.1, true ), Time( $now )
+    ]->
+     [ ]
+    variants (modulo AC)
+    1. $i    = $i.35
+       $i0   = $i0.36
+       $id   = $id.37
+       $idCA = $idCA.38
+       $j    = $j.39
+       $j0   = $j0.40
+       $rootCA
+             = $rootCA.42
+       ca_sig
+             = ca_sig.43
+       pkCA  = pkCA.44
+       pkID  = pkID.45
+       pkRootCA
+             = pkRootCA.46
+       pub_sig
+             = pub_sig.47
+       sn    = sn.48
+       snCA  = snCA.49
+       z     = verify(pub_sig.47,
+                      <$idCA.38, $id.37, pkID.45, 'pubKey', sn.48, $i.35, $j.39>, pkCA.44)
+       z.1   = verify(ca_sig.43,
+                      <$rootCA.42, $idCA.38, pkCA.44, 'pubKey-CA', snCA.49, $i0.36, $j0.40>,
+                      pkRootCA.46)
+    
+    2. $i    = $i.49
+       $i0   = $i0.50
+       $id   = $id.51
+       $idCA = $idCA.52
+       $j    = $j.53
+       $j0   = $j0.54
+       $rootCA
+             = $rootCA.56
+       ca_sig
+             = ca_sig.57
+       pkCA  = pk(x.96)
+       pkID  = pkID.59
+       pkRootCA
+             = pkRootCA.60
+       pub_sig
+             = sign(<$idCA.52, $id.51, pkID.59, 'pubKey', sn.62, $i.49, $j.53>, x.96)
+       sn    = sn.62
+       snCA  = snCA.63
+       z     = true
+       z.1   = verify(ca_sig.57,
+                      <$rootCA.56, $idCA.52, pk(x.96), 'pubKey-CA', snCA.63, $i0.50, $j0.54>,
+                      pkRootCA.60)
+    
+    3. $i    = $i.49
+       $i0   = $i0.50
+       $id   = $id.51
+       $idCA = $idCA.52
+       $j    = $j.53
+       $j0   = $j0.54
+       $rootCA
+             = $rootCA.56
+       ca_sig
+             = sign(<$rootCA.56, $idCA.52, pkCA.58, 'pubKey-CA', snCA.63, $i0.50, 
+                     $j0.54>,
+                    x.96)
+       pkCA  = pkCA.58
+       pkID  = pkID.59
+       pkRootCA
+             = pk(x.96)
+       pub_sig
+             = pub_sig.61
+       sn    = sn.62
+       snCA  = snCA.63
+       z     = verify(pub_sig.61,
+                      <$idCA.52, $id.51, pkID.59, 'pubKey', sn.62, $i.49, $j.53>, pkCA.58)
+       z.1   = true
+    
+    4. $i    = $i.50
+       $i0   = $i0.51
+       $id   = $id.52
+       $idCA = $idCA.53
+       $j    = $j.54
+       $j0   = $j0.55
+       $rootCA
+             = $rootCA.57
+       ca_sig
+             = sign(<$rootCA.57, $idCA.53, pk(x.96), 'pubKey-CA', snCA.64, $i0.51, 
+                     $j0.55>,
+                    x.98)
+       pkCA  = pk(x.96)
+       pkID  = pkID.60
+       pkRootCA
+             = pk(x.98)
+       pub_sig
+             = sign(<$idCA.53, $id.52, pkID.60, 'pubKey', sn.63, $i.50, $j.54>, x.96)
+       sn    = sn.63
+       snCA  = snCA.64
+       z     = true
+       z.1   = true
+  */
+
+rule (modulo E) external_check_false:
+   [
+   In( <$idCA, $id, pkID, 'pubKey', sn, $i, $j> ), In( pub_sig ),
+   In( <$rootCA, $idCA, pkCA, 'pubKey-CA', snCA, $i0, $j0> ), In( ca_sig ),
+   !Root_CA( $rootCA, pkRootCA )
+   ]
+  --[
+  AssertsNot( $idCA, <$idCA, $id, pkID, sn>,
+              <$rootCA, $idCA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
+  ),
+  RogueCert( $idCA, <$idCA, $id, pkID, sn> ),
+  StatementCheckedExternally( <$rootCA, $idCA, pkCA, 'pubKey-CA', snCA, 
+                               $i0, $j0>,
+                              <$idCA, $id, pkID, sn>
+  ),
+  Eq( verify(pub_sig, <$idCA, $id, pkID, 'pubKey', sn, $i, $j>, pkCA), true
+  ),
+  Eq( verify(ca_sig, <$rootCA, $idCA, pkCA, 'pubKey-CA', snCA, $i0, $j0>,
+             pkRootCA),
+      true
+  ),
+  Time( $now )
+  ]->
+   [ ]
+
+  /*
+  rule (modulo AC) external_check_false:
+     [
+     In( <$idCA, $id, pkID, 'pubKey', sn, $i, $j> ), In( pub_sig ),
+     In( <$rootCA, $idCA, pkCA, 'pubKey-CA', snCA, $i0, $j0> ), In( ca_sig ),
+     !Root_CA( $rootCA, pkRootCA )
+     ]
+    --[
+    AssertsNot( $idCA, <$idCA, $id, pkID, sn>,
+                <$rootCA, $idCA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
+    ),
+    RogueCert( $idCA, <$idCA, $id, pkID, sn> ),
+    StatementCheckedExternally( <$rootCA, $idCA, pkCA, 'pubKey-CA', snCA, 
+                                 $i0, $j0>,
+                                <$idCA, $id, pkID, sn>
+    ),
+    Eq( z, true ), Eq( z.1, true ), Time( $now )
+    ]->
+     [ ]
+    variants (modulo AC)
+    1. $i    = $i.35
+       $i0   = $i0.36
+       $id   = $id.37
+       $idCA = $idCA.38
+       $j    = $j.39
+       $j0   = $j0.40
+       $rootCA
+             = $rootCA.42
+       ca_sig
+             = ca_sig.43
+       pkCA  = pkCA.44
+       pkID  = pkID.45
+       pkRootCA
+             = pkRootCA.46
+       pub_sig
+             = pub_sig.47
+       sn    = sn.48
+       snCA  = snCA.49
+       z     = verify(pub_sig.47,
+                      <$idCA.38, $id.37, pkID.45, 'pubKey', sn.48, $i.35, $j.39>, pkCA.44)
+       z.1   = verify(ca_sig.43,
+                      <$rootCA.42, $idCA.38, pkCA.44, 'pubKey-CA', snCA.49, $i0.36, $j0.40>,
+                      pkRootCA.46)
+    
+    2. $i    = $i.49
+       $i0   = $i0.50
+       $id   = $id.51
+       $idCA = $idCA.52
+       $j    = $j.53
+       $j0   = $j0.54
+       $rootCA
+             = $rootCA.56
+       ca_sig
+             = ca_sig.57
+       pkCA  = pk(x.96)
+       pkID  = pkID.59
+       pkRootCA
+             = pkRootCA.60
+       pub_sig
+             = sign(<$idCA.52, $id.51, pkID.59, 'pubKey', sn.62, $i.49, $j.53>, x.96)
+       sn    = sn.62
+       snCA  = snCA.63
+       z     = true
+       z.1   = verify(ca_sig.57,
+                      <$rootCA.56, $idCA.52, pk(x.96), 'pubKey-CA', snCA.63, $i0.50, $j0.54>,
+                      pkRootCA.60)
+    
+    3. $i    = $i.49
+       $i0   = $i0.50
+       $id   = $id.51
+       $idCA = $idCA.52
+       $j    = $j.53
+       $j0   = $j0.54
+       $rootCA
+             = $rootCA.56
+       ca_sig
+             = sign(<$rootCA.56, $idCA.52, pkCA.58, 'pubKey-CA', snCA.63, $i0.50, 
+                     $j0.54>,
+                    x.96)
+       pkCA  = pkCA.58
+       pkID  = pkID.59
+       pkRootCA
+             = pk(x.96)
+       pub_sig
+             = pub_sig.61
+       sn    = sn.62
+       snCA  = snCA.63
+       z     = verify(pub_sig.61,
+                      <$idCA.52, $id.51, pkID.59, 'pubKey', sn.62, $i.49, $j.53>, pkCA.58)
+       z.1   = true
+    
+    4. $i    = $i.50
+       $i0   = $i0.51
+       $id   = $id.52
+       $idCA = $idCA.53
+       $j    = $j.54
+       $j0   = $j0.55
+       $rootCA
+             = $rootCA.57
+       ca_sig
+             = sign(<$rootCA.57, $idCA.53, pk(x.96), 'pubKey-CA', snCA.64, $i0.51, 
+                     $j0.55>,
+                    x.98)
+       pkCA  = pk(x.96)
+       pkID  = pkID.60
+       pkRootCA
+             = pk(x.98)
+       pub_sig
+             = sign(<$idCA.53, $id.52, pkID.60, 'pubKey', sn.63, $i.50, $j.54>, x.96)
+       sn    = sn.63
+       snCA  = snCA.64
+       z     = true
+       z.1   = true
+  */
+
+restriction rootCA_CA_distinct:
+  "∀ rootCA idCA #t1 #t2.
+    ((Root_CA_Init( rootCA ) @ #t1) ∧ (NonRoot_CA_Init( idCA ) @ #t2)) ⇒
+    (¬(rootCA = idCA))"
+  // safety formula
+
+restriction CAsUnique:
+  "∀ IdCA pk1 sk1 pk2 sk2 #t1 #t2.
+    ((CA_Registered( IdCA, sk1, pk1 ) @ #t1) ∧
+     (CA_Registered( IdCA, sk2, pk2 ) @ #t2)) ⇒
+    (#t1 = #t2)"
+  // safety formula
+
+restriction eq:
+  "∀ e1 e2 #t. (Eq( e1, e2 ) @ #t) ⇒ (e1 = e2)"
+  // safety formula
+
+restriction time_monotonicity:
+  "∀ t #t1 #t3.
+    (((Time( t ) @ #t1) ∧ (Time( t ) @ #t3)) ∧ (#t1 < #t3)) ⇒
+    (∀ tp #t2.
+      (((Time( tp ) @ #t2) ∧ (#t1 < #t2)) ∧ (#t2 < #t3)) ⇒ (tp = t))"
+  // safety formula
+
+restriction certStillValid:
+  "∀ currTime valid_till #t1.
+    ((Time( currTime ) @ #t1) ∧
+     (CheckValidUntil( currTime, valid_till ) @ #t1)) ⇒
+    (¬(∃ #t2. (#t2 < #t1) ∧ (Time( valid_till ) @ #t2)))"
+  // safety formula
+
+rule (modulo E) compromiseCA[color=#d40808]:
+   [ !CA_s0( $idCA, ~skCA, pk(~skCA), ca_fields, CA_sig ) ]
+  --[
+  CompromiseCA( $idCA ), Compromise( ), Corrupted( $idCA ), Time( $now )
+  ]->
+   [ Out( ~skCA ) ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) compromiseRootCA[color=#d40808]:
+   [ !Root_CA_s0( $idCA, skCA, pkCA ) ]
+  --[
+  CompromiseRootCA( $idCA ), Compromise( ), Corrupted( $idCA ),
+  Time( $now )
+  ]->
+   [ Out( skCA ) ]
+
+  /* has exactly the trivial AC variant */
+
+lemma san_PKI_Root_CA_Init:
+  exists-trace "∃ idCA #t. Root_CA_Init( idCA ) @ #t"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ idCA #t. (Root_CA_Init( idCA ) @ #t)"
+*/
+by sorry
+
+lemma san_PKI_NonRoot_CA_Init:
+  exists-trace "∃ idCA #t. NonRoot_CA_Init( idCA ) @ #t"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ idCA #t. (NonRoot_CA_Init( idCA ) @ #t)"
+*/
+by sorry
+
+lemma san_PKI_Certify:
+  exists-trace "∃ idCA cert #t. Certified( idCA, cert ) @ #t"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ idCA cert #t. (Certified( idCA, cert ) @ #t)"
+*/
+by sorry
+
+lemma san_PKI_ClientValidate:
+  exists-trace
+  "∃ rootCA ca_fields idCA stmt #t.
+    ClientAcceptsChain( rootCA, ca_fields, idCA, stmt ) @ #t"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ rootCA ca_fields idCA stmt #t.
+  (ClientAcceptsChain( rootCA, ca_fields, idCA, stmt ) @ #t)"
+*/
+by sorry
+
+lemma san_PKI_RequestLegitimacyProof_Success:
+  exists-trace
+  "∃ rootCA idCA ca_fields #t.
+    DocumentedIntermediateCA( rootCA, ca_fields, idCA ) @ #t"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ rootCA idCA ca_fields #t.
+  (DocumentedIntermediateCA( rootCA, ca_fields, idCA ) @ #t)"
+*/
+by sorry
+
+lemma san_PKI_RequestLegitimacyProof_Illegal:
+  exists-trace
+  "∃ rootCA idCA ca_fields #t.
+    UndocumentedIntermediateCA( rootCA, idCA, ca_fields ) @ #t"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ rootCA idCA ca_fields #t.
+  (UndocumentedIntermediateCA( rootCA, idCA, ca_fields ) @ #t)"
+*/
+by sorry
+
+lemma san_PKIExt_external_check_true:
+  exists-trace
+  "∃ idCA ca_fields stmt #t.
+    (StatementCheckedExternally( ca_fields, stmt ) @ #t) ∧
+    (Asserts_PKI( idCA, stmt ) @ #t)"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ idCA ca_fields stmt #t.
+  (StatementCheckedExternally( ca_fields, stmt ) @ #t) ∧
+  (Asserts_PKI( idCA, stmt ) @ #t)"
+*/
+by sorry
+
+lemma san_PKIExt_external_check_false:
+  exists-trace
+  "∃ idCA ca_fields stmt #t.
+    (StatementCheckedExternally( ca_fields, stmt ) @ #t) ∧
+    (AssertsNot( idCA, stmt, ca_fields ) @ #t)"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ idCA ca_fields stmt #t.
+  (StatementCheckedExternally( ca_fields, stmt ) @ #t) ∧
+  (AssertsNot( idCA, stmt, ca_fields ) @ #t)"
+*/
+by sorry
+
+lemma CA_auth_w_compromise:
+  exists-trace
+  "∃ rootCA ca_fields idCA stmt #t.
+    (ClientAcceptsChain( rootCA, ca_fields, idCA, stmt ) @ #t) ∧
+    (¬(∃ #t1. CAAsserts( idCA, stmt ) @ #t1))"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ rootCA ca_fields idCA stmt #t.
+  (ClientAcceptsChain( rootCA, ca_fields, idCA, stmt ) @ #t)
+ ∧
+  ∀ #t1. (CAAsserts( idCA, stmt ) @ #t1) ⇒ ⊥"
+*/
+by sorry
+
+lemma authenticity:
+  all-traces
+  "∀ rootCA ca_fields idCA stmt #j.
+    (ClientAcceptsChain( rootCA, ca_fields, idCA, stmt ) @ #j) ⇒
+    (∃ #i. (GroundTruth( idCA, stmt ) @ #i) ∧ (#i < #j))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ rootCA ca_fields idCA stmt #j.
+  (ClientAcceptsChain( rootCA, ca_fields, idCA, stmt ) @ #j)
+ ∧
+  ∀ #i. (GroundTruth( idCA, stmt ) @ #i) ⇒ ¬(#i < #j)"
+*/
+by sorry
+
+lemma cert_auth:
+  all-traces
+  "∀ rootCA ca_fields idCA stmt #t.
+    (ClientAcceptsChain( rootCA, ca_fields, idCA, stmt ) @ #t) ⇒
+    (((∃ #t1. CAAsserts( idCA, stmt ) @ #t1) ∨
+      (∃ #t2. (CompromiseCA( idCA ) @ #t2) ∧ (#t2 < #t))) ∨
+     (∃ #t2. (CompromiseRootCA( rootCA ) @ #t2) ∧ (#t2 < #t)))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ rootCA ca_fields idCA stmt #t.
+  (ClientAcceptsChain( rootCA, ca_fields, idCA, stmt ) @ #t)
+ ∧
+  (∀ #t1. (CAAsserts( idCA, stmt ) @ #t1) ⇒ ⊥) ∧
+  (∀ #t2. (CompromiseCA( idCA ) @ #t2) ⇒ ¬(#t2 < #t)) ∧
+  (∀ #t2. (CompromiseRootCA( rootCA ) @ #t2) ⇒ ¬(#t2 < #t))"
+*/
+by sorry
+
+lemma A_PKI_Ext_CAfalseAsserts_rootBlamed_suff:
+  exists-trace
+  "∃ rootCA idCA stmt ca_fields #t0 #t1.
+    (((AssertsNot( idCA, stmt, ca_fields ) @ #t0) ∧
+      (UndocumentedIntermediateCA( rootCA, idCA, ca_fields ) @ #t1)) ∧
+     (∀ rootCA.1 idCA.1 stmt.1 ca_fields.1 #t0.1 #t1.1.
+       ((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+        (UndocumentedIntermediateCA( rootCA.1, idCA.1, ca_fields.1 ) @ #t1.1)) ⇒
+       (rootCA.1 = rootCA))) ∧
+    ((∀ a #i. (Corrupted( a ) @ #i) ⇒ (a = rootCA)) ∧
+     (¬(∃ idCA.1 rootCA.1 stmt.1 ca_fields.1 #t0.1 #t1.1.
+         (AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+         (DocumentedIntermediateCA( rootCA.1, ca_fields.1, idCA.1 ) @ #t1.1))))"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ rootCA idCA stmt ca_fields #t0 #t1.
+  (AssertsNot( idCA, stmt, ca_fields ) @ #t0) ∧
+  (UndocumentedIntermediateCA( rootCA, idCA, ca_fields ) @ #t1)
+ ∧
+  (∀ rootCA.1 idCA.1 stmt.1 ca_fields.1 #t0.1 #t1.1.
+    (AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+    (UndocumentedIntermediateCA( rootCA.1, idCA.1, ca_fields.1 ) @ #t1.1)
+   ⇒
+    rootCA.1 = rootCA) ∧
+  (∀ a #i. (Corrupted( a ) @ #i) ⇒ a = rootCA) ∧
+  (∀ idCA.1 rootCA.1 stmt.1 ca_fields.1 #t0.1 #t1.1.
+    (AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+    (DocumentedIntermediateCA( rootCA.1, ca_fields.1, idCA.1 ) @ #t1.1)
+   ⇒
+    ⊥)"
+*/
+by sorry
+
+lemma A_PKI_Ext_CAfalseAsserts_rootNotBlamed_suff:
+  exists-trace
+  "∃ idCA rootCA stmt ca_fields #t0 #t1.
+    (((AssertsNot( idCA, stmt, ca_fields ) @ #t0) ∧
+      (DocumentedIntermediateCA( rootCA, ca_fields, idCA ) @ #t1)) ∧
+     (∀ idCA.1 rootCA.1 stmt.1 ca_fields.1 #t0.1 #t1.1.
+       ((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+        (DocumentedIntermediateCA( rootCA.1, ca_fields.1, idCA.1 ) @ #t1.1)) ⇒
+       (idCA.1 = idCA))) ∧
+    ((∀ a #i. (Corrupted( a ) @ #i) ⇒ (a = idCA)) ∧
+     (¬(∃ rootCA.1 idCA.1 stmt.1 ca_fields.1 #t0.1 #t1.1.
+         (AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+         (UndocumentedIntermediateCA( rootCA.1, idCA.1, ca_fields.1 ) @ #t1.1))))"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ idCA rootCA stmt ca_fields #t0 #t1.
+  (AssertsNot( idCA, stmt, ca_fields ) @ #t0) ∧
+  (DocumentedIntermediateCA( rootCA, ca_fields, idCA ) @ #t1)
+ ∧
+  (∀ idCA.1 rootCA.1 stmt.1 ca_fields.1 #t0.1 #t1.1.
+    (AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+    (DocumentedIntermediateCA( rootCA.1, ca_fields.1, idCA.1 ) @ #t1.1)
+   ⇒
+    idCA.1 = idCA) ∧
+  (∀ a #i. (Corrupted( a ) @ #i) ⇒ a = idCA) ∧
+  (∀ rootCA.1 idCA.1 stmt.1 ca_fields.1 #t0.1 #t1.1.
+    (AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+    (UndocumentedIntermediateCA( rootCA.1, idCA.1, ca_fields.1 ) @ #t1.1)
+   ⇒
+    ⊥)"
+*/
+by sorry
+
+lemma A_PKI_Ext_verif_empty:
+  all-traces
+  "(¬((∃ rootCA idCA stmt ca_fields #t0 #t1.
+        (AssertsNot( idCA, stmt, ca_fields ) @ #t0) ∧
+        (UndocumentedIntermediateCA( rootCA, idCA, ca_fields ) @ #t1)) ∨
+      (∃ idCA rootCA stmt ca_fields #t0 #t1.
+        (AssertsNot( idCA, stmt, ca_fields ) @ #t0) ∧
+        (DocumentedIntermediateCA( rootCA, ca_fields, idCA ) @ #t1)))) ⇒
+   (∀ rootCA ca_fields stmt #t0 #t1.
+     ((StatementCheckedExternally( ca_fields, stmt ) @ #t0) ∧
+      (RootCADocumented( rootCA, ca_fields ) @ #t1)) ⇒
+     (∃ idCA #t. Asserts_PKI( idCA, stmt ) @ #t))"
+/*
+guarded formula characterizing all counter-examples:
+"(∀ rootCA idCA stmt ca_fields #t0 #t1.
+   (AssertsNot( idCA, stmt, ca_fields ) @ #t0) ∧
+   (UndocumentedIntermediateCA( rootCA, idCA, ca_fields ) @ #t1)
+  ⇒
+   ⊥) ∧
+ (∀ idCA rootCA stmt ca_fields #t0 #t1.
+   (AssertsNot( idCA, stmt, ca_fields ) @ #t0) ∧
+   (DocumentedIntermediateCA( rootCA, ca_fields, idCA ) @ #t1)
+  ⇒
+   ⊥) ∧
+ (∃ rootCA ca_fields stmt #t0 #t1.
+   (StatementCheckedExternally( ca_fields, stmt ) @ #t0) ∧
+   (RootCADocumented( rootCA, ca_fields ) @ #t1)
+  ∧
+   ∀ idCA #t. (Asserts_PKI( idCA, stmt ) @ #t) ⇒ ⊥)"
+*/
+by sorry
+
+lemma A_PKI_Ext_CAfalseAsserts_rootBlamed_verif_nonempty:
+  all-traces
+  "∀ rootCA idCA stmt ca_fields #t0 #t1.
+    ((AssertsNot( idCA, stmt, ca_fields ) @ #t0) ∧
+     (UndocumentedIntermediateCA( rootCA, idCA, ca_fields ) @ #t1)) ⇒
+    (¬(∀ rootCA.1 ca_fields.1 stmt.1 #t0.1 #t1.1.
+        ((StatementCheckedExternally( ca_fields.1, stmt.1 ) @ #t0.1) ∧
+         (RootCADocumented( rootCA.1, ca_fields.1 ) @ #t1.1)) ⇒
+        (∃ idCA.1 #t. Asserts_PKI( idCA.1, stmt.1 ) @ #t)))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ rootCA idCA stmt ca_fields #t0 #t1.
+  (AssertsNot( idCA, stmt, ca_fields ) @ #t0) ∧
+  (UndocumentedIntermediateCA( rootCA, idCA, ca_fields ) @ #t1)
+ ∧
+  ∀ rootCA.1 ca_fields.1 stmt.1 #t0.1 #t1.1.
+   (StatementCheckedExternally( ca_fields.1, stmt.1 ) @ #t0.1) ∧
+   (RootCADocumented( rootCA.1, ca_fields.1 ) @ #t1.1)
+  ⇒
+   ∃ idCA.1 #t. (Asserts_PKI( idCA.1, stmt.1 ) @ #t)"
+*/
+by sorry
+
+lemma A_PKI_Ext_CAfalseAsserts_rootNotBlamed_verif_nonempty:
+  all-traces
+  "∀ idCA rootCA stmt ca_fields #t0 #t1.
+    ((AssertsNot( idCA, stmt, ca_fields ) @ #t0) ∧
+     (DocumentedIntermediateCA( rootCA, ca_fields, idCA ) @ #t1)) ⇒
+    (¬(∀ rootCA.1 ca_fields.1 stmt.1 #t0.1 #t1.1.
+        ((StatementCheckedExternally( ca_fields.1, stmt.1 ) @ #t0.1) ∧
+         (RootCADocumented( rootCA.1, ca_fields.1 ) @ #t1.1)) ⇒
+        (∃ idCA.1 #t. Asserts_PKI( idCA.1, stmt.1 ) @ #t)))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ idCA rootCA stmt ca_fields #t0 #t1.
+  (AssertsNot( idCA, stmt, ca_fields ) @ #t0) ∧
+  (DocumentedIntermediateCA( rootCA, ca_fields, idCA ) @ #t1)
+ ∧
+  ∀ rootCA.1 ca_fields.1 stmt.1 #t0.1 #t1.1.
+   (StatementCheckedExternally( ca_fields.1, stmt.1 ) @ #t0.1) ∧
+   (RootCADocumented( rootCA.1, ca_fields.1 ) @ #t1.1)
+  ⇒
+   ∃ idCA.1 #t. (Asserts_PKI( idCA.1, stmt.1 ) @ #t)"
+*/
+by sorry
+
+lemma A_PKI_Ext_CAfalseAsserts_rootBlamed_min:
+  all-traces
+  "∀ rootCA idCA stmt ca_fields #t0 #t1.
+    ((AssertsNot( idCA, stmt, ca_fields ) @ #t0) ∧
+     (UndocumentedIntermediateCA( rootCA, idCA, ca_fields ) @ #t1)) ⇒
+    ((¬(∃ rootCA.1 idCA.1 stmt.1 ca_fields.1 #t0.1 #t1.1.
+         ((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+          (UndocumentedIntermediateCA( rootCA.1, idCA.1, ca_fields.1 ) @ #t1.1)) ∧
+         ((rootCA.1 = rootCA) ∧ (¬(rootCA = rootCA.1))))) ∧
+     (¬(∃ idCA.1 rootCA.1 stmt.1 ca_fields.1 #t0.1 #t1.1.
+         ((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+          (DocumentedIntermediateCA( rootCA.1, ca_fields.1, idCA.1 ) @ #t1.1)) ∧
+         ((idCA.1 = rootCA) ∧ (¬(rootCA = idCA.1))))))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ rootCA idCA stmt ca_fields #t0 #t1.
+  (AssertsNot( idCA, stmt, ca_fields ) @ #t0) ∧
+  (UndocumentedIntermediateCA( rootCA, idCA, ca_fields ) @ #t1)
+ ∧
+  ((∃ rootCA.1 idCA.1 stmt.1 ca_fields.1 #t0.1 #t1.1.
+     (AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+     (UndocumentedIntermediateCA( rootCA.1, idCA.1, ca_fields.1 ) @ #t1.1) ∧
+     (rootCA.1 = rootCA)
+    ∧
+     ¬(rootCA = rootCA.1)) ∨
+   (∃ idCA.1 rootCA.1 stmt.1 ca_fields.1 #t0.1 #t1.1.
+     (AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+     (DocumentedIntermediateCA( rootCA.1, ca_fields.1, idCA.1 ) @ #t1.1) ∧
+     (idCA.1 = rootCA)
+    ∧
+     ¬(rootCA = idCA.1)))"
+*/
+by sorry
+
+lemma A_PKI_Ext_CAfalseAsserts_rootNotBlamed_min:
+  all-traces
+  "∀ idCA rootCA stmt ca_fields #t0 #t1.
+    ((AssertsNot( idCA, stmt, ca_fields ) @ #t0) ∧
+     (DocumentedIntermediateCA( rootCA, ca_fields, idCA ) @ #t1)) ⇒
+    ((¬(∃ rootCA.1 idCA.1 stmt.1 ca_fields.1 #t0.1 #t1.1.
+         ((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+          (UndocumentedIntermediateCA( rootCA.1, idCA.1, ca_fields.1 ) @ #t1.1)) ∧
+         ((rootCA.1 = idCA) ∧ (¬(idCA = rootCA.1))))) ∧
+     (¬(∃ idCA.1 rootCA.1 stmt.1 ca_fields.1 #t0.1 #t1.1.
+         ((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+          (DocumentedIntermediateCA( rootCA.1, ca_fields.1, idCA.1 ) @ #t1.1)) ∧
+         ((idCA.1 = idCA) ∧ (¬(idCA = idCA.1))))))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ idCA rootCA stmt ca_fields #t0 #t1.
+  (AssertsNot( idCA, stmt, ca_fields ) @ #t0) ∧
+  (DocumentedIntermediateCA( rootCA, ca_fields, idCA ) @ #t1)
+ ∧
+  ((∃ rootCA.1 idCA.1 stmt.1 ca_fields.1 #t0.1 #t1.1.
+     (AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+     (UndocumentedIntermediateCA( rootCA.1, idCA.1, ca_fields.1 ) @ #t1.1) ∧
+     (rootCA.1 = idCA)
+    ∧
+     ¬(idCA = rootCA.1)) ∨
+   (∃ idCA.1 rootCA.1 stmt.1 ca_fields.1 #t0.1 #t1.1.
+     (AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+     (DocumentedIntermediateCA( rootCA.1, ca_fields.1, idCA.1 ) @ #t1.1) ∧
+     (idCA.1 = idCA)
+    ∧
+     ¬(idCA = idCA.1)))"
+*/
+by sorry
+
+lemma A_PKI_Ext_CAfalseAsserts_rootBlamed_uniq:
+  all-traces
+  "∀ rootCA idCA stmt ca_fields #t0 #t1.
+    ((AssertsNot( idCA, stmt, ca_fields ) @ #t0) ∧
+     (UndocumentedIntermediateCA( rootCA, idCA, ca_fields ) @ #t1)) ⇒
+    (∃ #i. Corrupted( rootCA ) @ #i)"
+/*
+guarded formula characterizing all counter-examples:
+"∃ rootCA idCA stmt ca_fields #t0 #t1.
+  (AssertsNot( idCA, stmt, ca_fields ) @ #t0) ∧
+  (UndocumentedIntermediateCA( rootCA, idCA, ca_fields ) @ #t1)
+ ∧
+  ∀ #i. (Corrupted( rootCA ) @ #i) ⇒ ⊥"
+*/
+by sorry
+
+lemma A_PKI_Ext_CAfalseAsserts_rootNotBlamed_uniq:
+  all-traces
+  "∀ idCA rootCA stmt ca_fields #t0 #t1.
+    ((AssertsNot( idCA, stmt, ca_fields ) @ #t0) ∧
+     (DocumentedIntermediateCA( rootCA, ca_fields, idCA ) @ #t1)) ⇒
+    (∃ #i. Corrupted( idCA ) @ #i)"
+/*
+guarded formula characterizing all counter-examples:
+"∃ idCA rootCA stmt ca_fields #t0 #t1.
+  (AssertsNot( idCA, stmt, ca_fields ) @ #t0) ∧
+  (DocumentedIntermediateCA( rootCA, ca_fields, idCA ) @ #t1)
+ ∧
+  ∀ #i. (Corrupted( idCA ) @ #i) ⇒ ⊥"
+*/
+simplify
+solve( !Root_CA( $rootCA, pk(x.1) ) ▶₄ #t0 )
+  case Root_CA_Init
+  solve( !Root_CA( $rootCA, pk(x.1) ) ▶₂ #t1 )
+    case Root_CA_Init
+    solve( !CA_Documentation( $rootCA, $idCA,
+                              <$rootCA, $idCA, pk(x), 'pubKey-CA', snCA, $i0, $j0>,
+                              sign(<$rootCA, $idCA, pk(x), 'pubKey-CA', snCA, $i0, $j0>, ~skCA)
+           ) ▶₃ #t1 )
+      case CA_Init
+      solve( !KU( sign(<$idCA, $id, pkID, 'pubKey', sn, $i, $j>, ~skCA)
+             ) @ #vk.15 )
+        case Certify
+        by contradiction /* from formulas */
+      next
+        case c_sign
+        solve( !KU( ~skCA ) @ #vk.27 )
+          case compromiseCA
+          by contradiction /* from formulas */
+        qed
+      qed
+    qed
+  qed
+qed
+
+lemma A_PKI_Ext_CAfalseAsserts_rootBlamed_inj:
+  all-traces "⊤"
+/*
+guarded formula characterizing all counter-examples:
+"⊥"
+*/
+by sorry
+
+lemma A_PKI_Ext_CAfalseAsserts_rootNotBlamed_inj:
+  all-traces "⊤"
+/*
+guarded formula characterizing all counter-examples:
+"⊥"
+*/
+by sorry
+
+lemma A_PKI_Ext_CAfalseAsserts_rootBlamed_single:
+  exists-trace
+  "∃ rootCA idCA stmt ca_fields #t0 #t1.
+    (((AssertsNot( idCA, stmt, ca_fields ) @ #t0) ∧
+      (UndocumentedIntermediateCA( rootCA, idCA, ca_fields ) @ #t1)) ∧
+     (∀ rootCA.1 idCA.1 stmt.1 ca_fields.1 #t0.1 #t1.1.
+       ((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+        (UndocumentedIntermediateCA( rootCA.1, idCA.1, ca_fields.1 ) @ #t1.1)) ⇒
+       (rootCA.1 = rootCA))) ∧
+    (¬(∃ idCA.1 rootCA.1 stmt.1 ca_fields.1 #t0.1 #t1.1.
+        (AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+        (DocumentedIntermediateCA( rootCA.1, ca_fields.1, idCA.1 ) @ #t1.1)))"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ rootCA idCA stmt ca_fields #t0 #t1.
+  (AssertsNot( idCA, stmt, ca_fields ) @ #t0) ∧
+  (UndocumentedIntermediateCA( rootCA, idCA, ca_fields ) @ #t1)
+ ∧
+  (∀ rootCA.1 idCA.1 stmt.1 ca_fields.1 #t0.1 #t1.1.
+    (AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+    (UndocumentedIntermediateCA( rootCA.1, idCA.1, ca_fields.1 ) @ #t1.1)
+   ⇒
+    rootCA.1 = rootCA) ∧
+  (∀ idCA.1 rootCA.1 stmt.1 ca_fields.1 #t0.1 #t1.1.
+    (AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+    (DocumentedIntermediateCA( rootCA.1, ca_fields.1, idCA.1 ) @ #t1.1)
+   ⇒
+    ⊥)"
+*/
+by sorry
+
+lemma A_PKI_Ext_CAfalseAsserts_rootNotBlamed_single:
+  exists-trace
+  "∃ idCA rootCA stmt ca_fields #t0 #t1.
+    (((AssertsNot( idCA, stmt, ca_fields ) @ #t0) ∧
+      (DocumentedIntermediateCA( rootCA, ca_fields, idCA ) @ #t1)) ∧
+     (∀ idCA.1 rootCA.1 stmt.1 ca_fields.1 #t0.1 #t1.1.
+       ((AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+        (DocumentedIntermediateCA( rootCA.1, ca_fields.1, idCA.1 ) @ #t1.1)) ⇒
+       (idCA.1 = idCA))) ∧
+    (¬(∃ rootCA.1 idCA.1 stmt.1 ca_fields.1 #t0.1 #t1.1.
+        (AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+        (UndocumentedIntermediateCA( rootCA.1, idCA.1, ca_fields.1 ) @ #t1.1)))"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ idCA rootCA stmt ca_fields #t0 #t1.
+  (AssertsNot( idCA, stmt, ca_fields ) @ #t0) ∧
+  (DocumentedIntermediateCA( rootCA, ca_fields, idCA ) @ #t1)
+ ∧
+  (∀ idCA.1 rootCA.1 stmt.1 ca_fields.1 #t0.1 #t1.1.
+    (AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+    (DocumentedIntermediateCA( rootCA.1, ca_fields.1, idCA.1 ) @ #t1.1)
+   ⇒
+    idCA.1 = idCA) ∧
+  (∀ rootCA.1 idCA.1 stmt.1 ca_fields.1 #t0.1 #t1.1.
+    (AssertsNot( idCA.1, stmt.1, ca_fields.1 ) @ #t0.1) ∧
+    (UndocumentedIntermediateCA( rootCA.1, idCA.1, ca_fields.1 ) @ #t1.1)
+   ⇒
+    ⊥)"
+*/
+by sorry
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* All wellformedness checks were successful. */
+
+/*
+Generated from:
+Tamarin version 1.10.0
+Maude version 3.4
+Git revision: UNKNOWN, branch: UNKNOWN
+Compiled at: 2025-07-07 04:54:25.960893702 UTC
+*/
+
+end

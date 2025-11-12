@@ -1,0 +1,13 @@
+{
+  "task_id": "--A_RevokeGossip_1_monitor_blames_log_gossip_intm_CA_single--default",
+  "error_description": "The task exceeded its memory limit. Review the memory limit setting for this task.",
+  "wrapper_measures": {
+    "time": 414.8182806968689,
+    "avg_memory": 3515.0437082827652,
+    "peak_memory": 8206.94140625
+  },
+  "return_code": -2,
+  "last_stderr_lines": [
+    "Process exceeded memory limit"
+  ]
+}

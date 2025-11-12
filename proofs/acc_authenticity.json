@@ -99,7 +99,7 @@
 			},
       "lemmas": [
         {"name": "A_CTExt_2_verif_empty_helper1"},
-        {"name": λ: "g""A_CTExt_2_root_ca_rogue_client_inclusion_viol_uniq_helper1"},
+        {"name": "A_CTExt_2_root_ca_rogue_client_inclusion_viol_uniq_helper1"},
         {"name": "A_CTExt_2_root_ca_rogue_client_inclusion_viol_uniq_helper2"},
         {"name": "A_CTExt_2_ca_rogue_client_inclusion_viol_inj_helper"},
         {"name": "A_CTAudit_2_ca_rogue_audit_logger_rogue_uniq_helper"}

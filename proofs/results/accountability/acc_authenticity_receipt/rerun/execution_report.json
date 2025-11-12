@@ -1,0 +1,66 @@
+{
+  "recipe": "acc_authenticity_receipt-rerun.json",
+  "config": {
+    "global_max_cores": 10,
+    "global_max_memory": 15,
+    "default_timeout": 300,
+    "output_directory": "results/accountability/acc_authenticity_receipt/rerun"
+  },
+  "tamarin_versions": {
+    "default": {
+      "path": "tamarin-prover",
+      "version": "v1.10.0"
+    }
+  },
+  "execution_metadata": {
+    "total_tasks": 1,
+    "total_successes": 1,
+    "total_failures": 0,
+    "total_cache_hit": 0,
+    "total_runtime": 13.401223182678223,
+    "total_memory": 284.76953125,
+    "max_runtime": 13.401223182678223,
+    "max_memory": 284.76953125
+  },
+  "tasks": {
+    "A_Receipt": {
+      "theory_file": "../ct_lemmas_pregen_receipt.spthy",
+      "subtasks": {
+        "A_Receipt--A_Receipt_1_root_ca_rogue_monitor_rogue_uniq--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_Receipt_1_root_ca_rogue_monitor_rogue_uniq",
+            "output_theory_file": "results/accountability/acc_authenticity_receipt/rerun/proofs/A_Receipt--A_Receipt_1_root_ca_rogue_monitor_rogue_uniq--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_receipt/rerun/traces/A_Receipt--A_Receipt_1_root_ca_rogue_monitor_rogue_uniq--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=RECEIPT"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 120
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2025-11-10T18:51:07.682702",
+            "exec_end": "2025-11-10T18:51:21.083925",
+            "exec_duration_monotonic": 13.401223182678223,
+            "avg_memory": 196.41517857142858,
+            "peak_memory": 284.76953125
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 13.27,
+            "lemma_result": "verified",
+            "steps": 128,
+            "analysis_type": "all-traces"
+          }
+        }
+      }
+    }
+  }
+}

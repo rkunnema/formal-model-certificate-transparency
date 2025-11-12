@@ -1,5 +1,35 @@
 # Tamarin model for Certificate Transparency
 
+## Files:
+
+- `README.md` This file
+
+### Model:
+
+- `ct.spthy` model for CT and extensions
+- `pki.spthy` model for PKI
+- `acc_oracle` oracle used to guide proofs in those models
+
+### Use with batch-tamarin
+
+`batch-tamarin` (see below) needs the accountability lemmas to be translated
+before running. These files are generated from `ct.spthy` and `pki.spthy` by
+clicking "Download" in interactive mode after loading.
+
+- `ct_lemmas_pregen.spthy`
+- `pki_lemma_pregen.spthy`
+- `ct_lemmas_pregen_receipt.spthy` (generated from `ct.sphy` with `--defines=RECEIPT` see below.)
+
+### Results
+
+- `proofs` We saved important proofs in case reproducibility environment should fail.
+- `results` batch-tamarin generates this and puts results in HTML format here 
+
+### Reproducibility:
+- `flake.lock` for Nix environment
+- `flake.nix` for Nix environment
+- `tamarin-1.10-and-batch.Dockerfile` to produce docker image
+
 ## Usage:
 
 Use `tamarin-prover --prove={lemmaname}` to prove most lemmas. This can take a while and you need some memory.

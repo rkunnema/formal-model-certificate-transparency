@@ -2,7 +2,7 @@
   "recipe": "acc_authenticity_receipt.json",
   "config": {
     "global_max_cores": 10,
-    "global_max_memory": 128,
+    "global_max_memory": 15,
     "default_timeout": 300,
     "output_directory": "results/accountability/acc_authenticity_receipt"
   },
@@ -13,14 +13,982 @@
     }
   },
   "execution_metadata": {
-    "total_tasks": 0,
-    "total_successes": 0,
-    "total_failures": 0,
-    "total_cache_hit": 0,
-    "total_runtime": 0.0,
-    "total_memory": 0.0,
-    "max_runtime": 0.0,
-    "max_memory": 0.0
+    "total_tasks": 28,
+    "total_successes": 27,
+    "total_failures": 1,
+    "total_cache_hit": 28,
+    "total_runtime": 994.4558005332947,
+    "total_memory": 21097.9296875,
+    "max_runtime": 172.4369764328003,
+    "max_memory": 4970.89453125
   },
-  "tasks": {}
+  "tasks": {
+    "A_Receipt": {
+      "theory_file": "../ct_lemmas_pregen_receipt.spthy",
+      "subtasks": {
+        "--A_Receipt_1_root_ca_rogue_suff--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_Receipt_1_root_ca_rogue_suff",
+            "output_theory_file": "results/accountability/acc_authenticity_receipt/proofs/--A_Receipt_1_root_ca_rogue_suff--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_receipt/traces/--A_Receipt_1_root_ca_rogue_suff--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=RECEIPT"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 120
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-09T18:47:42.027712",
+            "exec_end": "2025-11-09T18:48:28.620453",
+            "exec_duration_monotonic": 46.59274101257324,
+            "avg_memory": 482.77892287234033,
+            "peak_memory": 861.18359375
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 46.44,
+            "lemma_result": "verified",
+            "steps": 39,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--A_Receipt_1_ca_rogue_receipt_suff--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_Receipt_1_ca_rogue_receipt_suff",
+            "output_theory_file": "results/accountability/acc_authenticity_receipt/proofs/--A_Receipt_1_ca_rogue_receipt_suff--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_receipt/traces/--A_Receipt_1_ca_rogue_receipt_suff--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=RECEIPT"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 120
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-09T18:48:28.719027",
+            "exec_end": "2025-11-09T18:48:45.593004",
+            "exec_duration_monotonic": 16.873976707458496,
+            "avg_memory": 229.96093749999997,
+            "peak_memory": 365.875
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 16.72,
+            "lemma_result": "verified",
+            "steps": 30,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--A_Receipt_1_verif_empty--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_Receipt_1_verif_empty",
+            "output_theory_file": "results/accountability/acc_authenticity_receipt/proofs/--A_Receipt_1_verif_empty--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_receipt/traces/--A_Receipt_1_verif_empty--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=RECEIPT"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 120
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-09T18:48:45.630366",
+            "exec_end": "2025-11-09T18:49:27.147974",
+            "exec_duration_monotonic": 41.51760792732239,
+            "avg_memory": 292.03097098214283,
+            "peak_memory": 382.64453125
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 41.32,
+            "lemma_result": "verified",
+            "steps": 433,
+            "analysis_type": "all-traces"
+          }
+        },
+        "--A_Receipt_1_root_ca_rogue_verif_nonempty--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_Receipt_1_root_ca_rogue_verif_nonempty",
+            "output_theory_file": "results/accountability/acc_authenticity_receipt/proofs/--A_Receipt_1_root_ca_rogue_verif_nonempty--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_receipt/traces/--A_Receipt_1_root_ca_rogue_verif_nonempty--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=RECEIPT"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 120
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-09T18:49:27.208342",
+            "exec_end": "2025-11-09T18:49:37.893262",
+            "exec_duration_monotonic": 10.6849205493927,
+            "avg_memory": 165.3025568181818,
+            "peak_memory": 267.61328125
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 10.55,
+            "lemma_result": "verified",
+            "steps": 40,
+            "analysis_type": "all-traces"
+          }
+        },
+        "--A_Receipt_1_root_ca_rogue_monitor_rogue_verif_nonempty--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_Receipt_1_root_ca_rogue_monitor_rogue_verif_nonempty",
+            "output_theory_file": "results/accountability/acc_authenticity_receipt/proofs/--A_Receipt_1_root_ca_rogue_monitor_rogue_verif_nonempty--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_receipt/traces/--A_Receipt_1_root_ca_rogue_monitor_rogue_verif_nonempty--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=RECEIPT"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 120
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-09T18:49:37.979212",
+            "exec_end": "2025-11-09T18:49:53.932612",
+            "exec_duration_monotonic": 15.953399896621704,
+            "avg_memory": 195.810791015625,
+            "peak_memory": 287.94140625
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 15.81,
+            "lemma_result": "verified",
+            "steps": 108,
+            "analysis_type": "all-traces"
+          }
+        },
+        "--A_Receipt_1_ca_rogue_receipt_verif_nonempty--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_Receipt_1_ca_rogue_receipt_verif_nonempty",
+            "output_theory_file": "results/accountability/acc_authenticity_receipt/proofs/--A_Receipt_1_ca_rogue_receipt_verif_nonempty--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_receipt/traces/--A_Receipt_1_ca_rogue_receipt_verif_nonempty--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=RECEIPT"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 120
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-09T18:49:53.994212",
+            "exec_end": "2025-11-09T18:50:04.722042",
+            "exec_duration_monotonic": 10.727829933166504,
+            "avg_memory": 157.26811079545453,
+            "peak_memory": 277.546875
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 10.59,
+            "lemma_result": "verified",
+            "steps": 37,
+            "analysis_type": "all-traces"
+          }
+        },
+        "--A_Receipt_1_ca_rogue_receipt_monitor_rogue_verif_nonempty--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_Receipt_1_ca_rogue_receipt_monitor_rogue_verif_nonempty",
+            "output_theory_file": "results/accountability/acc_authenticity_receipt/proofs/--A_Receipt_1_ca_rogue_receipt_monitor_rogue_verif_nonempty--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_receipt/traces/--A_Receipt_1_ca_rogue_receipt_monitor_rogue_verif_nonempty--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=RECEIPT"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 120
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-09T18:50:04.770161",
+            "exec_end": "2025-11-09T18:50:22.000380",
+            "exec_duration_monotonic": 17.2302188873291,
+            "avg_memory": 206.5859375,
+            "peak_memory": 284.92578125
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 17.08,
+            "lemma_result": "verified",
+            "steps": 104,
+            "analysis_type": "all-traces"
+          }
+        },
+        "--A_Receipt_1_root_ca_rogue_min--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_Receipt_1_root_ca_rogue_min",
+            "output_theory_file": "results/accountability/acc_authenticity_receipt/proofs/--A_Receipt_1_root_ca_rogue_min--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_receipt/traces/--A_Receipt_1_root_ca_rogue_min--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=RECEIPT"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 120
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-09T18:50:22.080751",
+            "exec_end": "2025-11-09T18:50:31.520902",
+            "exec_duration_monotonic": 9.440151453018188,
+            "avg_memory": 148.706640625,
+            "peak_memory": 255.33203125
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 9.3,
+            "lemma_result": "verified",
+            "steps": 6,
+            "analysis_type": "all-traces"
+          }
+        },
+        "--A_Receipt_1_root_ca_rogue_monitor_rogue_min--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_Receipt_1_root_ca_rogue_monitor_rogue_min",
+            "output_theory_file": "results/accountability/acc_authenticity_receipt/proofs/--A_Receipt_1_root_ca_rogue_monitor_rogue_min--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_receipt/traces/--A_Receipt_1_root_ca_rogue_monitor_rogue_min--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=RECEIPT"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 120
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-09T18:50:31.555744",
+            "exec_end": "2025-11-09T18:51:37.227364",
+            "exec_duration_monotonic": 65.67161965370178,
+            "avg_memory": 425.12559185606057,
+            "peak_memory": 493.9140625
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 65.45,
+            "lemma_result": "verified",
+            "steps": 884,
+            "analysis_type": "all-traces"
+          }
+        },
+        "--A_Receipt_1_ca_rogue_receipt_min--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_Receipt_1_ca_rogue_receipt_min",
+            "output_theory_file": "results/accountability/acc_authenticity_receipt/proofs/--A_Receipt_1_ca_rogue_receipt_min--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_receipt/traces/--A_Receipt_1_ca_rogue_receipt_min--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=RECEIPT"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 120
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-09T18:51:37.326255",
+            "exec_end": "2025-11-09T18:51:46.697476",
+            "exec_duration_monotonic": 9.37122130393982,
+            "avg_memory": 146.66640625000002,
+            "peak_memory": 251.6015625
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 9.24,
+            "lemma_result": "verified",
+            "steps": 6,
+            "analysis_type": "all-traces"
+          }
+        },
+        "--A_Receipt_1_ca_rogue_receipt_monitor_rogue_min--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_Receipt_1_ca_rogue_receipt_monitor_rogue_min",
+            "output_theory_file": "results/accountability/acc_authenticity_receipt/proofs/--A_Receipt_1_ca_rogue_receipt_monitor_rogue_min--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_receipt/traces/--A_Receipt_1_ca_rogue_receipt_monitor_rogue_min--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=RECEIPT"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 120
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-09T18:51:46.793259",
+            "exec_end": "2025-11-09T18:52:55.690481",
+            "exec_duration_monotonic": 68.89722204208374,
+            "avg_memory": 402.72390172101444,
+            "peak_memory": 458.296875
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 68.66,
+            "lemma_result": "verified",
+            "steps": 900,
+            "analysis_type": "all-traces"
+          }
+        },
+        "--A_Receipt_1_root_ca_rogue_uniq--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_Receipt_1_root_ca_rogue_uniq",
+            "output_theory_file": "results/accountability/acc_authenticity_receipt/proofs/--A_Receipt_1_root_ca_rogue_uniq--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_receipt/traces/--A_Receipt_1_root_ca_rogue_uniq--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=RECEIPT"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 120
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-09T18:52:55.795004",
+            "exec_end": "2025-11-09T18:53:05.686570",
+            "exec_duration_monotonic": 9.891566038131714,
+            "avg_memory": 150.759765625,
+            "peak_memory": 269.9296875
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 9.74,
+            "lemma_result": "verified",
+            "steps": 32,
+            "analysis_type": "all-traces"
+          }
+        },
+        "A_Receipt--A_Receipt_1_root_ca_rogue_monitor_rogue_uniq--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_Receipt_1_root_ca_rogue_monitor_rogue_uniq",
+            "output_theory_file": "results/accountability/acc_authenticity_receipt/rerun/proofs/A_Receipt--A_Receipt_1_root_ca_rogue_monitor_rogue_uniq--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_receipt/rerun/traces/A_Receipt--A_Receipt_1_root_ca_rogue_monitor_rogue_uniq--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=RECEIPT"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 120
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2025-11-10T18:51:07.682702",
+            "exec_end": "2025-11-10T18:51:21.083925",
+            "exec_duration_monotonic": 13.401223182678223,
+            "avg_memory": 196.41517857142858,
+            "peak_memory": 284.76953125
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 13.27,
+            "lemma_result": "verified",
+            "steps": 128,
+            "analysis_type": "all-traces"
+          }
+        },
+        "--A_Receipt_1_ca_rogue_receipt_uniq--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_Receipt_1_ca_rogue_receipt_uniq",
+            "output_theory_file": "results/accountability/acc_authenticity_receipt/proofs/--A_Receipt_1_ca_rogue_receipt_uniq--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_receipt/traces/--A_Receipt_1_ca_rogue_receipt_uniq--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=RECEIPT"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 120
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-09T18:53:12.925136",
+            "exec_end": "2025-11-09T18:53:22.882560",
+            "exec_duration_monotonic": 9.957423448562622,
+            "avg_memory": 152.938671875,
+            "peak_memory": 264.0234375
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 9.8,
+            "lemma_result": "verified",
+            "steps": 31,
+            "analysis_type": "all-traces"
+          }
+        },
+        "--A_Receipt_1_ca_rogue_receipt_monitor_rogue_uniq--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_Receipt_1_ca_rogue_receipt_monitor_rogue_uniq",
+            "output_theory_file": "results/accountability/acc_authenticity_receipt/proofs/--A_Receipt_1_ca_rogue_receipt_monitor_rogue_uniq--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_receipt/traces/--A_Receipt_1_ca_rogue_receipt_monitor_rogue_uniq--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=RECEIPT"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 120
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-09T18:53:22.987557",
+            "exec_end": "2025-11-09T18:53:38.267639",
+            "exec_duration_monotonic": 15.280081987380981,
+            "avg_memory": 196.66674804687497,
+            "peak_memory": 292.3125
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 15.14,
+            "lemma_result": "verified",
+            "steps": 132,
+            "analysis_type": "all-traces"
+          }
+        },
+        "--A_Receipt_1_root_ca_rogue_inj--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_Receipt_1_root_ca_rogue_inj",
+            "output_theory_file": "results/accountability/acc_authenticity_receipt/proofs/--A_Receipt_1_root_ca_rogue_inj--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_receipt/traces/--A_Receipt_1_root_ca_rogue_inj--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=RECEIPT"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 120
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-09T18:53:38.338089",
+            "exec_end": "2025-11-09T18:53:42.594499",
+            "exec_duration_monotonic": 4.256409645080566,
+            "avg_memory": 87.38984375,
+            "peak_memory": 109.140625
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 4.12,
+            "lemma_result": "verified",
+            "steps": 1,
+            "analysis_type": "all-traces"
+          }
+        },
+        "--A_Receipt_1_root_ca_rogue_monitor_rogue_inj--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_Receipt_1_root_ca_rogue_monitor_rogue_inj",
+            "output_theory_file": "results/accountability/acc_authenticity_receipt/proofs/--A_Receipt_1_root_ca_rogue_monitor_rogue_inj--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_receipt/traces/--A_Receipt_1_root_ca_rogue_monitor_rogue_inj--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=RECEIPT"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 120
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-09T18:53:42.686038",
+            "exec_end": "2025-11-09T18:53:52.705601",
+            "exec_duration_monotonic": 10.019562721252441,
+            "avg_memory": 142.01874999999998,
+            "peak_memory": 275.70703125
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 9.88,
+            "lemma_result": "verified",
+            "steps": 40,
+            "analysis_type": "all-traces"
+          }
+        },
+        "--A_Receipt_1_ca_rogue_receipt_inj--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_Receipt_1_ca_rogue_receipt_inj",
+            "output_theory_file": "results/accountability/acc_authenticity_receipt/proofs/--A_Receipt_1_ca_rogue_receipt_inj--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_receipt/traces/--A_Receipt_1_ca_rogue_receipt_inj--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=RECEIPT"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 120
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-09T18:53:52.760250",
+            "exec_end": "2025-11-09T18:53:57.174156",
+            "exec_duration_monotonic": 4.413906097412109,
+            "avg_memory": 87.02109375,
+            "peak_memory": 108.6796875
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 4.27,
+            "lemma_result": "verified",
+            "steps": 1,
+            "analysis_type": "all-traces"
+          }
+        },
+        "--A_Receipt_1_ca_rogue_receipt_monitor_rogue_inj--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_Receipt_1_ca_rogue_receipt_monitor_rogue_inj",
+            "output_theory_file": "results/accountability/acc_authenticity_receipt/proofs/--A_Receipt_1_ca_rogue_receipt_monitor_rogue_inj--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_receipt/traces/--A_Receipt_1_ca_rogue_receipt_monitor_rogue_inj--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=RECEIPT"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 120
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-09T18:53:57.198048",
+            "exec_end": "2025-11-09T18:54:08.786325",
+            "exec_duration_monotonic": 11.588276624679565,
+            "avg_memory": 150.87109375,
+            "peak_memory": 285.109375
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 11.42,
+            "lemma_result": "verified",
+            "steps": 48,
+            "analysis_type": "all-traces"
+          }
+        },
+        "--A_Receipt_1_root_ca_rogue_single--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_Receipt_1_root_ca_rogue_single",
+            "output_theory_file": "results/accountability/acc_authenticity_receipt/proofs/--A_Receipt_1_root_ca_rogue_single--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_receipt/traces/--A_Receipt_1_root_ca_rogue_single--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=RECEIPT"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 120
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-09T18:54:08.881824",
+            "exec_end": "2025-11-09T18:54:32.778575",
+            "exec_duration_monotonic": 23.896751165390015,
+            "avg_memory": 317.75732421875,
+            "peak_memory": 521.44140625
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 23.75,
+            "lemma_result": "verified",
+            "steps": 32,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--A_Receipt_1_ca_rogue_receipt_single--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_Receipt_1_ca_rogue_receipt_single",
+            "output_theory_file": "results/accountability/acc_authenticity_receipt/proofs/--A_Receipt_1_ca_rogue_receipt_single--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_receipt/traces/--A_Receipt_1_ca_rogue_receipt_single--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=RECEIPT"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 120
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-09T18:54:32.872472",
+            "exec_end": "2025-11-09T18:54:48.895534",
+            "exec_duration_monotonic": 16.023062467575073,
+            "avg_memory": 226.605712890625,
+            "peak_memory": 389.99609375
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 15.89,
+            "lemma_result": "verified",
+            "steps": 30,
+            "analysis_type": "exists-trace"
+          }
+        }
+      }
+    },
+    "sanity": {
+      "theory_file": "../ct_lemmas_pregen_receipt.spthy",
+      "subtasks": {
+        "--san_receipt_loggerReceivesReceipt--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "san_receipt_loggerReceivesReceipt",
+            "output_theory_file": "results/accountability/acc_authenticity_receipt/proofs/--san_receipt_loggerReceivesReceipt--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_receipt/traces/--san_receipt_loggerReceivesReceipt--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=RECEIPT"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 120
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-09T18:54:48.984063",
+            "exec_end": "2025-11-09T18:55:03.640349",
+            "exec_duration_monotonic": 14.656286239624023,
+            "avg_memory": 227.9671875,
+            "peak_memory": 407.05859375
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 14.51,
+            "lemma_result": "verified",
+            "steps": 13,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--san_receipt_domainOwnerBlamesMonitor--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "san_receipt_domainOwnerBlamesMonitor",
+            "output_theory_file": "results/accountability/acc_authenticity_receipt/proofs/--san_receipt_domainOwnerBlamesMonitor--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_receipt/traces/--san_receipt_domainOwnerBlamesMonitor--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=RECEIPT"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 120
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-09T18:55:03.719704",
+            "exec_end": "2025-11-09T18:55:18.052467",
+            "exec_duration_monotonic": 14.332762956619263,
+            "avg_memory": 200.16718749999998,
+            "peak_memory": 329.703125
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 14.17,
+            "lemma_result": "verified",
+            "steps": 21,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--san_receipt_domainOwnerVerifiesReceipt--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "san_receipt_domainOwnerVerifiesReceipt",
+            "output_theory_file": "results/accountability/acc_authenticity_receipt/proofs/--san_receipt_domainOwnerVerifiesReceipt--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_receipt/traces/--san_receipt_domainOwnerVerifiesReceipt--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=RECEIPT"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 120
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-09T18:55:18.158937",
+            "exec_end": "2025-11-09T18:56:21.178746",
+            "exec_duration_monotonic": 63.01980948448181,
+            "avg_memory": 1069.0733506944441,
+            "peak_memory": 2262.5546875
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 62.81,
+            "lemma_result": "verified",
+            "steps": 27,
+            "analysis_type": "exists-trace"
+          }
+        }
+      }
+    },
+    "specialized": {
+      "theory_file": "../ct_lemmas_pregen_receipt.spthy",
+      "subtasks": {
+        "--A_Receipt_1_root_ca_rogue_monitor_rogue_suff--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_Receipt_1_root_ca_rogue_monitor_rogue_suff",
+            "output_theory_file": "results/accountability/acc_authenticity_receipt/proofs/--A_Receipt_1_root_ca_rogue_monitor_rogue_suff--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_receipt/traces/--A_Receipt_1_root_ca_rogue_monitor_rogue_suff--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=SUFFICIENCY_PROOF"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 300
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-09T19:10:00.702029",
+            "exec_end": "2025-11-09T19:11:46.292254",
+            "exec_duration_monotonic": 105.59022498130798,
+            "avg_memory": 813.1095610119049,
+            "peak_memory": 1571.52734375
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 105.4,
+            "lemma_result": "verified",
+            "steps": 46,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--A_Receipt_1_ca_rogue_receipt_monitor_rogue_suff--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_Receipt_1_ca_rogue_receipt_monitor_rogue_suff",
+            "output_theory_file": "results/accountability/acc_authenticity_receipt/proofs/--A_Receipt_1_ca_rogue_receipt_monitor_rogue_suff--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_receipt/traces/--A_Receipt_1_ca_rogue_receipt_monitor_rogue_suff--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=SUFFICIENCY_PROOF"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 300
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-09T19:11:46.368606",
+            "exec_end": "2025-11-09T19:13:07.392330",
+            "exec_duration_monotonic": 81.02372407913208,
+            "avg_memory": 750.5869020061731,
+            "peak_memory": 1311.16015625
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 80.85,
+            "lemma_result": "verified",
+            "steps": 42,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--A_Receipt_1_root_ca_rogue_monitor_rogue_single--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_Receipt_1_root_ca_rogue_monitor_rogue_single",
+            "output_theory_file": "results/accountability/acc_authenticity_receipt/proofs/--A_Receipt_1_root_ca_rogue_monitor_rogue_single--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_receipt/traces/--A_Receipt_1_root_ca_rogue_monitor_rogue_single--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=SUFFICIENCY_PROOF"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 300
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-09T19:13:07.475573",
+            "exec_end": "2025-11-09T19:15:59.912549",
+            "exec_duration_monotonic": 172.4369764328003,
+            "avg_memory": 2500.487847222222,
+            "peak_memory": 4970.89453125
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 172.18,
+            "lemma_result": "verified",
+            "steps": 43,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--A_Receipt_1_ca_rogue_receipt_monitor_rogue_single--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_Receipt_1_ca_rogue_receipt_monitor_rogue_single",
+            "output_theory_file": "results/accountability/acc_authenticity_receipt/proofs/--A_Receipt_1_ca_rogue_receipt_monitor_rogue_single--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_receipt/traces/--A_Receipt_1_ca_rogue_receipt_monitor_rogue_single--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=SUFFICIENCY_PROOF"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 300
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-09T19:16:00.005189",
+            "exec_end": "2025-11-09T19:17:58.051929",
+            "exec_duration_monotonic": 118.04674029350281,
+            "avg_memory": 1691.2988782051277,
+            "peak_memory": 3376.08203125
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 117.81,
+            "lemma_result": "verified",
+            "steps": 42,
+            "analysis_type": "exists-trace"
+          }
+        }
+      }
+    }
+  }
 }

@@ -1,0 +1,51 @@
+{
+  "config": {
+    "global_max_cores": 10,
+    "global_max_memory": 15,
+    "default_timeout": 300,
+    "output_directory": "results/accountability/acc_authenticity_revoke/rerun"
+  },
+  "tamarin_versions": {
+    "default": {
+      "path": "tamarin-prover",
+      "version": "v1.10.0"
+    }
+  },
+  "tasks": {
+    "specialized": {
+      "theory_file": "../ct_lemmas_pregen.spthy",
+      "tamarin_versions": [
+        "default"
+      ],
+      "output_file_prefix": "specialized",
+      "lemmas": [
+        {
+          "name": "A_RevokeGossip_1_monitor_blames_log_gossip_root_CA_single",
+          "tamarin_options": [
+            "--derivcheck-timeout=0",
+            "--defines=REVOCATION",
+            "--defines=SUFFICIENCY_PROOF"
+          ],
+          "resources": {
+            "max_cores": 10,
+            "max_memory": 8,
+            "timeout": 1800
+          }
+        },
+        {
+          "name": "A_RevokeGossip_1_monitor_blames_log_gossip_intm_CA_single",
+          "tamarin_options": [
+            "--derivcheck-timeout=0",
+            "--defines=REVOCATION",
+            "--defines=SUFFICIENCY_PROOF"
+          ],
+          "resources": {
+            "max_cores": 10,
+            "max_memory": 8,
+            "timeout": 1800
+          }
+        }
+      ]
+    }
+  }
+}

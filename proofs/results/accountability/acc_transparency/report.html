@@ -1,0 +1,1607 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Batch Tamarin Execution Report</title>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1,
+        h2,
+        h3 {
+            color: #2c3e50;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #dfe9ee;
+            font-weight: 600;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f6f6f6;
+        }
+
+        /* Simple task and lemma alternating colors */
+        .task-table tr.task-white {
+            background-color: white;
+        }
+
+        .task-table tr.task-light-gray {
+            background-color: #f4fbff;
+        }
+
+        /* light blue accent */
+
+        /* Lemma alternation within white tasks */
+        .task-table tr.task-white.lemma-alt {
+            background-color: #f6f6f6;
+        }
+
+        /* lighter gray */
+
+        /* Lemma alternation within light gray tasks */
+        .task-table tr.task-light-gray.lemma-alt {
+            background-color: #edf7ff;
+        }
+
+        /* deeper blue accent */
+        .success {
+            color: #28a745;
+        }
+
+        /* green for verified */
+        .failed {
+            color: #ec1026;
+        }
+
+        /* red for failed */
+        .warning {
+            color: #ea9400;
+        }
+
+        /* orange with green for timeout */
+        .info {
+            color: #116dd7;
+        }
+
+        /* blue for info */
+        .darkinfo {
+            color: #1200b9;
+        }
+
+        /* darker blue for info */
+        .memory {
+            color: #8b5cf6;
+        }
+
+        /* violet for memory limit */
+        .falsified {
+            color: #e600ff;
+        }
+
+        /* light violet for falsified */
+        .unterminated {
+            color: #dbc100;
+        }
+
+        /* yellow-orange for unterminated */
+        pre {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .error-details {
+            background-color: #ffeaec;
+            border: 1px solid #ffdcdf;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+
+        .error-details h3 {
+            margin: 0;
+        }
+
+        .chart-div {
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .chart-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .chart-item {
+            flex: 1;
+            min-width: 400px;
+        }
+
+        .trace-visualization {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px 0;
+            background-color: #fff;
+        }
+
+        .trace-visualization svg {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #eee;
+            border-radius: 3px;
+        }
+
+        .trace-svg-container {
+            text-align: center;
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+
+        .settings,
+        .summary {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+    <script>hljs.highlightAll();</script>
+</head>
+
+<body>
+    <h1>Batch Tamarin Execution Report</h1>
+
+    <div class="info">
+        <strong>Execution results from:</strong> .<br>
+        <strong>Executed :</strong> 2025-11-10 15:01:44
+    </div>
+
+    <h2 id="table-of-contents">Table of Contents</h2>
+    <ul>
+        <li><a href="#overview">Overview</a>
+            <ul>
+                <li><a href="#configuration">Configuration</a></li>
+                <li><a href="#global-summary">Global Summary</a></li>
+                <li><a href="#global-results">Global Results</a></li>
+                <li><a href="#global-timeline">Global Execution Timeline</a></li>
+            </ul>
+        </li>
+        <li><a href="#task-details">Task Details</a>
+            <ul>
+                <li><a href="#task-autoprove">autoprove</a></li>
+                <li><a href="#task-specialized">specialized</a></li>
+            </ul>
+        </li>
+        <li><a href="#errors">Errors</a></li>
+    </ul>
+
+    <h2 id="overview">Overview</h2>
+
+    <h3 id="configuration">Configuration</h3>
+
+    <div class="settings">
+        <div>
+            <h4>Global Settings</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Setting</th>
+                        <th>Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Max cores</td>
+                        <td>10</td>
+                    </tr>
+                    <tr>
+                        <td>Max memory</td>
+                        <td>15GB</td>
+                    </tr>
+                    <tr>
+                        <td>Default timeout</td>
+                        <td>300s</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div>
+            <h4>Tamarin Versions</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Alias</th>
+                        <th>Path</th>
+                        <th>Version</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>default</td>
+                        <td><code>tamarin-prover</code></td>
+                        <td>v1.10.0</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <h3 id="global-summary">Global Summary</h3>
+
+    <h4>Global Statistics</h4>
+    <div class="summary">
+        <table>
+            <thead>
+                <tr>
+                    <th>Metric</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Total Executed Lemmas</td>
+                    <td>36</td>
+                </tr>
+                <tr>
+                    <td>Verified Lemmas</td>
+                    <td class="success">35 (97.2%)</td>
+                </tr>
+                <tr>
+                    <td>Falsified Lemmas</td>
+                    <td class="falsified">1 (2.8%)</td>
+                </tr>
+                <tr>
+                    <td>Unterminated Lemmas</td>
+                    <td class="unterminated">0 (0.0%)</td>
+                </tr>
+                <tr>
+                    <td>Failed Executions</td>
+                    <td class="failed">0 (0.0%)</td>
+                </tr>
+                <tr>
+                    <td>Lemmas killed by timeout</td>
+                    <td class="warning">0 (0.0%)</td>
+                </tr>
+                <tr>
+                    <td>Lemmas killed for memory limit</td>
+                    <td class="memory">0 (0.0%)</td>
+                </tr>
+            </tbody>
+        </table>
+        <table>
+            <thead>
+                <tr>
+                    <th>Metric</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Total runtime</td>
+                    <td>421.5s</td>
+                </tr>
+                <tr>
+                    <td>Total peak memory used</td>
+                    <td>13.3GB</td>
+                </tr>
+                <tr>
+                    <td>Max peak memory used</td>
+                    <td>0.6GB</td>
+                </tr>
+                <tr>
+                    <td>Freshly executed tasks</td>
+                    <td class="darkinfo">36 (100.0%)</td>
+                </tr>
+                <tr>
+                    <td>Cache hits</td>
+                    <td class="info">0 (0.0%)</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="chart-container">
+        <div class="chart-item">
+            <div id="success_rate_chart" class="chart-div" style="width: 100%; height: 400px;"></div>
+        </div>
+        <div class="chart-item">
+            <div id="cache_performance_chart" class="chart-div" style="width: 100%; height: 400px;"></div>
+        </div>
+    </div>
+
+    <div id="runtime_per_task_chart" class="chart-div" style="width: 100%; height: 400px; margin: 20px 0;"></div>
+    <div id="memory_per_task_chart" class="chart-div" style="width: 100%; height: 400px; margin: 20px 0;"></div>
+
+    <h3 id="global-results">Global Results</h3>
+    <table class="task-table">
+        <thead>
+            <tr>
+                <th>Task</th>
+                <th>Extracted lemma</th>
+                <th>Tamarin Version</th>
+                <th>Status</th>
+                <th>Runtime</th>
+                <th>Peak Memory Used</th>
+                <th>Cache Hit</th>
+            </tr>
+        </thead>
+        <tbody>
+                        <tr class="task-white">
+                                <td rowspan="32">
+                                    <strong>autoprove</strong><br>
+                                    <small style="color: #6c757d;">../ct_lemmas_pregen.spthy</small>
+                                </td>
+                                <td>T_CT_1_verif_empty</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>7.3s</td>
+                            <td>520.0MB</td>
+                            <td class="info">💾 No</td>
+                        </tr>
+                        <tr class="task-white lemma-alt">
+                                <td>T_CT_1_client_inclusionViol_verif_nonempty</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>8.9s</td>
+                            <td>226.3MB</td>
+                            <td class="info">💾 No</td>
+                        </tr>
+                        <tr class="task-white">
+                                <td>T_CT_1_client_inclusionViol_min</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>7.6s</td>
+                            <td>303.9MB</td>
+                            <td class="info">💾 No</td>
+                        </tr>
+                        <tr class="task-white lemma-alt">
+                                <td>T_CT_1_client_inclusionViol_uniq</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>8.0s</td>
+                            <td>222.8MB</td>
+                            <td class="info">💾 No</td>
+                        </tr>
+                        <tr class="task-white">
+                                <td>T_CT_1_client_inclusionViol_inj</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>5.7s</td>
+                            <td>358.7MB</td>
+                            <td class="info">💾 No</td>
+                        </tr>
+                        <tr class="task-white lemma-alt">
+                                <td>T_CT_2_client_monitor_inclusionViol_verif_nonempty</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>9.1s</td>
+                            <td>240.1MB</td>
+                            <td class="info">💾 No</td>
+                        </tr>
+                        <tr class="task-white">
+                                <td>T_CT_2_client_monitor_inclusionViol_suff</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>15.1s</td>
+                            <td>334.0MB</td>
+                            <td class="info">💾 No</td>
+                        </tr>
+                        <tr class="task-white lemma-alt">
+                                <td>T_CT_2_client_monitor_inclusionViol_single</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>16.0s</td>
+                            <td>382.5MB</td>
+                            <td class="info">💾 No</td>
+                        </tr>
+                        <tr class="task-white">
+                                <td>T_CT_2_client_monitor_inclusionViol_min</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>7.7s</td>
+                            <td>242.2MB</td>
+                            <td class="info">💾 No</td>
+                        </tr>
+                        <tr class="task-white lemma-alt">
+                                <td>T_CT_2_verif_empty</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>8.5s</td>
+                            <td>375.1MB</td>
+                            <td class="info">💾 No</td>
+                        </tr>
+                        <tr class="task-white">
+                                <td>T_CT_2_client_monitor_inclusionViol_uniq</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>12.7s</td>
+                            <td>426.5MB</td>
+                            <td class="info">💾 No</td>
+                        </tr>
+                        <tr class="task-white lemma-alt">
+                                <td>T_CT_2_client_monitor_inclusionViol_inj</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>6.2s</td>
+                            <td>484.4MB</td>
+                            <td class="info">💾 No</td>
+                        </tr>
+                        <tr class="task-white">
+                                <td>T_CT_3_client_monitor_inclusionViol_wo_validate_min</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>6.3s</td>
+                            <td>492.8MB</td>
+                            <td class="info">💾 No</td>
+                        </tr>
+                        <tr class="task-white lemma-alt">
+                                <td>T_CT_3_client_monitor_inclusionViol_wo_validate_single</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>8.1s</td>
+                            <td>221.0MB</td>
+                            <td class="info">💾 No</td>
+                        </tr>
+                        <tr class="task-white">
+                                <td>T_CT_3_client_monitor_inclusionViol_wo_validate_suff</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>7.9s</td>
+                            <td>219.3MB</td>
+                            <td class="info">💾 No</td>
+                        </tr>
+                        <tr class="task-white lemma-alt">
+                                <td>T_CT_3_client_monitor_inclusionViol_wo_validate_verif_nonempty</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>7.7s</td>
+                            <td>464.2MB</td>
+                            <td class="info">💾 No</td>
+                        </tr>
+                        <tr class="task-white">
+                                <td>T_CT_3_client_monitor_inclusionViol_wo_validate_inj</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>5.7s</td>
+                            <td>343.2MB</td>
+                            <td class="info">💾 No</td>
+                        </tr>
+                        <tr class="task-white lemma-alt">
+                                <td>T_CT_3_client_monitor_inclusionViol_wo_validate_uniq</td>
+                            <td>default</td>
+                            <td class="falsified">
+ ❗ Falsified
+                            </td>
+                            <td>8.1s</td>
+                            <td>222.5MB</td>
+                            <td class="info">💾 No</td>
+                        </tr>
+                        <tr class="task-white">
+                                <td>T_CT_3_verif_empty</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>7.7s</td>
+                            <td>438.7MB</td>
+                            <td class="info">💾 No</td>
+                        </tr>
+                        <tr class="task-white lemma-alt">
+                                <td>T_Audit_audit_inclusionViol_single</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>12.6s</td>
+                            <td>391.3MB</td>
+                            <td class="info">💾 No</td>
+                        </tr>
+                        <tr class="task-white">
+                                <td>transparency_SCT_Auditing</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>7.8s</td>
+                            <td>351.8MB</td>
+                            <td class="info">💾 No</td>
+                        </tr>
+                        <tr class="task-white lemma-alt">
+                                <td>T_Audit_audit_inclusionViol_uniq</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>21.3s</td>
+                            <td>505.5MB</td>
+                            <td class="info">💾 No</td>
+                        </tr>
+                        <tr class="task-white">
+                                <td>T_Audit_audit_inclusionViol_suff</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>17.2s</td>
+                            <td>305.3MB</td>
+                            <td class="info">💾 No</td>
+                        </tr>
+                        <tr class="task-white lemma-alt">
+                                <td>T_Audit_audit_inclusionViol_min</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>5.8s</td>
+                            <td>249.5MB</td>
+                            <td class="info">💾 No</td>
+                        </tr>
+                        <tr class="task-white">
+                                <td>T_Audit_audit_inclusionViol_verif_nonempty</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>9.4s</td>
+                            <td>490.3MB</td>
+                            <td class="info">💾 No</td>
+                        </tr>
+                        <tr class="task-white lemma-alt">
+                                <td>T_Audit_verif_empty</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>9.5s</td>
+                            <td>501.2MB</td>
+                            <td class="info">💾 No</td>
+                        </tr>
+                        <tr class="task-white">
+                                <td>T_Audit_audit_inclusionViol_inj</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>6.3s</td>
+                            <td>453.4MB</td>
+                            <td class="info">💾 No</td>
+                        </tr>
+                        <tr class="task-white lemma-alt">
+                                <td>T_Gossip_verif_empty</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>10.7s</td>
+                            <td>460.0MB</td>
+                            <td class="info">💾 No</td>
+                        </tr>
+                        <tr class="task-white">
+                                <td>T_Gossip_gossip_inclusionViol_verif_nonempty</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>63.6s</td>
+                            <td>639.4MB</td>
+                            <td class="info">💾 No</td>
+                        </tr>
+                        <tr class="task-white lemma-alt">
+                                <td>T_Gossip_gossip_inclusionViol_min</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>6.0s</td>
+                            <td>179.0MB</td>
+                            <td class="info">💾 No</td>
+                        </tr>
+                        <tr class="task-white">
+                                <td>T_Gossip_gossip_inclusionViol_uniq</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>11.3s</td>
+                            <td>515.3MB</td>
+                            <td class="info">💾 No</td>
+                        </tr>
+                        <tr class="task-white lemma-alt">
+                                <td>T_Gossip_gossip_inclusionViol_inj</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>6.1s</td>
+                            <td>348.2MB</td>
+                            <td class="info">💾 No</td>
+                        </tr>
+                        <tr class="task-light-gray">
+                                <td rowspan="4">
+                                    <strong>specialized</strong><br>
+                                    <small style="color: #6c757d;">../ct_lemmas_pregen.spthy</small>
+                                </td>
+                                <td>T_CT_1_client_inclusionViol_suff</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>14.2s</td>
+                            <td>510.0MB</td>
+                            <td class="info">💾 No</td>
+                        </tr>
+                        <tr class="task-light-gray lemma-alt">
+                                <td>T_CT_1_client_inclusionViol_single</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>14.4s</td>
+                            <td>414.1MB</td>
+                            <td class="info">💾 No</td>
+                        </tr>
+                        <tr class="task-light-gray">
+                                <td>T_Gossip_gossip_inclusionViol_suff</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>20.0s</td>
+                            <td>317.8MB</td>
+                            <td class="info">💾 No</td>
+                        </tr>
+                        <tr class="task-light-gray lemma-alt">
+                                <td>T_Gossip_gossip_inclusionViol_single</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>20.9s</td>
+                            <td>463.7MB</td>
+                            <td class="info">💾 No</td>
+                        </tr>
+        </tbody>
+    </table>
+
+    <h3 id="global-timeline">Global Execution Timeline</h3>
+    <div id="global_timeline_chart" class="chart-div" style="width: 100%; height: 600px;"></div>
+
+    <h2 id="task-details">Task Details</h2>
+
+    <h3 id="task-autoprove">Task: autoprove</h3>
+
+    <h4>Execution Summary</h4>
+    <table class="task-table">
+        <thead>
+            <tr>
+                <th>Lemma</th>
+                <th>Resources config</th>
+                <th>Options</th>
+                <th>Preprocessor</th>
+                <th>Tamarin Version</th>
+                <th>Status</th>
+                <th>Runtime</th>
+                <th>Peak Memory Used</th>
+                <th>Cache Hit</th>
+            </tr>
+        </thead>
+        <tbody>
+                    <tr class="task-white">
+                            <td>T_CT_1_verif_empty</td>
+                            <td>10c / 6GB / 200s</td>
+                            <td>--derivcheck-timeout=0</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>7.29s</td>
+                        <td>519.98MB</td>
+                        <td class="info">💻 No</td>
+                    </tr>
+                    <tr class="task-light-gray">
+                            <td>T_CT_1_client_inclusionViol_verif_nonempty</td>
+                            <td>10c / 6GB / 200s</td>
+                            <td>--derivcheck-timeout=0</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>8.94s</td>
+                        <td>226.28MB</td>
+                        <td class="info">💻 No</td>
+                    </tr>
+                    <tr class="task-white">
+                            <td>T_CT_1_client_inclusionViol_min</td>
+                            <td>10c / 6GB / 200s</td>
+                            <td>--derivcheck-timeout=0</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>7.64s</td>
+                        <td>303.89MB</td>
+                        <td class="info">💻 No</td>
+                    </tr>
+                    <tr class="task-light-gray">
+                            <td>T_CT_1_client_inclusionViol_uniq</td>
+                            <td>10c / 6GB / 200s</td>
+                            <td>--derivcheck-timeout=0</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>8.01s</td>
+                        <td>222.79MB</td>
+                        <td class="info">💻 No</td>
+                    </tr>
+                    <tr class="task-white">
+                            <td>T_CT_1_client_inclusionViol_inj</td>
+                            <td>10c / 6GB / 200s</td>
+                            <td>--derivcheck-timeout=0</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>5.68s</td>
+                        <td>358.66MB</td>
+                        <td class="info">💻 No</td>
+                    </tr>
+                    <tr class="task-light-gray">
+                            <td>T_CT_2_client_monitor_inclusionViol_verif_nonempty</td>
+                            <td>10c / 6GB / 200s</td>
+                            <td>--derivcheck-timeout=0</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>9.12s</td>
+                        <td>240.15MB</td>
+                        <td class="info">💻 No</td>
+                    </tr>
+                    <tr class="task-white">
+                            <td>T_CT_2_client_monitor_inclusionViol_suff</td>
+                            <td>10c / 6GB / 200s</td>
+                            <td>--derivcheck-timeout=0</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>15.14s</td>
+                        <td>333.98MB</td>
+                        <td class="info">💻 No</td>
+                    </tr>
+                    <tr class="task-light-gray">
+                            <td>T_CT_2_client_monitor_inclusionViol_single</td>
+                            <td>10c / 6GB / 200s</td>
+                            <td>--derivcheck-timeout=0</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>15.96s</td>
+                        <td>382.50MB</td>
+                        <td class="info">💻 No</td>
+                    </tr>
+                    <tr class="task-white">
+                            <td>T_CT_2_client_monitor_inclusionViol_min</td>
+                            <td>10c / 6GB / 200s</td>
+                            <td>--derivcheck-timeout=0</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>7.73s</td>
+                        <td>242.23MB</td>
+                        <td class="info">💻 No</td>
+                    </tr>
+                    <tr class="task-light-gray">
+                            <td>T_CT_2_verif_empty</td>
+                            <td>10c / 6GB / 200s</td>
+                            <td>--derivcheck-timeout=0</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>8.55s</td>
+                        <td>375.11MB</td>
+                        <td class="info">💻 No</td>
+                    </tr>
+                    <tr class="task-white">
+                            <td>T_CT_2_client_monitor_inclusionViol_uniq</td>
+                            <td>10c / 6GB / 200s</td>
+                            <td>--derivcheck-timeout=0</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>12.67s</td>
+                        <td>426.54MB</td>
+                        <td class="info">💻 No</td>
+                    </tr>
+                    <tr class="task-light-gray">
+                            <td>T_CT_2_client_monitor_inclusionViol_inj</td>
+                            <td>10c / 6GB / 200s</td>
+                            <td>--derivcheck-timeout=0</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>6.20s</td>
+                        <td>484.36MB</td>
+                        <td class="info">💻 No</td>
+                    </tr>
+                    <tr class="task-white">
+                            <td>T_CT_3_client_monitor_inclusionViol_wo_validate_min</td>
+                            <td>10c / 6GB / 200s</td>
+                            <td>--derivcheck-timeout=0</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>6.27s</td>
+                        <td>492.76MB</td>
+                        <td class="info">💻 No</td>
+                    </tr>
+                    <tr class="task-light-gray">
+                            <td>T_CT_3_client_monitor_inclusionViol_wo_validate_single</td>
+                            <td>10c / 6GB / 200s</td>
+                            <td>--derivcheck-timeout=0</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>8.14s</td>
+                        <td>220.96MB</td>
+                        <td class="info">💻 No</td>
+                    </tr>
+                    <tr class="task-white">
+                            <td>T_CT_3_client_monitor_inclusionViol_wo_validate_suff</td>
+                            <td>10c / 6GB / 200s</td>
+                            <td>--derivcheck-timeout=0</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>7.94s</td>
+                        <td>219.30MB</td>
+                        <td class="info">💻 No</td>
+                    </tr>
+                    <tr class="task-light-gray">
+                            <td>T_CT_3_client_monitor_inclusionViol_wo_validate_verif_nonempty</td>
+                            <td>10c / 6GB / 200s</td>
+                            <td>--derivcheck-timeout=0</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>7.66s</td>
+                        <td>464.19MB</td>
+                        <td class="info">💻 No</td>
+                    </tr>
+                    <tr class="task-white">
+                            <td>T_CT_3_client_monitor_inclusionViol_wo_validate_inj</td>
+                            <td>10c / 6GB / 200s</td>
+                            <td>--derivcheck-timeout=0</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>5.67s</td>
+                        <td>343.21MB</td>
+                        <td class="info">💻 No</td>
+                    </tr>
+                    <tr class="task-light-gray">
+                            <td>T_CT_3_client_monitor_inclusionViol_wo_validate_uniq</td>
+                            <td>10c / 6GB / 200s</td>
+                            <td>--derivcheck-timeout=0</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="falsified">
+❗ Falsified
+                        </td>
+                        <td>8.06s</td>
+                        <td>222.53MB</td>
+                        <td class="info">💻 No</td>
+                    </tr>
+                    <tr class="task-white">
+                            <td>T_CT_3_verif_empty</td>
+                            <td>10c / 6GB / 200s</td>
+                            <td>--derivcheck-timeout=0</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>7.73s</td>
+                        <td>438.66MB</td>
+                        <td class="info">💻 No</td>
+                    </tr>
+                    <tr class="task-light-gray">
+                            <td>T_Audit_audit_inclusionViol_single</td>
+                            <td>10c / 6GB / 200s</td>
+                            <td>--derivcheck-timeout=0</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>12.64s</td>
+                        <td>391.29MB</td>
+                        <td class="info">💻 No</td>
+                    </tr>
+                    <tr class="task-white">
+                            <td>transparency_SCT_Auditing</td>
+                            <td>10c / 6GB / 200s</td>
+                            <td>--derivcheck-timeout=0</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>7.75s</td>
+                        <td>351.79MB</td>
+                        <td class="info">💻 No</td>
+                    </tr>
+                    <tr class="task-light-gray">
+                            <td>T_Audit_audit_inclusionViol_uniq</td>
+                            <td>10c / 6GB / 200s</td>
+                            <td>--derivcheck-timeout=0</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>21.35s</td>
+                        <td>505.53MB</td>
+                        <td class="info">💻 No</td>
+                    </tr>
+                    <tr class="task-white">
+                            <td>T_Audit_audit_inclusionViol_suff</td>
+                            <td>10c / 6GB / 200s</td>
+                            <td>--derivcheck-timeout=0</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>17.15s</td>
+                        <td>305.32MB</td>
+                        <td class="info">💻 No</td>
+                    </tr>
+                    <tr class="task-light-gray">
+                            <td>T_Audit_audit_inclusionViol_min</td>
+                            <td>10c / 6GB / 200s</td>
+                            <td>--derivcheck-timeout=0</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>5.78s</td>
+                        <td>249.52MB</td>
+                        <td class="info">💻 No</td>
+                    </tr>
+                    <tr class="task-white">
+                            <td>T_Audit_audit_inclusionViol_verif_nonempty</td>
+                            <td>10c / 6GB / 200s</td>
+                            <td>--derivcheck-timeout=0</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>9.35s</td>
+                        <td>490.27MB</td>
+                        <td class="info">💻 No</td>
+                    </tr>
+                    <tr class="task-light-gray">
+                            <td>T_Audit_verif_empty</td>
+                            <td>10c / 6GB / 200s</td>
+                            <td>--derivcheck-timeout=0</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>9.51s</td>
+                        <td>501.18MB</td>
+                        <td class="info">💻 No</td>
+                    </tr>
+                    <tr class="task-white">
+                            <td>T_Audit_audit_inclusionViol_inj</td>
+                            <td>10c / 6GB / 200s</td>
+                            <td>--derivcheck-timeout=0</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>6.29s</td>
+                        <td>453.44MB</td>
+                        <td class="info">💻 No</td>
+                    </tr>
+                    <tr class="task-light-gray">
+                            <td>T_Gossip_verif_empty</td>
+                            <td>10c / 6GB / 200s</td>
+                            <td>--derivcheck-timeout=0</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>10.70s</td>
+                        <td>459.96MB</td>
+                        <td class="info">💻 No</td>
+                    </tr>
+                    <tr class="task-white">
+                            <td>T_Gossip_gossip_inclusionViol_verif_nonempty</td>
+                            <td>10c / 6GB / 200s</td>
+                            <td>--derivcheck-timeout=0</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>63.62s</td>
+                        <td>639.45MB</td>
+                        <td class="info">💻 No</td>
+                    </tr>
+                    <tr class="task-light-gray">
+                            <td>T_Gossip_gossip_inclusionViol_min</td>
+                            <td>10c / 6GB / 200s</td>
+                            <td>--derivcheck-timeout=0</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>6.05s</td>
+                        <td>178.97MB</td>
+                        <td class="info">💻 No</td>
+                    </tr>
+                    <tr class="task-white">
+                            <td>T_Gossip_gossip_inclusionViol_uniq</td>
+                            <td>10c / 6GB / 200s</td>
+                            <td>--derivcheck-timeout=0</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>11.27s</td>
+                        <td>515.30MB</td>
+                        <td class="info">💻 No</td>
+                    </tr>
+                    <tr class="task-light-gray">
+                            <td>T_Gossip_gossip_inclusionViol_inj</td>
+                            <td>10c / 6GB / 200s</td>
+                            <td>--derivcheck-timeout=0</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>6.10s</td>
+                        <td>348.16MB</td>
+                        <td class="info">💻 No</td>
+                    </tr>
+        </tbody>
+    </table>
+
+
+    <div class="chart-item">
+        <div id="task_timeline_autoprove" class="chart-div" style="width: 100%; height: 200px;"></div>
+    </div>
+
+    <h4>Traces</h4>
+    <div class="trace-visualization">
+        <h5>T_Audit_audit_inclusionViol_suff (default)</h5>
+        <p>
+            <strong>JSON File:</strong> <a href="traces/--T_Audit_audit_inclusionViol_suff--default.json">traces/--T_Audit_audit_inclusionViol_suff--default.json</a>
+            <br><strong>DOT File:</strong> <a href="traces/--T_Audit_audit_inclusionViol_suff--default.dot">traces/--T_Audit_audit_inclusionViol_suff--default.dot</a>
+        </p>
+        <div class="trace-svg-container">
+            <img src="traces/--T_Audit_audit_inclusionViol_suff--default.svg" alt="T_Audit_audit_inclusionViol_suff trace visualization" style="max-width: 100%; height: auto;">
+        </div>
+    </div>
+    <div class="trace-visualization">
+        <h5>T_CT_3_client_monitor_inclusionViol_wo_validate_single (default)</h5>
+        <p>
+            <strong>JSON File:</strong> <a href="traces/--T_CT_3_client_monitor_inclusionViol_wo_validate_single--default.json">traces/--T_CT_3_client_monitor_inclusionViol_wo_validate_single--default.json</a>
+            <br><strong>DOT File:</strong> <a href="traces/--T_CT_3_client_monitor_inclusionViol_wo_validate_single--default.dot">traces/--T_CT_3_client_monitor_inclusionViol_wo_validate_single--default.dot</a>
+        </p>
+        <div class="trace-svg-container">
+            <img src="traces/--T_CT_3_client_monitor_inclusionViol_wo_validate_single--default.svg" alt="T_CT_3_client_monitor_inclusionViol_wo_validate_single trace visualization" style="max-width: 100%; height: auto;">
+        </div>
+    </div>
+    <div class="trace-visualization">
+        <h5>T_CT_2_client_monitor_inclusionViol_suff (default)</h5>
+        <p>
+            <strong>JSON File:</strong> <a href="traces/--T_CT_2_client_monitor_inclusionViol_suff--default.json">traces/--T_CT_2_client_monitor_inclusionViol_suff--default.json</a>
+            <br><strong>DOT File:</strong> <a href="traces/--T_CT_2_client_monitor_inclusionViol_suff--default.dot">traces/--T_CT_2_client_monitor_inclusionViol_suff--default.dot</a>
+        </p>
+        <div class="trace-svg-container">
+            <img src="traces/--T_CT_2_client_monitor_inclusionViol_suff--default.svg" alt="T_CT_2_client_monitor_inclusionViol_suff trace visualization" style="max-width: 100%; height: auto;">
+        </div>
+    </div>
+    <div class="trace-visualization">
+        <h5>T_CT_3_client_monitor_inclusionViol_wo_validate_uniq (default)</h5>
+        <p>
+            <strong>JSON File:</strong> <a href="traces/--T_CT_3_client_monitor_inclusionViol_wo_validate_uniq--default.json">traces/--T_CT_3_client_monitor_inclusionViol_wo_validate_uniq--default.json</a>
+            <br><strong>DOT File:</strong> <a href="traces/--T_CT_3_client_monitor_inclusionViol_wo_validate_uniq--default.dot">traces/--T_CT_3_client_monitor_inclusionViol_wo_validate_uniq--default.dot</a>
+        </p>
+        <div class="trace-svg-container">
+            <img src="traces/--T_CT_3_client_monitor_inclusionViol_wo_validate_uniq--default.svg" alt="T_CT_3_client_monitor_inclusionViol_wo_validate_uniq trace visualization" style="max-width: 100%; height: auto;">
+        </div>
+    </div>
+    <div class="trace-visualization">
+        <h5>T_CT_2_client_monitor_inclusionViol_single (default)</h5>
+        <p>
+            <strong>JSON File:</strong> <a href="traces/--T_CT_2_client_monitor_inclusionViol_single--default.json">traces/--T_CT_2_client_monitor_inclusionViol_single--default.json</a>
+            <br><strong>DOT File:</strong> <a href="traces/--T_CT_2_client_monitor_inclusionViol_single--default.dot">traces/--T_CT_2_client_monitor_inclusionViol_single--default.dot</a>
+        </p>
+        <div class="trace-svg-container">
+            <img src="traces/--T_CT_2_client_monitor_inclusionViol_single--default.svg" alt="T_CT_2_client_monitor_inclusionViol_single trace visualization" style="max-width: 100%; height: auto;">
+        </div>
+    </div>
+    <div class="trace-visualization">
+        <h5>T_CT_3_client_monitor_inclusionViol_wo_validate_suff (default)</h5>
+        <p>
+            <strong>JSON File:</strong> <a href="traces/--T_CT_3_client_monitor_inclusionViol_wo_validate_suff--default.json">traces/--T_CT_3_client_monitor_inclusionViol_wo_validate_suff--default.json</a>
+            <br><strong>DOT File:</strong> <a href="traces/--T_CT_3_client_monitor_inclusionViol_wo_validate_suff--default.dot">traces/--T_CT_3_client_monitor_inclusionViol_wo_validate_suff--default.dot</a>
+        </p>
+        <div class="trace-svg-container">
+            <img src="traces/--T_CT_3_client_monitor_inclusionViol_wo_validate_suff--default.svg" alt="T_CT_3_client_monitor_inclusionViol_wo_validate_suff trace visualization" style="max-width: 100%; height: auto;">
+        </div>
+    </div>
+    <div class="trace-visualization">
+        <h5>T_Audit_audit_inclusionViol_single (default)</h5>
+        <p>
+            <strong>JSON File:</strong> <a href="traces/--T_Audit_audit_inclusionViol_single--default.json">traces/--T_Audit_audit_inclusionViol_single--default.json</a>
+            <br><strong>DOT File:</strong> <a href="traces/--T_Audit_audit_inclusionViol_single--default.dot">traces/--T_Audit_audit_inclusionViol_single--default.dot</a>
+        </p>
+        <div class="trace-svg-container">
+            <img src="traces/--T_Audit_audit_inclusionViol_single--default.svg" alt="T_Audit_audit_inclusionViol_single trace visualization" style="max-width: 100%; height: auto;">
+        </div>
+    </div>
+
+    <h3 id="task-specialized">Task: specialized</h3>
+
+    <h4>Execution Summary</h4>
+    <table class="task-table">
+        <thead>
+            <tr>
+                <th>Lemma</th>
+                <th>Resources config</th>
+                <th>Options</th>
+                <th>Preprocessor</th>
+                <th>Tamarin Version</th>
+                <th>Status</th>
+                <th>Runtime</th>
+                <th>Peak Memory Used</th>
+                <th>Cache Hit</th>
+            </tr>
+        </thead>
+        <tbody>
+                    <tr class="task-white">
+                            <td>T_CT_1_client_inclusionViol_suff</td>
+                            <td>10c / 6GB / 200s</td>
+                            <td>--derivcheck-timeout=0 --defines=SUFFICIENCY_PROOF</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>14.21s</td>
+                        <td>510.04MB</td>
+                        <td class="info">💻 No</td>
+                    </tr>
+                    <tr class="task-light-gray">
+                            <td>T_CT_1_client_inclusionViol_single</td>
+                            <td>10c / 6GB / 200s</td>
+                            <td>--derivcheck-timeout=0 --defines=SUFFICIENCY_PROOF</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>14.39s</td>
+                        <td>414.10MB</td>
+                        <td class="info">💻 No</td>
+                    </tr>
+                    <tr class="task-white">
+                            <td>T_Gossip_gossip_inclusionViol_suff</td>
+                            <td>10c / 6GB / 200s</td>
+                            <td>--derivcheck-timeout=0 --defines=SUFFICIENCY_PROOF</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>20.02s</td>
+                        <td>317.79MB</td>
+                        <td class="info">💻 No</td>
+                    </tr>
+                    <tr class="task-light-gray">
+                            <td>T_Gossip_gossip_inclusionViol_single</td>
+                            <td>10c / 6GB / 200s</td>
+                            <td>--derivcheck-timeout=0 --defines=SUFFICIENCY_PROOF</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>20.92s</td>
+                        <td>463.69MB</td>
+                        <td class="info">💻 No</td>
+                    </tr>
+        </tbody>
+    </table>
+
+
+    <div class="chart-item">
+        <div id="task_timeline_specialized" class="chart-div" style="width: 100%; height: 200px;"></div>
+    </div>
+
+    <h4>Traces</h4>
+    <div class="trace-visualization">
+        <h5>T_CT_1_client_inclusionViol_single (default)</h5>
+        <p>
+            <strong>JSON File:</strong> <a href="traces/--T_CT_1_client_inclusionViol_single--default.json">traces/--T_CT_1_client_inclusionViol_single--default.json</a>
+            <br><strong>DOT File:</strong> <a href="traces/--T_CT_1_client_inclusionViol_single--default.dot">traces/--T_CT_1_client_inclusionViol_single--default.dot</a>
+        </p>
+        <div class="trace-svg-container">
+            <img src="traces/--T_CT_1_client_inclusionViol_single--default.svg" alt="T_CT_1_client_inclusionViol_single trace visualization" style="max-width: 100%; height: auto;">
+        </div>
+    </div>
+    <div class="trace-visualization">
+        <h5>T_Gossip_gossip_inclusionViol_suff (default)</h5>
+        <p>
+            <strong>JSON File:</strong> <a href="traces/--T_Gossip_gossip_inclusionViol_suff--default.json">traces/--T_Gossip_gossip_inclusionViol_suff--default.json</a>
+            <br><strong>DOT File:</strong> <a href="traces/--T_Gossip_gossip_inclusionViol_suff--default.dot">traces/--T_Gossip_gossip_inclusionViol_suff--default.dot</a>
+        </p>
+        <div class="trace-svg-container">
+            <img src="traces/--T_Gossip_gossip_inclusionViol_suff--default.svg" alt="T_Gossip_gossip_inclusionViol_suff trace visualization" style="max-width: 100%; height: auto;">
+        </div>
+    </div>
+    <div class="trace-visualization">
+        <h5>T_CT_1_client_inclusionViol_suff (default)</h5>
+        <p>
+            <strong>JSON File:</strong> <a href="traces/--T_CT_1_client_inclusionViol_suff--default.json">traces/--T_CT_1_client_inclusionViol_suff--default.json</a>
+            <br><strong>DOT File:</strong> <a href="traces/--T_CT_1_client_inclusionViol_suff--default.dot">traces/--T_CT_1_client_inclusionViol_suff--default.dot</a>
+        </p>
+        <div class="trace-svg-container">
+            <img src="traces/--T_CT_1_client_inclusionViol_suff--default.svg" alt="T_CT_1_client_inclusionViol_suff trace visualization" style="max-width: 100%; height: auto;">
+        </div>
+    </div>
+    <div class="trace-visualization">
+        <h5>T_Gossip_gossip_inclusionViol_single (default)</h5>
+        <p>
+            <strong>JSON File:</strong> <a href="traces/--T_Gossip_gossip_inclusionViol_single--default.json">traces/--T_Gossip_gossip_inclusionViol_single--default.json</a>
+            <br><strong>DOT File:</strong> <a href="traces/--T_Gossip_gossip_inclusionViol_single--default.dot">traces/--T_Gossip_gossip_inclusionViol_single--default.dot</a>
+        </p>
+        <div class="trace-svg-container">
+            <img src="traces/--T_Gossip_gossip_inclusionViol_single--default.svg" alt="T_Gossip_gossip_inclusionViol_single trace visualization" style="max-width: 100%; height: auto;">
+        </div>
+    </div>
+
+
+    <h2 id="errors">Errors</h2>
+
+    <div class="info">
+        <p><strong>✅ No errors encountered in this run</strong></p>
+        <p>All tasks completed successfully without any failures, timeouts, or memory limit issues.</p>
+    </div>
+
+    <hr>
+    <footer>
+        <p><em>Report generated by Batch Tamarin v1.1.0 on 2025-11-11 at 22:05:23</em></p>
+    </footer>
+
+    <script>
+        // Load Google Charts
+        google.charts.load('current', {
+            'packages': ['corechart', 'bar', 'timeline']
+        });
+        google.charts.setOnLoadCallback(drawCharts);
+
+        function drawCharts() {
+            drawSuccessRateChart();
+            drawCachePerformanceChart();
+            drawRuntimePerTaskChart();
+            drawMemoryPerTaskChart();
+            drawGlobalTimelineChart();
+
+            // Draw task-specific charts
+            drawTaskTimelineChart_autoprove();
+            drawTaskTimelineChart_specialized();
+        }
+
+        // Success Rate Pie Chart
+        function drawSuccessRateChart() {
+            var data = google.visualization.arrayToDataTable([
+                ['Status', 'Percentage'],
+['Verified', 97.22222222222221],['Falsified', 2.7777777777777777],            ]);
+
+            var options = {
+                title: 'Success Rate',
+                colors: ['#28a745', '#e600ff', '#dbc100', '#ec1026', '#ea9400', '#8b5cf6'],
+                legend: { position: 'bottom' },
+                chartArea: { width: '80%', height: '70%' }
+            };
+
+            var chart = new google.visualization.PieChart(document.getElementById('success_rate_chart'));
+            chart.draw(data, options);
+        }
+
+        // Cache Performance Pie Chart
+        function drawCachePerformanceChart() {
+            var data = google.visualization.arrayToDataTable([
+                ['Type', 'Percentage'],
+                ['Cache Hit', 0.0],
+                ['Freshly Executed', 100.0]
+            ]);
+
+            var options = {
+                title: 'Cache Performance',
+                colors: ['#116dd7', '#1200b9'],
+                legend: { position: 'bottom' },
+                chartArea: { width: '80%', height: '70%' }
+            };
+
+            var chart = new google.visualization.PieChart(document.getElementById('cache_performance_chart'));
+            chart.draw(data, options);
+        }
+
+        // Runtime per Task Horizontal Bar Chart
+        function drawRuntimePerTaskChart() {
+            var data = google.visualization.arrayToDataTable([
+                ['Task', 'Runtime (seconds)'],
+                ['autoprove', 352.0],                ['specialized', 69.5]            ]);
+
+            var options = {
+                chart: {
+                    title: 'Runtime per Task',
+                    subtitle: 'Total execution time in seconds'
+                },
+                bars: 'horizontal',
+                hAxis: { title: 'Runtime (seconds)' },
+                vAxis: { title: 'Tasks' },
+                colors: ['#1f77b4'],
+                chartArea: { width: '70%', height: '80%' }
+            };
+
+            var chart = new google.charts.Bar(document.getElementById('runtime_per_task_chart'));
+            chart.draw(data, google.charts.Bar.convertOptions(options));
+        }
+
+        // Memory per Task Horizontal Bar Chart
+        function drawMemoryPerTaskChart() {
+            var data = google.visualization.arrayToDataTable([
+                ['Task', 'Memory (MB)'],
+                ['autoprove', 639.4],                ['specialized', 510.0]            ]);
+
+            var options = {
+                chart: {
+                    title: 'Memory Usage per Task',
+                    subtitle: 'Peak memory usage in MB'
+                },
+                bars: 'horizontal',
+                hAxis: { title: 'Memory (MB)' },
+                vAxis: { title: 'Tasks' },
+                colors: ['#ff7f0e'],
+                chartArea: { width: '70%', height: '80%' }
+            };
+
+            var chart = new google.charts.Bar(document.getElementById('memory_per_task_chart'));
+            chart.draw(data, google.charts.Bar.convertOptions(options));
+        }
+
+        // Global Timeline Chart
+        function drawGlobalTimelineChart() {
+            var container = document.getElementById('global_timeline_chart');
+            var chart = new google.visualization.Timeline(container);
+            var dataTable = new google.visualization.DataTable();
+
+            dataTable.addColumn({ type: 'string', id: 'Task' });
+            dataTable.addColumn({ type: 'string', id: 'Label' });
+            dataTable.addColumn({ type: 'date', id: 'Start' });
+            dataTable.addColumn({ type: 'date', id: 'End' });
+
+            // Use current time as base for timeline
+            var baseTime = new Date().getTime();
+            var timelineData = [];
+            timelineData.push(['autoprove', 'T_CT_1_verif_empty_default', new Date(baseTime + 0.000), new Date(baseTime + 7000.000)]);
+            timelineData.push(['autoprove', 'T_CT_1_client_inclusionViol_verif_nonempty_default', new Date(baseTime + 7000.000), new Date(baseTime + 16000.000)]);
+            timelineData.push(['autoprove', 'T_CT_1_client_inclusionViol_min_default', new Date(baseTime + 16000.000), new Date(baseTime + 23000.000)]);
+            timelineData.push(['autoprove', 'T_CT_1_client_inclusionViol_uniq_default', new Date(baseTime + 24000.000), new Date(baseTime + 32000.000)]);
+            timelineData.push(['autoprove', 'T_CT_1_client_inclusionViol_inj_default', new Date(baseTime + 32000.000), new Date(baseTime + 37000.000)]);
+            timelineData.push(['autoprove', 'T_CT_2_client_monitor_inclusionViol_verif_nonempty_default', new Date(baseTime + 37000.000), new Date(baseTime + 46000.000)]);
+            timelineData.push(['autoprove', 'T_CT_2_client_monitor_inclusionViol_suff_default', new Date(baseTime + 46000.000), new Date(baseTime + 62000.000)]);
+            timelineData.push(['autoprove', 'T_CT_2_client_monitor_inclusionViol_single_default', new Date(baseTime + 62000.000), new Date(baseTime + 78000.000)]);
+            timelineData.push(['autoprove', 'T_CT_2_client_monitor_inclusionViol_min_default', new Date(baseTime + 78000.000), new Date(baseTime + 85000.000)]);
+            timelineData.push(['autoprove', 'T_CT_2_verif_empty_default', new Date(baseTime + 86000.000), new Date(baseTime + 94000.000)]);
+            timelineData.push(['autoprove', 'T_CT_2_client_monitor_inclusionViol_uniq_default', new Date(baseTime + 94000.000), new Date(baseTime + 107000.000)]);
+            timelineData.push(['autoprove', 'T_CT_2_client_monitor_inclusionViol_inj_default', new Date(baseTime + 107000.000), new Date(baseTime + 113000.000)]);
+            timelineData.push(['autoprove', 'T_CT_3_client_monitor_inclusionViol_wo_validate_min_default', new Date(baseTime + 113000.000), new Date(baseTime + 119000.000)]);
+            timelineData.push(['autoprove', 'T_CT_3_client_monitor_inclusionViol_wo_validate_single_default', new Date(baseTime + 119000.000), new Date(baseTime + 128000.000)]);
+            timelineData.push(['autoprove', 'T_CT_3_client_monitor_inclusionViol_wo_validate_suff_default', new Date(baseTime + 128000.000), new Date(baseTime + 136000.000)]);
+            timelineData.push(['autoprove', 'T_CT_3_client_monitor_inclusionViol_wo_validate_verif_nonempty_default', new Date(baseTime + 136000.000), new Date(baseTime + 143000.000)]);
+            timelineData.push(['autoprove', 'T_CT_3_client_monitor_inclusionViol_wo_validate_inj_default', new Date(baseTime + 143000.000), new Date(baseTime + 149000.000)]);
+            timelineData.push(['autoprove', 'T_CT_3_client_monitor_inclusionViol_wo_validate_uniq_default', new Date(baseTime + 149000.000), new Date(baseTime + 157000.000)]);
+            timelineData.push(['autoprove', 'T_CT_3_verif_empty_default', new Date(baseTime + 157000.000), new Date(baseTime + 165000.000)]);
+            timelineData.push(['autoprove', 'T_Audit_audit_inclusionViol_single_default', new Date(baseTime + 165000.000), new Date(baseTime + 178000.000)]);
+            timelineData.push(['autoprove', 'transparency_SCT_Auditing_default', new Date(baseTime + 178000.000), new Date(baseTime + 186000.000)]);
+            timelineData.push(['autoprove', 'T_Audit_audit_inclusionViol_uniq_default', new Date(baseTime + 186000.000), new Date(baseTime + 207000.000)]);
+            timelineData.push(['autoprove', 'T_Audit_audit_inclusionViol_suff_default', new Date(baseTime + 207000.000), new Date(baseTime + 224000.000)]);
+            timelineData.push(['autoprove', 'T_Audit_audit_inclusionViol_min_default', new Date(baseTime + 224000.000), new Date(baseTime + 230000.000)]);
+            timelineData.push(['autoprove', 'T_Audit_audit_inclusionViol_verif_nonempty_default', new Date(baseTime + 230000.000), new Date(baseTime + 240000.000)]);
+            timelineData.push(['autoprove', 'T_Audit_verif_empty_default', new Date(baseTime + 240000.000), new Date(baseTime + 249000.000)]);
+            timelineData.push(['autoprove', 'T_Audit_audit_inclusionViol_inj_default', new Date(baseTime + 249000.000), new Date(baseTime + 255000.000)]);
+            timelineData.push(['autoprove', 'T_Gossip_verif_empty_default', new Date(baseTime + 255000.000), new Date(baseTime + 266000.000)]);
+            timelineData.push(['autoprove', 'T_Gossip_gossip_inclusionViol_verif_nonempty_default', new Date(baseTime + 266000.000), new Date(baseTime + 330000.000)]);
+            timelineData.push(['autoprove', 'T_Gossip_gossip_inclusionViol_min_default', new Date(baseTime + 330000.000), new Date(baseTime + 336000.000)]);
+            timelineData.push(['autoprove', 'T_Gossip_gossip_inclusionViol_uniq_default', new Date(baseTime + 336000.000), new Date(baseTime + 347000.000)]);
+            timelineData.push(['autoprove', 'T_Gossip_gossip_inclusionViol_inj_default', new Date(baseTime + 348000.000), new Date(baseTime + 354000.000)]);
+            timelineData.push(['specialized', 'T_CT_1_client_inclusionViol_suff_default', new Date(baseTime + 354000.000), new Date(baseTime + 368000.000)]);
+            timelineData.push(['specialized', 'T_CT_1_client_inclusionViol_single_default', new Date(baseTime + 368000.000), new Date(baseTime + 382000.000)]);
+            timelineData.push(['specialized', 'T_Gossip_gossip_inclusionViol_suff_default', new Date(baseTime + 382000.000), new Date(baseTime + 403000.000)]);
+            timelineData.push(['specialized', 'T_Gossip_gossip_inclusionViol_single_default', new Date(baseTime + 403000.000), new Date(baseTime + 423000.000)]);
+
+            dataTable.addRows(timelineData);
+
+            var options = {
+                title: 'Global Execution Timeline',
+                timeline: {
+                    groupByRowLabel: true,
+                    showRowLabels: true
+                },
+                backgroundColor: '#fafafa'
+            };
+
+            chart.draw(dataTable, options);
+        }
+
+
+
+        // Task Timeline Chart for autoprove
+        function drawTaskTimelineChart_autoprove() {
+            var container = document.getElementById('task_timeline_autoprove');
+            var chart = new google.visualization.Timeline(container);
+            var dataTable = new google.visualization.DataTable();
+
+            dataTable.addColumn({ type: 'string', id: 'Task' });
+            dataTable.addColumn({ type: 'string', id: 'Label' });
+            dataTable.addColumn({ type: 'date', id: 'Start' });
+            dataTable.addColumn({ type: 'date', id: 'End' });
+
+            // Use current time as base for timeline
+            var baseTime = new Date().getTime();
+            dataTable.addRows([
+                ['autoprove', 'T_CT_1_verif_empty_default', new Date(baseTime + 0.000), new Date(baseTime + 7000.000)],                ['autoprove', 'T_CT_1_client_inclusionViol_verif_nonempty_default', new Date(baseTime + 7000.000), new Date(baseTime + 16000.000)],                ['autoprove', 'T_CT_1_client_inclusionViol_min_default', new Date(baseTime + 16000.000), new Date(baseTime + 23000.000)],                ['autoprove', 'T_CT_1_client_inclusionViol_uniq_default', new Date(baseTime + 24000.000), new Date(baseTime + 32000.000)],                ['autoprove', 'T_CT_1_client_inclusionViol_inj_default', new Date(baseTime + 32000.000), new Date(baseTime + 37000.000)],                ['autoprove', 'T_CT_2_client_monitor_inclusionViol_verif_nonempty_default', new Date(baseTime + 37000.000), new Date(baseTime + 46000.000)],                ['autoprove', 'T_CT_2_client_monitor_inclusionViol_suff_default', new Date(baseTime + 46000.000), new Date(baseTime + 62000.000)],                ['autoprove', 'T_CT_2_client_monitor_inclusionViol_single_default', new Date(baseTime + 62000.000), new Date(baseTime + 78000.000)],                ['autoprove', 'T_CT_2_client_monitor_inclusionViol_min_default', new Date(baseTime + 78000.000), new Date(baseTime + 85000.000)],                ['autoprove', 'T_CT_2_verif_empty_default', new Date(baseTime + 86000.000), new Date(baseTime + 94000.000)],                ['autoprove', 'T_CT_2_client_monitor_inclusionViol_uniq_default', new Date(baseTime + 94000.000), new Date(baseTime + 107000.000)],                ['autoprove', 'T_CT_2_client_monitor_inclusionViol_inj_default', new Date(baseTime + 107000.000), new Date(baseTime + 113000.000)],                ['autoprove', 'T_CT_3_client_monitor_inclusionViol_wo_validate_min_default', new Date(baseTime + 113000.000), new Date(baseTime + 119000.000)],                ['autoprove', 'T_CT_3_client_monitor_inclusionViol_wo_validate_single_default', new Date(baseTime + 119000.000), new Date(baseTime + 128000.000)],                ['autoprove', 'T_CT_3_client_monitor_inclusionViol_wo_validate_suff_default', new Date(baseTime + 128000.000), new Date(baseTime + 136000.000)],                ['autoprove', 'T_CT_3_client_monitor_inclusionViol_wo_validate_verif_nonempty_default', new Date(baseTime + 136000.000), new Date(baseTime + 143000.000)],                ['autoprove', 'T_CT_3_client_monitor_inclusionViol_wo_validate_inj_default', new Date(baseTime + 143000.000), new Date(baseTime + 149000.000)],                ['autoprove', 'T_CT_3_client_monitor_inclusionViol_wo_validate_uniq_default', new Date(baseTime + 149000.000), new Date(baseTime + 157000.000)],                ['autoprove', 'T_CT_3_verif_empty_default', new Date(baseTime + 157000.000), new Date(baseTime + 165000.000)],                ['autoprove', 'T_Audit_audit_inclusionViol_single_default', new Date(baseTime + 165000.000), new Date(baseTime + 178000.000)],                ['autoprove', 'transparency_SCT_Auditing_default', new Date(baseTime + 178000.000), new Date(baseTime + 186000.000)],                ['autoprove', 'T_Audit_audit_inclusionViol_uniq_default', new Date(baseTime + 186000.000), new Date(baseTime + 207000.000)],                ['autoprove', 'T_Audit_audit_inclusionViol_suff_default', new Date(baseTime + 207000.000), new Date(baseTime + 224000.000)],                ['autoprove', 'T_Audit_audit_inclusionViol_min_default', new Date(baseTime + 224000.000), new Date(baseTime + 230000.000)],                ['autoprove', 'T_Audit_audit_inclusionViol_verif_nonempty_default', new Date(baseTime + 230000.000), new Date(baseTime + 240000.000)],                ['autoprove', 'T_Audit_verif_empty_default', new Date(baseTime + 240000.000), new Date(baseTime + 249000.000)],                ['autoprove', 'T_Audit_audit_inclusionViol_inj_default', new Date(baseTime + 249000.000), new Date(baseTime + 255000.000)],                ['autoprove', 'T_Gossip_verif_empty_default', new Date(baseTime + 255000.000), new Date(baseTime + 266000.000)],                ['autoprove', 'T_Gossip_gossip_inclusionViol_verif_nonempty_default', new Date(baseTime + 266000.000), new Date(baseTime + 330000.000)],                ['autoprove', 'T_Gossip_gossip_inclusionViol_min_default', new Date(baseTime + 330000.000), new Date(baseTime + 336000.000)],                ['autoprove', 'T_Gossip_gossip_inclusionViol_uniq_default', new Date(baseTime + 336000.000), new Date(baseTime + 347000.000)],                ['autoprove', 'T_Gossip_gossip_inclusionViol_inj_default', new Date(baseTime + 348000.000), new Date(baseTime + 354000.000)]            ]);
+
+            var options = {
+                title: 'Execution Timeline for autoprove',
+                timeline: {
+                    groupByRowLabel: false,
+                    showRowLabels: false
+                },
+                backgroundColor: '#fafafa'
+            };
+
+            chart.draw(dataTable, options);
+        }
+
+        // Task Timeline Chart for specialized
+        function drawTaskTimelineChart_specialized() {
+            var container = document.getElementById('task_timeline_specialized');
+            var chart = new google.visualization.Timeline(container);
+            var dataTable = new google.visualization.DataTable();
+
+            dataTable.addColumn({ type: 'string', id: 'Task' });
+            dataTable.addColumn({ type: 'string', id: 'Label' });
+            dataTable.addColumn({ type: 'date', id: 'Start' });
+            dataTable.addColumn({ type: 'date', id: 'End' });
+
+            // Use current time as base for timeline
+            var baseTime = new Date().getTime();
+            dataTable.addRows([
+                ['specialized', 'T_CT_1_client_inclusionViol_suff_default', new Date(baseTime + 354000.000), new Date(baseTime + 368000.000)],                ['specialized', 'T_CT_1_client_inclusionViol_single_default', new Date(baseTime + 368000.000), new Date(baseTime + 382000.000)],                ['specialized', 'T_Gossip_gossip_inclusionViol_suff_default', new Date(baseTime + 382000.000), new Date(baseTime + 403000.000)],                ['specialized', 'T_Gossip_gossip_inclusionViol_single_default', new Date(baseTime + 403000.000), new Date(baseTime + 423000.000)]            ]);
+
+            var options = {
+                title: 'Execution Timeline for specialized',
+                timeline: {
+                    groupByRowLabel: false,
+                    showRowLabels: false
+                },
+                backgroundColor: '#fafafa'
+            };
+
+            chart.draw(dataTable, options);
+        }
+    </script>
+</body>
+
+</html>

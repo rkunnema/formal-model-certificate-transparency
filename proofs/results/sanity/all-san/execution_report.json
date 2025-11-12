@@ -2,7 +2,7 @@
   "recipe": "all_san.json",
   "config": {
     "global_max_cores": 10,
-    "global_max_memory": 128,
+    "global_max_memory": 15,
     "default_timeout": 300,
     "output_directory": "results/sanity/all-san"
   },
@@ -13,54 +13,19 @@
     }
   },
   "execution_metadata": {
-    "total_tasks": 27,
-    "total_successes": 26,
-    "total_failures": 1,
+    "total_tasks": 41,
+    "total_successes": 41,
+    "total_failures": 0,
     "total_cache_hit": 0,
-    "total_runtime": 242.33740091323853,
-    "total_memory": 13377.265625,
-    "max_runtime": 21.898426055908203,
-    "max_memory": 1540.21875
+    "total_runtime": 530.1304433345795,
+    "total_memory": 20235.47265625,
+    "max_runtime": 40.072354555130005,
+    "max_memory": 1734.03125
   },
   "tasks": {
     "autoprove": {
       "theory_file": "../ct.spthy",
       "subtasks": {
-        "--san_CT_ClientFindsInclusionViolation_2--default": {
-          "task_config": {
-            "tamarin_alias": "default",
-            "lemma": "san_CT_ClientFindsInclusionViolation_2",
-            "output_theory_file": "results/sanity/all-san/proofs/--san_CT_ClientFindsInclusionViolation_2--default.spthy",
-            "output_trace_file": "results/sanity/all-san/traces/--san_CT_ClientFindsInclusionViolation_2--default.json",
-            "options": [
-              "--derivcheck-timeout=0"
-            ],
-            "resources": {
-              "cores": 10,
-              "memory": 5,
-              "timeout": 200
-            }
-          },
-          "task_execution_metadata": {
-            "command": [],
-            "status": "completed",
-            "cache_hit": false,
-            "exec_start": "2025-11-06T14:47:07.119900",
-            "exec_end": "2025-11-06T14:47:14.845067",
-            "exec_duration_monotonic": 7.7251670360565186,
-            "avg_memory": 221.478515625,
-            "peak_memory": 382.71875
-          },
-          "task_result": {
-            "warnings": [
-              "1 wellformedness check failed!"
-            ],
-            "real_time_tamarin_measure": 7.42,
-            "lemma_result": "verified",
-            "steps": 25,
-            "analysis_type": "exists-trace"
-          }
-        },
         "--san_PKIExt_external_check_false--default": {
           "task_config": {
             "tamarin_alias": "default",
@@ -80,194 +45,19 @@
             "command": [],
             "status": "completed",
             "cache_hit": false,
-            "exec_start": "2025-11-06T14:47:14.903338",
-            "exec_end": "2025-11-06T14:47:19.411455",
-            "exec_duration_monotonic": 4.508116960525513,
-            "avg_memory": 155.79375,
-            "peak_memory": 276.78125
+            "exec_start": "2025-11-10T18:15:01.434700",
+            "exec_end": "2025-11-10T18:15:08.266768",
+            "exec_duration_monotonic": 6.832067966461182,
+            "avg_memory": 138.12667410714286,
+            "peak_memory": 249.140625
           },
           "task_result": {
             "warnings": [
               "1 wellformedness check failed!"
             ],
-            "real_time_tamarin_measure": 4.21,
+            "real_time_tamarin_measure": 6.52,
             "lemma_result": "verified",
             "steps": 8,
-            "analysis_type": "exists-trace"
-          }
-        },
-        "--san_CT_ClientStoresSnapshot--default": {
-          "task_config": {
-            "tamarin_alias": "default",
-            "lemma": "san_CT_ClientStoresSnapshot",
-            "output_theory_file": "results/sanity/all-san/proofs/--san_CT_ClientStoresSnapshot--default.spthy",
-            "output_trace_file": "results/sanity/all-san/traces/--san_CT_ClientStoresSnapshot--default.json",
-            "options": [
-              "--derivcheck-timeout=0"
-            ],
-            "resources": {
-              "cores": 10,
-              "memory": 5,
-              "timeout": 200
-            }
-          },
-          "task_execution_metadata": {
-            "command": [],
-            "status": "completed",
-            "cache_hit": false,
-            "exec_start": "2025-11-06T14:47:19.451330",
-            "exec_end": "2025-11-06T14:47:30.499266",
-            "exec_duration_monotonic": 11.047936201095581,
-            "avg_memory": 248.8252840909091,
-            "peak_memory": 390.046875
-          },
-          "task_result": {
-            "warnings": [
-              "1 wellformedness check failed!"
-            ],
-            "real_time_tamarin_measure": 10.74,
-            "lemma_result": "verified",
-            "steps": 43,
-            "analysis_type": "exists-trace"
-          }
-        },
-        "--san_CT_forge_log_view--default": {
-          "task_config": {
-            "tamarin_alias": "default",
-            "lemma": "san_CT_forge_log_view",
-            "output_theory_file": "results/sanity/all-san/proofs/--san_CT_forge_log_view--default.spthy",
-            "output_trace_file": "results/sanity/all-san/traces/--san_CT_forge_log_view--default.json",
-            "options": [
-              "--derivcheck-timeout=0"
-            ],
-            "resources": {
-              "cores": 10,
-              "memory": 5,
-              "timeout": 200
-            }
-          },
-          "task_execution_metadata": {
-            "command": [],
-            "status": "completed",
-            "cache_hit": false,
-            "exec_start": "2025-11-06T14:47:30.578797",
-            "exec_end": "2025-11-06T14:47:34.058502",
-            "exec_duration_monotonic": 3.4797048568725586,
-            "avg_memory": 119.28515625,
-            "peak_memory": 219.09375
-          },
-          "task_result": {
-            "warnings": [
-              "1 wellformedness check failed!"
-            ],
-            "real_time_tamarin_measure": 3.18,
-            "lemma_result": "verified",
-            "steps": 3,
-            "analysis_type": "exists-trace"
-          }
-        },
-        "--san_CT_ClientVerifiesAppendOnly--default": {
-          "task_config": {
-            "tamarin_alias": "default",
-            "lemma": "san_CT_ClientVerifiesAppendOnly",
-            "output_theory_file": "results/sanity/all-san/proofs/--san_CT_ClientVerifiesAppendOnly--default.spthy",
-            "output_trace_file": "results/sanity/all-san/traces/--san_CT_ClientVerifiesAppendOnly--default.json",
-            "options": [
-              "--derivcheck-timeout=0"
-            ],
-            "resources": {
-              "cores": 10,
-              "memory": 5,
-              "timeout": 200
-            }
-          },
-          "task_execution_metadata": {
-            "command": [],
-            "status": "completed",
-            "cache_hit": false,
-            "exec_start": "2025-11-06T14:47:34.118732",
-            "exec_end": "2025-11-06T14:47:43.718696",
-            "exec_duration_monotonic": 9.599963903427124,
-            "avg_memory": 229.81718750000002,
-            "peak_memory": 344.703125
-          },
-          "task_result": {
-            "warnings": [
-              "1 wellformedness check failed!"
-            ],
-            "real_time_tamarin_measure": 9.27,
-            "lemma_result": "verified",
-            "steps": 38,
-            "analysis_type": "exists-trace"
-          }
-        },
-        "--san_CTAudit_monitorAudit_no_viol--default": {
-          "task_config": {
-            "tamarin_alias": "default",
-            "lemma": "san_CTAudit_monitorAudit_no_viol",
-            "output_theory_file": "results/sanity/all-san/proofs/--san_CTAudit_monitorAudit_no_viol--default.spthy",
-            "output_trace_file": "results/sanity/all-san/traces/--san_CTAudit_monitorAudit_no_viol--default.json",
-            "options": [
-              "--derivcheck-timeout=0"
-            ],
-            "resources": {
-              "cores": 10,
-              "memory": 5,
-              "timeout": 200
-            }
-          },
-          "task_execution_metadata": {
-            "command": [],
-            "status": "completed",
-            "cache_hit": false,
-            "exec_start": "2025-11-06T14:47:43.737553",
-            "exec_end": "2025-11-06T14:47:54.179895",
-            "exec_duration_monotonic": 10.442342042922974,
-            "avg_memory": 413.5411931818182,
-            "peak_memory": 787.671875
-          },
-          "task_result": {
-            "warnings": [
-              "1 wellformedness check failed!"
-            ],
-            "real_time_tamarin_measure": 10.13,
-            "lemma_result": "verified",
-            "steps": 23,
-            "analysis_type": "exists-trace"
-          }
-        },
-        "--san_CT_add_preC_to_log--default": {
-          "task_config": {
-            "tamarin_alias": "default",
-            "lemma": "san_CT_add_preC_to_log",
-            "output_theory_file": "results/sanity/all-san/proofs/--san_CT_add_preC_to_log--default.spthy",
-            "output_trace_file": "results/sanity/all-san/traces/--san_CT_add_preC_to_log--default.json",
-            "options": [
-              "--derivcheck-timeout=0"
-            ],
-            "resources": {
-              "cores": 10,
-              "memory": 5,
-              "timeout": 200
-            }
-          },
-          "task_execution_metadata": {
-            "command": [],
-            "status": "completed",
-            "cache_hit": false,
-            "exec_start": "2025-11-06T14:47:54.264922",
-            "exec_end": "2025-11-06T14:47:58.773719",
-            "exec_duration_monotonic": 4.50879693031311,
-            "avg_memory": 149.66875,
-            "peak_memory": 243.4375
-          },
-          "task_result": {
-            "warnings": [
-              "1 wellformedness check failed!"
-            ],
-            "real_time_tamarin_measure": 4.19,
-            "lemma_result": "verified",
-            "steps": 12,
             "analysis_type": "exists-trace"
           }
         },
@@ -290,17 +80,17 @@
             "command": [],
             "status": "completed",
             "cache_hit": false,
-            "exec_start": "2025-11-06T14:47:58.823818",
-            "exec_end": "2025-11-06T14:48:20.722244",
-            "exec_duration_monotonic": 21.898426055908203,
-            "avg_memory": 789.2812499999999,
-            "peak_memory": 1540.21875
+            "exec_start": "2025-11-10T18:15:08.278677",
+            "exec_end": "2025-11-10T18:15:48.351032",
+            "exec_duration_monotonic": 40.072354555130005,
+            "avg_memory": 776.0580078124999,
+            "peak_memory": 1573.57421875
           },
           "task_result": {
             "warnings": [
               "1 wellformedness check failed!"
             ],
-            "real_time_tamarin_measure": 21.6,
+            "real_time_tamarin_measure": 39.58,
             "lemma_result": "verified",
             "steps": 14,
             "analysis_type": "exists-trace"
@@ -325,28 +115,28 @@
             "command": [],
             "status": "completed",
             "cache_hit": false,
-            "exec_start": "2025-11-06T14:48:20.795679",
-            "exec_end": "2025-11-06T14:48:42.191979",
-            "exec_duration_monotonic": 21.396299839019775,
-            "avg_memory": 782.6633522727274,
-            "peak_memory": 1505.578125
+            "exec_start": "2025-11-10T18:15:48.450100",
+            "exec_end": "2025-11-10T18:16:28.504656",
+            "exec_duration_monotonic": 40.054556131362915,
+            "avg_memory": 796.7727539062503,
+            "peak_memory": 1596.84765625
           },
           "task_result": {
             "warnings": [
               "1 wellformedness check failed!"
             ],
-            "real_time_tamarin_measure": 21.06,
+            "real_time_tamarin_measure": 39.57,
             "lemma_result": "verified",
             "steps": 14,
             "analysis_type": "exists-trace"
           }
         },
-        "--san_CT_ClientValidate--default": {
+        "--san_CT_monitorVerifiesInclusion--default": {
           "task_config": {
             "tamarin_alias": "default",
-            "lemma": "san_CT_ClientValidate",
-            "output_theory_file": "results/sanity/all-san/proofs/--san_CT_ClientValidate--default.spthy",
-            "output_trace_file": "results/sanity/all-san/traces/--san_CT_ClientValidate--default.json",
+            "lemma": "san_CT_monitorVerifiesInclusion",
+            "output_theory_file": "results/sanity/all-san/proofs/--san_CT_monitorVerifiesInclusion--default.spthy",
+            "output_trace_file": "results/sanity/all-san/traces/--san_CT_monitorVerifiesInclusion--default.json",
             "options": [
               "--derivcheck-timeout=0"
             ],
@@ -360,123 +150,19 @@
             "command": [],
             "status": "completed",
             "cache_hit": false,
-            "exec_start": "2025-11-06T14:48:42.277705",
-            "exec_end": "2025-11-06T14:48:51.957502",
-            "exec_duration_monotonic": 9.679796934127808,
-            "avg_memory": 201.7828125,
-            "peak_memory": 278.65625
+            "exec_start": "2025-11-10T18:16:28.614339",
+            "exec_end": "2025-11-10T18:16:39.388238",
+            "exec_duration_monotonic": 10.773899555206299,
+            "avg_memory": 183.8497869318182,
+            "peak_memory": 342.01171875
           },
           "task_result": {
             "warnings": [
               "1 wellformedness check failed!"
             ],
-            "real_time_tamarin_measure": 9.35,
+            "real_time_tamarin_measure": 10.31,
             "lemma_result": "verified",
-            "steps": 35,
-            "analysis_type": "exists-trace"
-          }
-        },
-        "--san_CTGossip_monitorVerifiesAppendOnly_Gossiped--default": {
-          "task_config": {
-            "tamarin_alias": "default",
-            "lemma": "san_CTGossip_monitorVerifiesAppendOnly_Gossiped",
-            "output_theory_file": "results/sanity/all-san/proofs/--san_CTGossip_monitorVerifiesAppendOnly_Gossiped--default.spthy",
-            "output_trace_file": "results/sanity/all-san/traces/--san_CTGossip_monitorVerifiesAppendOnly_Gossiped--default.json",
-            "options": [
-              "--derivcheck-timeout=0"
-            ],
-            "resources": {
-              "cores": 10,
-              "memory": 5,
-              "timeout": 200
-            }
-          },
-          "task_execution_metadata": {
-            "command": [],
-            "status": "completed",
-            "cache_hit": false,
-            "exec_start": "2025-11-06T14:48:52.004196",
-            "exec_end": "2025-11-06T14:49:07.211894",
-            "exec_duration_monotonic": 15.207697868347168,
-            "avg_memory": 248.0114583333333,
-            "peak_memory": 404.40625
-          },
-          "task_result": {
-            "warnings": [
-              "1 wellformedness check failed!"
-            ],
-            "real_time_tamarin_measure": 14.88,
-            "lemma_result": "verified",
-            "steps": 45,
-            "analysis_type": "exists-trace"
-          }
-        },
-        "--san_CTAudit_monitorAudit_CA_Viol--default": {
-          "task_config": {
-            "tamarin_alias": "default",
-            "lemma": "san_CTAudit_monitorAudit_CA_Viol",
-            "output_theory_file": "results/sanity/all-san/proofs/--san_CTAudit_monitorAudit_CA_Viol--default.spthy",
-            "output_trace_file": "results/sanity/all-san/traces/--san_CTAudit_monitorAudit_CA_Viol--default.json",
-            "options": [
-              "--derivcheck-timeout=0"
-            ],
-            "resources": {
-              "cores": 10,
-              "memory": 5,
-              "timeout": 200
-            }
-          },
-          "task_execution_metadata": {
-            "command": [],
-            "status": "timeout",
-            "cache_hit": false,
-            "exec_start": "2025-11-06T14:49:07.315735",
-            "exec_end": "2025-11-06T14:49:12.465018",
-            "exec_duration_monotonic": 5.149282932281494,
-            "avg_memory": 0.0,
-            "peak_memory": 0.0
-          },
-          "task_result": {
-            "return_code": "-1",
-            "error_type": "timeout",
-            "error_description": "Task timed out during execution",
-            "last_stderr_lines": [
-              "Process timed out"
-            ]
-          }
-        },
-        "--san_CTExt_monitor_externalCheck_Verified--default": {
-          "task_config": {
-            "tamarin_alias": "default",
-            "lemma": "san_CTExt_monitor_externalCheck_Verified",
-            "output_theory_file": "results/sanity/all-san/proofs/--san_CTExt_monitor_externalCheck_Verified--default.spthy",
-            "output_trace_file": "results/sanity/all-san/traces/--san_CTExt_monitor_externalCheck_Verified--default.json",
-            "options": [
-              "--derivcheck-timeout=0"
-            ],
-            "resources": {
-              "cores": 10,
-              "memory": 5,
-              "timeout": 200
-            }
-          },
-          "task_execution_metadata": {
-            "command": [],
-            "status": "completed",
-            "cache_hit": false,
-            "exec_start": "2025-11-06T14:49:12.490309",
-            "exec_end": "2025-11-06T14:49:19.020494",
-            "exec_duration_monotonic": 6.530184745788574,
-            "avg_memory": 202.38169642857144,
-            "peak_memory": 326.71875
-          },
-          "task_result": {
-            "warnings": [
-              "1 wellformedness check failed!"
-            ],
-            "real_time_tamarin_measure": 6.19,
-            "lemma_result": "verified",
-            "steps": 24,
+            "steps": 17,
             "analysis_type": "exists-trace"
           }
         },
@@ -499,133 +185,28 @@
             "command": [],
             "status": "completed",
             "cache_hit": false,
-            "exec_start": "2025-11-06T14:49:19.095135",
-            "exec_end": "2025-11-06T14:49:26.186308",
-            "exec_duration_monotonic": 7.09117317199707,
-            "avg_memory": 320.96205357142856,
-            "peak_memory": 776.46875
+            "exec_start": "2025-11-10T18:16:39.492924",
+            "exec_end": "2025-11-10T18:17:06.014477",
+            "exec_duration_monotonic": 26.521552562713623,
+            "avg_memory": 873.6885127314814,
+            "peak_memory": 1734.03125
           },
           "task_result": {
             "warnings": [
               "1 wellformedness check failed!"
             ],
-            "real_time_tamarin_measure": 6.78,
-            "lemma_result": "verified",
-            "steps": 10,
-            "analysis_type": "exists-trace"
-          }
-        },
-        "--san_CT_monitorVerifiesAppendOnly--default": {
-          "task_config": {
-            "tamarin_alias": "default",
-            "lemma": "san_CT_monitorVerifiesAppendOnly",
-            "output_theory_file": "results/sanity/all-san/proofs/--san_CT_monitorVerifiesAppendOnly--default.spthy",
-            "output_trace_file": "results/sanity/all-san/traces/--san_CT_monitorVerifiesAppendOnly--default.json",
-            "options": [
-              "--derivcheck-timeout=0"
-            ],
-            "resources": {
-              "cores": 10,
-              "memory": 5,
-              "timeout": 200
-            }
-          },
-          "task_execution_metadata": {
-            "command": [],
-            "status": "completed",
-            "cache_hit": false,
-            "exec_start": "2025-11-06T14:49:26.303413",
-            "exec_end": "2025-11-06T14:49:46.668427",
-            "exec_duration_monotonic": 20.36501407623291,
-            "avg_memory": 564.7797619047618,
-            "peak_memory": 1142.84375
-          },
-          "task_result": {
-            "warnings": [
-              "1 wellformedness check failed!"
-            ],
-            "real_time_tamarin_measure": 20.04,
-            "lemma_result": "verified",
-            "steps": 32,
-            "analysis_type": "exists-trace"
-          }
-        },
-        "--san_CT_monitorFindsRogueCertificate_SLEEP--default": {
-          "task_config": {
-            "tamarin_alias": "default",
-            "lemma": "san_CT_monitorFindsRogueCertificate_SLEEP",
-            "output_theory_file": "results/sanity/all-san/proofs/--san_CT_monitorFindsRogueCertificate_SLEEP--default.spthy",
-            "output_trace_file": "results/sanity/all-san/traces/--san_CT_monitorFindsRogueCertificate_SLEEP--default.json",
-            "options": [
-              "--derivcheck-timeout=0"
-            ],
-            "resources": {
-              "cores": 10,
-              "memory": 5,
-              "timeout": 200
-            }
-          },
-          "task_execution_metadata": {
-            "command": [],
-            "status": "completed",
-            "cache_hit": false,
-            "exec_start": "2025-11-06T14:49:46.778002",
-            "exec_end": "2025-11-06T14:49:53.912990",
-            "exec_duration_monotonic": 7.134987831115723,
-            "avg_memory": 208.27901785714286,
-            "peak_memory": 391.171875
-          },
-          "task_result": {
-            "warnings": [
-              "1 wellformedness check failed!"
-            ],
-            "real_time_tamarin_measure": 6.82,
-            "lemma_result": "verified",
-            "steps": 16,
-            "analysis_type": "exists-trace"
-          }
-        },
-        "--san_CT_ClientFindsAppendOnlyViolation--default": {
-          "task_config": {
-            "tamarin_alias": "default",
-            "lemma": "san_CT_ClientFindsAppendOnlyViolation",
-            "output_theory_file": "results/sanity/all-san/proofs/--san_CT_ClientFindsAppendOnlyViolation--default.spthy",
-            "output_trace_file": "results/sanity/all-san/traces/--san_CT_ClientFindsAppendOnlyViolation--default.json",
-            "options": [
-              "--derivcheck-timeout=0"
-            ],
-            "resources": {
-              "cores": 10,
-              "memory": 5,
-              "timeout": 200
-            }
-          },
-          "task_execution_metadata": {
-            "command": [],
-            "status": "completed",
-            "cache_hit": false,
-            "exec_start": "2025-11-06T14:49:53.980093",
-            "exec_end": "2025-11-06T14:50:02.248263",
-            "exec_duration_monotonic": 8.26816987991333,
-            "avg_memory": 246.86284722222223,
-            "peak_memory": 481.734375
-          },
-          "task_result": {
-            "warnings": [
-              "1 wellformedness check failed!"
-            ],
-            "real_time_tamarin_measure": 7.94,
+            "real_time_tamarin_measure": 26.05,
             "lemma_result": "verified",
             "steps": 31,
             "analysis_type": "exists-trace"
           }
         },
-        "--san_CT_monitorCannotFindCertificate--default": {
+        "--san_CT_ConsultDocumentation_Failsf--default": {
           "task_config": {
             "tamarin_alias": "default",
-            "lemma": "san_CT_monitorCannotFindCertificate",
-            "output_theory_file": "results/sanity/all-san/proofs/--san_CT_monitorCannotFindCertificate--default.spthy",
-            "output_trace_file": "results/sanity/all-san/traces/--san_CT_monitorCannotFindCertificate--default.json",
+            "lemma": "san_CT_ConsultDocumentation_Failsf",
+            "output_theory_file": "results/sanity/all-san/proofs/--san_CT_ConsultDocumentation_Failsf--default.spthy",
+            "output_trace_file": "results/sanity/all-san/traces/--san_CT_ConsultDocumentation_Failsf--default.json",
             "options": [
               "--derivcheck-timeout=0"
             ],
@@ -639,54 +220,19 @@
             "command": [],
             "status": "completed",
             "cache_hit": false,
-            "exec_start": "2025-11-06T14:50:02.309778",
-            "exec_end": "2025-11-06T14:50:06.274112",
-            "exec_duration_monotonic": 3.964334011077881,
-            "avg_memory": 123.81640625,
-            "peak_memory": 231.125
+            "exec_start": "2025-11-10T18:17:06.039463",
+            "exec_end": "2025-11-10T18:17:13.082076",
+            "exec_duration_monotonic": 7.042612552642822,
+            "avg_memory": 118.26953125,
+            "peak_memory": 207.625
           },
           "task_result": {
             "warnings": [
               "1 wellformedness check failed!"
             ],
-            "real_time_tamarin_measure": 3.64,
+            "real_time_tamarin_measure": 6.58,
             "lemma_result": "verified",
-            "steps": 10,
-            "analysis_type": "exists-trace"
-          }
-        },
-        "--san_CT_PreCertified--default": {
-          "task_config": {
-            "tamarin_alias": "default",
-            "lemma": "san_CT_PreCertified",
-            "output_theory_file": "results/sanity/all-san/proofs/--san_CT_PreCertified--default.spthy",
-            "output_trace_file": "results/sanity/all-san/traces/--san_CT_PreCertified--default.json",
-            "options": [
-              "--derivcheck-timeout=0"
-            ],
-            "resources": {
-              "cores": 10,
-              "memory": 5,
-              "timeout": 200
-            }
-          },
-          "task_execution_metadata": {
-            "command": [],
-            "status": "completed",
-            "cache_hit": false,
-            "exec_start": "2025-11-06T14:50:06.375604",
-            "exec_end": "2025-11-06T14:50:10.106112",
-            "exec_duration_monotonic": 3.7305080890655518,
-            "avg_memory": 125.0546875,
-            "peak_memory": 236.765625
-          },
-          "task_result": {
-            "warnings": [
-              "1 wellformedness check failed!"
-            ],
-            "real_time_tamarin_measure": 3.39,
-            "lemma_result": "verified",
-            "steps": 4,
+            "steps": 5,
             "analysis_type": "exists-trace"
           }
         },
@@ -709,28 +255,28 @@
             "command": [],
             "status": "completed",
             "cache_hit": false,
-            "exec_start": "2025-11-06T14:50:10.136761",
-            "exec_end": "2025-11-06T14:50:15.781030",
-            "exec_duration_monotonic": 5.644268751144409,
-            "avg_memory": 182.11197916666666,
-            "peak_memory": 306.984375
+            "exec_start": "2025-11-10T18:17:13.187320",
+            "exec_end": "2025-11-10T18:17:22.623684",
+            "exec_duration_monotonic": 9.436363458633423,
+            "avg_memory": 178.452734375,
+            "peak_memory": 355.7265625
           },
           "task_result": {
             "warnings": [
               "1 wellformedness check failed!"
             ],
-            "real_time_tamarin_measure": 5.31,
+            "real_time_tamarin_measure": 9.01,
             "lemma_result": "verified",
             "steps": 22,
             "analysis_type": "exists-trace"
           }
         },
-        "--san_CTAudit_monitorAudit_Sleep--default": {
+        "--san_CT_CA_Init--default": {
           "task_config": {
             "tamarin_alias": "default",
-            "lemma": "san_CTAudit_monitorAudit_Sleep",
-            "output_theory_file": "results/sanity/all-san/proofs/--san_CTAudit_monitorAudit_Sleep--default.spthy",
-            "output_trace_file": "results/sanity/all-san/traces/--san_CTAudit_monitorAudit_Sleep--default.json",
+            "lemma": "san_CT_CA_Init",
+            "output_theory_file": "results/sanity/all-san/proofs/--san_CT_CA_Init--default.spthy",
+            "output_trace_file": "results/sanity/all-san/traces/--san_CT_CA_Init--default.json",
             "options": [
               "--derivcheck-timeout=0"
             ],
@@ -744,19 +290,19 @@
             "command": [],
             "status": "completed",
             "cache_hit": false,
-            "exec_start": "2025-11-06T14:50:15.820682",
-            "exec_end": "2025-11-06T14:50:21.232943",
-            "exec_duration_monotonic": 5.412261009216309,
-            "avg_memory": 177.984375,
-            "peak_memory": 346.34375
+            "exec_start": "2025-11-10T18:17:22.649543",
+            "exec_end": "2025-11-10T18:17:28.930866",
+            "exec_duration_monotonic": 6.281323194503784,
+            "avg_memory": 166.25111607142856,
+            "peak_memory": 490.671875
           },
           "task_result": {
             "warnings": [
               "1 wellformedness check failed!"
             ],
-            "real_time_tamarin_measure": 5.07,
+            "real_time_tamarin_measure": 5.86,
             "lemma_result": "verified",
-            "steps": 16,
+            "steps": 3,
             "analysis_type": "exists-trace"
           }
         },
@@ -779,17 +325,17 @@
             "command": [],
             "status": "completed",
             "cache_hit": false,
-            "exec_start": "2025-11-06T14:50:21.318278",
-            "exec_end": "2025-11-06T14:50:27.094514",
-            "exec_duration_monotonic": 5.776236057281494,
-            "avg_memory": 163.22135416666666,
-            "peak_memory": 252.65625
+            "exec_start": "2025-11-10T18:17:29.000458",
+            "exec_end": "2025-11-10T18:17:38.416742",
+            "exec_duration_monotonic": 9.41628384590149,
+            "avg_memory": 174.963671875,
+            "peak_memory": 373.19140625
           },
           "task_result": {
             "warnings": [
               "1 wellformedness check failed!"
             ],
-            "real_time_tamarin_measure": 5.42,
+            "real_time_tamarin_measure": 8.98,
             "lemma_result": "verified",
             "steps": 26,
             "analysis_type": "exists-trace"
@@ -814,19 +360,684 @@
             "command": [],
             "status": "completed",
             "cache_hit": false,
-            "exec_start": "2025-11-06T14:50:27.231742",
-            "exec_end": "2025-11-06T14:50:32.892299",
-            "exec_duration_monotonic": 5.66055703163147,
-            "avg_memory": 160.23177083333334,
-            "peak_memory": 253.296875
+            "exec_start": "2025-11-10T18:17:38.464662",
+            "exec_end": "2025-11-10T18:17:48.320745",
+            "exec_duration_monotonic": 9.856082439422607,
+            "avg_memory": 153.08515625,
+            "peak_memory": 266.39453125
           },
           "task_result": {
             "warnings": [
               "1 wellformedness check failed!"
             ],
-            "real_time_tamarin_measure": 5.32,
+            "real_time_tamarin_measure": 9.41,
             "lemma_result": "verified",
             "steps": 20,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--san_CTGossip_monitorFindsAppendOnlyViolation_Gossiped--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "san_CTGossip_monitorFindsAppendOnlyViolation_Gossiped",
+            "output_theory_file": "results/sanity/all-san/proofs/--san_CTGossip_monitorFindsAppendOnlyViolation_Gossiped--default.spthy",
+            "output_trace_file": "results/sanity/all-san/traces/--san_CTGossip_monitorFindsAppendOnlyViolation_Gossiped--default.json",
+            "options": [
+              "--derivcheck-timeout=0"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 5,
+              "timeout": 200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2025-11-10T18:17:48.435362",
+            "exec_end": "2025-11-10T18:18:16.219179",
+            "exec_duration_monotonic": 27.78381657600403,
+            "avg_memory": 506.8621651785715,
+            "peak_memory": 1027.7265625
+          },
+          "task_result": {
+            "warnings": [
+              "1 wellformedness check failed!"
+            ],
+            "real_time_tamarin_measure": 27.33,
+            "lemma_result": "verified",
+            "steps": 32,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--san_CT_ClientFindsInclusionViolation_2--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "san_CT_ClientFindsInclusionViolation_2",
+            "output_theory_file": "results/sanity/all-san/proofs/--san_CT_ClientFindsInclusionViolation_2--default.spthy",
+            "output_trace_file": "results/sanity/all-san/traces/--san_CT_ClientFindsInclusionViolation_2--default.json",
+            "options": [
+              "--derivcheck-timeout=0"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 5,
+              "timeout": 200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2025-11-10T18:18:16.277004",
+            "exec_end": "2025-11-10T18:18:29.802647",
+            "exec_duration_monotonic": 13.525643587112427,
+            "avg_memory": 213.33537946428572,
+            "peak_memory": 352.65625
+          },
+          "task_result": {
+            "warnings": [
+              "1 wellformedness check failed!"
+            ],
+            "real_time_tamarin_measure": 13.1,
+            "lemma_result": "verified",
+            "steps": 25,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--san_CT_Start_Log--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "san_CT_Start_Log",
+            "output_theory_file": "results/sanity/all-san/proofs/--san_CT_Start_Log--default.spthy",
+            "output_trace_file": "results/sanity/all-san/traces/--san_CT_Start_Log--default.json",
+            "options": [
+              "--derivcheck-timeout=0"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 5,
+              "timeout": 200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2025-11-10T18:18:29.868678",
+            "exec_end": "2025-11-10T18:18:37.534750",
+            "exec_duration_monotonic": 7.666072368621826,
+            "avg_memory": 150.7666015625,
+            "peak_memory": 317.50390625
+          },
+          "task_result": {
+            "warnings": [
+              "1 wellformedness check failed!"
+            ],
+            "real_time_tamarin_measure": 7.32,
+            "lemma_result": "verified",
+            "steps": 3,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--san_CT_monitorFindsInclusionViolation--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "san_CT_monitorFindsInclusionViolation",
+            "output_theory_file": "results/sanity/all-san/proofs/--san_CT_monitorFindsInclusionViolation--default.spthy",
+            "output_trace_file": "results/sanity/all-san/traces/--san_CT_monitorFindsInclusionViolation--default.json",
+            "options": [
+              "--derivcheck-timeout=0"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 5,
+              "timeout": 200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2025-11-10T18:18:37.635053",
+            "exec_end": "2025-11-10T18:18:44.241032",
+            "exec_duration_monotonic": 6.605978965759277,
+            "avg_memory": 158.73828125,
+            "peak_memory": 454.515625
+          },
+          "task_result": {
+            "warnings": [
+              "1 wellformedness check failed!"
+            ],
+            "real_time_tamarin_measure": 6.17,
+            "lemma_result": "verified",
+            "steps": 8,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--san_CT_PreCertify--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "san_CT_PreCertify",
+            "output_theory_file": "results/sanity/all-san/proofs/--san_CT_PreCertify--default.spthy",
+            "output_trace_file": "results/sanity/all-san/traces/--san_CT_PreCertify--default.json",
+            "options": [
+              "--derivcheck-timeout=0"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 5,
+              "timeout": 200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2025-11-10T18:18:44.291648",
+            "exec_end": "2025-11-10T18:18:50.949696",
+            "exec_duration_monotonic": 6.658048152923584,
+            "avg_memory": 136.56305803571428,
+            "peak_memory": 332.28125
+          },
+          "task_result": {
+            "warnings": [
+              "1 wellformedness check failed!"
+            ],
+            "real_time_tamarin_measure": 6.22,
+            "lemma_result": "verified",
+            "steps": 4,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--san_CT_ClientValidate--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "san_CT_ClientValidate",
+            "output_theory_file": "results/sanity/all-san/proofs/--san_CT_ClientValidate--default.spthy",
+            "output_trace_file": "results/sanity/all-san/traces/--san_CT_ClientValidate--default.json",
+            "options": [
+              "--derivcheck-timeout=0"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 5,
+              "timeout": 200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2025-11-10T18:18:51.056912",
+            "exec_end": "2025-11-10T18:19:06.963152",
+            "exec_duration_monotonic": 15.906239986419678,
+            "avg_memory": 198.84326171874997,
+            "peak_memory": 272.4921875
+          },
+          "task_result": {
+            "warnings": [
+              "1 wellformedness check failed!"
+            ],
+            "real_time_tamarin_measure": 15.48,
+            "lemma_result": "verified",
+            "steps": 35,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--san_CT_LoggerSnapshot--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "san_CT_LoggerSnapshot",
+            "output_theory_file": "results/sanity/all-san/proofs/--san_CT_LoggerSnapshot--default.spthy",
+            "output_trace_file": "results/sanity/all-san/traces/--san_CT_LoggerSnapshot--default.json",
+            "options": [
+              "--derivcheck-timeout=0"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 5,
+              "timeout": 200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2025-11-10T18:19:07.070568",
+            "exec_end": "2025-11-10T18:19:13.524601",
+            "exec_duration_monotonic": 6.454033136367798,
+            "avg_memory": 157.81194196428572,
+            "peak_memory": 445.609375
+          },
+          "task_result": {
+            "warnings": [
+              "1 wellformedness check failed!"
+            ],
+            "real_time_tamarin_measure": 6.02,
+            "lemma_result": "verified",
+            "steps": 7,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--san_CT_monitorFindsRogueCertificate_SLEEP--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "san_CT_monitorFindsRogueCertificate_SLEEP",
+            "output_theory_file": "results/sanity/all-san/proofs/--san_CT_monitorFindsRogueCertificate_SLEEP--default.spthy",
+            "output_trace_file": "results/sanity/all-san/traces/--san_CT_monitorFindsRogueCertificate_SLEEP--default.json",
+            "options": [
+              "--derivcheck-timeout=0"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 5,
+              "timeout": 200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2025-11-10T18:19:13.649781",
+            "exec_end": "2025-11-10T18:19:24.329413",
+            "exec_duration_monotonic": 10.679632425308228,
+            "avg_memory": 184.3302556818182,
+            "peak_memory": 390.421875
+          },
+          "task_result": {
+            "warnings": [
+              "1 wellformedness check failed!"
+            ],
+            "real_time_tamarin_measure": 10.23,
+            "lemma_result": "verified",
+            "steps": 16,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--san_CT_ChainValidator_Invalid--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "san_CT_ChainValidator_Invalid",
+            "output_theory_file": "results/sanity/all-san/proofs/--san_CT_ChainValidator_Invalid--default.spthy",
+            "output_trace_file": "results/sanity/all-san/traces/--san_CT_ChainValidator_Invalid--default.json",
+            "options": [
+              "--derivcheck-timeout=0"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 5,
+              "timeout": 200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2025-11-10T18:19:24.449735",
+            "exec_end": "2025-11-10T18:19:30.853393",
+            "exec_duration_monotonic": 6.40365743637085,
+            "avg_memory": 161.37946428571428,
+            "peak_memory": 466.41796875
+          },
+          "task_result": {
+            "warnings": [
+              "1 wellformedness check failed!"
+            ],
+            "real_time_tamarin_measure": 6.06,
+            "lemma_result": "verified",
+            "steps": 5,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--san_CT_Intermediate_CA_Init--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "san_CT_Intermediate_CA_Init",
+            "output_theory_file": "results/sanity/all-san/proofs/--san_CT_Intermediate_CA_Init--default.spthy",
+            "output_trace_file": "results/sanity/all-san/traces/--san_CT_Intermediate_CA_Init--default.json",
+            "options": [
+              "--derivcheck-timeout=0"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 5,
+              "timeout": 200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2025-11-10T18:19:30.914663",
+            "exec_end": "2025-11-10T18:19:35.393717",
+            "exec_duration_monotonic": 4.47905421257019,
+            "avg_memory": 136.5828125,
+            "peak_memory": 355.23828125
+          },
+          "task_result": {
+            "warnings": [
+              "1 wellformedness check failed!"
+            ],
+            "real_time_tamarin_measure": 4.03,
+            "lemma_result": "verified",
+            "steps": 2,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--san_CT_ConsultDocumentation_Success--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "san_CT_ConsultDocumentation_Success",
+            "output_theory_file": "results/sanity/all-san/proofs/--san_CT_ConsultDocumentation_Success--default.spthy",
+            "output_trace_file": "results/sanity/all-san/traces/--san_CT_ConsultDocumentation_Success--default.json",
+            "options": [
+              "--derivcheck-timeout=0"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 5,
+              "timeout": 200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2025-11-10T18:19:35.472194",
+            "exec_end": "2025-11-10T18:19:42.282918",
+            "exec_duration_monotonic": 6.8107240200042725,
+            "avg_memory": 125.64564732142857,
+            "peak_memory": 209.1640625
+          },
+          "task_result": {
+            "warnings": [
+              "1 wellformedness check failed!"
+            ],
+            "real_time_tamarin_measure": 6.4,
+            "lemma_result": "verified",
+            "steps": 7,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--san_CT_forge_log_view--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "san_CT_forge_log_view",
+            "output_theory_file": "results/sanity/all-san/proofs/--san_CT_forge_log_view--default.spthy",
+            "output_trace_file": "results/sanity/all-san/traces/--san_CT_forge_log_view--default.json",
+            "options": [
+              "--derivcheck-timeout=0"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 5,
+              "timeout": 200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2025-11-10T18:19:42.333464",
+            "exec_end": "2025-11-10T18:19:48.578852",
+            "exec_duration_monotonic": 6.245388746261597,
+            "avg_memory": 161.44977678571428,
+            "peak_memory": 483.74609375
+          },
+          "task_result": {
+            "warnings": [
+              "1 wellformedness check failed!"
+            ],
+            "real_time_tamarin_measure": 5.89,
+            "lemma_result": "verified",
+            "steps": 3,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--san_CT_ClientVerifiesAppendOnly--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "san_CT_ClientVerifiesAppendOnly",
+            "output_theory_file": "results/sanity/all-san/proofs/--san_CT_ClientVerifiesAppendOnly--default.spthy",
+            "output_trace_file": "results/sanity/all-san/traces/--san_CT_ClientVerifiesAppendOnly--default.json",
+            "options": [
+              "--derivcheck-timeout=0"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 5,
+              "timeout": 200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2025-11-10T18:19:48.688555",
+            "exec_end": "2025-11-10T18:20:05.696644",
+            "exec_duration_monotonic": 17.008089065551758,
+            "avg_memory": 205.17968750000003,
+            "peak_memory": 313.96875
+          },
+          "task_result": {
+            "warnings": [
+              "1 wellformedness check failed!"
+            ],
+            "real_time_tamarin_measure": 16.57,
+            "lemma_result": "verified",
+            "steps": 38,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--san_CTAudit_monitorAudit_no_viol--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "san_CTAudit_monitorAudit_no_viol",
+            "output_theory_file": "results/sanity/all-san/proofs/--san_CTAudit_monitorAudit_no_viol--default.spthy",
+            "output_trace_file": "results/sanity/all-san/traces/--san_CTAudit_monitorAudit_no_viol--default.json",
+            "options": [
+              "--derivcheck-timeout=0"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 5,
+              "timeout": 200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2025-11-10T18:20:05.755102",
+            "exec_end": "2025-11-10T18:20:24.876166",
+            "exec_duration_monotonic": 19.12106418609619,
+            "avg_memory": 383.9934210526316,
+            "peak_memory": 744.15234375
+          },
+          "task_result": {
+            "warnings": [
+              "1 wellformedness check failed!"
+            ],
+            "real_time_tamarin_measure": 18.77,
+            "lemma_result": "verified",
+            "steps": 23,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--san_CTAudit_monitorAudit_CA_Viol--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "san_CTAudit_monitorAudit_CA_Viol",
+            "output_theory_file": "results/sanity/all-san/proofs/--san_CTAudit_monitorAudit_CA_Viol--default.spthy",
+            "output_trace_file": "results/sanity/all-san/traces/--san_CTAudit_monitorAudit_CA_Viol--default.json",
+            "options": [
+              "--derivcheck-timeout=0"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 5,
+              "timeout": 200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2025-11-10T18:20:24.922877",
+            "exec_end": "2025-11-10T18:20:33.583437",
+            "exec_duration_monotonic": 8.660560607910156,
+            "avg_memory": 156.54600694444446,
+            "peak_memory": 306.1015625
+          },
+          "task_result": {
+            "warnings": [
+              "1 wellformedness check failed!"
+            ],
+            "real_time_tamarin_measure": 8.3,
+            "lemma_result": "verified",
+            "steps": 16,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--san_CT_monitorVerifiesAppendOnly--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "san_CT_monitorVerifiesAppendOnly",
+            "output_theory_file": "results/sanity/all-san/proofs/--san_CT_monitorVerifiesAppendOnly--default.spthy",
+            "output_trace_file": "results/sanity/all-san/traces/--san_CT_monitorVerifiesAppendOnly--default.json",
+            "options": [
+              "--derivcheck-timeout=0"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 5,
+              "timeout": 200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2025-11-10T18:20:33.702936",
+            "exec_end": "2025-11-10T18:21:08.611340",
+            "exec_duration_monotonic": 34.90840458869934,
+            "avg_memory": 572.6978794642856,
+            "peak_memory": 1157.6796875
+          },
+          "task_result": {
+            "warnings": [
+              "1 wellformedness check failed!"
+            ],
+            "real_time_tamarin_measure": 34.45,
+            "lemma_result": "verified",
+            "steps": 32,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--san_CT_ClientFindsAppendOnlyViolation--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "san_CT_ClientFindsAppendOnlyViolation",
+            "output_theory_file": "results/sanity/all-san/proofs/--san_CT_ClientFindsAppendOnlyViolation--default.spthy",
+            "output_trace_file": "results/sanity/all-san/traces/--san_CT_ClientFindsAppendOnlyViolation--default.json",
+            "options": [
+              "--derivcheck-timeout=0"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 5,
+              "timeout": 200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2025-11-10T18:21:08.718191",
+            "exec_end": "2025-11-10T18:21:22.778177",
+            "exec_duration_monotonic": 14.059986114501953,
+            "avg_memory": 213.9400111607143,
+            "peak_memory": 365.51171875
+          },
+          "task_result": {
+            "warnings": [
+              "1 wellformedness check failed!"
+            ],
+            "real_time_tamarin_measure": 13.65,
+            "lemma_result": "verified",
+            "steps": 31,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--san_CT_monitorCannotFindCertificate--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "san_CT_monitorCannotFindCertificate",
+            "output_theory_file": "results/sanity/all-san/proofs/--san_CT_monitorCannotFindCertificate--default.spthy",
+            "output_trace_file": "results/sanity/all-san/traces/--san_CT_monitorCannotFindCertificate--default.json",
+            "options": [
+              "--derivcheck-timeout=0"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 5,
+              "timeout": 200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2025-11-10T18:21:22.831840",
+            "exec_end": "2025-11-10T18:21:29.866191",
+            "exec_duration_monotonic": 7.034351110458374,
+            "avg_memory": 123.14508928571429,
+            "peak_memory": 215.26953125
+          },
+          "task_result": {
+            "warnings": [
+              "1 wellformedness check failed!"
+            ],
+            "real_time_tamarin_measure": 6.7,
+            "lemma_result": "verified",
+            "steps": 10,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--san_CTAudit_monitorAudit_Sleep--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "san_CTAudit_monitorAudit_Sleep",
+            "output_theory_file": "results/sanity/all-san/proofs/--san_CTAudit_monitorAudit_Sleep--default.spthy",
+            "output_trace_file": "results/sanity/all-san/traces/--san_CTAudit_monitorAudit_Sleep--default.json",
+            "options": [
+              "--derivcheck-timeout=0"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 5,
+              "timeout": 200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2025-11-10T18:21:29.918145",
+            "exec_end": "2025-11-10T18:21:39.492901",
+            "exec_duration_monotonic": 9.574755907058716,
+            "avg_memory": 173.87109375,
+            "peak_memory": 325.94140625
+          },
+          "task_result": {
+            "warnings": [
+              "1 wellformedness check failed!"
+            ],
+            "real_time_tamarin_measure": 9.16,
+            "lemma_result": "verified",
+            "steps": 16,
             "analysis_type": "exists-trace"
           }
         },
@@ -849,19 +1060,334 @@
             "command": [],
             "status": "completed",
             "cache_hit": false,
-            "exec_start": "2025-11-06T14:50:32.930733",
-            "exec_end": "2025-11-06T14:50:40.932987",
-            "exec_duration_monotonic": 8.002254009246826,
-            "avg_memory": 211.38671875,
-            "peak_memory": 334.328125
+            "exec_start": "2025-11-10T18:21:39.610120",
+            "exec_end": "2025-11-10T18:21:53.153635",
+            "exec_duration_monotonic": 13.5435152053833,
+            "avg_memory": 209.83314732142858,
+            "peak_memory": 363.52734375
           },
           "task_result": {
             "warnings": [
               "1 wellformedness check failed!"
             ],
-            "real_time_tamarin_measure": 7.67,
+            "real_time_tamarin_measure": 13.12,
             "lemma_result": "verified",
             "steps": 25,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--san_CT_ProofFetching_C--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "san_CT_ProofFetching_C",
+            "output_theory_file": "results/sanity/all-san/proofs/--san_CT_ProofFetching_C--default.spthy",
+            "output_trace_file": "results/sanity/all-san/traces/--san_CT_ProofFetching_C--default.json",
+            "options": [
+              "--derivcheck-timeout=0"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 5,
+              "timeout": 200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2025-11-10T18:21:53.222525",
+            "exec_end": "2025-11-10T18:21:59.841133",
+            "exec_duration_monotonic": 6.618608474731445,
+            "avg_memory": 153.88504464285714,
+            "peak_memory": 401.9140625
+          },
+          "task_result": {
+            "warnings": [
+              "1 wellformedness check failed!"
+            ],
+            "real_time_tamarin_measure": 6.14,
+            "lemma_result": "verified",
+            "steps": 3,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--san_CT_ChainValidator_Valid--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "san_CT_ChainValidator_Valid",
+            "output_theory_file": "results/sanity/all-san/proofs/--san_CT_ChainValidator_Valid--default.spthy",
+            "output_trace_file": "results/sanity/all-san/traces/--san_CT_ChainValidator_Valid--default.json",
+            "options": [
+              "--derivcheck-timeout=0"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 5,
+              "timeout": 200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2025-11-10T18:21:59.902231",
+            "exec_end": "2025-11-10T18:22:08.320270",
+            "exec_duration_monotonic": 8.418038368225098,
+            "avg_memory": 168.5625,
+            "peak_memory": 380.4140625
+          },
+          "task_result": {
+            "warnings": [
+              "1 wellformedness check failed!"
+            ],
+            "real_time_tamarin_measure": 7.98,
+            "lemma_result": "verified",
+            "steps": 8,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--san_CT_ClientStoresSnapshot--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "san_CT_ClientStoresSnapshot",
+            "output_theory_file": "results/sanity/all-san/proofs/--san_CT_ClientStoresSnapshot--default.spthy",
+            "output_trace_file": "results/sanity/all-san/traces/--san_CT_ClientStoresSnapshot--default.json",
+            "options": [
+              "--derivcheck-timeout=0"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 5,
+              "timeout": 200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2025-11-10T18:22:08.387692",
+            "exec_end": "2025-11-10T18:22:27.416992",
+            "exec_duration_monotonic": 19.029300212860107,
+            "avg_memory": 238.7012746710526,
+            "peak_memory": 370.76953125
+          },
+          "task_result": {
+            "warnings": [
+              "1 wellformedness check failed!"
+            ],
+            "real_time_tamarin_measure": 18.58,
+            "lemma_result": "verified",
+            "steps": 43,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--san_CT_Start_Log_malicious--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "san_CT_Start_Log_malicious",
+            "output_theory_file": "results/sanity/all-san/proofs/--san_CT_Start_Log_malicious--default.spthy",
+            "output_trace_file": "results/sanity/all-san/traces/--san_CT_Start_Log_malicious--default.json",
+            "options": [
+              "--derivcheck-timeout=0"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 5,
+              "timeout": 200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2025-11-10T18:22:27.564676",
+            "exec_end": "2025-11-10T18:22:34.283245",
+            "exec_duration_monotonic": 6.718569040298462,
+            "avg_memory": 139.7421875,
+            "peak_memory": 330.5
+          },
+          "task_result": {
+            "warnings": [
+              "1 wellformedness check failed!"
+            ],
+            "real_time_tamarin_measure": 6.27,
+            "lemma_result": "verified",
+            "steps": 3,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--san_CT_add_preC_to_log--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "san_CT_add_preC_to_log",
+            "output_theory_file": "results/sanity/all-san/proofs/--san_CT_add_preC_to_log--default.spthy",
+            "output_trace_file": "results/sanity/all-san/traces/--san_CT_add_preC_to_log--default.json",
+            "options": [
+              "--derivcheck-timeout=0"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 5,
+              "timeout": 200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2025-11-10T18:22:34.343729",
+            "exec_end": "2025-11-10T18:22:42.336124",
+            "exec_duration_monotonic": 7.99239444732666,
+            "avg_memory": 137.94921875,
+            "peak_memory": 216.16796875
+          },
+          "task_result": {
+            "warnings": [
+              "1 wellformedness check failed!"
+            ],
+            "real_time_tamarin_measure": 7.55,
+            "lemma_result": "verified",
+            "steps": 12,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--san_CTGossip_monitorVerifiesAppendOnly_Gossiped--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "san_CTGossip_monitorVerifiesAppendOnly_Gossiped",
+            "output_theory_file": "results/sanity/all-san/proofs/--san_CTGossip_monitorVerifiesAppendOnly_Gossiped--default.spthy",
+            "output_trace_file": "results/sanity/all-san/traces/--san_CTGossip_monitorVerifiesAppendOnly_Gossiped--default.json",
+            "options": [
+              "--derivcheck-timeout=0"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 5,
+              "timeout": 200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2025-11-10T18:22:42.437228",
+            "exec_end": "2025-11-10T18:23:07.375698",
+            "exec_duration_monotonic": 24.938470125198364,
+            "avg_memory": 239.54874999999998,
+            "peak_memory": 413.12109375
+          },
+          "task_result": {
+            "warnings": [
+              "1 wellformedness check failed!"
+            ],
+            "real_time_tamarin_measure": 24.5,
+            "lemma_result": "verified",
+            "steps": 45,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--san_CT_MonitorStoresSnapshot--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "san_CT_MonitorStoresSnapshot",
+            "output_theory_file": "results/sanity/all-san/proofs/--san_CT_MonitorStoresSnapshot--default.spthy",
+            "output_trace_file": "results/sanity/all-san/traces/--san_CT_MonitorStoresSnapshot--default.json",
+            "options": [
+              "--derivcheck-timeout=0"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 5,
+              "timeout": 200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2025-11-10T18:23:07.458334",
+            "exec_end": "2025-11-10T18:23:13.825503",
+            "exec_duration_monotonic": 6.367169141769409,
+            "avg_memory": 149.20200892857142,
+            "peak_memory": 352.53125
+          },
+          "task_result": {
+            "warnings": [
+              "1 wellformedness check failed!"
+            ],
+            "real_time_tamarin_measure": 5.94,
+            "lemma_result": "verified",
+            "steps": 7,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--san_CTExt_monitor_externalCheck_Verified--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "san_CTExt_monitor_externalCheck_Verified",
+            "output_theory_file": "results/sanity/all-san/proofs/--san_CTExt_monitor_externalCheck_Verified--default.spthy",
+            "output_trace_file": "results/sanity/all-san/traces/--san_CTExt_monitor_externalCheck_Verified--default.json",
+            "options": [
+              "--derivcheck-timeout=0"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 5,
+              "timeout": 200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2025-11-10T18:23:13.939152",
+            "exec_end": "2025-11-10T18:23:25.005144",
+            "exec_duration_monotonic": 11.06599235534668,
+            "avg_memory": 185.4236505681818,
+            "peak_memory": 316.16796875
+          },
+          "task_result": {
+            "warnings": [
+              "1 wellformedness check failed!"
+            ],
+            "real_time_tamarin_measure": 10.72,
+            "lemma_result": "verified",
+            "steps": 24,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--san_CT_ProofFetching_M--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "san_CT_ProofFetching_M",
+            "output_theory_file": "results/sanity/all-san/proofs/--san_CT_ProofFetching_M--default.spthy",
+            "output_trace_file": "results/sanity/all-san/traces/--san_CT_ProofFetching_M--default.json",
+            "options": [
+              "--derivcheck-timeout=0"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 5,
+              "timeout": 200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2025-11-10T18:23:25.151758",
+            "exec_end": "2025-11-10T18:23:31.420595",
+            "exec_duration_monotonic": 6.268836975097656,
+            "avg_memory": 161.35993303571428,
+            "peak_memory": 448.17578125
+          },
+          "task_result": {
+            "warnings": [
+              "1 wellformedness check failed!"
+            ],
+            "real_time_tamarin_measure": 5.81,
+            "lemma_result": "verified",
+            "steps": 4,
             "analysis_type": "exists-trace"
           }
         },
@@ -884,17 +1410,17 @@
             "command": [],
             "status": "completed",
             "cache_hit": false,
-            "exec_start": "2025-11-06T14:50:41.067833",
-            "exec_end": "2025-11-06T14:50:50.308475",
-            "exec_duration_monotonic": 9.240641593933105,
-            "avg_memory": 260.00624999999997,
-            "peak_memory": 501.921875
+            "exec_start": "2025-11-10T18:23:31.538641",
+            "exec_end": "2025-11-10T18:23:47.192757",
+            "exec_duration_monotonic": 15.654115676879883,
+            "avg_memory": 243.05346679687497,
+            "peak_memory": 465.1015625
           },
           "task_result": {
             "warnings": [
               "1 wellformedness check failed!"
             ],
-            "real_time_tamarin_measure": 8.9,
+            "real_time_tamarin_measure": 15.29,
             "lemma_result": "verified",
             "steps": 31,
             "analysis_type": "exists-trace"
@@ -919,54 +1445,19 @@
             "command": [],
             "status": "completed",
             "cache_hit": false,
-            "exec_start": "2025-11-06T14:50:50.409287",
-            "exec_end": "2025-11-06T14:50:54.830384",
-            "exec_duration_monotonic": 4.421097040176392,
-            "avg_memory": 166.146875,
-            "peak_memory": 343.703125
+            "exec_start": "2025-11-10T18:23:47.272535",
+            "exec_end": "2025-11-10T18:23:54.915370",
+            "exec_duration_monotonic": 7.642835855484009,
+            "avg_memory": 166.13916015625,
+            "peak_memory": 451.46875
           },
           "task_result": {
             "warnings": [
               "1 wellformedness check failed!"
             ],
-            "real_time_tamarin_measure": 4.09,
+            "real_time_tamarin_measure": 7.2,
             "lemma_result": "verified",
             "steps": 11,
-            "analysis_type": "exists-trace"
-          }
-        },
-        "--san_CTGossip_monitorFindsAppendOnlyViolation_Gossiped--default": {
-          "task_config": {
-            "tamarin_alias": "default",
-            "lemma": "san_CTGossip_monitorFindsAppendOnlyViolation_Gossiped",
-            "output_theory_file": "results/sanity/all-san/proofs/--san_CTGossip_monitorFindsAppendOnlyViolation_Gossiped--default.spthy",
-            "output_trace_file": "results/sanity/all-san/traces/--san_CTGossip_monitorFindsAppendOnlyViolation_Gossiped--default.json",
-            "options": [
-              "--derivcheck-timeout=0"
-            ],
-            "resources": {
-              "cores": 10,
-              "memory": 5,
-              "timeout": 200
-            }
-          },
-          "task_execution_metadata": {
-            "command": [],
-            "status": "completed",
-            "cache_hit": false,
-            "exec_start": "2025-11-06T14:50:54.887810",
-            "exec_end": "2025-11-06T14:51:11.339992",
-            "exec_duration_monotonic": 16.452182054519653,
-            "avg_memory": 524.1709558823529,
-            "peak_memory": 1077.890625
-          },
-          "task_result": {
-            "warnings": [
-              "1 wellformedness check failed!"
-            ],
-            "real_time_tamarin_measure": 16.14,
-            "lemma_result": "verified",
-            "steps": 32,
             "analysis_type": "exists-trace"
           }
         }

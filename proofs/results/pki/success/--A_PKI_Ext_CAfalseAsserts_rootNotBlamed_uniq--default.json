@@ -1,0 +1,43 @@
+{
+  "task_id": "--A_PKI_Ext_CAfalseAsserts_rootNotBlamed_uniq--default",
+  "warnings": [],
+  "tamarin_timing": 0.31,
+  "wrapper_measures": {
+    "time": 0.43949007987976074,
+    "avg_memory": 0.37890625,
+    "peak_memory": 0.37890625
+  },
+  "output_spthy": "results/pki/proofs/--A_PKI_Ext_CAfalseAsserts_rootNotBlamed_uniq--default.spthy",
+  "verified_lemma": {
+    "A_PKI_Ext_CAfalseAsserts_rootNotBlamed_uniq": {
+      "steps": 8,
+      "analysis_type": "all-traces"
+    }
+  },
+  "falsified_lemma": {},
+  "unterminated_lemma": [
+    "san_PKI_Root_CA_Init",
+    "san_PKI_NonRoot_CA_Init",
+    "san_PKI_Certify",
+    "san_PKI_ClientValidate",
+    "san_PKI_RequestLegitimacyProof_Success",
+    "san_PKI_RequestLegitimacyProof_Illegal",
+    "san_PKIExt_external_check_true",
+    "san_PKIExt_external_check_false",
+    "CA_auth_w_compromise",
+    "authenticity",
+    "cert_auth",
+    "A_PKI_Ext_CAfalseAsserts_rootBlamed_suff",
+    "A_PKI_Ext_CAfalseAsserts_rootNotBlamed_suff",
+    "A_PKI_Ext_verif_empty",
+    "A_PKI_Ext_CAfalseAsserts_rootBlamed_verif_nonempty",
+    "A_PKI_Ext_CAfalseAsserts_rootNotBlamed_verif_nonempty",
+    "A_PKI_Ext_CAfalseAsserts_rootBlamed_min",
+    "A_PKI_Ext_CAfalseAsserts_rootNotBlamed_min",
+    "A_PKI_Ext_CAfalseAsserts_rootBlamed_uniq",
+    "A_PKI_Ext_CAfalseAsserts_rootBlamed_inj",
+    "A_PKI_Ext_CAfalseAsserts_rootNotBlamed_inj",
+    "A_PKI_Ext_CAfalseAsserts_rootBlamed_single",
+    "A_PKI_Ext_CAfalseAsserts_rootNotBlamed_single"
+  ]
+}

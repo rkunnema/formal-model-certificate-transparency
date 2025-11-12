@@ -1,0 +1,2361 @@
+{
+  "recipe": "acc_authenticity_revoke.json",
+  "config": {
+    "global_max_cores": 10,
+    "global_max_memory": 15,
+    "default_timeout": 300,
+    "output_directory": "results/accountability/acc_authenticity_revoke"
+  },
+  "tamarin_versions": {
+    "default": {
+      "path": "tamarin-prover",
+      "version": "v1.10.0"
+    }
+  },
+  "execution_metadata": {
+    "total_tasks": 68,
+    "total_successes": 66,
+    "total_failures": 2,
+    "total_cache_hit": 66,
+    "total_runtime": 5718.942566871643,
+    "total_memory": 57416.06640625,
+    "max_runtime": 1393.613699913025,
+    "max_memory": 8323.70703125
+  },
+  "tasks": {
+    "autoprove": {
+      "theory_file": "../ct_lemmas_pregen.spthy",
+      "subtasks": {
+        "--A_Revoke_1_monitor_sleeps_intm_CA_min--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_Revoke_1_monitor_sleeps_intm_CA_min",
+            "output_theory_file": "results/accountability/acc_authenticity_revoke/proofs/--A_Revoke_1_monitor_sleeps_intm_CA_min--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_revoke/traces/--A_Revoke_1_monitor_sleeps_intm_CA_min--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=REVOCATION"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 180
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-10T11:19:34.416854",
+            "exec_end": "2025-11-10T11:19:43.636495",
+            "exec_duration_monotonic": 9.219641208648682,
+            "avg_memory": 194.573046875,
+            "peak_memory": 494.53125
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 8.87,
+            "lemma_result": "verified",
+            "steps": 12,
+            "analysis_type": "all-traces"
+          }
+        },
+        "--A_Revoke_1_monitor_sleeps_intm_CA_uniq--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_Revoke_1_monitor_sleeps_intm_CA_uniq",
+            "output_theory_file": "results/accountability/acc_authenticity_revoke/proofs/--A_Revoke_1_monitor_sleeps_intm_CA_uniq--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_revoke/traces/--A_Revoke_1_monitor_sleeps_intm_CA_uniq--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=REVOCATION"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 180
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-10T11:19:43.666907",
+            "exec_end": "2025-11-10T11:19:53.343697",
+            "exec_duration_monotonic": 9.6767897605896,
+            "avg_memory": 183.545703125,
+            "peak_memory": 428.50390625
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 9.04,
+            "lemma_result": "verified",
+            "steps": 4,
+            "analysis_type": "all-traces"
+          }
+        },
+        "--A_Revoke_1_monitor_sleeps_intm_CA_inj--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_Revoke_1_monitor_sleeps_intm_CA_inj",
+            "output_theory_file": "results/accountability/acc_authenticity_revoke/proofs/--A_Revoke_1_monitor_sleeps_intm_CA_inj--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_revoke/traces/--A_Revoke_1_monitor_sleeps_intm_CA_inj--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=REVOCATION"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 180
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-10T11:19:53.427650",
+            "exec_end": "2025-11-10T11:20:01.779046",
+            "exec_duration_monotonic": 8.35139513015747,
+            "avg_memory": 188.22916666666666,
+            "peak_memory": 476.2109375
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 7.87,
+            "lemma_result": "verified",
+            "steps": 4,
+            "analysis_type": "all-traces"
+          }
+        },
+        "--A_Revoke_1_monitor_sleeps_root_CA_inj--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_Revoke_1_monitor_sleeps_root_CA_inj",
+            "output_theory_file": "results/accountability/acc_authenticity_revoke/proofs/--A_Revoke_1_monitor_sleeps_root_CA_inj--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_revoke/traces/--A_Revoke_1_monitor_sleeps_root_CA_inj--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=REVOCATION"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 180
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-10T11:20:01.788017",
+            "exec_end": "2025-11-10T11:20:10.026092",
+            "exec_duration_monotonic": 8.238075256347656,
+            "avg_memory": 187.11414930555554,
+            "peak_memory": 471.03125
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 7.81,
+            "lemma_result": "verified",
+            "steps": 4,
+            "analysis_type": "all-traces"
+          }
+        },
+        "--A_Revoke_1_monitor_sleeps_root_CA_verif_nonempty--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_Revoke_1_monitor_sleeps_root_CA_verif_nonempty",
+            "output_theory_file": "results/accountability/acc_authenticity_revoke/proofs/--A_Revoke_1_monitor_sleeps_root_CA_verif_nonempty--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_revoke/traces/--A_Revoke_1_monitor_sleeps_root_CA_verif_nonempty--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=REVOCATION"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 180
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-10T11:20:10.035765",
+            "exec_end": "2025-11-10T11:20:18.110600",
+            "exec_duration_monotonic": 8.074835777282715,
+            "avg_memory": 152.30615234375,
+            "peak_memory": 213.73046875
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 7.63,
+            "lemma_result": "verified",
+            "steps": 13,
+            "analysis_type": "all-traces"
+          }
+        },
+        "--A_Revoke_1_monitor_sleeps_root_CA_min--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_Revoke_1_monitor_sleeps_root_CA_min",
+            "output_theory_file": "results/accountability/acc_authenticity_revoke/proofs/--A_Revoke_1_monitor_sleeps_root_CA_min--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_revoke/traces/--A_Revoke_1_monitor_sleeps_root_CA_min--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=REVOCATION"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 180
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-10T11:20:18.173846",
+            "exec_end": "2025-11-10T11:20:27.081352",
+            "exec_duration_monotonic": 8.907506227493286,
+            "avg_memory": 162.31857638888886,
+            "peak_memory": 222.18359375
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 8.47,
+            "lemma_result": "verified",
+            "steps": 12,
+            "analysis_type": "all-traces"
+          }
+        },
+        "--A_Revoke_1_monitor_sleeps_intm_CA_single--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_Revoke_1_monitor_sleeps_intm_CA_single",
+            "output_theory_file": "results/accountability/acc_authenticity_revoke/proofs/--A_Revoke_1_monitor_sleeps_intm_CA_single--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_revoke/traces/--A_Revoke_1_monitor_sleeps_intm_CA_single--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=REVOCATION"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 180
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-10T11:20:27.109409",
+            "exec_end": "2025-11-10T11:21:09.044738",
+            "exec_duration_monotonic": 41.935328245162964,
+            "avg_memory": 296.94680059523813,
+            "peak_memory": 576.36328125
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 41.5,
+            "lemma_result": "verified",
+            "steps": 59,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--A_Revoke_1_monitor_sleeps_root_CA_uniq--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_Revoke_1_monitor_sleeps_root_CA_uniq",
+            "output_theory_file": "results/accountability/acc_authenticity_revoke/proofs/--A_Revoke_1_monitor_sleeps_root_CA_uniq--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_revoke/traces/--A_Revoke_1_monitor_sleeps_root_CA_uniq--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=REVOCATION"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 180
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-10T11:21:09.137260",
+            "exec_end": "2025-11-10T11:21:17.996143",
+            "exec_duration_monotonic": 8.858883380889893,
+            "avg_memory": 161.08420138888889,
+            "peak_memory": 241.3984375
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 8.39,
+            "lemma_result": "verified",
+            "steps": 4,
+            "analysis_type": "all-traces"
+          }
+        },
+        "--A_Revoke_1_monitor_sleeps_root_CA_suff--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_Revoke_1_monitor_sleeps_root_CA_suff",
+            "output_theory_file": "results/accountability/acc_authenticity_revoke/proofs/--A_Revoke_1_monitor_sleeps_root_CA_suff--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_revoke/traces/--A_Revoke_1_monitor_sleeps_root_CA_suff--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=REVOCATION"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 180
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-10T11:21:18.101650",
+            "exec_end": "2025-11-10T11:22:54.830399",
+            "exec_duration_monotonic": 96.72874808311462,
+            "avg_memory": 392.61088053385413,
+            "peak_memory": 694.65625
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 96.25,
+            "lemma_result": "verified",
+            "steps": 92,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--A_Revoke_1_monitor_sleeps_root_CA_single--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_Revoke_1_monitor_sleeps_root_CA_single",
+            "output_theory_file": "results/accountability/acc_authenticity_revoke/proofs/--A_Revoke_1_monitor_sleeps_root_CA_single--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_revoke/traces/--A_Revoke_1_monitor_sleeps_root_CA_single--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=REVOCATION"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 180
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-10T11:22:54.863667",
+            "exec_end": "2025-11-10T11:23:35.795964",
+            "exec_duration_monotonic": 40.93229675292969,
+            "avg_memory": 313.71484374999994,
+            "peak_memory": 485.5390625
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 40.56,
+            "lemma_result": "verified",
+            "steps": 64,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--A_Revoke_1_verif_empty--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_Revoke_1_verif_empty",
+            "output_theory_file": "results/accountability/acc_authenticity_revoke/proofs/--A_Revoke_1_verif_empty--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_revoke/traces/--A_Revoke_1_verif_empty--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=REVOCATION"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 180
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-10T11:23:35.830575",
+            "exec_end": "2025-11-10T11:23:47.830133",
+            "exec_duration_monotonic": 11.999558687210083,
+            "avg_memory": 181.20833333333334,
+            "peak_memory": 234.0
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 11.56,
+            "lemma_result": "verified",
+            "steps": 124,
+            "analysis_type": "all-traces"
+          }
+        },
+        "--A_Revoke_1_monitor_sleeps_intm_CA_suff--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_Revoke_1_monitor_sleeps_intm_CA_suff",
+            "output_theory_file": "results/accountability/acc_authenticity_revoke/proofs/--A_Revoke_1_monitor_sleeps_intm_CA_suff--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_revoke/traces/--A_Revoke_1_monitor_sleeps_intm_CA_suff--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=REVOCATION"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 180
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-10T11:23:47.902672",
+            "exec_end": "2025-11-10T11:24:25.106209",
+            "exec_duration_monotonic": 37.20353698730469,
+            "avg_memory": 288.30468749999994,
+            "peak_memory": 399.05859375
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 36.83,
+            "lemma_result": "verified",
+            "steps": 59,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--A_Revoke_1_monitor_sleeps_intm_CA_verif_nonempty--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_Revoke_1_monitor_sleeps_intm_CA_verif_nonempty",
+            "output_theory_file": "results/accountability/acc_authenticity_revoke/proofs/--A_Revoke_1_monitor_sleeps_intm_CA_verif_nonempty--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_revoke/traces/--A_Revoke_1_monitor_sleeps_intm_CA_verif_nonempty--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=REVOCATION"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 180
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-10T11:24:25.195693",
+            "exec_end": "2025-11-10T11:24:33.634202",
+            "exec_duration_monotonic": 8.438509225845337,
+            "avg_memory": 172.14539930555554,
+            "peak_memory": 349.0546875
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 8.02,
+            "lemma_result": "verified",
+            "steps": 14,
+            "analysis_type": "all-traces"
+          }
+        },
+        "--A_Revoke_2_monitor_sleeps_cond_root_CA_verif_nonempty--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_Revoke_2_monitor_sleeps_cond_root_CA_verif_nonempty",
+            "output_theory_file": "results/accountability/acc_authenticity_revoke/proofs/--A_Revoke_2_monitor_sleeps_cond_root_CA_verif_nonempty--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_revoke/traces/--A_Revoke_2_monitor_sleeps_cond_root_CA_verif_nonempty--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=REVOCATION"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 180
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-10T11:24:33.757947",
+            "exec_end": "2025-11-10T11:24:42.260975",
+            "exec_duration_monotonic": 8.50302767753601,
+            "avg_memory": 174.59027777777777,
+            "peak_memory": 347.9453125
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 8.07,
+            "lemma_result": "verified",
+            "steps": 28,
+            "analysis_type": "all-traces"
+          }
+        },
+        "--A_Revoke_2_monitor_sleeps_cond_intm_CA_uniq--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_Revoke_2_monitor_sleeps_cond_intm_CA_uniq",
+            "output_theory_file": "results/accountability/acc_authenticity_revoke/proofs/--A_Revoke_2_monitor_sleeps_cond_intm_CA_uniq--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_revoke/traces/--A_Revoke_2_monitor_sleeps_cond_intm_CA_uniq--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=REVOCATION"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 180
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-10T11:24:42.320151",
+            "exec_end": "2025-11-10T11:24:50.439304",
+            "exec_duration_monotonic": 8.119153261184692,
+            "avg_memory": 191.43532986111111,
+            "peak_memory": 494.8125
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 7.69,
+            "lemma_result": "verified",
+            "steps": 8,
+            "analysis_type": "all-traces"
+          }
+        },
+        "--A_Revoke_2_monitor_sleeps_cond_intm_CA_min--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_Revoke_2_monitor_sleeps_cond_intm_CA_min",
+            "output_theory_file": "results/accountability/acc_authenticity_revoke/proofs/--A_Revoke_2_monitor_sleeps_cond_intm_CA_min--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_revoke/traces/--A_Revoke_2_monitor_sleeps_cond_intm_CA_min--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=REVOCATION"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 180
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-10T11:24:50.479970",
+            "exec_end": "2025-11-10T11:25:01.032432",
+            "exec_duration_monotonic": 10.552462577819824,
+            "avg_memory": 185.1466619318182,
+            "peak_memory": 383.71484375
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 10.12,
+            "lemma_result": "verified",
+            "steps": 48,
+            "analysis_type": "all-traces"
+          }
+        },
+        "--A_Revoke_2_monitor_sleeps_cond_root_CA_single--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_Revoke_2_monitor_sleeps_cond_root_CA_single",
+            "output_theory_file": "results/accountability/acc_authenticity_revoke/proofs/--A_Revoke_2_monitor_sleeps_cond_root_CA_single--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_revoke/traces/--A_Revoke_2_monitor_sleeps_cond_root_CA_single--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=REVOCATION"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 180
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-10T11:25:01.149111",
+            "exec_end": "2025-11-10T11:26:02.525318",
+            "exec_duration_monotonic": 61.37620663642883,
+            "avg_memory": 388.0984246926231,
+            "peak_memory": 630.53515625
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 61.0,
+            "lemma_result": "verified",
+            "steps": 64,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--A_Revoke_2_monitor_sleeps_cond_root_CA_uniq--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_Revoke_2_monitor_sleeps_cond_root_CA_uniq",
+            "output_theory_file": "results/accountability/acc_authenticity_revoke/proofs/--A_Revoke_2_monitor_sleeps_cond_root_CA_uniq--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_revoke/traces/--A_Revoke_2_monitor_sleeps_cond_root_CA_uniq--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=REVOCATION"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 180
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-10T11:26:02.616291",
+            "exec_end": "2025-11-10T11:26:10.336908",
+            "exec_duration_monotonic": 7.720617771148682,
+            "avg_memory": 169.71728515625,
+            "peak_memory": 350.85546875
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 7.3,
+            "lemma_result": "verified",
+            "steps": 8,
+            "analysis_type": "all-traces"
+          }
+        },
+        "--A_Revoke_2_monitor_sleeps_cond_intm_CA_inj--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_Revoke_2_monitor_sleeps_cond_intm_CA_inj",
+            "output_theory_file": "results/accountability/acc_authenticity_revoke/proofs/--A_Revoke_2_monitor_sleeps_cond_intm_CA_inj--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_revoke/traces/--A_Revoke_2_monitor_sleeps_cond_intm_CA_inj--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=REVOCATION"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 180
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-10T11:26:10.382996",
+            "exec_end": "2025-11-10T11:26:18.429726",
+            "exec_duration_monotonic": 8.046730756759644,
+            "avg_memory": 153.09228515624997,
+            "peak_memory": 235.359375
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 7.64,
+            "lemma_result": "verified",
+            "steps": 8,
+            "analysis_type": "all-traces"
+          }
+        },
+        "--A_Revoke_2_verif_empty--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_Revoke_2_verif_empty",
+            "output_theory_file": "results/accountability/acc_authenticity_revoke/proofs/--A_Revoke_2_verif_empty--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_revoke/traces/--A_Revoke_2_verif_empty--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=REVOCATION"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 180
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-10T11:26:18.555898",
+            "exec_end": "2025-11-10T11:26:35.286787",
+            "exec_duration_monotonic": 16.730889081954956,
+            "avg_memory": 223.92072610294116,
+            "peak_memory": 315.36328125
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 16.36,
+            "lemma_result": "verified",
+            "steps": 236,
+            "analysis_type": "all-traces"
+          }
+        },
+        "--A_Revoke_2_monitor_sleeps_cond_intm_CA_suff--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_Revoke_2_monitor_sleeps_cond_intm_CA_suff",
+            "output_theory_file": "results/accountability/acc_authenticity_revoke/proofs/--A_Revoke_2_monitor_sleeps_cond_intm_CA_suff--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_revoke/traces/--A_Revoke_2_monitor_sleeps_cond_intm_CA_suff--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=REVOCATION"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 180
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-10T11:26:35.383600",
+            "exec_end": "2025-11-10T11:27:27.234085",
+            "exec_duration_monotonic": 51.8504855632782,
+            "avg_memory": 371.84645432692315,
+            "peak_memory": 558.53515625
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 51.49,
+            "lemma_result": "verified",
+            "steps": 60,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--A_Revoke_2_monitor_sleeps_cond_root_CA_min--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_Revoke_2_monitor_sleeps_cond_root_CA_min",
+            "output_theory_file": "results/accountability/acc_authenticity_revoke/proofs/--A_Revoke_2_monitor_sleeps_cond_root_CA_min--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_revoke/traces/--A_Revoke_2_monitor_sleeps_cond_root_CA_min--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=REVOCATION"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 180
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-10T11:27:27.366155",
+            "exec_end": "2025-11-10T11:27:37.484728",
+            "exec_duration_monotonic": 10.118573427200317,
+            "avg_memory": 152.17720170454547,
+            "peak_memory": 228.453125
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 9.71,
+            "lemma_result": "verified",
+            "steps": 48,
+            "analysis_type": "all-traces"
+          }
+        },
+        "--A_Revoke_2_monitor_sleeps_cond_root_CA_suff--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_Revoke_2_monitor_sleeps_cond_root_CA_suff",
+            "output_theory_file": "results/accountability/acc_authenticity_revoke/proofs/--A_Revoke_2_monitor_sleeps_cond_root_CA_suff--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_revoke/traces/--A_Revoke_2_monitor_sleeps_cond_root_CA_suff--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=REVOCATION"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 180
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-10T11:27:37.555809",
+            "exec_end": "2025-11-10T11:30:04.095257",
+            "exec_duration_monotonic": 146.5394470691681,
+            "avg_memory": 482.6871789383563,
+            "peak_memory": 879.734375
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 146.08,
+            "lemma_result": "verified",
+            "steps": 93,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--A_Revoke_2_monitor_sleeps_cond_intm_CA_verif_nonempty--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_Revoke_2_monitor_sleeps_cond_intm_CA_verif_nonempty",
+            "output_theory_file": "results/accountability/acc_authenticity_revoke/proofs/--A_Revoke_2_monitor_sleeps_cond_intm_CA_verif_nonempty--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_revoke/traces/--A_Revoke_2_monitor_sleeps_cond_intm_CA_verif_nonempty--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=REVOCATION"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 180
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-10T11:30:04.171480",
+            "exec_end": "2025-11-10T11:30:13.465149",
+            "exec_duration_monotonic": 9.293668270111084,
+            "avg_memory": 191.04179687500002,
+            "peak_memory": 460.3828125
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 8.84,
+            "lemma_result": "verified",
+            "steps": 30,
+            "analysis_type": "all-traces"
+          }
+        },
+        "--A_Revoke_2_monitor_sleeps_cond_intm_CA_single--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_Revoke_2_monitor_sleeps_cond_intm_CA_single",
+            "output_theory_file": "results/accountability/acc_authenticity_revoke/proofs/--A_Revoke_2_monitor_sleeps_cond_intm_CA_single--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_revoke/traces/--A_Revoke_2_monitor_sleeps_cond_intm_CA_single--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=REVOCATION"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 180
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-10T11:30:13.560591",
+            "exec_end": "2025-11-10T11:31:04.880331",
+            "exec_duration_monotonic": 51.31973958015442,
+            "avg_memory": 363.63534007352933,
+            "peak_memory": 553.33984375
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 50.95,
+            "lemma_result": "verified",
+            "steps": 60,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--A_Revoke_2_monitor_sleeps_cond_root_CA_inj--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_Revoke_2_monitor_sleeps_cond_root_CA_inj",
+            "output_theory_file": "results/accountability/acc_authenticity_revoke/proofs/--A_Revoke_2_monitor_sleeps_cond_root_CA_inj--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_revoke/traces/--A_Revoke_2_monitor_sleeps_cond_root_CA_inj--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=REVOCATION"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 180
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-10T11:31:05.014815",
+            "exec_end": "2025-11-10T11:31:12.778407",
+            "exec_duration_monotonic": 7.763591289520264,
+            "avg_memory": 169.322265625,
+            "peak_memory": 323.28125
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 7.32,
+            "lemma_result": "verified",
+            "steps": 8,
+            "analysis_type": "all-traces"
+          }
+        },
+        "--A_Revoke_3_monitor_sleeps_unconditional_intm_CA_verif_nonempty--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_Revoke_3_monitor_sleeps_unconditional_intm_CA_verif_nonempty",
+            "output_theory_file": "results/accountability/acc_authenticity_revoke/proofs/--A_Revoke_3_monitor_sleeps_unconditional_intm_CA_verif_nonempty--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_revoke/traces/--A_Revoke_3_monitor_sleeps_unconditional_intm_CA_verif_nonempty--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=REVOCATION"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 180
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-10T11:31:12.910765",
+            "exec_end": "2025-11-10T11:31:21.772408",
+            "exec_duration_monotonic": 8.861642599105835,
+            "avg_memory": 160.57378472222226,
+            "peak_memory": 240.25
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 8.43,
+            "lemma_result": "verified",
+            "steps": 13,
+            "analysis_type": "all-traces"
+          }
+        },
+        "--A_Revoke_3_monitor_sleeps_unconditional_root_CA_suff--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_Revoke_3_monitor_sleeps_unconditional_root_CA_suff",
+            "output_theory_file": "results/accountability/acc_authenticity_revoke/proofs/--A_Revoke_3_monitor_sleeps_unconditional_root_CA_suff--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_revoke/traces/--A_Revoke_3_monitor_sleeps_unconditional_root_CA_suff--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=REVOCATION"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 180
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-10T11:31:21.915082",
+            "exec_end": "2025-11-10T11:32:55.355054",
+            "exec_duration_monotonic": 93.4399721622467,
+            "avg_memory": 391.9775705645161,
+            "peak_memory": 701.7109375
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 92.99,
+            "lemma_result": "verified",
+            "steps": 92,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--A_Revoke_3_monitor_sleeps_unconditional_root_CA_verif_nonempty--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_Revoke_3_monitor_sleeps_unconditional_root_CA_verif_nonempty",
+            "output_theory_file": "results/accountability/acc_authenticity_revoke/proofs/--A_Revoke_3_monitor_sleeps_unconditional_root_CA_verif_nonempty--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_revoke/traces/--A_Revoke_3_monitor_sleeps_unconditional_root_CA_verif_nonempty--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=REVOCATION"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 180
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-10T11:32:55.432981",
+            "exec_end": "2025-11-10T11:33:03.708415",
+            "exec_duration_monotonic": 8.275434017181396,
+            "avg_memory": 185.90321180555554,
+            "peak_memory": 466.83203125
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 7.82,
+            "lemma_result": "verified",
+            "steps": 12,
+            "analysis_type": "all-traces"
+          }
+        },
+        "--A_Revoke_3_monitor_sleeps_unconditional_root_CA_inj--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_Revoke_3_monitor_sleeps_unconditional_root_CA_inj",
+            "output_theory_file": "results/accountability/acc_authenticity_revoke/proofs/--A_Revoke_3_monitor_sleeps_unconditional_root_CA_inj--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_revoke/traces/--A_Revoke_3_monitor_sleeps_unconditional_root_CA_inj--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=REVOCATION"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 180
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-10T11:33:03.829615",
+            "exec_end": "2025-11-10T11:33:11.716124",
+            "exec_duration_monotonic": 7.886508464813232,
+            "avg_memory": 154.080078125,
+            "peak_memory": 226.9765625
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 7.45,
+            "lemma_result": "verified",
+            "steps": 4,
+            "analysis_type": "all-traces"
+          }
+        },
+        "--A_Revoke_3_monitor_sleeps_unconditional_root_CA_uniq--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_Revoke_3_monitor_sleeps_unconditional_root_CA_uniq",
+            "output_theory_file": "results/accountability/acc_authenticity_revoke/proofs/--A_Revoke_3_monitor_sleeps_unconditional_root_CA_uniq--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_revoke/traces/--A_Revoke_3_monitor_sleeps_unconditional_root_CA_uniq--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=REVOCATION"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 180
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-10T11:33:11.823662",
+            "exec_end": "2025-11-10T11:33:20.004311",
+            "exec_duration_monotonic": 8.180648803710938,
+            "avg_memory": 191.60546875,
+            "peak_memory": 494.7578125
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 7.66,
+            "lemma_result": "verified",
+            "steps": 4,
+            "analysis_type": "all-traces"
+          }
+        },
+        "--A_Revoke_3_monitor_sleeps_unconditional_root_CA_single--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_Revoke_3_monitor_sleeps_unconditional_root_CA_single",
+            "output_theory_file": "results/accountability/acc_authenticity_revoke/proofs/--A_Revoke_3_monitor_sleeps_unconditional_root_CA_single--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_revoke/traces/--A_Revoke_3_monitor_sleeps_unconditional_root_CA_single--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=REVOCATION"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 180
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-10T11:33:20.123632",
+            "exec_end": "2025-11-10T11:34:32.528328",
+            "exec_duration_monotonic": 72.40469574928284,
+            "avg_memory": 438.9144422743056,
+            "peak_memory": 660.609375
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 72.04,
+            "lemma_result": "verified",
+            "steps": 56,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--A_Revoke_3_monitor_sleeps_unconditional_intm_CA_uniq--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_Revoke_3_monitor_sleeps_unconditional_intm_CA_uniq",
+            "output_theory_file": "results/accountability/acc_authenticity_revoke/proofs/--A_Revoke_3_monitor_sleeps_unconditional_intm_CA_uniq--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_revoke/traces/--A_Revoke_3_monitor_sleeps_unconditional_intm_CA_uniq--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=REVOCATION"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 180
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-10T11:34:32.660837",
+            "exec_end": "2025-11-10T11:34:41.935836",
+            "exec_duration_monotonic": 9.274998903274536,
+            "avg_memory": 188.4890625,
+            "peak_memory": 475.85546875
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 8.77,
+            "lemma_result": "verified",
+            "steps": 4,
+            "analysis_type": "all-traces"
+          }
+        },
+        "--A_Revoke_3_monitor_sleeps_unconditional_intm_CA_min--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_Revoke_3_monitor_sleeps_unconditional_intm_CA_min",
+            "output_theory_file": "results/accountability/acc_authenticity_revoke/proofs/--A_Revoke_3_monitor_sleeps_unconditional_intm_CA_min--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_revoke/traces/--A_Revoke_3_monitor_sleeps_unconditional_intm_CA_min--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=REVOCATION"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 180
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-10T11:34:42.081247",
+            "exec_end": "2025-11-10T11:34:52.925879",
+            "exec_duration_monotonic": 10.844631910324097,
+            "avg_memory": 180.23686079545453,
+            "peak_memory": 353.49609375
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 10.35,
+            "lemma_result": "verified",
+            "steps": 12,
+            "analysis_type": "all-traces"
+          }
+        },
+        "--A_Revoke_3_monitor_sleeps_unconditional_root_CA_min--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_Revoke_3_monitor_sleeps_unconditional_root_CA_min",
+            "output_theory_file": "results/accountability/acc_authenticity_revoke/proofs/--A_Revoke_3_monitor_sleeps_unconditional_root_CA_min--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_revoke/traces/--A_Revoke_3_monitor_sleeps_unconditional_root_CA_min--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=REVOCATION"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 180
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-10T11:34:53.004670",
+            "exec_end": "2025-11-10T11:35:03.008180",
+            "exec_duration_monotonic": 10.003509759902954,
+            "avg_memory": 166.640625,
+            "peak_memory": 236.0625
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 9.51,
+            "lemma_result": "verified",
+            "steps": 12,
+            "analysis_type": "all-traces"
+          }
+        },
+        "--A_Revoke_3_monitor_sleeps_unconditional_intm_CA_suff--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_Revoke_3_monitor_sleeps_unconditional_intm_CA_suff",
+            "output_theory_file": "results/accountability/acc_authenticity_revoke/proofs/--A_Revoke_3_monitor_sleeps_unconditional_intm_CA_suff--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_revoke/traces/--A_Revoke_3_monitor_sleeps_unconditional_intm_CA_suff--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=REVOCATION"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 180
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-10T11:35:03.129049",
+            "exec_end": "2025-11-10T11:35:41.573868",
+            "exec_duration_monotonic": 38.4448184967041,
+            "avg_memory": 303.529046474359,
+            "peak_memory": 586.359375
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 38.07,
+            "lemma_result": "verified",
+            "steps": 59,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--A_Revoke_3_verif_empty--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_Revoke_3_verif_empty",
+            "output_theory_file": "results/accountability/acc_authenticity_revoke/proofs/--A_Revoke_3_verif_empty--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_revoke/traces/--A_Revoke_3_verif_empty--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=REVOCATION"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 180
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-10T11:35:41.667974",
+            "exec_end": "2025-11-10T11:36:27.176275",
+            "exec_duration_monotonic": 45.50830125808716,
+            "avg_memory": 537.8988620923914,
+            "peak_memory": 1158.2265625
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 45.05,
+            "lemma_result": "falsified",
+            "steps": 0,
+            "analysis_type": "all-traces"
+          }
+        },
+        "--A_Revoke_3_monitor_sleeps_unconditional_intm_CA_inj--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_Revoke_3_monitor_sleeps_unconditional_intm_CA_inj",
+            "output_theory_file": "results/accountability/acc_authenticity_revoke/proofs/--A_Revoke_3_monitor_sleeps_unconditional_intm_CA_inj--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_revoke/traces/--A_Revoke_3_monitor_sleeps_unconditional_intm_CA_inj--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=REVOCATION"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 180
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-10T11:36:27.302027",
+            "exec_end": "2025-11-10T11:36:35.671368",
+            "exec_duration_monotonic": 8.369341373443604,
+            "avg_memory": 179.52907986111111,
+            "peak_memory": 396.59765625
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 7.95,
+            "lemma_result": "verified",
+            "steps": 4,
+            "analysis_type": "all-traces"
+          }
+        },
+        "--A_Revoke_3_monitor_sleeps_unconditional_intm_CA_single--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_Revoke_3_monitor_sleeps_unconditional_intm_CA_single",
+            "output_theory_file": "results/accountability/acc_authenticity_revoke/proofs/--A_Revoke_3_monitor_sleeps_unconditional_intm_CA_single--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_revoke/traces/--A_Revoke_3_monitor_sleeps_unconditional_intm_CA_single--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=REVOCATION"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 180
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-10T11:36:35.809323",
+            "exec_end": "2025-11-10T11:37:40.606416",
+            "exec_duration_monotonic": 64.79709339141846,
+            "avg_memory": 460.50649038461535,
+            "peak_memory": 682.375
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 64.33,
+            "lemma_result": "verified",
+            "steps": 51,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--A_RevokeAudit_1_monitor_sleeps_unconditional_audit_intm_CA_uniq--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_RevokeAudit_1_monitor_sleeps_unconditional_audit_intm_CA_uniq",
+            "output_theory_file": "results/accountability/acc_authenticity_revoke/proofs/--A_RevokeAudit_1_monitor_sleeps_unconditional_audit_intm_CA_uniq--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_revoke/traces/--A_RevokeAudit_1_monitor_sleeps_unconditional_audit_intm_CA_uniq--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=REVOCATION"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 180
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-10T11:37:40.749811",
+            "exec_end": "2025-11-10T11:37:50.091173",
+            "exec_duration_monotonic": 9.341361284255981,
+            "avg_memory": 185.471484375,
+            "peak_memory": 480.84765625
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 8.87,
+            "lemma_result": "verified",
+            "steps": 4,
+            "analysis_type": "all-traces"
+          }
+        },
+        "--A_RevokeAudit_1_monitor_sleeps_unconditional_audit_root_CA_suff--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_RevokeAudit_1_monitor_sleeps_unconditional_audit_root_CA_suff",
+            "output_theory_file": "results/accountability/acc_authenticity_revoke/proofs/--A_RevokeAudit_1_monitor_sleeps_unconditional_audit_root_CA_suff--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_revoke/traces/--A_RevokeAudit_1_monitor_sleeps_unconditional_audit_root_CA_suff--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=REVOCATION"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 180
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-10T11:37:50.321187",
+            "exec_end": "2025-11-10T11:38:26.924347",
+            "exec_duration_monotonic": 36.60316014289856,
+            "avg_memory": 311.4530194256756,
+            "peak_memory": 549.05078125
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 36.18,
+            "lemma_result": "verified",
+            "steps": 55,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--A_RevokeAudit_1_monitor_sleeps_unconditional_audit_intm_CA_verif_nonempty--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_RevokeAudit_1_monitor_sleeps_unconditional_audit_intm_CA_verif_nonempty",
+            "output_theory_file": "results/accountability/acc_authenticity_revoke/proofs/--A_RevokeAudit_1_monitor_sleeps_unconditional_audit_intm_CA_verif_nonempty--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_revoke/traces/--A_RevokeAudit_1_monitor_sleeps_unconditional_audit_intm_CA_verif_nonempty--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=REVOCATION"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 180
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-10T11:38:27.099071",
+            "exec_end": "2025-11-10T11:38:34.323947",
+            "exec_duration_monotonic": 7.224876403808594,
+            "avg_memory": 191.7080078125,
+            "peak_memory": 537.875
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 6.77,
+            "lemma_result": "verified",
+            "steps": 2,
+            "analysis_type": "all-traces"
+          }
+        },
+        "--A_RevokeAudit_1_monitor_sleeps_unconditional_audit_root_CA_single--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_RevokeAudit_1_monitor_sleeps_unconditional_audit_root_CA_single",
+            "output_theory_file": "results/accountability/acc_authenticity_revoke/proofs/--A_RevokeAudit_1_monitor_sleeps_unconditional_audit_root_CA_single--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_revoke/traces/--A_RevokeAudit_1_monitor_sleeps_unconditional_audit_root_CA_single--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=REVOCATION"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 180
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-10T11:38:34.497444",
+            "exec_end": "2025-11-10T11:41:32.958829",
+            "exec_duration_monotonic": 178.46138453483582,
+            "avg_memory": 2642.3471486581916,
+            "peak_memory": 5284.47265625
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 177.85,
+            "lemma_result": "verified",
+            "steps": 37,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--A_RevokeAudit_1_monitor_sleeps_unconditional_audit_intm_CA_min--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_RevokeAudit_1_monitor_sleeps_unconditional_audit_intm_CA_min",
+            "output_theory_file": "results/accountability/acc_authenticity_revoke/proofs/--A_RevokeAudit_1_monitor_sleeps_unconditional_audit_intm_CA_min--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_revoke/traces/--A_RevokeAudit_1_monitor_sleeps_unconditional_audit_intm_CA_min--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=REVOCATION"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 180
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-10T11:41:33.091171",
+            "exec_end": "2025-11-10T11:41:45.411945",
+            "exec_duration_monotonic": 12.320773601531982,
+            "avg_memory": 201.5802283653846,
+            "peak_memory": 526.89453125
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 11.87,
+            "lemma_result": "verified",
+            "steps": 24,
+            "analysis_type": "all-traces"
+          }
+        },
+        "--A_RevokeAudit_1_monitor_sleeps_unconditional_audit_root_CA_verif_nonempty--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_RevokeAudit_1_monitor_sleeps_unconditional_audit_root_CA_verif_nonempty",
+            "output_theory_file": "results/accountability/acc_authenticity_revoke/proofs/--A_RevokeAudit_1_monitor_sleeps_unconditional_audit_root_CA_verif_nonempty--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_revoke/traces/--A_RevokeAudit_1_monitor_sleeps_unconditional_audit_root_CA_verif_nonempty--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=REVOCATION"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 180
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-10T11:41:45.527943",
+            "exec_end": "2025-11-10T11:41:52.242173",
+            "exec_duration_monotonic": 6.714230060577393,
+            "avg_memory": 160.43470982142858,
+            "peak_memory": 309.515625
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 6.26,
+            "lemma_result": "verified",
+            "steps": 2,
+            "analysis_type": "all-traces"
+          }
+        },
+        "--A_RevokeAudit_1_monitor_sleeps_unconditional_audit_root_CA_uniq--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_RevokeAudit_1_monitor_sleeps_unconditional_audit_root_CA_uniq",
+            "output_theory_file": "results/accountability/acc_authenticity_revoke/proofs/--A_RevokeAudit_1_monitor_sleeps_unconditional_audit_root_CA_uniq--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_revoke/traces/--A_RevokeAudit_1_monitor_sleeps_unconditional_audit_root_CA_uniq--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=REVOCATION"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 180
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-10T11:41:52.347912",
+            "exec_end": "2025-11-10T11:42:01.197112",
+            "exec_duration_monotonic": 8.849200010299683,
+            "avg_memory": 158.26085069444446,
+            "peak_memory": 230.41796875
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 8.5,
+            "lemma_result": "verified",
+            "steps": 4,
+            "analysis_type": "all-traces"
+          }
+        },
+        "--A_RevokeAudit_1_monitor_sleeps_unconditional_audit_intm_CA_single--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_RevokeAudit_1_monitor_sleeps_unconditional_audit_intm_CA_single",
+            "output_theory_file": "results/accountability/acc_authenticity_revoke/proofs/--A_RevokeAudit_1_monitor_sleeps_unconditional_audit_intm_CA_single--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_revoke/traces/--A_RevokeAudit_1_monitor_sleeps_unconditional_audit_intm_CA_single--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=REVOCATION"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 180
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-10T11:42:01.364940",
+            "exec_end": "2025-11-10T11:42:18.890433",
+            "exec_duration_monotonic": 17.525492906570435,
+            "avg_memory": 213.9255642361111,
+            "peak_memory": 399.67578125
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 17.05,
+            "lemma_result": "verified",
+            "steps": 32,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--A_RevokeAudit_1_monitor_sleeps_unconditional_audit_root_CA_min--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_RevokeAudit_1_monitor_sleeps_unconditional_audit_root_CA_min",
+            "output_theory_file": "results/accountability/acc_authenticity_revoke/proofs/--A_RevokeAudit_1_monitor_sleeps_unconditional_audit_root_CA_min--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_revoke/traces/--A_RevokeAudit_1_monitor_sleeps_unconditional_audit_root_CA_min--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=REVOCATION"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 180
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-10T11:42:19.045706",
+            "exec_end": "2025-11-10T11:42:31.141114",
+            "exec_duration_monotonic": 12.095407724380493,
+            "avg_memory": 174.10904947916669,
+            "peak_memory": 226.1484375
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 11.64,
+            "lemma_result": "verified",
+            "steps": 24,
+            "analysis_type": "all-traces"
+          }
+        },
+        "--A_RevokeAudit_1_monitor_sleeps_unconditional_audit_root_CA_inj--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_RevokeAudit_1_monitor_sleeps_unconditional_audit_root_CA_inj",
+            "output_theory_file": "results/accountability/acc_authenticity_revoke/proofs/--A_RevokeAudit_1_monitor_sleeps_unconditional_audit_root_CA_inj--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_revoke/traces/--A_RevokeAudit_1_monitor_sleeps_unconditional_audit_root_CA_inj--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=REVOCATION"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 180
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-10T11:42:31.305870",
+            "exec_end": "2025-11-10T11:42:40.612601",
+            "exec_duration_monotonic": 9.306730508804321,
+            "avg_memory": 184.5078125,
+            "peak_memory": 458.58203125
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 8.85,
+            "lemma_result": "verified",
+            "steps": 4,
+            "analysis_type": "all-traces"
+          }
+        },
+        "--A_RevokeAudit_1_monitor_sleeps_unconditional_audit_intm_CA_inj--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_RevokeAudit_1_monitor_sleeps_unconditional_audit_intm_CA_inj",
+            "output_theory_file": "results/accountability/acc_authenticity_revoke/proofs/--A_RevokeAudit_1_monitor_sleeps_unconditional_audit_intm_CA_inj--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_revoke/traces/--A_RevokeAudit_1_monitor_sleeps_unconditional_audit_intm_CA_inj--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=REVOCATION"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 180
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-10T11:42:40.762028",
+            "exec_end": "2025-11-10T11:42:50.009329",
+            "exec_duration_monotonic": 9.247301578521729,
+            "avg_memory": 193.177734375,
+            "peak_memory": 523.27734375
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 8.78,
+            "lemma_result": "verified",
+            "steps": 4,
+            "analysis_type": "all-traces"
+          }
+        },
+        "--A_RevokeAudit_1_verif_empty--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_RevokeAudit_1_verif_empty",
+            "output_theory_file": "results/accountability/acc_authenticity_revoke/proofs/--A_RevokeAudit_1_verif_empty--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_revoke/traces/--A_RevokeAudit_1_verif_empty--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=REVOCATION"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 180
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-10T11:42:50.182779",
+            "exec_end": "2025-11-10T11:42:58.418388",
+            "exec_duration_monotonic": 8.235608577728271,
+            "avg_memory": 187.79383680555554,
+            "peak_memory": 456.33984375
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 7.82,
+            "lemma_result": "verified",
+            "steps": 26,
+            "analysis_type": "all-traces"
+          }
+        },
+        "--A_RevokeAudit_1_monitor_sleeps_unconditional_audit_intm_CA_suff--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_RevokeAudit_1_monitor_sleeps_unconditional_audit_intm_CA_suff",
+            "output_theory_file": "results/accountability/acc_authenticity_revoke/proofs/--A_RevokeAudit_1_monitor_sleeps_unconditional_audit_intm_CA_suff--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_revoke/traces/--A_RevokeAudit_1_monitor_sleeps_unconditional_audit_intm_CA_suff--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=REVOCATION"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 180
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-10T11:42:58.597538",
+            "exec_end": "2025-11-10T11:43:15.469804",
+            "exec_duration_monotonic": 16.87226629257202,
+            "avg_memory": 210.13970588235293,
+            "peak_memory": 286.58984375
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 16.43,
+            "lemma_result": "verified",
+            "steps": 32,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--A_RevokeGossip_1_monitor_blames_log_gossip_root_CA_verif_nonempty--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_RevokeGossip_1_monitor_blames_log_gossip_root_CA_verif_nonempty",
+            "output_theory_file": "results/accountability/acc_authenticity_revoke/proofs/--A_RevokeGossip_1_monitor_blames_log_gossip_root_CA_verif_nonempty--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_revoke/traces/--A_RevokeGossip_1_monitor_blames_log_gossip_root_CA_verif_nonempty--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=REVOCATION"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 180
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-10T11:43:15.655023",
+            "exec_end": "2025-11-10T11:44:26.469715",
+            "exec_duration_monotonic": 70.81469202041626,
+            "avg_memory": 290.1379291373239,
+            "peak_memory": 573.2109375
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 70.4,
+            "lemma_result": "verified",
+            "steps": 1325,
+            "analysis_type": "all-traces"
+          }
+        },
+        "--A_RevokeGossip_1_monitor_blames_log_gossip_intm_CA_verif_nonempty--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_RevokeGossip_1_monitor_blames_log_gossip_intm_CA_verif_nonempty",
+            "output_theory_file": "results/accountability/acc_authenticity_revoke/proofs/--A_RevokeGossip_1_monitor_blames_log_gossip_intm_CA_verif_nonempty--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_revoke/traces/--A_RevokeGossip_1_monitor_blames_log_gossip_intm_CA_verif_nonempty--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=REVOCATION"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 180
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-10T11:44:26.633345",
+            "exec_end": "2025-11-10T11:45:36.653160",
+            "exec_duration_monotonic": 70.01981449127197,
+            "avg_memory": 264.9672991071429,
+            "peak_memory": 466.19140625
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 69.48,
+            "lemma_result": "verified",
+            "steps": 1327,
+            "analysis_type": "all-traces"
+          }
+        },
+        "--A_RevokeGossip_1_monitor_blames_log_gossip_root_CA_min--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_RevokeGossip_1_monitor_blames_log_gossip_root_CA_min",
+            "output_theory_file": "results/accountability/acc_authenticity_revoke/proofs/--A_RevokeGossip_1_monitor_blames_log_gossip_root_CA_min--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_revoke/traces/--A_RevokeGossip_1_monitor_blames_log_gossip_root_CA_min--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=REVOCATION"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 180
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-10T11:45:36.776173",
+            "exec_end": "2025-11-10T11:45:46.678794",
+            "exec_duration_monotonic": 9.902621030807495,
+            "avg_memory": 165.28593750000002,
+            "peak_memory": 225.85546875
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 9.48,
+            "lemma_result": "verified",
+            "steps": 12,
+            "analysis_type": "all-traces"
+          }
+        },
+        "--A_RevokeGossip_1_monitor_blames_log_gossip_intm_CA_min--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_RevokeGossip_1_monitor_blames_log_gossip_intm_CA_min",
+            "output_theory_file": "results/accountability/acc_authenticity_revoke/proofs/--A_RevokeGossip_1_monitor_blames_log_gossip_intm_CA_min--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_revoke/traces/--A_RevokeGossip_1_monitor_blames_log_gossip_intm_CA_min--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=REVOCATION"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 180
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-10T11:45:46.811425",
+            "exec_end": "2025-11-10T11:45:57.200167",
+            "exec_duration_monotonic": 10.388742208480835,
+            "avg_memory": 189.30823863636365,
+            "peak_memory": 446.046875
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 9.96,
+            "lemma_result": "verified",
+            "steps": 12,
+            "analysis_type": "all-traces"
+          }
+        },
+        "--A_RevokeGossip_1_monitor_blames_log_gossip_intm_CA_uniq--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_RevokeGossip_1_monitor_blames_log_gossip_intm_CA_uniq",
+            "output_theory_file": "results/accountability/acc_authenticity_revoke/proofs/--A_RevokeGossip_1_monitor_blames_log_gossip_intm_CA_uniq--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_revoke/traces/--A_RevokeGossip_1_monitor_blames_log_gossip_intm_CA_uniq--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=REVOCATION"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 180
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-10T11:45:57.352733",
+            "exec_end": "2025-11-10T11:46:06.100793",
+            "exec_duration_monotonic": 8.74805998802185,
+            "avg_memory": 169.88628472222223,
+            "peak_memory": 335.28515625
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 8.3,
+            "lemma_result": "verified",
+            "steps": 4,
+            "analysis_type": "all-traces"
+          }
+        },
+        "--A_RevokeGossip_1_monitor_blames_log_gossip_root_CA_uniq--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_RevokeGossip_1_monitor_blames_log_gossip_root_CA_uniq",
+            "output_theory_file": "results/accountability/acc_authenticity_revoke/proofs/--A_RevokeGossip_1_monitor_blames_log_gossip_root_CA_uniq--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_revoke/traces/--A_RevokeGossip_1_monitor_blames_log_gossip_root_CA_uniq--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=REVOCATION"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 180
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-10T11:46:06.288041",
+            "exec_end": "2025-11-10T11:46:14.404002",
+            "exec_duration_monotonic": 8.115960836410522,
+            "avg_memory": 133.79730902777777,
+            "peak_memory": 222.44140625
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 7.67,
+            "lemma_result": "verified",
+            "steps": 4,
+            "analysis_type": "all-traces"
+          }
+        },
+        "--A_RevokeGossip_1_monitor_blames_log_gossip_root_CA_inj--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_RevokeGossip_1_monitor_blames_log_gossip_root_CA_inj",
+            "output_theory_file": "results/accountability/acc_authenticity_revoke/proofs/--A_RevokeGossip_1_monitor_blames_log_gossip_root_CA_inj--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_revoke/traces/--A_RevokeGossip_1_monitor_blames_log_gossip_root_CA_inj--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=REVOCATION"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 180
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-10T11:46:14.522492",
+            "exec_end": "2025-11-10T11:46:22.549798",
+            "exec_duration_monotonic": 8.02730655670166,
+            "avg_memory": 151.18066406249997,
+            "peak_memory": 226.578125
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 7.62,
+            "lemma_result": "verified",
+            "steps": 4,
+            "analysis_type": "all-traces"
+          }
+        },
+        "--A_RevokeGossip_1_monitor_blames_log_gossip_intm_CA_inj--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_RevokeGossip_1_monitor_blames_log_gossip_intm_CA_inj",
+            "output_theory_file": "results/accountability/acc_authenticity_revoke/proofs/--A_RevokeGossip_1_monitor_blames_log_gossip_intm_CA_inj--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_revoke/traces/--A_RevokeGossip_1_monitor_blames_log_gossip_intm_CA_inj--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=REVOCATION"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 180
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-10T11:46:22.654239",
+            "exec_end": "2025-11-10T11:46:31.225729",
+            "exec_duration_monotonic": 8.571489095687866,
+            "avg_memory": 175.79079861111111,
+            "peak_memory": 370.88671875
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 8.08,
+            "lemma_result": "verified",
+            "steps": 4,
+            "analysis_type": "all-traces"
+          }
+        }
+      }
+    },
+    "specialized": {
+      "theory_file": "../ct_lemmas_pregen.spthy",
+      "subtasks": {
+        "--A_RevokeGossip_1_monitor_blames_log_gossip_intm_CA_suff--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_RevokeGossip_1_monitor_blames_log_gossip_intm_CA_suff",
+            "output_theory_file": "results/accountability/acc_authenticity_revoke/proofs/--A_RevokeGossip_1_monitor_blames_log_gossip_intm_CA_suff--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_revoke/traces/--A_RevokeGossip_1_monitor_blames_log_gossip_intm_CA_suff--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=REVOCATION",
+              "--defines=SUFFICIENCY_PROOF"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 1800
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-10T11:46:31.403847",
+            "exec_end": "2025-11-10T12:07:02.683599",
+            "exec_duration_monotonic": 1231.2797524929047,
+            "avg_memory": 1573.0123361998367,
+            "peak_memory": 1687.76953125
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 1230.78,
+            "lemma_result": "verified",
+            "steps": 80,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--A_RevokeGossip_1_monitor_blames_log_gossip_root_CA_suff--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_RevokeGossip_1_monitor_blames_log_gossip_root_CA_suff",
+            "output_theory_file": "results/accountability/acc_authenticity_revoke/proofs/--A_RevokeGossip_1_monitor_blames_log_gossip_root_CA_suff--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_revoke/traces/--A_RevokeGossip_1_monitor_blames_log_gossip_root_CA_suff--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=REVOCATION",
+              "--defines=SUFFICIENCY_PROOF"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 1800
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-10T12:07:02.818258",
+            "exec_end": "2025-11-10T12:30:16.431957",
+            "exec_duration_monotonic": 1393.613699913025,
+            "avg_memory": 1813.0785973705683,
+            "peak_memory": 1960.03515625
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 1393.08,
+            "lemma_result": "verified",
+            "steps": 87,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--A_RevokeGossip_1_monitor_blames_log_gossip_root_CA_single--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_RevokeGossip_1_monitor_blames_log_gossip_root_CA_single",
+            "output_theory_file": "results/accountability/acc_authenticity_revoke/proofs/--A_RevokeGossip_1_monitor_blames_log_gossip_root_CA_single--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_revoke/traces/--A_RevokeGossip_1_monitor_blames_log_gossip_root_CA_single--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=REVOCATION",
+              "--defines=SUFFICIENCY_PROOF"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 8,
+              "timeout": 1800
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "memory_limit_exceeded",
+            "cache_hit": false,
+            "exec_start": "2025-11-10T12:58:05.359567",
+            "exec_end": "2025-11-10T13:05:42.935616",
+            "exec_duration_monotonic": 457.57604908943176,
+            "avg_memory": 4057.314453125,
+            "peak_memory": 8323.70703125
+          },
+          "task_result": {
+            "return_code": "-2",
+            "error_type": "memory_limit",
+            "error_description": "Task exceeded memory limit",
+            "last_stderr_lines": [
+              "Process exceeded memory limit"
+            ]
+          }
+        },
+        "--A_RevokeGossip_1_monitor_blames_log_gossip_intm_CA_single--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_RevokeGossip_1_monitor_blames_log_gossip_intm_CA_single",
+            "output_theory_file": "results/accountability/acc_authenticity_revoke/proofs/--A_RevokeGossip_1_monitor_blames_log_gossip_intm_CA_single--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_revoke/traces/--A_RevokeGossip_1_monitor_blames_log_gossip_intm_CA_single--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=REVOCATION",
+              "--defines=SUFFICIENCY_PROOF"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 8,
+              "timeout": 1800
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "memory_limit_exceeded",
+            "cache_hit": false,
+            "exec_start": "2025-11-10T13:05:43.189704",
+            "exec_end": "2025-11-10T13:12:38.007985",
+            "exec_duration_monotonic": 414.8182806968689,
+            "avg_memory": 3515.0437082827652,
+            "peak_memory": 8206.94140625
+          },
+          "task_result": {
+            "return_code": "-2",
+            "error_type": "memory_limit",
+            "error_description": "Task exceeded memory limit",
+            "last_stderr_lines": [
+              "Process exceeded memory limit"
+            ]
+          }
+        },
+        "--A_RevokeGossip_1_verif_empty--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_RevokeGossip_1_verif_empty",
+            "output_theory_file": "results/accountability/acc_authenticity_revoke/proofs/--A_RevokeGossip_1_verif_empty--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_revoke/traces/--A_RevokeGossip_1_verif_empty--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=REVOCATION",
+              "--defines=SUFFICIENCY_PROOF"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 1800
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-10T12:41:10.549679",
+            "exec_end": "2025-11-10T12:50:49.187750",
+            "exec_duration_monotonic": 578.6380708217621,
+            "avg_memory": 2785.9740013586975,
+            "peak_memory": 5259.05078125
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 577.99,
+            "lemma_result": "falsified",
+            "steps": 0,
+            "analysis_type": "all-traces"
+          }
+        }
+      }
+    },
+    "helper": {
+      "theory_file": "../ct_lemmas_pregen.spthy",
+      "subtasks": {
+        "--A_Revoke_uniq_helper1--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_Revoke_uniq_helper1",
+            "output_theory_file": "results/accountability/acc_authenticity_revoke/proofs/--A_Revoke_uniq_helper1--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_revoke/traces/--A_Revoke_uniq_helper1--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=REVOCATION"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 500
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-10T12:50:49.344346",
+            "exec_end": "2025-11-10T12:51:06.791455",
+            "exec_duration_monotonic": 17.44710898399353,
+            "avg_memory": 214.25217013888886,
+            "peak_memory": 463.94140625
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 17.03,
+            "lemma_result": "verified",
+            "steps": 145,
+            "analysis_type": "all-traces"
+          }
+        },
+        "--A_Revoke_uniq_helper2--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_Revoke_uniq_helper2",
+            "output_theory_file": "results/accountability/acc_authenticity_revoke/proofs/--A_Revoke_uniq_helper2--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_revoke/traces/--A_Revoke_uniq_helper2--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=REVOCATION"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 500
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-10T12:51:06.929898",
+            "exec_end": "2025-11-10T12:51:14.772988",
+            "exec_duration_monotonic": 7.843090772628784,
+            "avg_memory": 160.9189453125,
+            "peak_memory": 270.59375
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 7.39,
+            "lemma_result": "verified",
+            "steps": 7,
+            "analysis_type": "all-traces"
+          }
+        },
+        "--A_Revoke_uniq_helper3--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_Revoke_uniq_helper3",
+            "output_theory_file": "results/accountability/acc_authenticity_revoke/proofs/--A_Revoke_uniq_helper3--default.spthy",
+            "output_trace_file": "results/accountability/acc_authenticity_revoke/traces/--A_Revoke_uniq_helper3--default.json",
+            "options": [
+              "--derivcheck-timeout=0",
+              "--defines=REVOCATION"
+            ],
+            "resources": {
+              "cores": 10,
+              "memory": 6,
+              "timeout": 500
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": true,
+            "exec_start": "2025-11-10T12:51:14.971873",
+            "exec_end": "2025-11-10T12:51:22.520612",
+            "exec_duration_monotonic": 7.548739671707153,
+            "avg_memory": 178.564453125,
+            "peak_memory": 379.16015625
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 7.12,
+            "lemma_result": "verified",
+            "steps": 12,
+            "analysis_type": "all-traces"
+          }
+        }
+      }
+    }
+  }
+}

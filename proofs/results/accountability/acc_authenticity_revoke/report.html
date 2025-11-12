@@ -1,0 +1,2606 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Batch Tamarin Execution Report</title>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1,
+        h2,
+        h3 {
+            color: #2c3e50;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #dfe9ee;
+            font-weight: 600;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f6f6f6;
+        }
+
+        /* Simple task and lemma alternating colors */
+        .task-table tr.task-white {
+            background-color: white;
+        }
+
+        .task-table tr.task-light-gray {
+            background-color: #f4fbff;
+        }
+
+        /* light blue accent */
+
+        /* Lemma alternation within white tasks */
+        .task-table tr.task-white.lemma-alt {
+            background-color: #f6f6f6;
+        }
+
+        /* lighter gray */
+
+        /* Lemma alternation within light gray tasks */
+        .task-table tr.task-light-gray.lemma-alt {
+            background-color: #edf7ff;
+        }
+
+        /* deeper blue accent */
+        .success {
+            color: #28a745;
+        }
+
+        /* green for verified */
+        .failed {
+            color: #ec1026;
+        }
+
+        /* red for failed */
+        .warning {
+            color: #ea9400;
+        }
+
+        /* orange with green for timeout */
+        .info {
+            color: #116dd7;
+        }
+
+        /* blue for info */
+        .darkinfo {
+            color: #1200b9;
+        }
+
+        /* darker blue for info */
+        .memory {
+            color: #8b5cf6;
+        }
+
+        /* violet for memory limit */
+        .falsified {
+            color: #e600ff;
+        }
+
+        /* light violet for falsified */
+        .unterminated {
+            color: #dbc100;
+        }
+
+        /* yellow-orange for unterminated */
+        pre {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .error-details {
+            background-color: #ffeaec;
+            border: 1px solid #ffdcdf;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+
+        .error-details h3 {
+            margin: 0;
+        }
+
+        .chart-div {
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .chart-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .chart-item {
+            flex: 1;
+            min-width: 400px;
+        }
+
+        .trace-visualization {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px 0;
+            background-color: #fff;
+        }
+
+        .trace-visualization svg {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #eee;
+            border-radius: 3px;
+        }
+
+        .trace-svg-container {
+            text-align: center;
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+
+        .settings,
+        .summary {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+    <script>hljs.highlightAll();</script>
+</head>
+
+<body>
+    <h1>Batch Tamarin Execution Report</h1>
+
+    <div class="info">
+        <strong>Execution results from:</strong> .<br>
+        <strong>Executed :</strong> 2025-11-10 11:19:34
+    </div>
+
+    <h2 id="table-of-contents">Table of Contents</h2>
+    <ul>
+        <li><a href="#overview">Overview</a>
+            <ul>
+                <li><a href="#configuration">Configuration</a></li>
+                <li><a href="#global-summary">Global Summary</a></li>
+                <li><a href="#global-results">Global Results</a></li>
+                <li><a href="#global-timeline">Global Execution Timeline</a></li>
+            </ul>
+        </li>
+        <li><a href="#task-details">Task Details</a>
+            <ul>
+                <li><a href="#task-autoprove">autoprove</a></li>
+                <li><a href="#task-specialized">specialized</a></li>
+                <li><a href="#task-helper">helper</a></li>
+            </ul>
+        </li>
+        <li><a href="#errors">Errors</a></li>
+    </ul>
+
+    <h2 id="overview">Overview</h2>
+
+    <h3 id="configuration">Configuration</h3>
+
+    <div class="settings">
+        <div>
+            <h4>Global Settings</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Setting</th>
+                        <th>Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Max cores</td>
+                        <td>10</td>
+                    </tr>
+                    <tr>
+                        <td>Max memory</td>
+                        <td>15GB</td>
+                    </tr>
+                    <tr>
+                        <td>Default timeout</td>
+                        <td>300s</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div>
+            <h4>Tamarin Versions</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Alias</th>
+                        <th>Path</th>
+                        <th>Version</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>default</td>
+                        <td><code>tamarin-prover</code></td>
+                        <td>v1.10.0</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <h3 id="global-summary">Global Summary</h3>
+
+    <h4>Global Statistics</h4>
+    <div class="summary">
+        <table>
+            <thead>
+                <tr>
+                    <th>Metric</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Total Executed Lemmas</td>
+                    <td>68</td>
+                </tr>
+                <tr>
+                    <td>Verified Lemmas</td>
+                    <td class="success">64 (94.1%)</td>
+                </tr>
+                <tr>
+                    <td>Falsified Lemmas</td>
+                    <td class="falsified">2 (2.9%)</td>
+                </tr>
+                <tr>
+                    <td>Unterminated Lemmas</td>
+                    <td class="unterminated">0 (0.0%)</td>
+                </tr>
+                <tr>
+                    <td>Failed Executions</td>
+                    <td class="failed">0 (0.0%)</td>
+                </tr>
+                <tr>
+                    <td>Lemmas killed by timeout</td>
+                    <td class="warning">0 (0.0%)</td>
+                </tr>
+                <tr>
+                    <td>Lemmas killed for memory limit</td>
+                    <td class="memory">2 (2.9%)</td>
+                </tr>
+            </tbody>
+        </table>
+        <table>
+            <thead>
+                <tr>
+                    <th>Metric</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Total runtime</td>
+                    <td>5718.9s</td>
+                </tr>
+                <tr>
+                    <td>Total peak memory used</td>
+                    <td>56.1GB</td>
+                </tr>
+                <tr>
+                    <td>Max peak memory used</td>
+                    <td>8.1GB</td>
+                </tr>
+                <tr>
+                    <td>Freshly executed tasks</td>
+                    <td class="darkinfo">2 (2.9%)</td>
+                </tr>
+                <tr>
+                    <td>Cache hits</td>
+                    <td class="info">66 (97.1%)</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="chart-container">
+        <div class="chart-item">
+            <div id="success_rate_chart" class="chart-div" style="width: 100%; height: 400px;"></div>
+        </div>
+        <div class="chart-item">
+            <div id="cache_performance_chart" class="chart-div" style="width: 100%; height: 400px;"></div>
+        </div>
+    </div>
+
+    <div id="runtime_per_task_chart" class="chart-div" style="width: 100%; height: 400px; margin: 20px 0;"></div>
+    <div id="memory_per_task_chart" class="chart-div" style="width: 100%; height: 400px; margin: 20px 0;"></div>
+
+    <h3 id="global-results">Global Results</h3>
+    <table class="task-table">
+        <thead>
+            <tr>
+                <th>Task</th>
+                <th>Extracted lemma</th>
+                <th>Tamarin Version</th>
+                <th>Status</th>
+                <th>Runtime</th>
+                <th>Peak Memory Used</th>
+                <th>Cache Hit</th>
+            </tr>
+        </thead>
+        <tbody>
+                        <tr class="task-white">
+                                <td rowspan="60">
+                                    <strong>autoprove</strong><br>
+                                    <small style="color: #6c757d;">../ct_lemmas_pregen.spthy</small>
+                                </td>
+                                <td>A_Revoke_1_monitor_sleeps_intm_CA_min</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>9.2s</td>
+                            <td>494.5MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white lemma-alt">
+                                <td>A_Revoke_1_monitor_sleeps_intm_CA_uniq</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>9.7s</td>
+                            <td>428.5MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white">
+                                <td>A_Revoke_1_monitor_sleeps_intm_CA_inj</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>8.4s</td>
+                            <td>476.2MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white lemma-alt">
+                                <td>A_Revoke_1_monitor_sleeps_root_CA_inj</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>8.2s</td>
+                            <td>471.0MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white">
+                                <td>A_Revoke_1_monitor_sleeps_root_CA_verif_nonempty</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>8.1s</td>
+                            <td>213.7MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white lemma-alt">
+                                <td>A_Revoke_1_monitor_sleeps_root_CA_min</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>8.9s</td>
+                            <td>222.2MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white">
+                                <td>A_Revoke_1_monitor_sleeps_intm_CA_single</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>41.9s</td>
+                            <td>576.4MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white lemma-alt">
+                                <td>A_Revoke_1_monitor_sleeps_root_CA_uniq</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>8.9s</td>
+                            <td>241.4MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white">
+                                <td>A_Revoke_1_monitor_sleeps_root_CA_suff</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>96.7s</td>
+                            <td>694.7MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white lemma-alt">
+                                <td>A_Revoke_1_monitor_sleeps_root_CA_single</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>40.9s</td>
+                            <td>485.5MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white">
+                                <td>A_Revoke_1_verif_empty</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>12.0s</td>
+                            <td>234.0MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white lemma-alt">
+                                <td>A_Revoke_1_monitor_sleeps_intm_CA_suff</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>37.2s</td>
+                            <td>399.1MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white">
+                                <td>A_Revoke_1_monitor_sleeps_intm_CA_verif_nonempty</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>8.4s</td>
+                            <td>349.1MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white lemma-alt">
+                                <td>A_Revoke_2_monitor_sleeps_cond_root_CA_verif_nonempty</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>8.5s</td>
+                            <td>347.9MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white">
+                                <td>A_Revoke_2_monitor_sleeps_cond_intm_CA_uniq</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>8.1s</td>
+                            <td>494.8MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white lemma-alt">
+                                <td>A_Revoke_2_monitor_sleeps_cond_intm_CA_min</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>10.6s</td>
+                            <td>383.7MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white">
+                                <td>A_Revoke_2_monitor_sleeps_cond_root_CA_single</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>61.4s</td>
+                            <td>630.5MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white lemma-alt">
+                                <td>A_Revoke_2_monitor_sleeps_cond_root_CA_uniq</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>7.7s</td>
+                            <td>350.9MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white">
+                                <td>A_Revoke_2_monitor_sleeps_cond_intm_CA_inj</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>8.0s</td>
+                            <td>235.4MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white lemma-alt">
+                                <td>A_Revoke_2_verif_empty</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>16.7s</td>
+                            <td>315.4MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white">
+                                <td>A_Revoke_2_monitor_sleeps_cond_intm_CA_suff</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>51.9s</td>
+                            <td>558.5MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white lemma-alt">
+                                <td>A_Revoke_2_monitor_sleeps_cond_root_CA_min</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>10.1s</td>
+                            <td>228.5MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white">
+                                <td>A_Revoke_2_monitor_sleeps_cond_root_CA_suff</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>146.5s</td>
+                            <td>879.7MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white lemma-alt">
+                                <td>A_Revoke_2_monitor_sleeps_cond_intm_CA_verif_nonempty</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>9.3s</td>
+                            <td>460.4MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white">
+                                <td>A_Revoke_2_monitor_sleeps_cond_intm_CA_single</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>51.3s</td>
+                            <td>553.3MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white lemma-alt">
+                                <td>A_Revoke_2_monitor_sleeps_cond_root_CA_inj</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>7.8s</td>
+                            <td>323.3MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white">
+                                <td>A_Revoke_3_monitor_sleeps_unconditional_intm_CA_verif_nonempty</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>8.9s</td>
+                            <td>240.2MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white lemma-alt">
+                                <td>A_Revoke_3_monitor_sleeps_unconditional_root_CA_suff</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>93.4s</td>
+                            <td>701.7MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white">
+                                <td>A_Revoke_3_monitor_sleeps_unconditional_root_CA_verif_nonempty</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>8.3s</td>
+                            <td>466.8MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white lemma-alt">
+                                <td>A_Revoke_3_monitor_sleeps_unconditional_root_CA_inj</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>7.9s</td>
+                            <td>227.0MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white">
+                                <td>A_Revoke_3_monitor_sleeps_unconditional_root_CA_uniq</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>8.2s</td>
+                            <td>494.8MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white lemma-alt">
+                                <td>A_Revoke_3_monitor_sleeps_unconditional_root_CA_single</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>72.4s</td>
+                            <td>660.6MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white">
+                                <td>A_Revoke_3_monitor_sleeps_unconditional_intm_CA_uniq</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>9.3s</td>
+                            <td>475.9MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white lemma-alt">
+                                <td>A_Revoke_3_monitor_sleeps_unconditional_intm_CA_min</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>10.8s</td>
+                            <td>353.5MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white">
+                                <td>A_Revoke_3_monitor_sleeps_unconditional_root_CA_min</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>10.0s</td>
+                            <td>236.1MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white lemma-alt">
+                                <td>A_Revoke_3_monitor_sleeps_unconditional_intm_CA_suff</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>38.4s</td>
+                            <td>586.4MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white">
+                                <td>A_Revoke_3_verif_empty</td>
+                            <td>default</td>
+                            <td class="falsified">
+ ❗ Falsified
+                            </td>
+                            <td>45.5s</td>
+                            <td>1158.2MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white lemma-alt">
+                                <td>A_Revoke_3_monitor_sleeps_unconditional_intm_CA_inj</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>8.4s</td>
+                            <td>396.6MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white">
+                                <td>A_Revoke_3_monitor_sleeps_unconditional_intm_CA_single</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>64.8s</td>
+                            <td>682.4MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white lemma-alt">
+                                <td>A_RevokeAudit_1_monitor_sleeps_unconditional_audit_intm_CA_uniq</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>9.3s</td>
+                            <td>480.8MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white">
+                                <td>A_RevokeAudit_1_monitor_sleeps_unconditional_audit_root_CA_suff</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>36.6s</td>
+                            <td>549.1MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white lemma-alt">
+                                <td>A_RevokeAudit_1_monitor_sleeps_unconditional_audit_intm_CA_verif_nonempty</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>7.2s</td>
+                            <td>537.9MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white">
+                                <td>A_RevokeAudit_1_monitor_sleeps_unconditional_audit_root_CA_single</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>178.5s</td>
+                            <td>5284.5MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white lemma-alt">
+                                <td>A_RevokeAudit_1_monitor_sleeps_unconditional_audit_intm_CA_min</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>12.3s</td>
+                            <td>526.9MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white">
+                                <td>A_RevokeAudit_1_monitor_sleeps_unconditional_audit_root_CA_verif_nonempty</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>6.7s</td>
+                            <td>309.5MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white lemma-alt">
+                                <td>A_RevokeAudit_1_monitor_sleeps_unconditional_audit_root_CA_uniq</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>8.8s</td>
+                            <td>230.4MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white">
+                                <td>A_RevokeAudit_1_monitor_sleeps_unconditional_audit_intm_CA_single</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>17.5s</td>
+                            <td>399.7MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white lemma-alt">
+                                <td>A_RevokeAudit_1_monitor_sleeps_unconditional_audit_root_CA_min</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>12.1s</td>
+                            <td>226.1MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white">
+                                <td>A_RevokeAudit_1_monitor_sleeps_unconditional_audit_root_CA_inj</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>9.3s</td>
+                            <td>458.6MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white lemma-alt">
+                                <td>A_RevokeAudit_1_monitor_sleeps_unconditional_audit_intm_CA_inj</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>9.2s</td>
+                            <td>523.3MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white">
+                                <td>A_RevokeAudit_1_verif_empty</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>8.2s</td>
+                            <td>456.3MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white lemma-alt">
+                                <td>A_RevokeAudit_1_monitor_sleeps_unconditional_audit_intm_CA_suff</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>16.9s</td>
+                            <td>286.6MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white">
+                                <td>A_RevokeGossip_1_monitor_blames_log_gossip_root_CA_verif_nonempty</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>70.8s</td>
+                            <td>573.2MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white lemma-alt">
+                                <td>A_RevokeGossip_1_monitor_blames_log_gossip_intm_CA_verif_nonempty</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>70.0s</td>
+                            <td>466.2MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white">
+                                <td>A_RevokeGossip_1_monitor_blames_log_gossip_root_CA_min</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>9.9s</td>
+                            <td>225.9MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white lemma-alt">
+                                <td>A_RevokeGossip_1_monitor_blames_log_gossip_intm_CA_min</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>10.4s</td>
+                            <td>446.0MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white">
+                                <td>A_RevokeGossip_1_monitor_blames_log_gossip_intm_CA_uniq</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>8.7s</td>
+                            <td>335.3MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white lemma-alt">
+                                <td>A_RevokeGossip_1_monitor_blames_log_gossip_root_CA_uniq</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>8.1s</td>
+                            <td>222.4MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white">
+                                <td>A_RevokeGossip_1_monitor_blames_log_gossip_root_CA_inj</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>8.0s</td>
+                            <td>226.6MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white lemma-alt">
+                                <td>A_RevokeGossip_1_monitor_blames_log_gossip_intm_CA_inj</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>8.6s</td>
+                            <td>370.9MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-light-gray">
+                                <td rowspan="5">
+                                    <strong>specialized</strong><br>
+                                    <small style="color: #6c757d;">../ct_lemmas_pregen.spthy</small>
+                                </td>
+                                <td>A_RevokeGossip_1_monitor_blames_log_gossip_intm_CA_suff</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>1231.3s</td>
+                            <td>1687.8MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-light-gray lemma-alt">
+                                <td>A_RevokeGossip_1_monitor_blames_log_gossip_root_CA_suff</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>1393.6s</td>
+                            <td>1960.0MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-light-gray">
+                                <td>A_RevokeGossip_1_monitor_blames_log_gossip_root_CA_single</td>
+                            <td>default</td>
+                            <td class="memory">
+ 🧠 Memory Limit
+                            </td>
+                            <td>457.6s</td>
+                            <td>8323.7MB</td>
+                            <td class="info">💾 No</td>
+                        </tr>
+                        <tr class="task-light-gray lemma-alt">
+                                <td>A_RevokeGossip_1_monitor_blames_log_gossip_intm_CA_single</td>
+                            <td>default</td>
+                            <td class="memory">
+ 🧠 Memory Limit
+                            </td>
+                            <td>414.8s</td>
+                            <td>8206.9MB</td>
+                            <td class="info">💾 No</td>
+                        </tr>
+                        <tr class="task-light-gray">
+                                <td>A_RevokeGossip_1_verif_empty</td>
+                            <td>default</td>
+                            <td class="falsified">
+ ❗ Falsified
+                            </td>
+                            <td>578.6s</td>
+                            <td>5259.1MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white">
+                                <td rowspan="3">
+                                    <strong>helper</strong><br>
+                                    <small style="color: #6c757d;">../ct_lemmas_pregen.spthy</small>
+                                </td>
+                                <td>A_Revoke_uniq_helper1</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>17.4s</td>
+                            <td>463.9MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white lemma-alt">
+                                <td>A_Revoke_uniq_helper2</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>7.8s</td>
+                            <td>270.6MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white">
+                                <td>A_Revoke_uniq_helper3</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>7.5s</td>
+                            <td>379.2MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+        </tbody>
+    </table>
+
+    <h3 id="global-timeline">Global Execution Timeline</h3>
+    <div id="global_timeline_chart" class="chart-div" style="width: 100%; height: 600px;"></div>
+
+    <h2 id="task-details">Task Details</h2>
+
+    <h3 id="task-autoprove">Task: autoprove</h3>
+
+    <h4>Execution Summary</h4>
+    <table class="task-table">
+        <thead>
+            <tr>
+                <th>Lemma</th>
+                <th>Resources config</th>
+                <th>Options</th>
+                <th>Preprocessor</th>
+                <th>Tamarin Version</th>
+                <th>Status</th>
+                <th>Runtime</th>
+                <th>Peak Memory Used</th>
+                <th>Cache Hit</th>
+            </tr>
+        </thead>
+        <tbody>
+                    <tr class="task-white">
+                            <td>A_Revoke_1_monitor_sleeps_intm_CA_min</td>
+                            <td>10c / 6GB / 180s</td>
+                            <td>--derivcheck-timeout=0 --defines=REVOCATION</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>9.22s</td>
+                        <td>494.53MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-light-gray">
+                            <td>A_Revoke_1_monitor_sleeps_intm_CA_uniq</td>
+                            <td>10c / 6GB / 180s</td>
+                            <td>--derivcheck-timeout=0 --defines=REVOCATION</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>9.68s</td>
+                        <td>428.50MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-white">
+                            <td>A_Revoke_1_monitor_sleeps_intm_CA_inj</td>
+                            <td>10c / 6GB / 180s</td>
+                            <td>--derivcheck-timeout=0 --defines=REVOCATION</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>8.35s</td>
+                        <td>476.21MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-light-gray">
+                            <td>A_Revoke_1_monitor_sleeps_root_CA_inj</td>
+                            <td>10c / 6GB / 180s</td>
+                            <td>--derivcheck-timeout=0 --defines=REVOCATION</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>8.24s</td>
+                        <td>471.03MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-white">
+                            <td>A_Revoke_1_monitor_sleeps_root_CA_verif_nonempty</td>
+                            <td>10c / 6GB / 180s</td>
+                            <td>--derivcheck-timeout=0 --defines=REVOCATION</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>8.07s</td>
+                        <td>213.73MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-light-gray">
+                            <td>A_Revoke_1_monitor_sleeps_root_CA_min</td>
+                            <td>10c / 6GB / 180s</td>
+                            <td>--derivcheck-timeout=0 --defines=REVOCATION</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>8.91s</td>
+                        <td>222.18MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-white">
+                            <td>A_Revoke_1_monitor_sleeps_intm_CA_single</td>
+                            <td>10c / 6GB / 180s</td>
+                            <td>--derivcheck-timeout=0 --defines=REVOCATION</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>41.94s</td>
+                        <td>576.36MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-light-gray">
+                            <td>A_Revoke_1_monitor_sleeps_root_CA_uniq</td>
+                            <td>10c / 6GB / 180s</td>
+                            <td>--derivcheck-timeout=0 --defines=REVOCATION</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>8.86s</td>
+                        <td>241.40MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-white">
+                            <td>A_Revoke_1_monitor_sleeps_root_CA_suff</td>
+                            <td>10c / 6GB / 180s</td>
+                            <td>--derivcheck-timeout=0 --defines=REVOCATION</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>96.73s</td>
+                        <td>694.66MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-light-gray">
+                            <td>A_Revoke_1_monitor_sleeps_root_CA_single</td>
+                            <td>10c / 6GB / 180s</td>
+                            <td>--derivcheck-timeout=0 --defines=REVOCATION</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>40.93s</td>
+                        <td>485.54MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-white">
+                            <td>A_Revoke_1_verif_empty</td>
+                            <td>10c / 6GB / 180s</td>
+                            <td>--derivcheck-timeout=0 --defines=REVOCATION</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>12.00s</td>
+                        <td>234.00MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-light-gray">
+                            <td>A_Revoke_1_monitor_sleeps_intm_CA_suff</td>
+                            <td>10c / 6GB / 180s</td>
+                            <td>--derivcheck-timeout=0 --defines=REVOCATION</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>37.20s</td>
+                        <td>399.06MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-white">
+                            <td>A_Revoke_1_monitor_sleeps_intm_CA_verif_nonempty</td>
+                            <td>10c / 6GB / 180s</td>
+                            <td>--derivcheck-timeout=0 --defines=REVOCATION</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>8.44s</td>
+                        <td>349.05MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-light-gray">
+                            <td>A_Revoke_2_monitor_sleeps_cond_root_CA_verif_nonempty</td>
+                            <td>10c / 6GB / 180s</td>
+                            <td>--derivcheck-timeout=0 --defines=REVOCATION</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>8.50s</td>
+                        <td>347.95MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-white">
+                            <td>A_Revoke_2_monitor_sleeps_cond_intm_CA_uniq</td>
+                            <td>10c / 6GB / 180s</td>
+                            <td>--derivcheck-timeout=0 --defines=REVOCATION</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>8.12s</td>
+                        <td>494.81MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-light-gray">
+                            <td>A_Revoke_2_monitor_sleeps_cond_intm_CA_min</td>
+                            <td>10c / 6GB / 180s</td>
+                            <td>--derivcheck-timeout=0 --defines=REVOCATION</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>10.55s</td>
+                        <td>383.71MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-white">
+                            <td>A_Revoke_2_monitor_sleeps_cond_root_CA_single</td>
+                            <td>10c / 6GB / 180s</td>
+                            <td>--derivcheck-timeout=0 --defines=REVOCATION</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>61.38s</td>
+                        <td>630.54MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-light-gray">
+                            <td>A_Revoke_2_monitor_sleeps_cond_root_CA_uniq</td>
+                            <td>10c / 6GB / 180s</td>
+                            <td>--derivcheck-timeout=0 --defines=REVOCATION</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>7.72s</td>
+                        <td>350.86MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-white">
+                            <td>A_Revoke_2_monitor_sleeps_cond_intm_CA_inj</td>
+                            <td>10c / 6GB / 180s</td>
+                            <td>--derivcheck-timeout=0 --defines=REVOCATION</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>8.05s</td>
+                        <td>235.36MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-light-gray">
+                            <td>A_Revoke_2_verif_empty</td>
+                            <td>10c / 6GB / 180s</td>
+                            <td>--derivcheck-timeout=0 --defines=REVOCATION</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>16.73s</td>
+                        <td>315.36MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-white">
+                            <td>A_Revoke_2_monitor_sleeps_cond_intm_CA_suff</td>
+                            <td>10c / 6GB / 180s</td>
+                            <td>--derivcheck-timeout=0 --defines=REVOCATION</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>51.85s</td>
+                        <td>558.54MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-light-gray">
+                            <td>A_Revoke_2_monitor_sleeps_cond_root_CA_min</td>
+                            <td>10c / 6GB / 180s</td>
+                            <td>--derivcheck-timeout=0 --defines=REVOCATION</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>10.12s</td>
+                        <td>228.45MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-white">
+                            <td>A_Revoke_2_monitor_sleeps_cond_root_CA_suff</td>
+                            <td>10c / 6GB / 180s</td>
+                            <td>--derivcheck-timeout=0 --defines=REVOCATION</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>146.54s</td>
+                        <td>879.73MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-light-gray">
+                            <td>A_Revoke_2_monitor_sleeps_cond_intm_CA_verif_nonempty</td>
+                            <td>10c / 6GB / 180s</td>
+                            <td>--derivcheck-timeout=0 --defines=REVOCATION</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>9.29s</td>
+                        <td>460.38MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-white">
+                            <td>A_Revoke_2_monitor_sleeps_cond_intm_CA_single</td>
+                            <td>10c / 6GB / 180s</td>
+                            <td>--derivcheck-timeout=0 --defines=REVOCATION</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>51.32s</td>
+                        <td>553.34MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-light-gray">
+                            <td>A_Revoke_2_monitor_sleeps_cond_root_CA_inj</td>
+                            <td>10c / 6GB / 180s</td>
+                            <td>--derivcheck-timeout=0 --defines=REVOCATION</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>7.76s</td>
+                        <td>323.28MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-white">
+                            <td>A_Revoke_3_monitor_sleeps_unconditional_intm_CA_verif_nonempty</td>
+                            <td>10c / 6GB / 180s</td>
+                            <td>--derivcheck-timeout=0 --defines=REVOCATION</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>8.86s</td>
+                        <td>240.25MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-light-gray">
+                            <td>A_Revoke_3_monitor_sleeps_unconditional_root_CA_suff</td>
+                            <td>10c / 6GB / 180s</td>
+                            <td>--derivcheck-timeout=0 --defines=REVOCATION</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>93.44s</td>
+                        <td>701.71MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-white">
+                            <td>A_Revoke_3_monitor_sleeps_unconditional_root_CA_verif_nonempty</td>
+                            <td>10c / 6GB / 180s</td>
+                            <td>--derivcheck-timeout=0 --defines=REVOCATION</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>8.28s</td>
+                        <td>466.83MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-light-gray">
+                            <td>A_Revoke_3_monitor_sleeps_unconditional_root_CA_inj</td>
+                            <td>10c / 6GB / 180s</td>
+                            <td>--derivcheck-timeout=0 --defines=REVOCATION</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>7.89s</td>
+                        <td>226.98MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-white">
+                            <td>A_Revoke_3_monitor_sleeps_unconditional_root_CA_uniq</td>
+                            <td>10c / 6GB / 180s</td>
+                            <td>--derivcheck-timeout=0 --defines=REVOCATION</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>8.18s</td>
+                        <td>494.76MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-light-gray">
+                            <td>A_Revoke_3_monitor_sleeps_unconditional_root_CA_single</td>
+                            <td>10c / 6GB / 180s</td>
+                            <td>--derivcheck-timeout=0 --defines=REVOCATION</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>72.40s</td>
+                        <td>660.61MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-white">
+                            <td>A_Revoke_3_monitor_sleeps_unconditional_intm_CA_uniq</td>
+                            <td>10c / 6GB / 180s</td>
+                            <td>--derivcheck-timeout=0 --defines=REVOCATION</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>9.27s</td>
+                        <td>475.86MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-light-gray">
+                            <td>A_Revoke_3_monitor_sleeps_unconditional_intm_CA_min</td>
+                            <td>10c / 6GB / 180s</td>
+                            <td>--derivcheck-timeout=0 --defines=REVOCATION</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>10.84s</td>
+                        <td>353.50MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-white">
+                            <td>A_Revoke_3_monitor_sleeps_unconditional_root_CA_min</td>
+                            <td>10c / 6GB / 180s</td>
+                            <td>--derivcheck-timeout=0 --defines=REVOCATION</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>10.00s</td>
+                        <td>236.06MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-light-gray">
+                            <td>A_Revoke_3_monitor_sleeps_unconditional_intm_CA_suff</td>
+                            <td>10c / 6GB / 180s</td>
+                            <td>--derivcheck-timeout=0 --defines=REVOCATION</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>38.44s</td>
+                        <td>586.36MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-white">
+                            <td>A_Revoke_3_verif_empty</td>
+                            <td>10c / 6GB / 180s</td>
+                            <td>--derivcheck-timeout=0 --defines=REVOCATION</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="falsified">
+❗ Falsified
+                        </td>
+                        <td>45.51s</td>
+                        <td>1158.23MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-light-gray">
+                            <td>A_Revoke_3_monitor_sleeps_unconditional_intm_CA_inj</td>
+                            <td>10c / 6GB / 180s</td>
+                            <td>--derivcheck-timeout=0 --defines=REVOCATION</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>8.37s</td>
+                        <td>396.60MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-white">
+                            <td>A_Revoke_3_monitor_sleeps_unconditional_intm_CA_single</td>
+                            <td>10c / 6GB / 180s</td>
+                            <td>--derivcheck-timeout=0 --defines=REVOCATION</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>64.80s</td>
+                        <td>682.38MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-light-gray">
+                            <td>A_RevokeAudit_1_monitor_sleeps_unconditional_audit_intm_CA_uniq</td>
+                            <td>10c / 6GB / 180s</td>
+                            <td>--derivcheck-timeout=0 --defines=REVOCATION</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>9.34s</td>
+                        <td>480.85MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-white">
+                            <td>A_RevokeAudit_1_monitor_sleeps_unconditional_audit_root_CA_suff</td>
+                            <td>10c / 6GB / 180s</td>
+                            <td>--derivcheck-timeout=0 --defines=REVOCATION</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>36.60s</td>
+                        <td>549.05MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-light-gray">
+                            <td>A_RevokeAudit_1_monitor_sleeps_unconditional_audit_intm_CA_verif_nonempty</td>
+                            <td>10c / 6GB / 180s</td>
+                            <td>--derivcheck-timeout=0 --defines=REVOCATION</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>7.22s</td>
+                        <td>537.88MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-white">
+                            <td>A_RevokeAudit_1_monitor_sleeps_unconditional_audit_root_CA_single</td>
+                            <td>10c / 6GB / 180s</td>
+                            <td>--derivcheck-timeout=0 --defines=REVOCATION</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>178.46s</td>
+                        <td>5284.47MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-light-gray">
+                            <td>A_RevokeAudit_1_monitor_sleeps_unconditional_audit_intm_CA_min</td>
+                            <td>10c / 6GB / 180s</td>
+                            <td>--derivcheck-timeout=0 --defines=REVOCATION</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>12.32s</td>
+                        <td>526.89MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-white">
+                            <td>A_RevokeAudit_1_monitor_sleeps_unconditional_audit_root_CA_verif_nonempty</td>
+                            <td>10c / 6GB / 180s</td>
+                            <td>--derivcheck-timeout=0 --defines=REVOCATION</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>6.71s</td>
+                        <td>309.52MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-light-gray">
+                            <td>A_RevokeAudit_1_monitor_sleeps_unconditional_audit_root_CA_uniq</td>
+                            <td>10c / 6GB / 180s</td>
+                            <td>--derivcheck-timeout=0 --defines=REVOCATION</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>8.85s</td>
+                        <td>230.42MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-white">
+                            <td>A_RevokeAudit_1_monitor_sleeps_unconditional_audit_intm_CA_single</td>
+                            <td>10c / 6GB / 180s</td>
+                            <td>--derivcheck-timeout=0 --defines=REVOCATION</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>17.53s</td>
+                        <td>399.68MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-light-gray">
+                            <td>A_RevokeAudit_1_monitor_sleeps_unconditional_audit_root_CA_min</td>
+                            <td>10c / 6GB / 180s</td>
+                            <td>--derivcheck-timeout=0 --defines=REVOCATION</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>12.10s</td>
+                        <td>226.15MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-white">
+                            <td>A_RevokeAudit_1_monitor_sleeps_unconditional_audit_root_CA_inj</td>
+                            <td>10c / 6GB / 180s</td>
+                            <td>--derivcheck-timeout=0 --defines=REVOCATION</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>9.31s</td>
+                        <td>458.58MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-light-gray">
+                            <td>A_RevokeAudit_1_monitor_sleeps_unconditional_audit_intm_CA_inj</td>
+                            <td>10c / 6GB / 180s</td>
+                            <td>--derivcheck-timeout=0 --defines=REVOCATION</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>9.25s</td>
+                        <td>523.28MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-white">
+                            <td>A_RevokeAudit_1_verif_empty</td>
+                            <td>10c / 6GB / 180s</td>
+                            <td>--derivcheck-timeout=0 --defines=REVOCATION</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>8.24s</td>
+                        <td>456.34MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-light-gray">
+                            <td>A_RevokeAudit_1_monitor_sleeps_unconditional_audit_intm_CA_suff</td>
+                            <td>10c / 6GB / 180s</td>
+                            <td>--derivcheck-timeout=0 --defines=REVOCATION</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>16.87s</td>
+                        <td>286.59MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-white">
+                            <td>A_RevokeGossip_1_monitor_blames_log_gossip_root_CA_verif_nonempty</td>
+                            <td>10c / 6GB / 180s</td>
+                            <td>--derivcheck-timeout=0 --defines=REVOCATION</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>70.81s</td>
+                        <td>573.21MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-light-gray">
+                            <td>A_RevokeGossip_1_monitor_blames_log_gossip_intm_CA_verif_nonempty</td>
+                            <td>10c / 6GB / 180s</td>
+                            <td>--derivcheck-timeout=0 --defines=REVOCATION</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>70.02s</td>
+                        <td>466.19MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-white">
+                            <td>A_RevokeGossip_1_monitor_blames_log_gossip_root_CA_min</td>
+                            <td>10c / 6GB / 180s</td>
+                            <td>--derivcheck-timeout=0 --defines=REVOCATION</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>9.90s</td>
+                        <td>225.86MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-light-gray">
+                            <td>A_RevokeGossip_1_monitor_blames_log_gossip_intm_CA_min</td>
+                            <td>10c / 6GB / 180s</td>
+                            <td>--derivcheck-timeout=0 --defines=REVOCATION</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>10.39s</td>
+                        <td>446.05MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-white">
+                            <td>A_RevokeGossip_1_monitor_blames_log_gossip_intm_CA_uniq</td>
+                            <td>10c / 6GB / 180s</td>
+                            <td>--derivcheck-timeout=0 --defines=REVOCATION</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>8.75s</td>
+                        <td>335.29MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-light-gray">
+                            <td>A_RevokeGossip_1_monitor_blames_log_gossip_root_CA_uniq</td>
+                            <td>10c / 6GB / 180s</td>
+                            <td>--derivcheck-timeout=0 --defines=REVOCATION</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>8.12s</td>
+                        <td>222.44MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-white">
+                            <td>A_RevokeGossip_1_monitor_blames_log_gossip_root_CA_inj</td>
+                            <td>10c / 6GB / 180s</td>
+                            <td>--derivcheck-timeout=0 --defines=REVOCATION</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>8.03s</td>
+                        <td>226.58MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-light-gray">
+                            <td>A_RevokeGossip_1_monitor_blames_log_gossip_intm_CA_inj</td>
+                            <td>10c / 6GB / 180s</td>
+                            <td>--derivcheck-timeout=0 --defines=REVOCATION</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>8.57s</td>
+                        <td>370.89MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+        </tbody>
+    </table>
+
+
+    <div class="chart-item">
+        <div id="task_timeline_autoprove" class="chart-div" style="width: 100%; height: 200px;"></div>
+    </div>
+
+    <h4>Traces</h4>
+    <div class="trace-visualization">
+        <h5>A_Revoke_3_verif_empty (default)</h5>
+        <p>
+            <strong>JSON File:</strong> <a href="traces/--A_Revoke_3_verif_empty--default.json">traces/--A_Revoke_3_verif_empty--default.json</a>
+            <br><strong>DOT File:</strong> <a href="traces/--A_Revoke_3_verif_empty--default.dot">traces/--A_Revoke_3_verif_empty--default.dot</a>
+        </p>
+        <div class="trace-svg-container">
+            <img src="traces/--A_Revoke_3_verif_empty--default.svg" alt="A_Revoke_3_verif_empty trace visualization" style="max-width: 100%; height: auto;">
+        </div>
+    </div>
+    <div class="trace-visualization">
+        <h5>A_Revoke_1_monitor_sleeps_intm_CA_suff (default)</h5>
+        <p>
+            <strong>JSON File:</strong> <a href="traces/--A_Revoke_1_monitor_sleeps_intm_CA_suff--default.json">traces/--A_Revoke_1_monitor_sleeps_intm_CA_suff--default.json</a>
+            <br><strong>DOT File:</strong> <a href="traces/--A_Revoke_1_monitor_sleeps_intm_CA_suff--default.dot">traces/--A_Revoke_1_monitor_sleeps_intm_CA_suff--default.dot</a>
+        </p>
+        <div class="trace-svg-container">
+            <img src="traces/--A_Revoke_1_monitor_sleeps_intm_CA_suff--default.svg" alt="A_Revoke_1_monitor_sleeps_intm_CA_suff trace visualization" style="max-width: 100%; height: auto;">
+        </div>
+    </div>
+    <div class="trace-visualization">
+        <h5>A_Revoke_2_monitor_sleeps_cond_root_CA_single (default)</h5>
+        <p>
+            <strong>JSON File:</strong> <a href="traces/--A_Revoke_2_monitor_sleeps_cond_root_CA_single--default.json">traces/--A_Revoke_2_monitor_sleeps_cond_root_CA_single--default.json</a>
+            <br><strong>DOT File:</strong> <a href="traces/--A_Revoke_2_monitor_sleeps_cond_root_CA_single--default.dot">traces/--A_Revoke_2_monitor_sleeps_cond_root_CA_single--default.dot</a>
+        </p>
+        <div class="trace-svg-container">
+            <img src="traces/--A_Revoke_2_monitor_sleeps_cond_root_CA_single--default.svg" alt="A_Revoke_2_monitor_sleeps_cond_root_CA_single trace visualization" style="max-width: 100%; height: auto;">
+        </div>
+    </div>
+    <div class="trace-visualization">
+        <h5>A_Revoke_1_monitor_sleeps_intm_CA_single (default)</h5>
+        <p>
+            <strong>JSON File:</strong> <a href="traces/--A_Revoke_1_monitor_sleeps_intm_CA_single--default.json">traces/--A_Revoke_1_monitor_sleeps_intm_CA_single--default.json</a>
+            <br><strong>DOT File:</strong> <a href="traces/--A_Revoke_1_monitor_sleeps_intm_CA_single--default.dot">traces/--A_Revoke_1_monitor_sleeps_intm_CA_single--default.dot</a>
+        </p>
+        <div class="trace-svg-container">
+            <img src="traces/--A_Revoke_1_monitor_sleeps_intm_CA_single--default.svg" alt="A_Revoke_1_monitor_sleeps_intm_CA_single trace visualization" style="max-width: 100%; height: auto;">
+        </div>
+    </div>
+    <div class="trace-visualization">
+        <h5>A_Revoke_3_monitor_sleeps_unconditional_intm_CA_single (default)</h5>
+        <p>
+            <strong>JSON File:</strong> <a href="traces/--A_Revoke_3_monitor_sleeps_unconditional_intm_CA_single--default.json">traces/--A_Revoke_3_monitor_sleeps_unconditional_intm_CA_single--default.json</a>
+            <br><strong>DOT File:</strong> <a href="traces/--A_Revoke_3_monitor_sleeps_unconditional_intm_CA_single--default.dot">traces/--A_Revoke_3_monitor_sleeps_unconditional_intm_CA_single--default.dot</a>
+        </p>
+        <div class="trace-svg-container">
+            <img src="traces/--A_Revoke_3_monitor_sleeps_unconditional_intm_CA_single--default.svg" alt="A_Revoke_3_monitor_sleeps_unconditional_intm_CA_single trace visualization" style="max-width: 100%; height: auto;">
+        </div>
+    </div>
+    <div class="trace-visualization">
+        <h5>A_Revoke_3_monitor_sleeps_unconditional_root_CA_single (default)</h5>
+        <p>
+            <strong>JSON File:</strong> <a href="traces/--A_Revoke_3_monitor_sleeps_unconditional_root_CA_single--default.json">traces/--A_Revoke_3_monitor_sleeps_unconditional_root_CA_single--default.json</a>
+            <br><strong>DOT File:</strong> <a href="traces/--A_Revoke_3_monitor_sleeps_unconditional_root_CA_single--default.dot">traces/--A_Revoke_3_monitor_sleeps_unconditional_root_CA_single--default.dot</a>
+        </p>
+        <div class="trace-svg-container">
+            <img src="traces/--A_Revoke_3_monitor_sleeps_unconditional_root_CA_single--default.svg" alt="A_Revoke_3_monitor_sleeps_unconditional_root_CA_single trace visualization" style="max-width: 100%; height: auto;">
+        </div>
+    </div>
+    <div class="trace-visualization">
+        <h5>A_Revoke_2_monitor_sleeps_cond_intm_CA_suff (default)</h5>
+        <p>
+            <strong>JSON File:</strong> <a href="traces/--A_Revoke_2_monitor_sleeps_cond_intm_CA_suff--default.json">traces/--A_Revoke_2_monitor_sleeps_cond_intm_CA_suff--default.json</a>
+            <br><strong>DOT File:</strong> <a href="traces/--A_Revoke_2_monitor_sleeps_cond_intm_CA_suff--default.dot">traces/--A_Revoke_2_monitor_sleeps_cond_intm_CA_suff--default.dot</a>
+        </p>
+        <div class="trace-svg-container">
+            <img src="traces/--A_Revoke_2_monitor_sleeps_cond_intm_CA_suff--default.svg" alt="A_Revoke_2_monitor_sleeps_cond_intm_CA_suff trace visualization" style="max-width: 100%; height: auto;">
+        </div>
+    </div>
+    <div class="trace-visualization">
+        <h5>A_RevokeAudit_1_monitor_sleeps_unconditional_audit_root_CA_single (default)</h5>
+        <p>
+            <strong>JSON File:</strong> <a href="traces/--A_RevokeAudit_1_monitor_sleeps_unconditional_audit_root_CA_single--default.json">traces/--A_RevokeAudit_1_monitor_sleeps_unconditional_audit_root_CA_single--default.json</a>
+            <br><strong>DOT File:</strong> <a href="traces/--A_RevokeAudit_1_monitor_sleeps_unconditional_audit_root_CA_single--default.dot">traces/--A_RevokeAudit_1_monitor_sleeps_unconditional_audit_root_CA_single--default.dot</a>
+        </p>
+        <div class="trace-svg-container">
+            <img src="traces/--A_RevokeAudit_1_monitor_sleeps_unconditional_audit_root_CA_single--default.svg" alt="A_RevokeAudit_1_monitor_sleeps_unconditional_audit_root_CA_single trace visualization" style="max-width: 100%; height: auto;">
+        </div>
+    </div>
+    <div class="trace-visualization">
+        <h5>A_Revoke_3_monitor_sleeps_unconditional_intm_CA_suff (default)</h5>
+        <p>
+            <strong>JSON File:</strong> <a href="traces/--A_Revoke_3_monitor_sleeps_unconditional_intm_CA_suff--default.json">traces/--A_Revoke_3_monitor_sleeps_unconditional_intm_CA_suff--default.json</a>
+            <br><strong>DOT File:</strong> <a href="traces/--A_Revoke_3_monitor_sleeps_unconditional_intm_CA_suff--default.dot">traces/--A_Revoke_3_monitor_sleeps_unconditional_intm_CA_suff--default.dot</a>
+        </p>
+        <div class="trace-svg-container">
+            <img src="traces/--A_Revoke_3_monitor_sleeps_unconditional_intm_CA_suff--default.svg" alt="A_Revoke_3_monitor_sleeps_unconditional_intm_CA_suff trace visualization" style="max-width: 100%; height: auto;">
+        </div>
+    </div>
+    <div class="trace-visualization">
+        <h5>A_RevokeAudit_1_monitor_sleeps_unconditional_audit_intm_CA_suff (default)</h5>
+        <p>
+            <strong>JSON File:</strong> <a href="traces/--A_RevokeAudit_1_monitor_sleeps_unconditional_audit_intm_CA_suff--default.json">traces/--A_RevokeAudit_1_monitor_sleeps_unconditional_audit_intm_CA_suff--default.json</a>
+            <br><strong>DOT File:</strong> <a href="traces/--A_RevokeAudit_1_monitor_sleeps_unconditional_audit_intm_CA_suff--default.dot">traces/--A_RevokeAudit_1_monitor_sleeps_unconditional_audit_intm_CA_suff--default.dot</a>
+        </p>
+        <div class="trace-svg-container">
+            <img src="traces/--A_RevokeAudit_1_monitor_sleeps_unconditional_audit_intm_CA_suff--default.svg" alt="A_RevokeAudit_1_monitor_sleeps_unconditional_audit_intm_CA_suff trace visualization" style="max-width: 100%; height: auto;">
+        </div>
+    </div>
+    <div class="trace-visualization">
+        <h5>A_Revoke_2_monitor_sleeps_cond_intm_CA_single (default)</h5>
+        <p>
+            <strong>JSON File:</strong> <a href="traces/--A_Revoke_2_monitor_sleeps_cond_intm_CA_single--default.json">traces/--A_Revoke_2_monitor_sleeps_cond_intm_CA_single--default.json</a>
+            <br><strong>DOT File:</strong> <a href="traces/--A_Revoke_2_monitor_sleeps_cond_intm_CA_single--default.dot">traces/--A_Revoke_2_monitor_sleeps_cond_intm_CA_single--default.dot</a>
+        </p>
+        <div class="trace-svg-container">
+            <img src="traces/--A_Revoke_2_monitor_sleeps_cond_intm_CA_single--default.svg" alt="A_Revoke_2_monitor_sleeps_cond_intm_CA_single trace visualization" style="max-width: 100%; height: auto;">
+        </div>
+    </div>
+    <div class="trace-visualization">
+        <h5>A_Revoke_1_monitor_sleeps_root_CA_single (default)</h5>
+        <p>
+            <strong>JSON File:</strong> <a href="traces/--A_Revoke_1_monitor_sleeps_root_CA_single--default.json">traces/--A_Revoke_1_monitor_sleeps_root_CA_single--default.json</a>
+            <br><strong>DOT File:</strong> <a href="traces/--A_Revoke_1_monitor_sleeps_root_CA_single--default.dot">traces/--A_Revoke_1_monitor_sleeps_root_CA_single--default.dot</a>
+        </p>
+        <div class="trace-svg-container">
+            <img src="traces/--A_Revoke_1_monitor_sleeps_root_CA_single--default.svg" alt="A_Revoke_1_monitor_sleeps_root_CA_single trace visualization" style="max-width: 100%; height: auto;">
+        </div>
+    </div>
+    <div class="trace-visualization">
+        <h5>A_Revoke_2_monitor_sleeps_cond_root_CA_suff (default)</h5>
+        <p>
+            <strong>JSON File:</strong> <a href="traces/--A_Revoke_2_monitor_sleeps_cond_root_CA_suff--default.json">traces/--A_Revoke_2_monitor_sleeps_cond_root_CA_suff--default.json</a>
+            <br><strong>DOT File:</strong> <a href="traces/--A_Revoke_2_monitor_sleeps_cond_root_CA_suff--default.dot">traces/--A_Revoke_2_monitor_sleeps_cond_root_CA_suff--default.dot</a>
+        </p>
+        <div class="trace-svg-container">
+            <img src="traces/--A_Revoke_2_monitor_sleeps_cond_root_CA_suff--default.svg" alt="A_Revoke_2_monitor_sleeps_cond_root_CA_suff trace visualization" style="max-width: 100%; height: auto;">
+        </div>
+    </div>
+    <div class="trace-visualization">
+        <h5>A_RevokeAudit_1_monitor_sleeps_unconditional_audit_root_CA_suff (default)</h5>
+        <p>
+            <strong>JSON File:</strong> <a href="traces/--A_RevokeAudit_1_monitor_sleeps_unconditional_audit_root_CA_suff--default.json">traces/--A_RevokeAudit_1_monitor_sleeps_unconditional_audit_root_CA_suff--default.json</a>
+            <br><strong>DOT File:</strong> <a href="traces/--A_RevokeAudit_1_monitor_sleeps_unconditional_audit_root_CA_suff--default.dot">traces/--A_RevokeAudit_1_monitor_sleeps_unconditional_audit_root_CA_suff--default.dot</a>
+        </p>
+        <div class="trace-svg-container">
+            <img src="traces/--A_RevokeAudit_1_monitor_sleeps_unconditional_audit_root_CA_suff--default.svg" alt="A_RevokeAudit_1_monitor_sleeps_unconditional_audit_root_CA_suff trace visualization" style="max-width: 100%; height: auto;">
+        </div>
+    </div>
+    <div class="trace-visualization">
+        <h5>A_RevokeAudit_1_monitor_sleeps_unconditional_audit_intm_CA_single (default)</h5>
+        <p>
+            <strong>JSON File:</strong> <a href="traces/--A_RevokeAudit_1_monitor_sleeps_unconditional_audit_intm_CA_single--default.json">traces/--A_RevokeAudit_1_monitor_sleeps_unconditional_audit_intm_CA_single--default.json</a>
+            <br><strong>DOT File:</strong> <a href="traces/--A_RevokeAudit_1_monitor_sleeps_unconditional_audit_intm_CA_single--default.dot">traces/--A_RevokeAudit_1_monitor_sleeps_unconditional_audit_intm_CA_single--default.dot</a>
+        </p>
+        <div class="trace-svg-container">
+            <img src="traces/--A_RevokeAudit_1_monitor_sleeps_unconditional_audit_intm_CA_single--default.svg" alt="A_RevokeAudit_1_monitor_sleeps_unconditional_audit_intm_CA_single trace visualization" style="max-width: 100%; height: auto;">
+        </div>
+    </div>
+    <div class="trace-visualization">
+        <h5>A_Revoke_1_monitor_sleeps_root_CA_suff (default)</h5>
+        <p>
+            <strong>JSON File:</strong> <a href="traces/--A_Revoke_1_monitor_sleeps_root_CA_suff--default.json">traces/--A_Revoke_1_monitor_sleeps_root_CA_suff--default.json</a>
+            <br><strong>DOT File:</strong> <a href="traces/--A_Revoke_1_monitor_sleeps_root_CA_suff--default.dot">traces/--A_Revoke_1_monitor_sleeps_root_CA_suff--default.dot</a>
+        </p>
+        <div class="trace-svg-container">
+            <img src="traces/--A_Revoke_1_monitor_sleeps_root_CA_suff--default.svg" alt="A_Revoke_1_monitor_sleeps_root_CA_suff trace visualization" style="max-width: 100%; height: auto;">
+        </div>
+    </div>
+    <div class="trace-visualization">
+        <h5>A_Revoke_3_monitor_sleeps_unconditional_root_CA_suff (default)</h5>
+        <p>
+            <strong>JSON File:</strong> <a href="traces/--A_Revoke_3_monitor_sleeps_unconditional_root_CA_suff--default.json">traces/--A_Revoke_3_monitor_sleeps_unconditional_root_CA_suff--default.json</a>
+            <br><strong>DOT File:</strong> <a href="traces/--A_Revoke_3_monitor_sleeps_unconditional_root_CA_suff--default.dot">traces/--A_Revoke_3_monitor_sleeps_unconditional_root_CA_suff--default.dot</a>
+        </p>
+        <div class="trace-svg-container">
+            <img src="traces/--A_Revoke_3_monitor_sleeps_unconditional_root_CA_suff--default.svg" alt="A_Revoke_3_monitor_sleeps_unconditional_root_CA_suff trace visualization" style="max-width: 100%; height: auto;">
+        </div>
+    </div>
+
+    <h3 id="task-specialized">Task: specialized</h3>
+
+    <h4>Execution Summary</h4>
+    <table class="task-table">
+        <thead>
+            <tr>
+                <th>Lemma</th>
+                <th>Resources config</th>
+                <th>Options</th>
+                <th>Preprocessor</th>
+                <th>Tamarin Version</th>
+                <th>Status</th>
+                <th>Runtime</th>
+                <th>Peak Memory Used</th>
+                <th>Cache Hit</th>
+            </tr>
+        </thead>
+        <tbody>
+                    <tr class="task-white">
+                            <td>A_RevokeGossip_1_monitor_blames_log_gossip_intm_CA_suff</td>
+                            <td>10c / 6GB / 1800s</td>
+                            <td>--derivcheck-timeout=0 --defines=REVOCATION --defines=SUFFICIENCY_PROOF</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>1231.28s</td>
+                        <td>1687.77MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-light-gray">
+                            <td>A_RevokeGossip_1_monitor_blames_log_gossip_root_CA_suff</td>
+                            <td>10c / 6GB / 1800s</td>
+                            <td>--derivcheck-timeout=0 --defines=REVOCATION --defines=SUFFICIENCY_PROOF</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>1393.61s</td>
+                        <td>1960.04MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-white">
+                            <td>A_RevokeGossip_1_monitor_blames_log_gossip_root_CA_single</td>
+                            <td>10c / 8GB / 1800s</td>
+                            <td>--derivcheck-timeout=0 --defines=REVOCATION --defines=SUFFICIENCY_PROOF</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="memory">
+🧠 Memory Limit
+                        </td>
+                        <td>457.58s</td>
+                        <td>8323.71MB</td>
+                        <td class="info">💻 No</td>
+                    </tr>
+                    <tr class="task-light-gray">
+                            <td>A_RevokeGossip_1_monitor_blames_log_gossip_intm_CA_single</td>
+                            <td>10c / 8GB / 1800s</td>
+                            <td>--derivcheck-timeout=0 --defines=REVOCATION --defines=SUFFICIENCY_PROOF</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="memory">
+🧠 Memory Limit
+                        </td>
+                        <td>414.82s</td>
+                        <td>8206.94MB</td>
+                        <td class="info">💻 No</td>
+                    </tr>
+                    <tr class="task-white">
+                            <td>A_RevokeGossip_1_verif_empty</td>
+                            <td>10c / 6GB / 1800s</td>
+                            <td>--derivcheck-timeout=0 --defines=REVOCATION --defines=SUFFICIENCY_PROOF</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="falsified">
+❗ Falsified
+                        </td>
+                        <td>578.64s</td>
+                        <td>5259.05MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+        </tbody>
+    </table>
+
+
+    <div class="chart-item">
+        <div id="task_timeline_specialized" class="chart-div" style="width: 100%; height: 200px;"></div>
+    </div>
+
+    <h4>Traces</h4>
+    <div class="trace-visualization">
+        <h5>A_RevokeGossip_1_monitor_blames_log_gossip_root_CA_suff (default)</h5>
+        <p>
+            <strong>JSON File:</strong> <a href="traces/--A_RevokeGossip_1_monitor_blames_log_gossip_root_CA_suff--default.json">traces/--A_RevokeGossip_1_monitor_blames_log_gossip_root_CA_suff--default.json</a>
+            <br><strong>DOT File:</strong> <a href="traces/--A_RevokeGossip_1_monitor_blames_log_gossip_root_CA_suff--default.dot">traces/--A_RevokeGossip_1_monitor_blames_log_gossip_root_CA_suff--default.dot</a>
+        </p>
+        <div class="trace-svg-container">
+            <img src="traces/--A_RevokeGossip_1_monitor_blames_log_gossip_root_CA_suff--default.svg" alt="A_RevokeGossip_1_monitor_blames_log_gossip_root_CA_suff trace visualization" style="max-width: 100%; height: auto;">
+        </div>
+    </div>
+    <div class="trace-visualization">
+        <h5>A_RevokeGossip_1_verif_empty (default)</h5>
+        <p>
+            <strong>JSON File:</strong> <a href="traces/--A_RevokeGossip_1_verif_empty--default.json">traces/--A_RevokeGossip_1_verif_empty--default.json</a>
+            <br><strong>DOT File:</strong> <a href="traces/--A_RevokeGossip_1_verif_empty--default.dot">traces/--A_RevokeGossip_1_verif_empty--default.dot</a>
+        </p>
+        <div class="trace-svg-container">
+            <img src="traces/--A_RevokeGossip_1_verif_empty--default.svg" alt="A_RevokeGossip_1_verif_empty trace visualization" style="max-width: 100%; height: auto;">
+        </div>
+    </div>
+    <div class="trace-visualization">
+        <h5>A_RevokeGossip_1_monitor_blames_log_gossip_intm_CA_suff (default)</h5>
+        <p>
+            <strong>JSON File:</strong> <a href="traces/--A_RevokeGossip_1_monitor_blames_log_gossip_intm_CA_suff--default.json">traces/--A_RevokeGossip_1_monitor_blames_log_gossip_intm_CA_suff--default.json</a>
+            <br><strong>DOT File:</strong> <a href="traces/--A_RevokeGossip_1_monitor_blames_log_gossip_intm_CA_suff--default.dot">traces/--A_RevokeGossip_1_monitor_blames_log_gossip_intm_CA_suff--default.dot</a>
+        </p>
+        <div class="trace-svg-container">
+            <img src="traces/--A_RevokeGossip_1_monitor_blames_log_gossip_intm_CA_suff--default.svg" alt="A_RevokeGossip_1_monitor_blames_log_gossip_intm_CA_suff trace visualization" style="max-width: 100%; height: auto;">
+        </div>
+    </div>
+
+    <h3 id="task-helper">Task: helper</h3>
+
+    <h4>Execution Summary</h4>
+    <table class="task-table">
+        <thead>
+            <tr>
+                <th>Lemma</th>
+                <th>Resources config</th>
+                <th>Options</th>
+                <th>Preprocessor</th>
+                <th>Tamarin Version</th>
+                <th>Status</th>
+                <th>Runtime</th>
+                <th>Peak Memory Used</th>
+                <th>Cache Hit</th>
+            </tr>
+        </thead>
+        <tbody>
+                    <tr class="task-white">
+                            <td>A_Revoke_uniq_helper1</td>
+                            <td>10c / 6GB / 500s</td>
+                            <td>--derivcheck-timeout=0 --defines=REVOCATION</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>17.45s</td>
+                        <td>463.94MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-light-gray">
+                            <td>A_Revoke_uniq_helper2</td>
+                            <td>10c / 6GB / 500s</td>
+                            <td>--derivcheck-timeout=0 --defines=REVOCATION</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>7.84s</td>
+                        <td>270.59MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-white">
+                            <td>A_Revoke_uniq_helper3</td>
+                            <td>10c / 6GB / 500s</td>
+                            <td>--derivcheck-timeout=0 --defines=REVOCATION</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>7.55s</td>
+                        <td>379.16MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+        </tbody>
+    </table>
+
+
+    <div class="chart-item">
+        <div id="task_timeline_helper" class="chart-div" style="width: 100%; height: 200px;"></div>
+    </div>
+
+
+
+    <h2 id="errors">Errors</h2>
+
+
+    <div id="error_types_chart" class="chart-div" style="width: 100%; height: 400px;"></div>
+
+    <h3>Error Summary</h3>
+    <table class="task-table">
+        <thead>
+            <tr>
+                <th>Task</th>
+                <th>Lemma</th>
+                <th>Resources config</th>
+                <th>Options</th>
+                <th>Preprocessor</th>
+                <th>Tamarin Version</th>
+                <th>Error</th>
+                <th>Runtime</th>
+                <th>Peak Memory Used</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+                        <tr class="task-white">
+                                <td rowspan="2">specialized</td>
+                                <td>A_RevokeGossip_1_monitor_blames_log_gossip_root_CA_single</td>
+                                <td>10c / 8GB / 1800s</td>
+                                <td>--derivcheck-timeout=0 --defines=REVOCATION --defines=SUFFICIENCY_PROOF</td>
+                                <td>None</td>
+                            <td>default</td>
+                            <td class="memory">
+🧠 Memory Limit
+                            </td>
+                            <td>457.58s</td>
+                            <td>8323.71MB</td>
+                            <td>Task killed for exceeding memory limit</td>
+                        </tr>
+                        <tr class="task-white lemma-alt">
+                                <td>A_RevokeGossip_1_monitor_blames_log_gossip_intm_CA_single</td>
+                                <td>10c / 8GB / 1800s</td>
+                                <td>--derivcheck-timeout=0 --defines=REVOCATION --defines=SUFFICIENCY_PROOF</td>
+                                <td>None</td>
+                            <td>default</td>
+                            <td class="memory">
+🧠 Memory Limit
+                            </td>
+                            <td>414.82s</td>
+                            <td>8206.94MB</td>
+                            <td>Task killed for exceeding memory limit</td>
+                        </tr>
+        </tbody>
+    </table>
+
+    <h3>Detailed Error Information</h3>
+    <div class="error-details">
+        <h3><span class="memory">
+🧠 MEMORY LIMIT :
+</span> specialized</h3>
+        <h4>On lemma : A_RevokeGossip_1_monitor_blames_log_gossip_root_CA_single, with tamarin-prover : default</h4>
+        <p>Task killed for exceeding memory limit</p>
+    </div>
+    <div class="error-details">
+        <h3><span class="memory">
+🧠 MEMORY LIMIT :
+</span> specialized</h3>
+        <h4>On lemma : A_RevokeGossip_1_monitor_blames_log_gossip_intm_CA_single, with tamarin-prover : default</h4>
+        <p>Task killed for exceeding memory limit</p>
+    </div>
+
+    <h4>Rerun file : <a href="acc_authenticity_revoke-rerun.json">acc_authenticity_revoke-rerun.json</a></h4>
+
+    <hr>
+    <footer>
+        <p><em>Report generated by Batch Tamarin v1.1.0 on 2025-11-11 at 22:05:05</em></p>
+    </footer>
+
+    <script>
+        // Load Google Charts
+        google.charts.load('current', {
+            'packages': ['corechart', 'bar', 'timeline']
+        });
+        google.charts.setOnLoadCallback(drawCharts);
+
+        function drawCharts() {
+            drawSuccessRateChart();
+            drawCachePerformanceChart();
+            drawRuntimePerTaskChart();
+            drawMemoryPerTaskChart();
+            drawGlobalTimelineChart();
+            drawErrorTypesChart();
+
+            // Draw task-specific charts
+            drawTaskTimelineChart_autoprove();
+            drawTaskTimelineChart_specialized();
+            drawTaskTimelineChart_helper();
+        }
+
+        // Success Rate Pie Chart
+        function drawSuccessRateChart() {
+            var data = google.visualization.arrayToDataTable([
+                ['Status', 'Percentage'],
+['Verified', 94.11764705882352],['Falsified', 2.941176470588235],['Memory Limit', 2.941176470588235]            ]);
+
+            var options = {
+                title: 'Success Rate',
+                colors: ['#28a745', '#e600ff', '#dbc100', '#ec1026', '#ea9400', '#8b5cf6'],
+                legend: { position: 'bottom' },
+                chartArea: { width: '80%', height: '70%' }
+            };
+
+            var chart = new google.visualization.PieChart(document.getElementById('success_rate_chart'));
+            chart.draw(data, options);
+        }
+
+        // Cache Performance Pie Chart
+        function drawCachePerformanceChart() {
+            var data = google.visualization.arrayToDataTable([
+                ['Type', 'Percentage'],
+                ['Cache Hit', 97.05882352941177],
+                ['Freshly Executed', 2.941176470588235]
+            ]);
+
+            var options = {
+                title: 'Cache Performance',
+                colors: ['#116dd7', '#1200b9'],
+                legend: { position: 'bottom' },
+                chartArea: { width: '80%', height: '70%' }
+            };
+
+            var chart = new google.visualization.PieChart(document.getElementById('cache_performance_chart'));
+            chart.draw(data, options);
+        }
+
+        // Runtime per Task Horizontal Bar Chart
+        function drawRuntimePerTaskChart() {
+            var data = google.visualization.arrayToDataTable([
+                ['Task', 'Runtime (seconds)'],
+                ['autoprove', 1610.2],                ['specialized', 4075.9],                ['helper', 32.8]            ]);
+
+            var options = {
+                chart: {
+                    title: 'Runtime per Task',
+                    subtitle: 'Total execution time in seconds'
+                },
+                bars: 'horizontal',
+                hAxis: { title: 'Runtime (seconds)' },
+                vAxis: { title: 'Tasks' },
+                colors: ['#1f77b4'],
+                chartArea: { width: '70%', height: '80%' }
+            };
+
+            var chart = new google.charts.Bar(document.getElementById('runtime_per_task_chart'));
+            chart.draw(data, google.charts.Bar.convertOptions(options));
+        }
+
+        // Memory per Task Horizontal Bar Chart
+        function drawMemoryPerTaskChart() {
+            var data = google.visualization.arrayToDataTable([
+                ['Task', 'Memory (MB)'],
+                ['autoprove', 5284.5],                ['specialized', 8323.7],                ['helper', 463.9]            ]);
+
+            var options = {
+                chart: {
+                    title: 'Memory Usage per Task',
+                    subtitle: 'Peak memory usage in MB'
+                },
+                bars: 'horizontal',
+                hAxis: { title: 'Memory (MB)' },
+                vAxis: { title: 'Tasks' },
+                colors: ['#ff7f0e'],
+                chartArea: { width: '70%', height: '80%' }
+            };
+
+            var chart = new google.charts.Bar(document.getElementById('memory_per_task_chart'));
+            chart.draw(data, google.charts.Bar.convertOptions(options));
+        }
+
+        // Global Timeline Chart
+        function drawGlobalTimelineChart() {
+            var container = document.getElementById('global_timeline_chart');
+            var chart = new google.visualization.Timeline(container);
+            var dataTable = new google.visualization.DataTable();
+
+            dataTable.addColumn({ type: 'string', id: 'Task' });
+            dataTable.addColumn({ type: 'string', id: 'Label' });
+            dataTable.addColumn({ type: 'date', id: 'Start' });
+            dataTable.addColumn({ type: 'date', id: 'End' });
+
+            // Use current time as base for timeline
+            var baseTime = new Date().getTime();
+            var timelineData = [];
+            timelineData.push(['autoprove', 'A_Revoke_1_monitor_sleeps_intm_CA_min_default', new Date(baseTime + 0.000), new Date(baseTime + 9000.000)]);
+            timelineData.push(['autoprove', 'A_Revoke_1_monitor_sleeps_intm_CA_uniq_default', new Date(baseTime + 9000.000), new Date(baseTime + 18000.000)]);
+            timelineData.push(['autoprove', 'A_Revoke_1_monitor_sleeps_intm_CA_inj_default', new Date(baseTime + 19000.000), new Date(baseTime + 27000.000)]);
+            timelineData.push(['autoprove', 'A_Revoke_1_monitor_sleeps_root_CA_inj_default', new Date(baseTime + 27000.000), new Date(baseTime + 35000.000)]);
+            timelineData.push(['autoprove', 'A_Revoke_1_monitor_sleeps_root_CA_verif_nonempty_default', new Date(baseTime + 35000.000), new Date(baseTime + 43000.000)]);
+            timelineData.push(['autoprove', 'A_Revoke_1_monitor_sleeps_root_CA_min_default', new Date(baseTime + 43000.000), new Date(baseTime + 52000.000)]);
+            timelineData.push(['autoprove', 'A_Revoke_1_monitor_sleeps_intm_CA_single_default', new Date(baseTime + 52000.000), new Date(baseTime + 94000.000)]);
+            timelineData.push(['autoprove', 'A_Revoke_1_monitor_sleeps_root_CA_uniq_default', new Date(baseTime + 94000.000), new Date(baseTime + 103000.000)]);
+            timelineData.push(['autoprove', 'A_Revoke_1_monitor_sleeps_root_CA_suff_default', new Date(baseTime + 103000.000), new Date(baseTime + 200000.000)]);
+            timelineData.push(['autoprove', 'A_Revoke_1_monitor_sleeps_root_CA_single_default', new Date(baseTime + 200000.000), new Date(baseTime + 241000.000)]);
+            timelineData.push(['autoprove', 'A_Revoke_1_verif_empty_default', new Date(baseTime + 241000.000), new Date(baseTime + 253000.000)]);
+            timelineData.push(['autoprove', 'A_Revoke_1_monitor_sleeps_intm_CA_suff_default', new Date(baseTime + 253000.000), new Date(baseTime + 290000.000)]);
+            timelineData.push(['autoprove', 'A_Revoke_1_monitor_sleeps_intm_CA_verif_nonempty_default', new Date(baseTime + 290000.000), new Date(baseTime + 299000.000)]);
+            timelineData.push(['autoprove', 'A_Revoke_2_monitor_sleeps_cond_root_CA_verif_nonempty_default', new Date(baseTime + 299000.000), new Date(baseTime + 307000.000)]);
+            timelineData.push(['autoprove', 'A_Revoke_2_monitor_sleeps_cond_intm_CA_uniq_default', new Date(baseTime + 307000.000), new Date(baseTime + 316000.000)]);
+            timelineData.push(['autoprove', 'A_Revoke_2_monitor_sleeps_cond_intm_CA_min_default', new Date(baseTime + 316000.000), new Date(baseTime + 326000.000)]);
+            timelineData.push(['autoprove', 'A_Revoke_2_monitor_sleeps_cond_root_CA_single_default', new Date(baseTime + 326000.000), new Date(baseTime + 388000.000)]);
+            timelineData.push(['autoprove', 'A_Revoke_2_monitor_sleeps_cond_root_CA_uniq_default', new Date(baseTime + 388000.000), new Date(baseTime + 395000.000)]);
+            timelineData.push(['autoprove', 'A_Revoke_2_monitor_sleeps_cond_intm_CA_inj_default', new Date(baseTime + 395000.000), new Date(baseTime + 404000.000)]);
+            timelineData.push(['autoprove', 'A_Revoke_2_verif_empty_default', new Date(baseTime + 404000.000), new Date(baseTime + 420000.000)]);
+            timelineData.push(['autoprove', 'A_Revoke_2_monitor_sleeps_cond_intm_CA_suff_default', new Date(baseTime + 420000.000), new Date(baseTime + 472000.000)]);
+            timelineData.push(['autoprove', 'A_Revoke_2_monitor_sleeps_cond_root_CA_min_default', new Date(baseTime + 472000.000), new Date(baseTime + 483000.000)]);
+            timelineData.push(['autoprove', 'A_Revoke_2_monitor_sleeps_cond_root_CA_suff_default', new Date(baseTime + 483000.000), new Date(baseTime + 629000.000)]);
+            timelineData.push(['autoprove', 'A_Revoke_2_monitor_sleeps_cond_intm_CA_verif_nonempty_default', new Date(baseTime + 629000.000), new Date(baseTime + 639000.000)]);
+            timelineData.push(['autoprove', 'A_Revoke_2_monitor_sleeps_cond_intm_CA_single_default', new Date(baseTime + 639000.000), new Date(baseTime + 690000.000)]);
+            timelineData.push(['autoprove', 'A_Revoke_2_monitor_sleeps_cond_root_CA_inj_default', new Date(baseTime + 690000.000), new Date(baseTime + 698000.000)]);
+            timelineData.push(['autoprove', 'A_Revoke_3_monitor_sleeps_unconditional_intm_CA_verif_nonempty_default', new Date(baseTime + 698000.000), new Date(baseTime + 707000.000)]);
+            timelineData.push(['autoprove', 'A_Revoke_3_monitor_sleeps_unconditional_root_CA_suff_default', new Date(baseTime + 707000.000), new Date(baseTime + 800000.000)]);
+            timelineData.push(['autoprove', 'A_Revoke_3_monitor_sleeps_unconditional_root_CA_verif_nonempty_default', new Date(baseTime + 801000.000), new Date(baseTime + 809000.000)]);
+            timelineData.push(['autoprove', 'A_Revoke_3_monitor_sleeps_unconditional_root_CA_inj_default', new Date(baseTime + 809000.000), new Date(baseTime + 817000.000)]);
+            timelineData.push(['autoprove', 'A_Revoke_3_monitor_sleeps_unconditional_root_CA_uniq_default', new Date(baseTime + 817000.000), new Date(baseTime + 825000.000)]);
+            timelineData.push(['autoprove', 'A_Revoke_3_monitor_sleeps_unconditional_root_CA_single_default', new Date(baseTime + 825000.000), new Date(baseTime + 898000.000)]);
+            timelineData.push(['autoprove', 'A_Revoke_3_monitor_sleeps_unconditional_intm_CA_uniq_default', new Date(baseTime + 898000.000), new Date(baseTime + 907000.000)]);
+            timelineData.push(['autoprove', 'A_Revoke_3_monitor_sleeps_unconditional_intm_CA_min_default', new Date(baseTime + 907000.000), new Date(baseTime + 918000.000)]);
+            timelineData.push(['autoprove', 'A_Revoke_3_monitor_sleeps_unconditional_root_CA_min_default', new Date(baseTime + 918000.000), new Date(baseTime + 928000.000)]);
+            timelineData.push(['autoprove', 'A_Revoke_3_monitor_sleeps_unconditional_intm_CA_suff_default', new Date(baseTime + 928000.000), new Date(baseTime + 967000.000)]);
+            timelineData.push(['autoprove', 'A_Revoke_3_verif_empty_default', new Date(baseTime + 967000.000), new Date(baseTime + 1012000.000)]);
+            timelineData.push(['autoprove', 'A_Revoke_3_monitor_sleeps_unconditional_intm_CA_inj_default', new Date(baseTime + 1012000.000), new Date(baseTime + 1021000.000)]);
+            timelineData.push(['autoprove', 'A_Revoke_3_monitor_sleeps_unconditional_intm_CA_single_default', new Date(baseTime + 1021000.000), new Date(baseTime + 1086000.000)]);
+            timelineData.push(['autoprove', 'A_RevokeAudit_1_monitor_sleeps_unconditional_audit_intm_CA_uniq_default', new Date(baseTime + 1086000.000), new Date(baseTime + 1095000.000)]);
+            timelineData.push(['autoprove', 'A_RevokeAudit_1_monitor_sleeps_unconditional_audit_root_CA_suff_default', new Date(baseTime + 1095000.000), new Date(baseTime + 1132000.000)]);
+            timelineData.push(['autoprove', 'A_RevokeAudit_1_monitor_sleeps_unconditional_audit_intm_CA_verif_nonempty_default', new Date(baseTime + 1132000.000), new Date(baseTime + 1139000.000)]);
+            timelineData.push(['autoprove', 'A_RevokeAudit_1_monitor_sleeps_unconditional_audit_root_CA_single_default', new Date(baseTime + 1140000.000), new Date(baseTime + 1318000.000)]);
+            timelineData.push(['autoprove', 'A_RevokeAudit_1_monitor_sleeps_unconditional_audit_intm_CA_min_default', new Date(baseTime + 1318000.000), new Date(baseTime + 1330000.000)]);
+            timelineData.push(['autoprove', 'A_RevokeAudit_1_monitor_sleeps_unconditional_audit_root_CA_verif_nonempty_default', new Date(baseTime + 1331000.000), new Date(baseTime + 1337000.000)]);
+            timelineData.push(['autoprove', 'A_RevokeAudit_1_monitor_sleeps_unconditional_audit_root_CA_uniq_default', new Date(baseTime + 1337000.000), new Date(baseTime + 1346000.000)]);
+            timelineData.push(['autoprove', 'A_RevokeAudit_1_monitor_sleeps_unconditional_audit_intm_CA_single_default', new Date(baseTime + 1346000.000), new Date(baseTime + 1364000.000)]);
+            timelineData.push(['autoprove', 'A_RevokeAudit_1_monitor_sleeps_unconditional_audit_root_CA_min_default', new Date(baseTime + 1364000.000), new Date(baseTime + 1376000.000)]);
+            timelineData.push(['autoprove', 'A_RevokeAudit_1_monitor_sleeps_unconditional_audit_root_CA_inj_default', new Date(baseTime + 1376000.000), new Date(baseTime + 1386000.000)]);
+            timelineData.push(['autoprove', 'A_RevokeAudit_1_monitor_sleeps_unconditional_audit_intm_CA_inj_default', new Date(baseTime + 1386000.000), new Date(baseTime + 1395000.000)]);
+            timelineData.push(['autoprove', 'A_RevokeAudit_1_verif_empty_default', new Date(baseTime + 1395000.000), new Date(baseTime + 1404000.000)]);
+            timelineData.push(['autoprove', 'A_RevokeAudit_1_monitor_sleeps_unconditional_audit_intm_CA_suff_default', new Date(baseTime + 1404000.000), new Date(baseTime + 1421000.000)]);
+            timelineData.push(['autoprove', 'A_RevokeGossip_1_monitor_blames_log_gossip_root_CA_verif_nonempty_default', new Date(baseTime + 1421000.000), new Date(baseTime + 1492000.000)]);
+            timelineData.push(['autoprove', 'A_RevokeGossip_1_monitor_blames_log_gossip_intm_CA_verif_nonempty_default', new Date(baseTime + 1492000.000), new Date(baseTime + 1562000.000)]);
+            timelineData.push(['autoprove', 'A_RevokeGossip_1_monitor_blames_log_gossip_root_CA_min_default', new Date(baseTime + 1562000.000), new Date(baseTime + 1572000.000)]);
+            timelineData.push(['autoprove', 'A_RevokeGossip_1_monitor_blames_log_gossip_intm_CA_min_default', new Date(baseTime + 1572000.000), new Date(baseTime + 1582000.000)]);
+            timelineData.push(['autoprove', 'A_RevokeGossip_1_monitor_blames_log_gossip_intm_CA_uniq_default', new Date(baseTime + 1582000.000), new Date(baseTime + 1591000.000)]);
+            timelineData.push(['autoprove', 'A_RevokeGossip_1_monitor_blames_log_gossip_root_CA_uniq_default', new Date(baseTime + 1591000.000), new Date(baseTime + 1599000.000)]);
+            timelineData.push(['autoprove', 'A_RevokeGossip_1_monitor_blames_log_gossip_root_CA_inj_default', new Date(baseTime + 1600000.000), new Date(baseTime + 1608000.000)]);
+            timelineData.push(['autoprove', 'A_RevokeGossip_1_monitor_blames_log_gossip_intm_CA_inj_default', new Date(baseTime + 1608000.000), new Date(baseTime + 1616000.000)]);
+            timelineData.push(['specialized', 'A_RevokeGossip_1_monitor_blames_log_gossip_intm_CA_suff_default', new Date(baseTime + 1616000.000), new Date(baseTime + 2848000.000)]);
+            timelineData.push(['specialized', 'A_RevokeGossip_1_monitor_blames_log_gossip_root_CA_suff_default', new Date(baseTime + 2848000.000), new Date(baseTime + 4242000.000)]);
+            timelineData.push(['specialized', 'A_RevokeGossip_1_monitor_blames_log_gossip_root_CA_single_default', new Date(baseTime + 5910000.000), new Date(baseTime + 6368000.000)]);
+            timelineData.push(['specialized', 'A_RevokeGossip_1_monitor_blames_log_gossip_intm_CA_single_default', new Date(baseTime + 6368000.000), new Date(baseTime + 6783000.000)]);
+            timelineData.push(['specialized', 'A_RevokeGossip_1_verif_empty_default', new Date(baseTime + 4896000.000), new Date(baseTime + 5474000.000)]);
+            timelineData.push(['helper', 'A_Revoke_uniq_helper1_default', new Date(baseTime + 5474000.000), new Date(baseTime + 5492000.000)]);
+            timelineData.push(['helper', 'A_Revoke_uniq_helper2_default', new Date(baseTime + 5492000.000), new Date(baseTime + 5500000.000)]);
+            timelineData.push(['helper', 'A_Revoke_uniq_helper3_default', new Date(baseTime + 5500000.000), new Date(baseTime + 5508000.000)]);
+
+            dataTable.addRows(timelineData);
+
+            var options = {
+                title: 'Global Execution Timeline',
+                timeline: {
+                    groupByRowLabel: true,
+                    showRowLabels: true
+                },
+                backgroundColor: '#fafafa'
+            };
+
+            chart.draw(dataTable, options);
+        }
+
+        // Error Types Pie Chart
+        function drawErrorTypesChart() {
+            var data = google.visualization.arrayToDataTable([
+                ['Error Type', 'Percentage'],
+                ['Memory Limit', 100.0]            ]);
+
+            var options = {
+                title: 'Error Types',
+                colors: ['#ec1026', '#ea9400', '#8b5cf6', '#d95f02', '#7570b3'],
+                legend: { position: 'bottom' },
+                chartArea: { width: '80%', height: '70%' }
+            };
+
+            var chart = new google.visualization.PieChart(document.getElementById('error_types_chart'));
+            chart.draw(data, options);
+        }
+
+
+        // Task Timeline Chart for autoprove
+        function drawTaskTimelineChart_autoprove() {
+            var container = document.getElementById('task_timeline_autoprove');
+            var chart = new google.visualization.Timeline(container);
+            var dataTable = new google.visualization.DataTable();
+
+            dataTable.addColumn({ type: 'string', id: 'Task' });
+            dataTable.addColumn({ type: 'string', id: 'Label' });
+            dataTable.addColumn({ type: 'date', id: 'Start' });
+            dataTable.addColumn({ type: 'date', id: 'End' });
+
+            // Use current time as base for timeline
+            var baseTime = new Date().getTime();
+            dataTable.addRows([
+                ['autoprove', 'A_Revoke_1_monitor_sleeps_intm_CA_min_default', new Date(baseTime + 0.000), new Date(baseTime + 9000.000)],                ['autoprove', 'A_Revoke_1_monitor_sleeps_intm_CA_uniq_default', new Date(baseTime + 9000.000), new Date(baseTime + 18000.000)],                ['autoprove', 'A_Revoke_1_monitor_sleeps_intm_CA_inj_default', new Date(baseTime + 19000.000), new Date(baseTime + 27000.000)],                ['autoprove', 'A_Revoke_1_monitor_sleeps_root_CA_inj_default', new Date(baseTime + 27000.000), new Date(baseTime + 35000.000)],                ['autoprove', 'A_Revoke_1_monitor_sleeps_root_CA_verif_nonempty_default', new Date(baseTime + 35000.000), new Date(baseTime + 43000.000)],                ['autoprove', 'A_Revoke_1_monitor_sleeps_root_CA_min_default', new Date(baseTime + 43000.000), new Date(baseTime + 52000.000)],                ['autoprove', 'A_Revoke_1_monitor_sleeps_intm_CA_single_default', new Date(baseTime + 52000.000), new Date(baseTime + 94000.000)],                ['autoprove', 'A_Revoke_1_monitor_sleeps_root_CA_uniq_default', new Date(baseTime + 94000.000), new Date(baseTime + 103000.000)],                ['autoprove', 'A_Revoke_1_monitor_sleeps_root_CA_suff_default', new Date(baseTime + 103000.000), new Date(baseTime + 200000.000)],                ['autoprove', 'A_Revoke_1_monitor_sleeps_root_CA_single_default', new Date(baseTime + 200000.000), new Date(baseTime + 241000.000)],                ['autoprove', 'A_Revoke_1_verif_empty_default', new Date(baseTime + 241000.000), new Date(baseTime + 253000.000)],                ['autoprove', 'A_Revoke_1_monitor_sleeps_intm_CA_suff_default', new Date(baseTime + 253000.000), new Date(baseTime + 290000.000)],                ['autoprove', 'A_Revoke_1_monitor_sleeps_intm_CA_verif_nonempty_default', new Date(baseTime + 290000.000), new Date(baseTime + 299000.000)],                ['autoprove', 'A_Revoke_2_monitor_sleeps_cond_root_CA_verif_nonempty_default', new Date(baseTime + 299000.000), new Date(baseTime + 307000.000)],                ['autoprove', 'A_Revoke_2_monitor_sleeps_cond_intm_CA_uniq_default', new Date(baseTime + 307000.000), new Date(baseTime + 316000.000)],                ['autoprove', 'A_Revoke_2_monitor_sleeps_cond_intm_CA_min_default', new Date(baseTime + 316000.000), new Date(baseTime + 326000.000)],                ['autoprove', 'A_Revoke_2_monitor_sleeps_cond_root_CA_single_default', new Date(baseTime + 326000.000), new Date(baseTime + 388000.000)],                ['autoprove', 'A_Revoke_2_monitor_sleeps_cond_root_CA_uniq_default', new Date(baseTime + 388000.000), new Date(baseTime + 395000.000)],                ['autoprove', 'A_Revoke_2_monitor_sleeps_cond_intm_CA_inj_default', new Date(baseTime + 395000.000), new Date(baseTime + 404000.000)],                ['autoprove', 'A_Revoke_2_verif_empty_default', new Date(baseTime + 404000.000), new Date(baseTime + 420000.000)],                ['autoprove', 'A_Revoke_2_monitor_sleeps_cond_intm_CA_suff_default', new Date(baseTime + 420000.000), new Date(baseTime + 472000.000)],                ['autoprove', 'A_Revoke_2_monitor_sleeps_cond_root_CA_min_default', new Date(baseTime + 472000.000), new Date(baseTime + 483000.000)],                ['autoprove', 'A_Revoke_2_monitor_sleeps_cond_root_CA_suff_default', new Date(baseTime + 483000.000), new Date(baseTime + 629000.000)],                ['autoprove', 'A_Revoke_2_monitor_sleeps_cond_intm_CA_verif_nonempty_default', new Date(baseTime + 629000.000), new Date(baseTime + 639000.000)],                ['autoprove', 'A_Revoke_2_monitor_sleeps_cond_intm_CA_single_default', new Date(baseTime + 639000.000), new Date(baseTime + 690000.000)],                ['autoprove', 'A_Revoke_2_monitor_sleeps_cond_root_CA_inj_default', new Date(baseTime + 690000.000), new Date(baseTime + 698000.000)],                ['autoprove', 'A_Revoke_3_monitor_sleeps_unconditional_intm_CA_verif_nonempty_default', new Date(baseTime + 698000.000), new Date(baseTime + 707000.000)],                ['autoprove', 'A_Revoke_3_monitor_sleeps_unconditional_root_CA_suff_default', new Date(baseTime + 707000.000), new Date(baseTime + 800000.000)],                ['autoprove', 'A_Revoke_3_monitor_sleeps_unconditional_root_CA_verif_nonempty_default', new Date(baseTime + 801000.000), new Date(baseTime + 809000.000)],                ['autoprove', 'A_Revoke_3_monitor_sleeps_unconditional_root_CA_inj_default', new Date(baseTime + 809000.000), new Date(baseTime + 817000.000)],                ['autoprove', 'A_Revoke_3_monitor_sleeps_unconditional_root_CA_uniq_default', new Date(baseTime + 817000.000), new Date(baseTime + 825000.000)],                ['autoprove', 'A_Revoke_3_monitor_sleeps_unconditional_root_CA_single_default', new Date(baseTime + 825000.000), new Date(baseTime + 898000.000)],                ['autoprove', 'A_Revoke_3_monitor_sleeps_unconditional_intm_CA_uniq_default', new Date(baseTime + 898000.000), new Date(baseTime + 907000.000)],                ['autoprove', 'A_Revoke_3_monitor_sleeps_unconditional_intm_CA_min_default', new Date(baseTime + 907000.000), new Date(baseTime + 918000.000)],                ['autoprove', 'A_Revoke_3_monitor_sleeps_unconditional_root_CA_min_default', new Date(baseTime + 918000.000), new Date(baseTime + 928000.000)],                ['autoprove', 'A_Revoke_3_monitor_sleeps_unconditional_intm_CA_suff_default', new Date(baseTime + 928000.000), new Date(baseTime + 967000.000)],                ['autoprove', 'A_Revoke_3_verif_empty_default', new Date(baseTime + 967000.000), new Date(baseTime + 1012000.000)],                ['autoprove', 'A_Revoke_3_monitor_sleeps_unconditional_intm_CA_inj_default', new Date(baseTime + 1012000.000), new Date(baseTime + 1021000.000)],                ['autoprove', 'A_Revoke_3_monitor_sleeps_unconditional_intm_CA_single_default', new Date(baseTime + 1021000.000), new Date(baseTime + 1086000.000)],                ['autoprove', 'A_RevokeAudit_1_monitor_sleeps_unconditional_audit_intm_CA_uniq_default', new Date(baseTime + 1086000.000), new Date(baseTime + 1095000.000)],                ['autoprove', 'A_RevokeAudit_1_monitor_sleeps_unconditional_audit_root_CA_suff_default', new Date(baseTime + 1095000.000), new Date(baseTime + 1132000.000)],                ['autoprove', 'A_RevokeAudit_1_monitor_sleeps_unconditional_audit_intm_CA_verif_nonempty_default', new Date(baseTime + 1132000.000), new Date(baseTime + 1139000.000)],                ['autoprove', 'A_RevokeAudit_1_monitor_sleeps_unconditional_audit_root_CA_single_default', new Date(baseTime + 1140000.000), new Date(baseTime + 1318000.000)],                ['autoprove', 'A_RevokeAudit_1_monitor_sleeps_unconditional_audit_intm_CA_min_default', new Date(baseTime + 1318000.000), new Date(baseTime + 1330000.000)],                ['autoprove', 'A_RevokeAudit_1_monitor_sleeps_unconditional_audit_root_CA_verif_nonempty_default', new Date(baseTime + 1331000.000), new Date(baseTime + 1337000.000)],                ['autoprove', 'A_RevokeAudit_1_monitor_sleeps_unconditional_audit_root_CA_uniq_default', new Date(baseTime + 1337000.000), new Date(baseTime + 1346000.000)],                ['autoprove', 'A_RevokeAudit_1_monitor_sleeps_unconditional_audit_intm_CA_single_default', new Date(baseTime + 1346000.000), new Date(baseTime + 1364000.000)],                ['autoprove', 'A_RevokeAudit_1_monitor_sleeps_unconditional_audit_root_CA_min_default', new Date(baseTime + 1364000.000), new Date(baseTime + 1376000.000)],                ['autoprove', 'A_RevokeAudit_1_monitor_sleeps_unconditional_audit_root_CA_inj_default', new Date(baseTime + 1376000.000), new Date(baseTime + 1386000.000)],                ['autoprove', 'A_RevokeAudit_1_monitor_sleeps_unconditional_audit_intm_CA_inj_default', new Date(baseTime + 1386000.000), new Date(baseTime + 1395000.000)],                ['autoprove', 'A_RevokeAudit_1_verif_empty_default', new Date(baseTime + 1395000.000), new Date(baseTime + 1404000.000)],                ['autoprove', 'A_RevokeAudit_1_monitor_sleeps_unconditional_audit_intm_CA_suff_default', new Date(baseTime + 1404000.000), new Date(baseTime + 1421000.000)],                ['autoprove', 'A_RevokeGossip_1_monitor_blames_log_gossip_root_CA_verif_nonempty_default', new Date(baseTime + 1421000.000), new Date(baseTime + 1492000.000)],                ['autoprove', 'A_RevokeGossip_1_monitor_blames_log_gossip_intm_CA_verif_nonempty_default', new Date(baseTime + 1492000.000), new Date(baseTime + 1562000.000)],                ['autoprove', 'A_RevokeGossip_1_monitor_blames_log_gossip_root_CA_min_default', new Date(baseTime + 1562000.000), new Date(baseTime + 1572000.000)],                ['autoprove', 'A_RevokeGossip_1_monitor_blames_log_gossip_intm_CA_min_default', new Date(baseTime + 1572000.000), new Date(baseTime + 1582000.000)],                ['autoprove', 'A_RevokeGossip_1_monitor_blames_log_gossip_intm_CA_uniq_default', new Date(baseTime + 1582000.000), new Date(baseTime + 1591000.000)],                ['autoprove', 'A_RevokeGossip_1_monitor_blames_log_gossip_root_CA_uniq_default', new Date(baseTime + 1591000.000), new Date(baseTime + 1599000.000)],                ['autoprove', 'A_RevokeGossip_1_monitor_blames_log_gossip_root_CA_inj_default', new Date(baseTime + 1600000.000), new Date(baseTime + 1608000.000)],                ['autoprove', 'A_RevokeGossip_1_monitor_blames_log_gossip_intm_CA_inj_default', new Date(baseTime + 1608000.000), new Date(baseTime + 1616000.000)]            ]);
+
+            var options = {
+                title: 'Execution Timeline for autoprove',
+                timeline: {
+                    groupByRowLabel: false,
+                    showRowLabels: false
+                },
+                backgroundColor: '#fafafa'
+            };
+
+            chart.draw(dataTable, options);
+        }
+
+        // Task Timeline Chart for specialized
+        function drawTaskTimelineChart_specialized() {
+            var container = document.getElementById('task_timeline_specialized');
+            var chart = new google.visualization.Timeline(container);
+            var dataTable = new google.visualization.DataTable();
+
+            dataTable.addColumn({ type: 'string', id: 'Task' });
+            dataTable.addColumn({ type: 'string', id: 'Label' });
+            dataTable.addColumn({ type: 'date', id: 'Start' });
+            dataTable.addColumn({ type: 'date', id: 'End' });
+
+            // Use current time as base for timeline
+            var baseTime = new Date().getTime();
+            dataTable.addRows([
+                ['specialized', 'A_RevokeGossip_1_monitor_blames_log_gossip_intm_CA_suff_default', new Date(baseTime + 1616000.000), new Date(baseTime + 2848000.000)],                ['specialized', 'A_RevokeGossip_1_monitor_blames_log_gossip_root_CA_suff_default', new Date(baseTime + 2848000.000), new Date(baseTime + 4242000.000)],                ['specialized', 'A_RevokeGossip_1_monitor_blames_log_gossip_root_CA_single_default', new Date(baseTime + 5910000.000), new Date(baseTime + 6368000.000)],                ['specialized', 'A_RevokeGossip_1_monitor_blames_log_gossip_intm_CA_single_default', new Date(baseTime + 6368000.000), new Date(baseTime + 6783000.000)],                ['specialized', 'A_RevokeGossip_1_verif_empty_default', new Date(baseTime + 4896000.000), new Date(baseTime + 5474000.000)]            ]);
+
+            var options = {
+                title: 'Execution Timeline for specialized',
+                timeline: {
+                    groupByRowLabel: false,
+                    showRowLabels: false
+                },
+                backgroundColor: '#fafafa'
+            };
+
+            chart.draw(dataTable, options);
+        }
+
+        // Task Timeline Chart for helper
+        function drawTaskTimelineChart_helper() {
+            var container = document.getElementById('task_timeline_helper');
+            var chart = new google.visualization.Timeline(container);
+            var dataTable = new google.visualization.DataTable();
+
+            dataTable.addColumn({ type: 'string', id: 'Task' });
+            dataTable.addColumn({ type: 'string', id: 'Label' });
+            dataTable.addColumn({ type: 'date', id: 'Start' });
+            dataTable.addColumn({ type: 'date', id: 'End' });
+
+            // Use current time as base for timeline
+            var baseTime = new Date().getTime();
+            dataTable.addRows([
+                ['helper', 'A_Revoke_uniq_helper1_default', new Date(baseTime + 5474000.000), new Date(baseTime + 5492000.000)],                ['helper', 'A_Revoke_uniq_helper2_default', new Date(baseTime + 5492000.000), new Date(baseTime + 5500000.000)],                ['helper', 'A_Revoke_uniq_helper3_default', new Date(baseTime + 5500000.000), new Date(baseTime + 5508000.000)]            ]);
+
+            var options = {
+                title: 'Execution Timeline for helper',
+                timeline: {
+                    groupByRowLabel: false,
+                    showRowLabels: false
+                },
+                backgroundColor: '#fafafa'
+            };
+
+            chart.draw(dataTable, options);
+        }
+    </script>
+</body>
+
+</html>
