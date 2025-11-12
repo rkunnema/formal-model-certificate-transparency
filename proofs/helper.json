@@ -1,0 +1,40 @@
+{
+	"config": {
+		"global_max_cores": 10,
+		"global_max_memory": "max",
+		"default_timeout": 300,
+		"output_directory": "./results/sanity/helper/"
+	},
+  "tamarin_versions": {
+    "default": {
+      "path": "tamarin-prover"
+    }
+  },
+  "tasks": {
+    "autoprove": {
+      "theory_file": "../ct.spthy",
+			"tamarin_versions": ["default"],
+      "output_file_prefix": "",
+			"tamarin_options": ["--derivcheck-timeout=0"],
+            "resources": {
+				"max_cores": 10,
+				"max_memory": 6,
+				"timeout": 500
+			},
+      "lemmas": [
+        {"name": "A_Revoke_min_helper1"},
+        {"name": "A_Revoke_min_helper2"},
+        {"name": "A_Revoke_uniq_helper1"},
+        {"name": "A_Revoke_uniq_helper2"},
+        {"name": "A_Revoke_uniq_helper3"},
+        {"name": "A_CTExt_2_verif_empty_helper1"},
+        {"name": "A_CTExt_2_root_ca_rogue_client_inclusion_viol_uniq_helper1"},
+        {"name": "A_CTExt_2_root_ca_rogue_client_inclusion_viol_uniq_helper2"},
+        {"name": "A_CTExt_2_root_ca_rogue_client_inclusion_viol_uniq_helper3"},
+        {"name": "A_CTExt_2_ca_rogue_client_inclusion_viol_inj_helper"},
+        {"name": "A_CTAudit_2_ca_rogue_audit_logger_rogue_uniq_helper"},
+        {"name": "A_CTGossip_uniq_helper"}
+      ]
+    }
+  }
+}

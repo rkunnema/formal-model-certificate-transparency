@@ -1,0 +1,100 @@
+{
+  "config": {
+    "global_max_cores": 10,
+    "global_max_memory": 6,
+    "default_timeout": 300,
+    "output_directory": "results/accountability/acc_authenticity/rerun"
+  },
+  "tamarin_versions": {
+    "default": {
+      "path": "tamarin-prover",
+      "version": "v1.10.0"
+    }
+  },
+  "tasks": {
+    "autoprove": {
+      "theory_file": "../ct_lemmas_pregen.spthy",
+      "tamarin_versions": [
+        "default"
+      ],
+      "output_file_prefix": "autoprove",
+      "lemmas": [
+        {
+          "name": "A_PKI_Ext_CAfalseAsserts_rootBlamed_single",
+          "tamarin_options": [
+            "--derivcheck-timeout=0"
+          ],
+          "resources": {
+            "max_cores": 10,
+            "max_memory": 6,
+            "timeout": 180
+          }
+        },
+        {
+          "name": "A_CTExt_3_ca_rogue_logger_benign_uniq",
+          "tamarin_options": [
+            "--derivcheck-timeout=0"
+          ],
+          "resources": {
+            "max_cores": 10,
+            "max_memory": 6,
+            "timeout": 180
+          }
+        },
+        {
+          "name": "A_CTAudit_2_ca_rogue_audit_logger_rogue_uniq",
+          "tamarin_options": [
+            "--derivcheck-timeout=0"
+          ],
+          "resources": {
+            "max_cores": 10,
+            "max_memory": 6,
+            "timeout": 180
+          }
+        },
+        {
+          "name": "A_CTAudit_2_root_ca_rogue_audit_logger_honest_min",
+          "tamarin_options": [
+            "--derivcheck-timeout=0"
+          ],
+          "resources": {
+            "max_cores": 10,
+            "max_memory": 6,
+            "timeout": 180
+          }
+        },
+        {
+          "name": "A_CTAudit_2_root_ca_rogue_audit_logger_honest_suff",
+          "tamarin_options": [
+            "--derivcheck-timeout=0"
+          ],
+          "resources": {
+            "max_cores": 10,
+            "max_memory": 6,
+            "timeout": 180
+          }
+        }
+      ]
+    },
+    "helper": {
+      "theory_file": "../ct_lemmas_pregen.spthy",
+      "tamarin_versions": [
+        "default"
+      ],
+      "output_file_prefix": "helper",
+      "lemmas": [
+        {
+          "name": "A_CTExt_2_ca_rogue_client_inclusion_viol_inj_helper",
+          "tamarin_options": [
+            "--derivcheck-timeout=0"
+          ],
+          "resources": {
+            "max_cores": 10,
+            "max_memory": 6,
+            "timeout": 300
+          }
+        }
+      ]
+    }
+  }
+}

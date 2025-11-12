@@ -11,15 +11,15 @@
     }
   },
   "tasks": {
-    "autoprove": {
-      "theory_file": "../ct.spthy",
-			"tamarin_versions": ["stable"],
+    "A_Receipt": {
+      "theory_file": "../ct_lemmas_pregen_receipt.spthy",
+			"tamarin_versions": ["default"],
       "output_file_prefix": "",
 			"tamarin_options": ["--derivcheck-timeout=0", "--defines=RECEIPT"],
             "resources": {
 				"max_cores": 10,
 				"max_memory": 6,
-				"timeout": 500
+				"timeout": 120
 			},
       "lemmas": [
         {"name": "A_Receipt_1_root_ca_rogue_suff"},
@@ -43,37 +43,41 @@
         {"name": "A_Receipt_1_ca_rogue_receipt_monitor_rogue_inj"},
         {"name": "A_Receipt_1_root_ca_rogue_single"},
         {"name": "A_Receipt_1_ca_rogue_receipt_single"}
+
       ]
     },
-    "specialized": {
-      "theory_file": "../ct.spthy",
-			"tamarin_versions": ["stable"],
+    "sanity": {
+      "theory_file": "../ct_lemmas_pregen_receipt.spthy",
+			"tamarin_versions": ["default"],
       "output_file_prefix": "",
-			"tamarin_options": ["--derivcheck-timeout=0", "--defines=SUFFICIENCY", "--defines=RECEIPT"],
+			"tamarin_options": ["--derivcheck-timeout=0", "--defines=RECEIPT"],
             "resources": {
 				"max_cores": 10,
 				"max_memory": 6,
-				"timeout": 500
+				"timeout": 120
+			},
+      "lemmas": [
+        {"name": "san_receipt_loggerReceivesReceipt"},
+        {"name": "san_receipt_domainOwnerBlamesMonitor"},
+        {"name": "san_receipt_domainOwnerVerifiesReceipt"}
+
+      ]
+    },
+    "specialized": {
+      "theory_file": "../ct_lemmas_pregen_receipt.spthy",
+			"tamarin_versions": ["default"],
+      "output_file_prefix": "",
+			"tamarin_options": ["--derivcheck-timeout=0", "--defines=SUFFICIENCY_PROOF"],
+            "resources": {
+				"max_cores": 10,
+				"max_memory": 6,
+				"timeout": 300
 			},
       "lemmas": [
         {"name": "A_Receipt_1_root_ca_rogue_monitor_rogue_suff"},
         {"name": "A_Receipt_1_ca_rogue_receipt_monitor_rogue_suff"},
         {"name": "A_Receipt_1_root_ca_rogue_monitor_rogue_single"},
         {"name": "A_Receipt_1_ca_rogue_receipt_monitor_rogue_single"}
-      ]
-    },
-    "helper": {
-      "theory_file": "../ct.spthy",
-			"tamarin_versions": ["stable"],
-      "output_file_prefix": "",
-			"tamarin_options": ["--derivcheck-timeout=0", "--defines=RECEIPT"],
-            "resources": {
-				"max_cores": 10,
-				"max_memory": 6,
-				"timeout": 500
-			},
-      "lemmas": [
-        {"name": "A_Receipt_1_ca_rogue_receipt_monitor_rogue_inj_helper"}
       ]
     }
   }

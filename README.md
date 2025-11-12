@@ -2,7 +2,7 @@
 
 ## Usage:
 
-Use `tamarin-prover --prove` to prove most lemmas. This can take a while and you need some memory.
+Use `tamarin-prover --prove={lemmaname}` to prove most lemmas. This can take a while and you need some memory.
 
 The models for revocation (in the appendix) or the addition of receipts to the
 SCT auditing model are disable by default and can be activated with the
@@ -59,6 +59,6 @@ To run the proofs in the paper:
 
 3. `cd proofs` 
 
-4. `batch-tamarin run $FILE` for one of the JSON files in the `proofs` directory.
+4. `batch-tamarin run $FILE` for one of the JSON files in the `proofs` directory. In case individual lemmas unexpectedly fail, batch-tamarin will recommend re-running these.
 
 

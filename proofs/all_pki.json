@@ -3,7 +3,7 @@
 		"global_max_cores": 10,
 		"global_max_memory": "max",
 		"default_timeout": 300,
-		"output_directory": "./results/transparency/"
+		"output_directory": "./results/pki/"
 	},
   "tamarin_versions": {
     "default": {
@@ -11,36 +11,35 @@
     }
   },
   "tasks": {
-    "autoprove": {
-      "theory_file": "../ct.spthy",
+    "normal": {
+      "theory_file": "../pki_lemma_pregen.spthy",
 			"tamarin_versions": ["default"],
       "output_file_prefix": "",
 			"tamarin_options": ["--derivcheck-timeout=0"],
             "resources": {
 				"max_cores": 10,
 				"max_memory": 6,
-				"timeout": 200
+				"timeout": 300
 			},
       "lemmas": [
-        {"name": "transparency_CT_w_honest_MMD"},
-        {"name": "transparency_SCT_Auditing"}
+        {"name": "san_"},
+        {"name": "authenticity"},
+        {"name": "CA_auth_w_compromise"},
+        {"name": "cert_auth"}
       ]
     },
-    "manual": {
-      "theory_file": "../ct.spthy",
+    "acc": {
+      "theory_file": "../pki_lemma_pregen.spthy",
 			"tamarin_versions": ["default"],
       "output_file_prefix": "",
-			"tamarin_options": ["--derivcheck-timeout=0", "--defines=SUFFICIENCY_PROOF"],
+			"tamarin_options": ["--derivcheck-timeout=0"],
             "resources": {
 				"max_cores": 10,
 				"max_memory": 6,
-				"timeout": 500
+				"timeout": 300
 			},
       "lemmas": [
-        {"name": "transparency_CT_attempt"},
-        {"name": "transparency_w_MMD"},
-        {"name": "transparency_Gossip_w_o_client_proof"},
-        {"name": "no_transparency_gossip_with_client_proof"}
+        {"name": "A_PKI_Ext"}
       ]
     }
   }

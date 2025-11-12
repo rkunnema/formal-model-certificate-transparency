@@ -12,26 +12,57 @@
   },
   "tasks": {
     "autoprove": {
-      "theory_file": "../ct.spthy",
-			"tamarin_versions": ["stable"],
+      "theory_file": "../ct_lemmas_pregen.spthy",
+			"tamarin_versions": ["default"],
       "output_file_prefix": "",
 			"tamarin_options": ["--derivcheck-timeout=0", "--defines=REVOCATION"],
             "resources": {
 				"max_cores": 10,
 				"max_memory": 6,
-				"timeout": 500
+				"timeout": 180
 			},
       "lemmas": [
         {"name": "A_Revoke_1"},
         {"name": "A_Revoke_2"},
         {"name": "A_Revoke_3"},
         {"name": "A_RevokeAudit_1"},
-        {"name": "A_RevokeGossip_1"}
+        {"name": "A_RevokeGossip_1_monitor_blames_log_gossip_root_CA_verif_nonempty"},
+        {"name": "A_RevokeGossip_1_monitor_blames_log_gossip_intm_CA_verif_nonempty"},
+        {"name": "A_RevokeGossip_1_monitor_blames_log_gossip_root_CA_min"},
+        {"name": "A_RevokeGossip_1_monitor_blames_log_gossip_intm_CA_min"},
+        {"name": "A_RevokeGossip_1_monitor_blames_log_gossip_intm_CA_uniq"},
+        {"name": "A_RevokeGossip_1_monitor_blames_log_gossip_root_CA_uniq"},
+        {"name": "A_RevokeGossip_1_monitor_blames_log_gossip_root_CA_inj"},
+        {"name": "A_RevokeGossip_1_monitor_blames_log_gossip_intm_CA_inj"}
+      ]
+    },
+    "specialized": {
+      "theory_file": "../ct_lemmas_pregen.spthy",
+			"tamarin_versions": ["default"],
+      "output_file_prefix": "",
+			"tamarin_options": ["--derivcheck-timeout=0", "--defines=REVOCATION", "--defines=SUFFICIENCY_PROOF"],
+            "resources": {
+				"max_cores": 10,
+				"max_memory": 6,
+				"timeout": 1800
+			},
+      "lemmas": [
+        {"name": "A_RevokeGossip_1_monitor_blames_log_gossip_intm_CA_suff"},
+        {"name": "A_RevokeGossip_1_monitor_blames_log_gossip_root_CA_suff"},
+        {"name": "A_RevokeGossip_1_monitor_blames_log_gossip_root_CA_single", "resources": {
+				"max_cores": 10,
+				"max_memory": 8,
+				"timeout": 1800}},
+        {"name": "A_RevokeGossip_1_monitor_blames_log_gossip_intm_CA_single", "resources": {
+				"max_cores": 10,
+				"max_memory": 8,
+				"timeout": 1800}},
+        {"name": "A_RevokeGossip_1_verif_empty"}
       ]
     },
     "helper": {
-      "theory_file": "../ct.spthy",
-			"tamarin_versions": ["stable"],
+      "theory_file": "../ct_lemmas_pregen.spthy",
+			"tamarin_versions": ["default"],
       "output_file_prefix": "",
 			"tamarin_options": ["--derivcheck-timeout=0", "--defines=REVOCATION"],
             "resources": {

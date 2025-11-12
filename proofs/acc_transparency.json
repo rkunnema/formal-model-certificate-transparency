@@ -12,14 +12,14 @@
   },
   "tasks": {
     "autoprove": {
-      "theory_file": "../ct.spthy",
-			"tamarin_versions": ["stable"],
+      "theory_file": "../ct_lemmas_pregen.spthy",
+			"tamarin_versions": ["default"],
       "output_file_prefix": "",
 			"tamarin_options": ["--derivcheck-timeout=0"],
             "resources": {
 				"max_cores": 10,
 				"max_memory": 6,
-				"timeout": 500
+				"timeout": 200
 			},
       "lemmas": [
         {"name": "T_CT_1_verif_empty"},
@@ -38,33 +38,20 @@
       ]
     },
     "specialized": {
-      "theory_file": "../ct.spthy",
-			"tamarin_versions": ["stable"],
+      "theory_file": "../ct_lemmas_pregen.spthy",
+			"tamarin_versions": ["default"],
       "output_file_prefix": "",
-			"tamarin_options": ["--derivcheck-timeout=0", "--defines=SUFFICIENCY"],
+			"tamarin_options": ["--derivcheck-timeout=0", "--defines=SUFFICIENCY_PROOF"],
             "resources": {
 				"max_cores": 10,
 				"max_memory": 6,
-				"timeout": 500
+				"timeout": 200
 			},
       "lemmas": [
         {"name": "T_CT_1_client_inclusionViol_suff"},
         {"name": "T_CT_1_client_inclusionViol_single"},
         {"name": "T_Gossip_gossip_inclusionViol_suff"},
         {"name": "T_Gossip_gossip_inclusionViol_single"}
-      ]
-    },
-    "helper": {
-      "theory_file": "../ct.spthy",
-			"tamarin_versions": ["stable"],
-      "output_file_prefix": "",
-			"tamarin_options": ["--derivcheck-timeout=0"],
-            "resources": {
-				"max_cores": 10,
-				"max_memory": 6,
-				"timeout": 500
-			},
-      "lemmas": [
       ]
     }
   }

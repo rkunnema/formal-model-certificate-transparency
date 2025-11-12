@@ -27,23 +27,6 @@
           "tamarin_versions": ["default"]
         }
       ]
-    },
-    "receipt_san_autoprove": {
-      "theory_file": "../ct.spthy",
-			"tamarin_versions": ["stable"],
-      "output_file_prefix": "",
-			"tamarin_options": ["--derivcheck-timeout=0", "--defines=RECEIPT"],
-            "resources": {
-				"max_cores": 10,
-				"max_memory": 6,
-				"timeout": 500
-			},
-      "lemmas": [
-        {
-          "name": "san_receipt_",
-          "tamarin_versions": ["default"]
-        }
-      ]
     }
   }
 }

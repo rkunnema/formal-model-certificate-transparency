@@ -12,14 +12,14 @@
   },
   "tasks": {
     "autoprove": {
-      "theory_file": "../ct.spthy",
-			"tamarin_versions": ["stable"],
+      "theory_file": "../ct_lemmas_pregen.spthy",
+			"tamarin_versions": ["default"],
       "output_file_prefix": "",
 			"tamarin_options": ["--derivcheck-timeout=0"],
             "resources": {
 				"max_cores": 10,
 				"max_memory": 6,
-				"timeout": 500
+				"timeout": 180
 			},
       "lemmas": [
         {"name": "A_PKI_Ext"},
@@ -43,65 +43,65 @@
         {"name": "A_CTExt_2_root_ca_rogue_client_inclusion_verif_inj"},
         {"name": "A_CTExt_2_ca_rogue_client_inclusion_verif_inj"},
         {"name": "A_CTExt_2_root_ca_rogue_client_inclusion_viol_single"},
-        {"name": "A_CTExt_2_ca_rogue_client_inclusion_verif_single"},
         {"name": "A_CTExt_2_root_ca_rogue_client_inclusion_verif_single"},
         {"name": "A_CTExt_3"},
         {"name": "A_CT_1"},
         {"name": "A_CT_2"},
         {"name": "A_CTAudit_1"},
         {"name": "A_CTAudit_2"},
-        {"name": "A_CTGossip_1_ca_rogue_gossip_suff"},
-        {"name": "A_CTGossip_1_root_ca_rogue_gossip_suff"},
-        {"name": "A_CTGossip_1_ca_rogue_gossip_verif_nonempty"},
-        {"name": "A_CTGossip_1_root_ca_rogue_gossip_verif_nonempty"},
-        {"name": "A_CTGossip_1_ca_rogue_gossip_min"},
-        {"name": "A_CTGossip_1_root_ca_rogue_gossip_min"},
-        {"name": "A_CTGossip_1_ca_rogue_gossip_uniq"},
-        {"name": "A_CTGossip_1_root_ca_rogue_gossip_uniq"},
-        {"name": "A_CTGossip_1_ca_rogue_gossip_inj"},
-        {"name": "A_CTGossip_1_root_ca_rogue_gossip_inj"},
-        {"name": "A_CTGossip_1_ca_rogue_gossip_single"},
-        {"name": "A_CTGossip_1_root_ca_rogue_gossip_single"},
-        {"name": "A_CTGossip_2"}
+        {"name": "A_CTAudit_3"},
+        {"name": "A_CTGossip_ca_rogue_gossip_verif_nonempty"},
+        {"name": "A_CTGossip_root_ca_rogue_gossip_verif_nonempty"},
+        {"name": "A_CTGossip_ca_rogue_gossip_min"},
+        {"name": "A_CTGossip_root_ca_rogue_gossip_min"},
+        {"name": "A_CTGossip_ca_rogue_gossip_uniq"},
+        {"name": "A_CTGossip_root_ca_rogue_gossip_uniq"},
+        {"name": "A_CTGossip_ca_rogue_gossip_inj"},
+        {"name": "A_CTGossip_root_ca_rogue_gossip_inj"}
       ]
     },
     "specialized": {
-      "theory_file": "../ct.spthy",
-			"tamarin_versions": ["stable"],
+      "theory_file": "../ct_lemmas_pregen.spthy",
+			"tamarin_versions": ["default"],
       "output_file_prefix": "",
-			"tamarin_options": ["--derivcheck-timeout=0", "--defines=SUFFICIENCY"],
+			"tamarin_options": ["--derivcheck-timeout=0", "--defines=SUFFICIENCY_PROOF"],
             "resources": {
 				"max_cores": 10,
 				"max_memory": 6,
-				"timeout": 500
+				"timeout": 800
 			},
       "lemmas": [
         {"name": "A_CTExt_2_root_ca_rogue_client_inclusion_viol_suff"},
         {"name": "A_CTExt_2_ca_rogue_client_inclusion_viol_suff"},
         {"name": "A_CTExt_2_root_ca_rogue_client_inclusion_viol_single"},
         {"name": "A_CTExt_2_ca_rogue_client_inclusion_viol_single"},
-        {"name": "A_CTGossip_1_verif_empty"}
+        {"name": "A_CTExt_2_ca_rogue_client_inclusion_verif_single"},
+        {"name": "A_CTGossip_verif_empty", "resources": {
+				"max_cores": 10,
+				"max_memory": 8,
+				"timeout": 1000
+			}},
+        {"name": "A_CTGossip_ca_rogue_gossip_suff"},
+        {"name": "A_CTGossip_root_ca_rogue_gossip_suff"},
+        {"name": "A_CTGossip_ca_rogue_gossip_single"},
+        {"name": "A_CTGossip_root_ca_rogue_gossip_single"}
       ]
     },
     "helper": {
-      "theory_file": "../ct.spthy",
-			"tamarin_versions": ["stable"],
+      "theory_file": "../ct_lemmas_pregen.spthy",
+			"tamarin_versions": ["default"],
       "output_file_prefix": "",
 			"tamarin_options": ["--derivcheck-timeout=0"],
             "resources": {
 				"max_cores": 10,
 				"max_memory": 6,
-				"timeout": 500
+				"timeout": 300
 			},
       "lemmas": [
-        {"name": "A_PKI_Ext_uniq_helper"},
         {"name": "A_CTExt_2_verif_empty_helper1"},
-        {"name": "A_CTExt_2_root_ca_rogue_client_inclusion_viol_uniq_helper1"},
+        {"name": λ: "g""A_CTExt_2_root_ca_rogue_client_inclusion_viol_uniq_helper1"},
         {"name": "A_CTExt_2_root_ca_rogue_client_inclusion_viol_uniq_helper2"},
-        {"name": "A_CTExt_2_ca_rogue_client_inclusion_viol_inj_helper1"},
-        {"name": "A_CTExt_2_ca_rogue_client_inclusion_viol_inj_helper2"},
         {"name": "A_CTExt_2_ca_rogue_client_inclusion_viol_inj_helper"},
-        {"name": "A_CT_2_verif_empty_helper"},
         {"name": "A_CTAudit_2_ca_rogue_audit_logger_rogue_uniq_helper"}
       ]
     }
