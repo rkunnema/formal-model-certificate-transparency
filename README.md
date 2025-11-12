@@ -40,6 +40,14 @@ following flags to tamarin.
 
     - `--defines=REVOCATION` for (simplified: perfect, without delay) revocation model 
     - `--defines=RECEIPT` for realistic monitor blaming by combining domain owner and logger knowledge
+    - `--defines=SUFFICIENCY` to automate `exists-trace` proofs of the
+      sufficiency component of accountability lemmas.
+
+The configuration files for `batch-tamarin` (see Reproducibility, below)
+already encode which flags and additional options (some lemmas need an oracle
+to guide the proof) need to be set for which model file. We recommend using
+batch-tamarin for convenience, otherwise the JSON files state clearly and
+formally which combination of flags is to be used for which lemma.
 
 ## Running the model
 
@@ -59,6 +67,15 @@ checking version: 2.7.1. OK. checking installation: OK.
 Generated from: Tamarin version 1.10.0 Maude version 2.7.1 Git revision: UNKNOWN, branch: UNKNOWN Compiled at: 2024-10-30 14:56:23.355649243 UTC
 ```
 
+3. Note that: 
+
+    - Lemmas `A_RevokeGossip_1_monitor_blames_log_gossip_root_CA_single`
+         and `A_RevokeGossip_1_monitor_blames_log_gossip_intm_CA_single` will FAIL,
+        but they consitute other conditions for an accountability lemma that
+has an attack (hence there is a provable counter-example against another trace
+lemma generated from the same accountability lemma). Hence this lemma does not need to be proved.
+
+    - Sufficiency lemmas from accountability needs `--defines=SUFFICIENCY_PROOF`, see above.
 
 ## Reproducibility
 
@@ -90,5 +107,4 @@ To run the proofs in the paper:
 3. `cd proofs` 
 
 4. `batch-tamarin run $FILE` for one of the JSON files in the `proofs` directory. In case individual lemmas unexpectedly fail, batch-tamarin will recommend re-running these.
-
 
