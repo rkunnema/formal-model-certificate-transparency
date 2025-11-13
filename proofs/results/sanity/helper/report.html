@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Batch Tamarin Execution Report</title>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1,
+        h2,
+        h3 {
+            color: #2c3e50;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #dfe9ee;
+            font-weight: 600;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f6f6f6;
+        }
+
+        /* Simple task and lemma alternating colors */
+        .task-table tr.task-white {
+            background-color: white;
+        }
+
+        .task-table tr.task-light-gray {
+            background-color: #f4fbff;
+        }
+
+        /* light blue accent */
+
+        /* Lemma alternation within white tasks */
+        .task-table tr.task-white.lemma-alt {
+            background-color: #f6f6f6;
+        }
+
+        /* lighter gray */
+
+        /* Lemma alternation within light gray tasks */
+        .task-table tr.task-light-gray.lemma-alt {
+            background-color: #edf7ff;
+        }
+
+        /* deeper blue accent */
+        .success {
+            color: #28a745;
+        }
+
+        /* green for verified */
+        .failed {
+            color: #ec1026;
+        }
+
+        /* red for failed */
+        .warning {
+            color: #ea9400;
+        }
+
+        /* orange with green for timeout */
+        .info {
+            color: #116dd7;
+        }
+
+        /* blue for info */
+        .darkinfo {
+            color: #1200b9;
+        }
+
+        /* darker blue for info */
+        .memory {
+            color: #8b5cf6;
+        }
+
+        /* violet for memory limit */
+        .falsified {
+            color: #e600ff;
+        }
+
+        /* light violet for falsified */
+        .unterminated {
+            color: #dbc100;
+        }
+
+        /* yellow-orange for unterminated */
+        pre {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .error-details {
+            background-color: #ffeaec;
+            border: 1px solid #ffdcdf;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+
+        .error-details h3 {
+            margin: 0;
+        }
+
+        .chart-div {
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .chart-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .chart-item {
+            flex: 1;
+            min-width: 400px;
+        }
+
+        .trace-visualization {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px 0;
+            background-color: #fff;
+        }
+
+        .trace-visualization svg {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #eee;
+            border-radius: 3px;
+        }
+
+        .trace-svg-container {
+            text-align: center;
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+
+        .settings,
+        .summary {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+    <script>hljs.highlightAll();</script>
+</head>
+
+<body>
+    <h1>Batch Tamarin Execution Report</h1>
+
+    <div class="info">
+        <strong>Execution results from:</strong> .<br>
+        <strong>Executed :</strong> 2025-11-10 21:16:03
+    </div>
+
+    <h2 id="table-of-contents">Table of Contents</h2>
+    <ul>
+        <li><a href="#overview">Overview</a>
+            <ul>
+                <li><a href="#configuration">Configuration</a></li>
+                <li><a href="#global-summary">Global Summary</a></li>
+                <li><a href="#global-results">Global Results</a></li>
+                <li><a href="#global-timeline">Global Execution Timeline</a></li>
+            </ul>
+        </li>
+        <li><a href="#task-details">Task Details</a>
+            <ul>
+                <li><a href="#task-autoprove">autoprove</a></li>
+            </ul>
+        </li>
+        <li><a href="#errors">Errors</a></li>
+    </ul>
+
+    <h2 id="overview">Overview</h2>
+
+    <h3 id="configuration">Configuration</h3>
+
+    <div class="settings">
+        <div>
+            <h4>Global Settings</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Setting</th>
+                        <th>Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Max cores</td>
+                        <td>10</td>
+                    </tr>
+                    <tr>
+                        <td>Max memory</td>
+                        <td>15GB</td>
+                    </tr>
+                    <tr>
+                        <td>Default timeout</td>
+                        <td>300s</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div>
+            <h4>Tamarin Versions</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Alias</th>
+                        <th>Path</th>
+                        <th>Version</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>default</td>
+                        <td><code>tamarin-prover</code></td>
+                        <td>v1.10.0</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <h3 id="global-summary">Global Summary</h3>
+
+    <h4>Global Statistics</h4>
+    <div class="summary">
+        <table>
+            <thead>
+                <tr>
+                    <th>Metric</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Total Executed Lemmas</td>
+                    <td>14</td>
+                </tr>
+                <tr>
+                    <td>Verified Lemmas</td>
+                    <td class="success">14 (100.0%)</td>
+                </tr>
+                <tr>
+                    <td>Falsified Lemmas</td>
+                    <td class="falsified">0 (0.0%)</td>
+                </tr>
+                <tr>
+                    <td>Unterminated Lemmas</td>
+                    <td class="unterminated">0 (0.0%)</td>
+                </tr>
+                <tr>
+                    <td>Failed Executions</td>
+                    <td class="failed">0 (0.0%)</td>
+                </tr>
+                <tr>
+                    <td>Lemmas killed by timeout</td>
+                    <td class="warning">0 (0.0%)</td>
+                </tr>
+                <tr>
+                    <td>Lemmas killed for memory limit</td>
+                    <td class="memory">0 (0.0%)</td>
+                </tr>
+            </tbody>
+        </table>
+        <table>
+            <thead>
+                <tr>
+                    <th>Metric</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Total runtime</td>
+                    <td>113.5s</td>
+                </tr>
+                <tr>
+                    <td>Total peak memory used</td>
+                    <td>4.8GB</td>
+                </tr>
+                <tr>
+                    <td>Max peak memory used</td>
+                    <td>0.4GB</td>
+                </tr>
+                <tr>
+                    <td>Freshly executed tasks</td>
+                    <td class="darkinfo">0 (0.0%)</td>
+                </tr>
+                <tr>
+                    <td>Cache hits</td>
+                    <td class="info">14 (100.0%)</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="chart-container">
+        <div class="chart-item">
+            <div id="success_rate_chart" class="chart-div" style="width: 100%; height: 400px;"></div>
+        </div>
+        <div class="chart-item">
+            <div id="cache_performance_chart" class="chart-div" style="width: 100%; height: 400px;"></div>
+        </div>
+    </div>
+
+    <div id="runtime_per_task_chart" class="chart-div" style="width: 100%; height: 400px; margin: 20px 0;"></div>
+    <div id="memory_per_task_chart" class="chart-div" style="width: 100%; height: 400px; margin: 20px 0;"></div>
+
+    <h3 id="global-results">Global Results</h3>
+    <table class="task-table">
+        <thead>
+            <tr>
+                <th>Task</th>
+                <th>Extracted lemma</th>
+                <th>Tamarin Version</th>
+                <th>Status</th>
+                <th>Runtime</th>
+                <th>Peak Memory Used</th>
+                <th>Cache Hit</th>
+            </tr>
+        </thead>
+        <tbody>
+                        <tr class="task-white">
+                                <td rowspan="14">
+                                    <strong>autoprove</strong><br>
+                                    <small style="color: #6c757d;">../ct.spthy</small>
+                                </td>
+                                <td>A_Revoke_min_helper1</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>5.5s</td>
+                            <td>341.7MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white lemma-alt">
+                                <td>A_Revoke_min_helper2</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>6.4s</td>
+                            <td>424.2MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white">
+                                <td>A_Revoke_uniq_helper1</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>16.8s</td>
+                            <td>338.1MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white lemma-alt">
+                                <td>A_Revoke_uniq_helper2</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>6.5s</td>
+                            <td>387.7MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white">
+                                <td>A_Revoke_uniq_helper3</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>6.5s</td>
+                            <td>433.2MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white lemma-alt">
+                                <td>A_CTExt_2_verif_empty_helper1</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>4.8s</td>
+                            <td>299.0MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white">
+                                <td>A_CTExt_2_root_ca_rogue_client_inclusion_viol_uniq_helper1</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>4.7s</td>
+                            <td>273.2MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white lemma-alt">
+                                <td>A_CTExt_2_root_ca_rogue_client_inclusion_viol_uniq_helper2</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>6.8s</td>
+                            <td>245.8MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white">
+                                <td>A_CTExt_2_root_ca_rogue_client_inclusion_viol_uniq_helper3</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>14.3s</td>
+                            <td>449.0MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white lemma-alt">
+                                <td>A_CTExt_2_ca_rogue_client_inclusion_viol_inj_helper</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>4.6s</td>
+                            <td>350.4MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white">
+                                <td>A_CTExt_2_ca_rogue_client_inclusion_viol_inj_helper2</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>6.6s</td>
+                            <td>417.8MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white lemma-alt">
+                                <td>A_CTExt_2_ca_rogue_client_inclusion_viol_inj_helper1</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>6.6s</td>
+                            <td>340.7MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white">
+                                <td>A_CTAudit_2_ca_rogue_audit_logger_rogue_uniq_helper</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>15.5s</td>
+                            <td>364.0MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+                        <tr class="task-white lemma-alt">
+                                <td>A_CTGossip_uniq_helper</td>
+                            <td>default</td>
+                            <td class="success">
+ ✅ Verified
+                            </td>
+                            <td>7.9s</td>
+                            <td>209.1MB</td>
+                            <td class="info">💾 Yes</td>
+                        </tr>
+        </tbody>
+    </table>
+
+    <h3 id="global-timeline">Global Execution Timeline</h3>
+    <div id="global_timeline_chart" class="chart-div" style="width: 100%; height: 600px;"></div>
+
+    <h2 id="task-details">Task Details</h2>
+
+    <h3 id="task-autoprove">Task: autoprove</h3>
+
+    <h4>Execution Summary</h4>
+    <table class="task-table">
+        <thead>
+            <tr>
+                <th>Lemma</th>
+                <th>Resources config</th>
+                <th>Options</th>
+                <th>Preprocessor</th>
+                <th>Tamarin Version</th>
+                <th>Status</th>
+                <th>Runtime</th>
+                <th>Peak Memory Used</th>
+                <th>Cache Hit</th>
+            </tr>
+        </thead>
+        <tbody>
+                    <tr class="task-white">
+                            <td>A_Revoke_min_helper1</td>
+                            <td>10c / 6GB / 500s</td>
+                            <td>--derivcheck-timeout=0</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>5.48s</td>
+                        <td>341.71MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-light-gray">
+                            <td>A_Revoke_min_helper2</td>
+                            <td>10c / 6GB / 500s</td>
+                            <td>--derivcheck-timeout=0</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>6.41s</td>
+                        <td>424.23MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-white">
+                            <td>A_Revoke_uniq_helper1</td>
+                            <td>10c / 6GB / 500s</td>
+                            <td>--derivcheck-timeout=0</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>16.81s</td>
+                        <td>338.05MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-light-gray">
+                            <td>A_Revoke_uniq_helper2</td>
+                            <td>10c / 6GB / 500s</td>
+                            <td>--derivcheck-timeout=0</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>6.47s</td>
+                        <td>387.72MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-white">
+                            <td>A_Revoke_uniq_helper3</td>
+                            <td>10c / 6GB / 500s</td>
+                            <td>--derivcheck-timeout=0</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>6.51s</td>
+                        <td>433.18MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-light-gray">
+                            <td>A_CTExt_2_verif_empty_helper1</td>
+                            <td>10c / 6GB / 500s</td>
+                            <td>--derivcheck-timeout=0</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>4.77s</td>
+                        <td>298.96MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-white">
+                            <td>A_CTExt_2_root_ca_rogue_client_inclusion_viol_uniq_helper1</td>
+                            <td>10c / 6GB / 500s</td>
+                            <td>--derivcheck-timeout=0</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>4.73s</td>
+                        <td>273.22MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-light-gray">
+                            <td>A_CTExt_2_root_ca_rogue_client_inclusion_viol_uniq_helper2</td>
+                            <td>10c / 6GB / 500s</td>
+                            <td>--derivcheck-timeout=0</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>6.82s</td>
+                        <td>245.76MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-white">
+                            <td>A_CTExt_2_root_ca_rogue_client_inclusion_viol_uniq_helper3</td>
+                            <td>10c / 6GB / 500s</td>
+                            <td>--derivcheck-timeout=0</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>14.33s</td>
+                        <td>449.04MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-light-gray">
+                            <td>A_CTExt_2_ca_rogue_client_inclusion_viol_inj_helper</td>
+                            <td>10c / 6GB / 500s</td>
+                            <td>--derivcheck-timeout=0</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>4.63s</td>
+                        <td>350.42MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-white">
+                            <td>A_CTExt_2_ca_rogue_client_inclusion_viol_inj_helper2</td>
+                            <td>10c / 6GB / 500s</td>
+                            <td>--derivcheck-timeout=0</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>6.60s</td>
+                        <td>417.78MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-light-gray">
+                            <td>A_CTExt_2_ca_rogue_client_inclusion_viol_inj_helper1</td>
+                            <td>10c / 6GB / 500s</td>
+                            <td>--derivcheck-timeout=0</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>6.57s</td>
+                        <td>340.71MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-white">
+                            <td>A_CTAudit_2_ca_rogue_audit_logger_rogue_uniq_helper</td>
+                            <td>10c / 6GB / 500s</td>
+                            <td>--derivcheck-timeout=0</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>15.48s</td>
+                        <td>363.99MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+                    <tr class="task-light-gray">
+                            <td>A_CTGossip_uniq_helper</td>
+                            <td>10c / 6GB / 500s</td>
+                            <td>--derivcheck-timeout=0</td>
+                            <td>None</td>
+                        <td>default</td>
+                        <td class="success">
+✅ Verified
+                        </td>
+                        <td>7.89s</td>
+                        <td>209.12MB</td>
+                        <td class="info">💾 Yes</td>
+                    </tr>
+        </tbody>
+    </table>
+
+
+    <div class="chart-item">
+        <div id="task_timeline_autoprove" class="chart-div" style="width: 100%; height: 200px;"></div>
+    </div>
+
+
+
+    <h2 id="errors">Errors</h2>
+
+    <div class="info">
+        <p><strong>✅ No errors encountered in this run</strong></p>
+        <p>All tasks completed successfully without any failures, timeouts, or memory limit issues.</p>
+    </div>
+
+    <hr>
+    <footer>
+        <p><em>Report generated by Batch Tamarin v1.1.0 on 2025-11-13 at 01:57:48</em></p>
+    </footer>
+
+    <script>
+        // Load Google Charts
+        google.charts.load('current', {
+            'packages': ['corechart', 'bar', 'timeline']
+        });
+        google.charts.setOnLoadCallback(drawCharts);
+
+        function drawCharts() {
+            drawSuccessRateChart();
+            drawCachePerformanceChart();
+            drawRuntimePerTaskChart();
+            drawMemoryPerTaskChart();
+            drawGlobalTimelineChart();
+
+            // Draw task-specific charts
+            drawTaskTimelineChart_autoprove();
+        }
+
+        // Success Rate Pie Chart
+        function drawSuccessRateChart() {
+            var data = google.visualization.arrayToDataTable([
+                ['Status', 'Percentage'],
+['Verified', 100.0],            ]);
+
+            var options = {
+                title: 'Success Rate',
+                colors: ['#28a745', '#e600ff', '#dbc100', '#ec1026', '#ea9400', '#8b5cf6'],
+                legend: { position: 'bottom' },
+                chartArea: { width: '80%', height: '70%' }
+            };
+
+            var chart = new google.visualization.PieChart(document.getElementById('success_rate_chart'));
+            chart.draw(data, options);
+        }
+
+        // Cache Performance Pie Chart
+        function drawCachePerformanceChart() {
+            var data = google.visualization.arrayToDataTable([
+                ['Type', 'Percentage'],
+                ['Cache Hit', 100.0],
+                ['Freshly Executed', 0.0]
+            ]);
+
+            var options = {
+                title: 'Cache Performance',
+                colors: ['#116dd7', '#1200b9'],
+                legend: { position: 'bottom' },
+                chartArea: { width: '80%', height: '70%' }
+            };
+
+            var chart = new google.visualization.PieChart(document.getElementById('cache_performance_chart'));
+            chart.draw(data, options);
+        }
+
+        // Runtime per Task Horizontal Bar Chart
+        function drawRuntimePerTaskChart() {
+            var data = google.visualization.arrayToDataTable([
+                ['Task', 'Runtime (seconds)'],
+                ['autoprove', 113.5]            ]);
+
+            var options = {
+                chart: {
+                    title: 'Runtime per Task',
+                    subtitle: 'Total execution time in seconds'
+                },
+                bars: 'horizontal',
+                hAxis: { title: 'Runtime (seconds)' },
+                vAxis: { title: 'Tasks' },
+                colors: ['#1f77b4'],
+                chartArea: { width: '70%', height: '80%' }
+            };
+
+            var chart = new google.charts.Bar(document.getElementById('runtime_per_task_chart'));
+            chart.draw(data, google.charts.Bar.convertOptions(options));
+        }
+
+        // Memory per Task Horizontal Bar Chart
+        function drawMemoryPerTaskChart() {
+            var data = google.visualization.arrayToDataTable([
+                ['Task', 'Memory (MB)'],
+                ['autoprove', 449.0]            ]);
+
+            var options = {
+                chart: {
+                    title: 'Memory Usage per Task',
+                    subtitle: 'Peak memory usage in MB'
+                },
+                bars: 'horizontal',
+                hAxis: { title: 'Memory (MB)' },
+                vAxis: { title: 'Tasks' },
+                colors: ['#ff7f0e'],
+                chartArea: { width: '70%', height: '80%' }
+            };
+
+            var chart = new google.charts.Bar(document.getElementById('memory_per_task_chart'));
+            chart.draw(data, google.charts.Bar.convertOptions(options));
+        }
+
+        // Global Timeline Chart
+        function drawGlobalTimelineChart() {
+            var container = document.getElementById('global_timeline_chart');
+            var chart = new google.visualization.Timeline(container);
+            var dataTable = new google.visualization.DataTable();
+
+            dataTable.addColumn({ type: 'string', id: 'Task' });
+            dataTable.addColumn({ type: 'string', id: 'Label' });
+            dataTable.addColumn({ type: 'date', id: 'Start' });
+            dataTable.addColumn({ type: 'date', id: 'End' });
+
+            // Use current time as base for timeline
+            var baseTime = new Date().getTime();
+            var timelineData = [];
+            timelineData.push(['autoprove', 'A_Revoke_min_helper1_default', new Date(baseTime + 0.000), new Date(baseTime + 5000.000)]);
+            timelineData.push(['autoprove', 'A_Revoke_min_helper2_default', new Date(baseTime + 5000.000), new Date(baseTime + 11000.000)]);
+            timelineData.push(['autoprove', 'A_Revoke_uniq_helper1_default', new Date(baseTime + 11000.000), new Date(baseTime + 28000.000)]);
+            timelineData.push(['autoprove', 'A_Revoke_uniq_helper2_default', new Date(baseTime + 28000.000), new Date(baseTime + 35000.000)]);
+            timelineData.push(['autoprove', 'A_Revoke_uniq_helper3_default', new Date(baseTime + 35000.000), new Date(baseTime + 41000.000)]);
+            timelineData.push(['autoprove', 'A_CTExt_2_verif_empty_helper1_default', new Date(baseTime + 41000.000), new Date(baseTime + 46000.000)]);
+            timelineData.push(['autoprove', 'A_CTExt_2_root_ca_rogue_client_inclusion_viol_uniq_helper1_default', new Date(baseTime + 46000.000), new Date(baseTime + 51000.000)]);
+            timelineData.push(['autoprove', 'A_CTExt_2_root_ca_rogue_client_inclusion_viol_uniq_helper2_default', new Date(baseTime + 51000.000), new Date(baseTime + 58000.000)]);
+            timelineData.push(['autoprove', 'A_CTExt_2_root_ca_rogue_client_inclusion_viol_uniq_helper3_default', new Date(baseTime + 58000.000), new Date(baseTime + 72000.000)]);
+            timelineData.push(['autoprove', 'A_CTExt_2_ca_rogue_client_inclusion_viol_inj_helper_default', new Date(baseTime + 86000.000), new Date(baseTime + 90000.000)]);
+            timelineData.push(['autoprove', 'A_CTExt_2_ca_rogue_client_inclusion_viol_inj_helper2_default', new Date(baseTime + 79000.000), new Date(baseTime + 86000.000)]);
+            timelineData.push(['autoprove', 'A_CTExt_2_ca_rogue_client_inclusion_viol_inj_helper1_default', new Date(baseTime + 72000.000), new Date(baseTime + 79000.000)]);
+            timelineData.push(['autoprove', 'A_CTAudit_2_ca_rogue_audit_logger_rogue_uniq_helper_default', new Date(baseTime + 91000.000), new Date(baseTime + 106000.000)]);
+            timelineData.push(['autoprove', 'A_CTGossip_uniq_helper_default', new Date(baseTime + 106000.000), new Date(baseTime + 114000.000)]);
+
+            dataTable.addRows(timelineData);
+
+            var options = {
+                title: 'Global Execution Timeline',
+                timeline: {
+                    groupByRowLabel: true,
+                    showRowLabels: true
+                },
+                backgroundColor: '#fafafa'
+            };
+
+            chart.draw(dataTable, options);
+        }
+
+
+
+        // Task Timeline Chart for autoprove
+        function drawTaskTimelineChart_autoprove() {
+            var container = document.getElementById('task_timeline_autoprove');
+            var chart = new google.visualization.Timeline(container);
+            var dataTable = new google.visualization.DataTable();
+
+            dataTable.addColumn({ type: 'string', id: 'Task' });
+            dataTable.addColumn({ type: 'string', id: 'Label' });
+            dataTable.addColumn({ type: 'date', id: 'Start' });
+            dataTable.addColumn({ type: 'date', id: 'End' });
+
+            // Use current time as base for timeline
+            var baseTime = new Date().getTime();
+            dataTable.addRows([
+                ['autoprove', 'A_Revoke_min_helper1_default', new Date(baseTime + 0.000), new Date(baseTime + 5000.000)],                ['autoprove', 'A_Revoke_min_helper2_default', new Date(baseTime + 5000.000), new Date(baseTime + 11000.000)],                ['autoprove', 'A_Revoke_uniq_helper1_default', new Date(baseTime + 11000.000), new Date(baseTime + 28000.000)],                ['autoprove', 'A_Revoke_uniq_helper2_default', new Date(baseTime + 28000.000), new Date(baseTime + 35000.000)],                ['autoprove', 'A_Revoke_uniq_helper3_default', new Date(baseTime + 35000.000), new Date(baseTime + 41000.000)],                ['autoprove', 'A_CTExt_2_verif_empty_helper1_default', new Date(baseTime + 41000.000), new Date(baseTime + 46000.000)],                ['autoprove', 'A_CTExt_2_root_ca_rogue_client_inclusion_viol_uniq_helper1_default', new Date(baseTime + 46000.000), new Date(baseTime + 51000.000)],                ['autoprove', 'A_CTExt_2_root_ca_rogue_client_inclusion_viol_uniq_helper2_default', new Date(baseTime + 51000.000), new Date(baseTime + 58000.000)],                ['autoprove', 'A_CTExt_2_root_ca_rogue_client_inclusion_viol_uniq_helper3_default', new Date(baseTime + 58000.000), new Date(baseTime + 72000.000)],                ['autoprove', 'A_CTExt_2_ca_rogue_client_inclusion_viol_inj_helper_default', new Date(baseTime + 86000.000), new Date(baseTime + 90000.000)],                ['autoprove', 'A_CTExt_2_ca_rogue_client_inclusion_viol_inj_helper2_default', new Date(baseTime + 79000.000), new Date(baseTime + 86000.000)],                ['autoprove', 'A_CTExt_2_ca_rogue_client_inclusion_viol_inj_helper1_default', new Date(baseTime + 72000.000), new Date(baseTime + 79000.000)],                ['autoprove', 'A_CTAudit_2_ca_rogue_audit_logger_rogue_uniq_helper_default', new Date(baseTime + 91000.000), new Date(baseTime + 106000.000)],                ['autoprove', 'A_CTGossip_uniq_helper_default', new Date(baseTime + 106000.000), new Date(baseTime + 114000.000)]            ]);
+
+            var options = {
+                title: 'Execution Timeline for autoprove',
+                timeline: {
+                    groupByRowLabel: false,
+                    showRowLabels: false
+                },
+                backgroundColor: '#fafafa'
+            };
+
+            chart.draw(dataTable, options);
+        }
+    </script>
+</body>
+
+</html>

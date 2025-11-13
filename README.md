@@ -38,10 +38,9 @@ The models for revocation (in the appendix) or the addition of receipts to the
 SCT auditing model are disable by default and can be activated with the
 following flags to tamarin.
 
-    - `--defines=REVOCATION` for (simplified: perfect, without delay) revocation model 
-    - `--defines=RECEIPT` for realistic monitor blaming by combining domain owner and logger knowledge
-    - `--defines=SUFFICIENCY` to automate `exists-trace` proofs of the
-      sufficiency component of accountability lemmas.
+- `--defines=REVOCATION` for (simplified: perfect, without delay) revocation model 
+- `--defines=RECEIPT` for realistic monitor blaming by combining domain owner and logger knowledge
+- `--defines=SUFFICIENCY` to automate `exists-trace` proofs of the sufficiency component of accountability lemmas.
 
 The configuration files for `batch-tamarin` (see Reproducibility, below)
 already encode which flags and additional options (some lemmas need an oracle
