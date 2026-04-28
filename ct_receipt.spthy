@@ -1,5 +1,5 @@
 /*
- * Protocol: Certficate Transparency with additions for SCT Auditing, STH Gossiping
+ * Protocol: Certficate Transparency with SCT auditing, instrumented with receipts
  * Modeler:  anonymized
  * Date:     July 2025
  * Sources:  RFC6962, RFC 9162, "Opt-in SCT Auditing", Emily Stark and Chris Thompson, and partly rooted on "Provable Security for PKI Schemes" by Wrótniak et al.
@@ -7,7 +7,7 @@
  * Notes:    consult README for instructions on evaluating this model
  */
 
-theory ct
+theory ct_receipt
 begin
 
 functions:
@@ -335,6 +335,92 @@ rule monitorFindsRogueCertificate_Sleep [color= #af2828]:
     ]->
     [ /* New: */ MonitorFoundCert($M, $L, fields, $CA, ca_fields, $time, session) /* but does not react: there is no assert in this rule, so the A_CT lemma needs to rule out monitor misbehavior (but we already know that it does not hold for other reasons) */ ]
 
+/***** SCT Auditing  *****/
+
+/*
+In SCT Auditing, a monitor receives a certificate along with its embedded SCTs. Each of the following rules considers one of the two SCTs at a time. 
+The SCT is then used together with the certificate to determine whether the certificate is rogue or benign, using the same techniques as seen for the external check (below) or in the CT model (above). There are 3 possible outcomes:
+    1. The certificate received is rogue. The monitor informs the domain owner about it.
+    2. The certificate received is benign. No further action is needed.
+    3. The monitor is itself malicious and sleeps on the rogue certificate instead of informing the domain owner.
+*/
+
+rule monitorAudit_CA_Viol:
+    let
+
+        pub_fields = <$CA, $id, pkID, 'pubKey', sn, $i, $j, sct1, sct2>
+        fields = <$CA, $id, pkID, 'pubKey', sn, $i, $j>
+        sct_fields = <$L, 'SCT', $sct, <$CA, $id, pkID, sn, $i, $j>>
+        ca_fields = <$rootCA, $CA, pkCA, 'pubKey-CA', sn, $i0, $j0>
+        chain = <<pub_fields, pub_sig>, <ca_fields, ca_sig>>
+
+        sct_to_audit = <$L, 'SCT', $sct, sct_sig>
+    in
+    [ !LoggerDict($M, $L), !TrackSubject($M, $id), !Logger($L, pkL), !Root_CA($rootCA, pkRootCA),
+    !TLS_to_M($M, chain, sct_to_audit) ]
+    --[ Eq(verify(pub_sig, pub_fields, pkCA), true()),
+        Eq(verify(sct_sig, sct_fields, pkL), true()),
+        Eq(verify(ca_sig, ca_fields, pkRootCA), true()),
+        _restrict((sct_to_audit = sct1) | (sct_to_audit = sct2)),
+        RogueCert($CA, fields), /* see restriction */
+
+        Asserts($M, 'This CA has the following fields and it failed the SCT audit for the following fields.', $CA, <fields, ca_fields>),
+        
+        Time($now),
+        San_monitorAudit_CA_Viol()
+    ]->
+    [ CraftReceipt($M, chain), MAudit_SCT($M, $L, fields, ca_fields, $sct) ]
+
+rule monitorAudit_no_viol:
+    let
+        pub_fields = <$CA, $id, pkID, 'pubKey', sn, $i, $j, sct1, sct2>
+        fields = <$CA, $id, pkID, 'pubKey', sn, $i, $j>
+        sct_fields = <$L, 'SCT', $sct, <$CA, $id, pkID, sn, $i, $j>>
+        ca_fields = <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
+        chain = <<pub_fields, pub_sig>, <ca_fields, ca_sig>>
+
+        sct_to_audit = <$L, 'SCT', $sct, sct_sig>
+    in
+    [ !LoggerDict($M, $L), !TrackSubject($M, $id), !Logger($L, pkL), !Root_CA($rootCA, pkRootCA),
+    !TLS_to_M($M, chain, sct_to_audit)
+    ]
+    --[ Eq(verify(pub_sig, pub_fields, pkCA), true()),        
+        Eq(verify(sct_sig, sct_fields, pkL), true()),
+        Eq(verify(ca_sig, ca_fields, pkRootCA), true()),
+        _restrict((sct_to_audit = sct1) | (sct_to_audit = sct2)), /* only one sct at a time is considered */
+        BenignCert($CA, fields), /* see restriction */
+        AssertsNot($M, 'This CA has the following fields and it failed the SCT audit for the following fields.', $CA, <fields, ca_fields>),
+
+        Time($now),
+        San_monitorAudit_no_viol(),
+    ]->
+    [ CraftReceipt($M, chain), MAudit_SCT($M, $L, fields, ca_fields, $sct) ]
+
+rule monitorAudit_Sleep [color= #af2828]: 
+    let
+        fields = <$CA, $id, pkID, 'pubKey', sn, $i, $j>
+        pub_fields = <$CA, $id, pkID, 'pubKey', sn, $i, $j, sct1, sct2>
+        sct_fields = <$L, 'SCT', $sct, <$CA, $id, pkID, sn, $i, $j>>
+        ca_fields = <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
+        chain = <<pub_fields, pub_sig>, <ca_fields, ca_sig>>
+
+        pubkey_cert = <pub_fields, pub_sig>
+        sct_to_audit = <$L, 'SCT', $sct, sct_sig>
+    in
+    [ !LoggerDict($M, $L), !St_bad_Monitor($M), !TrackSubject($M, $id), !Logger($L, pkL), !Root_CA($rootCA, pkRootCA),
+    !TLS_to_M($M, chain, sct_to_audit) ]
+    --[ Eq(verify(pub_sig, pub_fields, pkCA), true()),        
+        Eq(verify(sct_sig, sct_fields, pkL), true()),
+        Eq(verify(ca_sig, ca_fields, pkRootCA), true()),
+        _restrict((sct_to_audit = sct1) | (sct_to_audit = sct2)), /* only one sct at a time is considered */
+        RogueCert($CA, fields), /* see restriction */    
+        MonitorAuditSleeps($CA, $M, fields),
+        
+        Time($now),
+        San_monitorAudit_Sleep()
+    ]->
+    [ CraftReceipt($M, chain), MAudit_SCT($M, $L, fields, ca_fields, $sct) ]
+
 /* ----- Logger rules ----- */
 
 /* Initialize a Logger role. It will later be used to give out SCTs and STHs to others. The CT standard does not further define how authenticity of the loggers keys is ensured, e.g. Wrotniak's model uses self-signed certificates here.
@@ -503,13 +589,12 @@ rule ClientInitiatesAuditing:
     let
         chain = <<pub_fields, pub_sig>, <ca_fields, ca_sig>>
     in
-    [ In(ca_fields), In(ca_sig), In(pub_fields), In(pub_sig), In(sct) ]
+    [ !BAccept_SCT(chain, sct), In($M) /* target monitor */ ]
     --[ 
         Time($now),
         San_ClientInitiatesAuditing()
     ]->
-    [ !TLS_to_M($M, <<pub_fields, pub_sig>, <ca_fields, ca_sig>>, sct), Client_Receipt_Val($M, chain) ]
-// TODO T: Client_Receipt_Val does not occur anywhere, can be deleted
+    [ !TLS_to_M($M, chain, sct), Client_Receipt_Val($M, chain) ]
 
 /*
 A client receives a certificate and now validates it. This includes:
@@ -552,7 +637,7 @@ rule ClientValidate [color= #f2ce03]:
         Time($now),
         San_ClientValidate(),
     ]->
-    [ !Check(pkL1, fields, <ca_fields, ca_sig>), !Check(pkL2, fields, <ca_fields, ca_sig>) /* each SCT and statement is stored to later run client-side auditing checks, e.g. inclusion proofs */, !BAccept_State($CA, fields, ca_fields, $L1, $sct1, $L2, $sct2), !BAccept_SCT($L1, fields, ca_fields, $sct1), !BAccept_SCT($L2, fields, ca_fields, $sct2)
+    [ !BAccept_State($CA, fields, $L1, $sct1, $L2, $sct2), !BAccept_SCT(chain, sct1), !BAccept_SCT(chain, sct2)
     ]
 
 /* ---------- Interaction with the log to verify its properties ---------- */
@@ -597,7 +682,7 @@ rule ClientFindsAppendOnlyViolation [color= #e65208]:
         Time($now),
         San_ClientFindsAppendOnlyViolation()
     ]->
-    []
+    [ ]
 
 /* We deem append-only violated if entries disappear independent of whether they were valid submissions. According to the standard, there are only valid chains allowed on the log, thus this only covers more potential misbehavior of the log. We use these predicates for properties of the Merkle Tree, thus only using the fields directly, and ignoring the chain for now. */
 predicate: EntryMissing(Logger, fields, log_id, #time, sth_time) <=>
@@ -768,9 +853,8 @@ restriction only_existing_log_ids:
 rule ParticipantFindsInclusionViolation [color= #e65208]:
     let
         fields = <$CA, $id, pkID, 'pubKey', sn, $i, $j>
-        ca_cert = <ca_fields, ca_sig>
     in
-    [ !TLS_L_to_P($L, $P, $snapshot, sth, session, $time), !Logger($L, pkL),In(fields), In(ca_cert) /* entry to check for */ ]
+    [ !TLS_L_to_P($L, $P, $snapshot, sth, session, $time), !Logger($L, pkL),In(fields), In(ca_cert), /* entry to check for */ !Monitor($M) ]
     --[
         AssertsNot($P, 'This loggers log currently includes these fields.', $L, <fields, session>),
         InclusionProofFails($P, $L, fields, ca_cert, sth, session), /* entry is not contained in the snapshot, see restriction */
@@ -778,7 +862,7 @@ rule ParticipantFindsInclusionViolation [color= #e65208]:
         Time($now),
         San_ParticipantFindsInclusionViolation()
     ]->
-    [ InclusionFalsified($P, $L, fields, $time, session, ca_fields) ]
+    [ InclusionFailed($P, $L, fields, $time, session) ]
 
 restriction inclusionProofFails:
     "All IdFetcher L fields ca_cert sth session #t1. 
@@ -794,18 +878,16 @@ restriction inclusionProofFails:
 rule ParticipantVerifiesInclusion [color= #c1ff3c]:
     let
         fields = <$CA, $id, pkID, 'pubKey', sn, $i, $j>
-        ca_cert = <ca_fields, ca_sig>
     in
     [ !TLS_L_to_P($L, $P, $snapshot, sth, session, $time), !Logger($L, pkL),In(fields), In(ca_cert), In(chain) /* entry to check for */ ]
     --[
         InclusionProofSucceeds($P, $L, fields, ca_cert, chain, sth, session), /* entry is contained in the snapshot, see restriction */
         Asserts($P, 'This loggers log currently includes these fields.', $L, <fields, session>),
-        LContains($L, fields),
         
         Time($now),
         San_ParticipantVerifiesInclusion()
     ]->
-    [ InclusionVerified($P, $L, fields, $time, session, ca_fields) ]
+    [ InclusionVerified($P, $L, fields, $time, session) ]
 
 
 restriction inclusionProofWorks:
@@ -848,7 +930,7 @@ rule ConsultDocumentation_Fails:
     [ In(ca_fields), In(ca_sig), !Root_CA($rootCA, pkRCA) ]
     --[
         UndocumentedIntermediateCA($rootCA, $CA, ca_fields), // see restriction externalCA_no_proof below
-        Asserts('CCADB', 'No root CA signed this CA.', $CA, <ca_fields, $rootCA>),
+        AssertsNot($rootCA, 'I signed this intermediate CA.', $CA, <ca_fields>),
         Eq(verify(ca_sig, ca_fields, pkRCA), true()), // signed by root CA
         ExternalCheckCCADB($rootCA, ca_fields),
         
@@ -864,104 +946,149 @@ restriction externalCA_no_proof:
         UndocumentedIntermediateCA(rootCA, CA, ca_fields)@t1
             ==> not (Ex #t0. DocumentedCA(rootCA, CA, ca_fields)@t0 & #t0 < #t1)"
 
-
 // ==========================================
 
-/*** Predicate Rules ***/
+/* Additional Proposal for Receipts: */
 
-/* CTCheck with CCADB check included */
+// ===================================================================
 
-rule MonitorCheck_Found_CCADB:
-    [ !BAccept_State($CA, fields, ca_fields, $L1, $sct1, $L2, $sct2),
-      MonitorFoundCert($M, $L, fields, $CA, ca_fields, $time_of_proof_fetch, session), CCADBConsulted($rootCA, ca_fields) ]
+/* Additional proposal: Monitor blaming, with external auth check */
+
+/* 
+CT does not allow to realistically hold monitors accountable for not raising an alarm when they see a rogue certificate for one major reason: Other parties cannot prove that the monitor has seen the rogue certificate. For instance, a logger can be malicious too and hide the rogue certificate from the monitor. Thinking beyond CT and its extensions, we show that this can be solved by requiring monitors to issue receipts for the snapshots they receive.
+
+In this section we will assume that the domain owner and logger work together to provide this evidence. The loggers task will be to forward the receipt as a malicious monitor could choose to not create evidence of misbehavior. Additionally to check a receipt, the logger needs to provide the domain owner with a matching snapshot such that the domain owner can double check whether the monitor should have reacted to the rogue cert or not. A misbehaving logger could refuse to provide this snapshot list, as seen in gossiping.
+
+We reuse the inclusion proof axioms to state whether an entry is included in the given snapshot or not.
+
+*/
+
+rule DomainOwnerContract [color= #fac800]:
+    [ !TrackSubject($M, su), Fr(~skM) ]
     --[ 
-        CTCheck($M, fields, $CA, ca_fields),
-        _restrict(($L1 = $L) | ($L2 = $L)),
+        Time($now), 
+        San_DomainOwnerContract() 
+    ]->
+    [ !TrackSubject_Contract($M, su), !MonitorKey_s($M, pk(~skM), ~skM), !MonitorKey($M, pk(~skM)) ]
+
+rule signReceipt:
+    let
+        receipt = sign(<$M, chain>, skM)
+    in
+    [ CraftReceipt($M, chain) , !MonitorKey_s($M, pkSKM, skM) ]
+    --[ 
+        Time($now),
+        San_signReceipt() 
+    ]->
+    [ !TLS_M_to_C(receipt) /* We already assumed a TLS connection between client and monitor before */ ]
+
+rule clientReceivesReceipt:
+    [ !TLS_M_to_C(receipt), Client_Receipt_Val($M, chain) ]
+    --[
+        ClientHoldsReceipt($M, receipt), 
         
-        San_MonitorCheck_Found()
+        Time($now),
+        San_clientReceivesReceipt()
     ]->
-    [  ]
+    [ Out(<$M, receipt, chain>) /* will be used to share with domain owner, logger adds the underlying entries behind the receipt that can be used by the domain owner to (1) verify the receipt and (2) decide whether the monitor acted correctly */ ]
 
-rule MonitorCheck_NotFound_CCADB:
-    [ !BAccept_State($CA, fields, ca_fields, $L1, $sct1, $L2, $sct2),
-      MonitorCouldNotFindCert($M, fields, $L1, $CA, ca_fields, $proof1, session1), MonitorCouldNotFindCert($M, fields, $L2, $CA, ca_fields, $proof2, session2),
-      CCADBConsulted($rootCA, ca_fields) ]
-    --[ 
-        CTCheck($M, fields, $CA, ca_fields),
-        MMD_passed($sct1, $proof1), // $sct < $time_of_proof_fetch => MMD passed for both
-        MMD_passed($sct2, $proof2),
+/*
+All variants assume the ground truth to be availabble, which is fine as these tests are performed by the domain owner (DO) themselves.
 
-        San_MonitorCheck_NotFound()
-    ]->
-    [  ]
+Variant 1: The audited certificate is rogue but the monitor did not react. In this case the domain owner blames the monitor.
 
-/*  */
-
-rule TransparencyCheck_Success:
+Variant 2: The audited certificate is benign. In this case the monitor did not need to react.
+*/
+rule domainOwnerBlamesMonitor:
     let
         ca_fields = <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
+        pub_fields = <$CA, $id, pkID, 'pubKey', sn, $i, $j, sct1, sct2>
+        fields = <$CA, $id, pkID, 'pubKey', sn, $i, $j>
+        chain = <<pub_fields, pub_sig>, <ca_fields, ca_sig>>
     in
-    [ !BAccept_SCT($L, fields, ca_fields, $sct), InclusionVerified($P,$L, fields, $proof, session, ca_fields) ]
+    [ In(<$M, receipt, chain>), !MonitorKey($M, pkSKM), !TrackSubject_Contract($M, $idServer), !Root_CA($rootCA, pkRootCA) ]
     --[
-        CTTransparencyCheckSession($L, fields, session),
-        CTTransparencyCheck($L, fields),
-        CTTransparencyCheckSuccess($L, fields),
-
-        San_TransparencyCheck_Success()
+        Eq(verify(receipt, <$M, chain>, pkSKM), true()), 
+        Eq(verify(pub_sig, pub_fields, pkCA), true()),
+        Eq(verify(ca_sig, ca_fields, pkRootCA), true()), 
+        DO_MonitorBlame($M, $CA, ca_fields, fields),
+        Asserts($id, 'This monitor did not react', $M, <fields>),
+        AssertsNot($id, 'this is a correct statement', $CA, <fields, ca_fields>), // PKI style assertions for authenticity of the claim
+        DomainOwnerChecksReceipt($M, ca_fields, fields),
+        RogueCert($CA, fields),
+        
+        Time($now),
+        ReceiptCheck(),
+        San_domainOwnerBlamesMonitor()
     ]->
-    [  ]
+    [ ReceiptChecked($M, fields, ca_fields) ]
 
-rule TransparencyCheck_Failed:
+
+rule domainOwnerVerifiesReceipt_1:
     let
         ca_fields = <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
+        pub_fields = <$CA, $id, pkID, 'pubKey', sn, $i, $j, sct1, sct2>
+        fields = <$CA, $id, pkID, 'pubKey', sn, $i, $j>
+        chain = <<pub_fields, pub_sig>, <ca_fields, ca_sig>>
     in
-    [ !BAccept_SCT($L, fields, ca_fields, $sct), InclusionFalsified($P,$L, fields, $proof, session, ca_fields) ]
+    [ In(<$M, receipt, chain>), !MonitorKey($M, pkSKM), !TrackSubject_Contract($M, $idServer), !Root_CA($rootCA, pkRootCA) ]
     --[
-        CTTransparencyCheckSession($L, fields, session),
-        CTTransparencyCheck($L, fields),
-        MMD_passed($sct, $proof),
+        Eq(verify(receipt, <$M, chain>, pkSKM), true()), 
+        Eq(verify(pub_sig, pub_fields, pkCA), true()),
+        Eq(verify(ca_sig, ca_fields, pkRootCA), true()),
+        DO_MonitorBenign($M, ca_fields, pub_fields),
+        AssertsNot($id, 'This monitor did not react', $M, <fields>),
+        AssertsNot($id, 'this is a correct statement', $CA, <fields, ca_fields>), // PKI style assertions for authenticity of the claim
+        DomainOwnerChecksReceipt($M, ca_fields, fields),
+        Monitor_Reacted($M, fields),
+        RogueCert($CA, fields),
 
-        San_TransparencyCheck_Failed()
+        Time($now),
+        ReceiptCheck(),
+        San_domainOwnerVerifiesReceipt_1()
     ]->
-    [  ]
+    [ ReceiptChecked($M, fields, ca_fields) ]
 
-restriction mmd_passed: // "before < after"
-    "All before after #t2 #t1 #t0. 
-        MMD_passed(before, after)@t2 & Time(before)@t0 & Time(after)@t1
-        ==> 
-        (#t0 < #t1 & #t1 < #t2 & not(before = after))"
-
-// Transparency check without MMD (for counterexample)
-
-rule TransparencyCheck_wo_MMD_success:
+rule domainOwnerVerifiesReceipt_2:
     let
         ca_fields = <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
-        cert_fields = <$CA, $subj, ke, 'pre-cert', sn, $i, $j>
-        chain = <<cert_fields, cert_sig>, <ca_fields, ca_sig>>
+        pub_fields = <$CA, $id, pkID, 'pubKey', sn, $i, $j, sct1, sct2>
+        fields = <$CA, $id, pkID, 'pubKey', sn, $i, $j>
+        chain = <<pub_fields, pub_sig>, <ca_fields, ca_sig>>
     in
-    [ !BAccept_SCT($L, fields, ca_fields, $sct), InclusionVerified($P,$L, fields, $proof, session, ca_fields) ]
+    [ In(<$M, receipt, chain>), !MonitorKey($M, pkSKM), !TrackSubject_Contract($M, $idServer), !Root_CA($rootCA, pkRootCA) ]
     --[
-        CTTransparencyCheck_wo_MMD($L, fields),
-        CTTransparencyCheckSuccess_wo_MMD($L, fields),
-        San_TransparencyCheck_wo_MMD_success()
-    ]->
-    [  ]
+        Eq(verify(receipt, <$M, chain>, pkSKM), true()), 
+        Eq(verify(pub_sig, pub_fields, pkCA), true()),
+        Eq(verify(ca_sig, ca_fields, pkRootCA), true()),
+        DO_MonitorBenign($M, ca_fields, pub_fields),
+        DomainOwnerChecksReceipt($M, ca_fields, fields),
+        AssertsNot($id, 'This monitor did not react', $M, <fields>),
+        Asserts($id, 'this is a correct statement', $CA, <fields, ca_fields>), // PKI style assertions for authenticity of the claim
+        BenignCert($CA, fields),
 
-rule TransparencyCheck_wo_MMD_failed:
-    let
-        ca_fields = <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
-        cert_fields = <$CA, $subj, ke, 'pre-cert', sn, $i, $j>
-        chain = <<cert_fields, cert_sig>, <ca_fields, ca_sig>>
-    in
-    [ !BAccept_SCT($L, fields, ca_fields, $sct), InclusionFalsified($P,$L, fields, $proof, session, ca_fields) ]
+        Time($now),
+        ReceiptCheck(),
+        San_domainOwnerVerifiesReceipt_2()
+    ]->
+    [ ReceiptChecked($M, fields, ca_fields) ]
+
+restriction monitor_blame:
+    "All M CA ca_fields fields #t. DO_MonitorBlame(M, CA, ca_fields, fields)@t ==> (Ex #t0. MonitorAuditSleeps(CA, M, fields)@t0 & #t0 < #t)" /* Monitor should have reacted: Domain Owner did not know of the violating cert prior (monitor failed to inform the server and the server also did not issue the cert themselves as implicitly encoded in MonitorSleeps(.)) */
+
+restriction monitor_reacted:
+    "All M fields #t. Monitor_Reacted(M, fields)@t ==> (Ex CA ca_fields #t0. Asserts(M, 'This CA has the following fields and it failed the SCT audit for the following fields.', CA, <fields, ca_fields>)@t0 & #t0 < #t)"
+
+rule SCTReceiptCheck:
+    [ MAudit_SCT($M, $L, fields, ca_fields, $sct),
+      CCADBConsulted($rootCA, ca_fields),
+      ReceiptChecked($M, fields, ca_fields)
+    ]
     --[
-        CTTransparencyCheck_wo_MMD($L, fields),
-
-        San_TransparencyCheck_wo_MMD_failed()
+        SCTReceiptCheck($M, fields),
+        San_SCTReceiptCheck()
     ]->
-    [  ]
-
-// ==========================================
+    [ ]
 
 /* ----- General Restrictions ----- */
 
@@ -1072,8 +1199,7 @@ rule compromiseMonitor [color= #d40808 ]:
     ]-> 
     [ !St_bad_Monitor($M) ] 
 
-
-/* BEGIN: LEMMAS */
+/* BEGIN LEMMAS */
 
 lemma san_Root_CA_Init:
  exists-trace 
@@ -1172,6 +1298,29 @@ lemma san_monitorFindsRogueCertificate_Sleep:
 	San_monitorFindsRogueCertificate_Sleep()@t
 	& (All #t. Compromise()@t ==> (Ex M. CompromiseMonitor(M)@t)
     | (Ex CA. CompromiseCA(CA)@t)) // only monitor and CA corruptions allowed
+"
+
+lemma san_monitorAudit_CA_Viol:
+ exists-trace 
+"Ex #t. 
+	San_monitorAudit_CA_Viol()@t
+	& (All #t. Compromise()@t ==> (Ex CA. CompromiseCA(CA)@t)) // only CA corruptions allowed
+"
+
+lemma san_monitorAudit_no_viol:
+ exists-trace 
+"Ex #t. 
+	San_monitorAudit_no_viol()@t
+	& not (Ex #t. Compromise()@t)
+"
+
+lemma san_monitorAudit_Sleep:
+ exists-trace 
+"Ex #t. 
+	San_monitorAudit_Sleep()@t
+	& (All #t. Compromise()@t ==> 
+            (Ex M. CompromiseMonitor(M)@t)
+            | (Ex CA. CompromiseCA(CA)@t)) // only monitor or CA corruptions allowed
 "
 
 lemma san_Logger_Init:
@@ -1321,48 +1470,6 @@ lemma san_ConsultDocumentation_Fails:
 	& (All #t. Compromise()@t ==> (Ex rootCA. CompromiseRootCA(rootCA)@t))
 "
 
-lemma san_MonitorCheck_Found:
- exists-trace 
-"Ex #t. 
-	San_MonitorCheck_Found()@t
-	& not (Ex #t. Compromise()@t)
-"
-
-lemma san_MonitorCheck_NotFound:
- exists-trace 
-"Ex #t. 
-	San_MonitorCheck_NotFound()@t
-	& (All #t. Compromise()@t ==> (Ex L. CompromiseLogger(L)@t)) // only logger corruptions allowed
-"
-
-lemma san_TransparencyCheck_Success:
- exists-trace
-"Ex #t.
-    San_TransparencyCheck_Success()@t
-    & not (Ex #t. Compromise()@t)
-"
-
-lemma san_TransparencyCheck_Failed:
- exists-trace
-"Ex #t.
-    San_TransparencyCheck_Failed()@t
-    & (All #t. Compromise()@t ==> (Ex L. CompromiseLogger(L)@t)) // only logger corruptions allowed
-"
-
-lemma san_TransparencyCheck_wo_MMD_success:
- exists-trace
-"Ex #t.
-    San_TransparencyCheck_wo_MMD_success()@t
-    & not (Ex #t. Compromise()@t)
-"
-
-lemma san_TransparencyCheck_wo_MMD_failed:
- exists-trace
-"Ex #t.
-    San_TransparencyCheck_wo_MMD_failed()@t
-    & not (Ex #t. Compromise()@t)
-"
-
 lemma san_compromiseCA:
  exists-trace 
 "Ex #t. 
@@ -1387,208 +1494,65 @@ lemma san_compromiseMonitor:
 	San_compromiseMonitor()@t
 "
 
-/* ------------------------------ */
+/* Sanity receipt checks */
 
-/* Authenticity */
-
-// counterexample to authenticity
-lemma authenticity:
-    exists-trace
-    "Ex L1 L2 rootCA ca_fields CA fields #j.
-        BrowserAcceptsChain(CA, fields, rootCA, ca_fields, L1, L2)@j 
-        & not (Ex #i. GroundTruth(CA, fields)@i & #i < #j)"
-
-lemma authenticity_honest:
-    "All L1 L2 rootCA ca_fields CA fields #t. BrowserAcceptsChain(CA, fields, rootCA, ca_fields, L1, L2)@t ==> 
-                /* If client accepted cert signed by CA */
-          (Ex #t1. CAAsserts(CA, fields)@t1) 
-            /* then CA asserts this certificate */
-        | (Ex #t2. CompromiseCA(CA)@t2 & #t2 < #t ) 
-            /* or that particular CA is compromised */
-        | (Ex #t2. CompromiseRootCA(rootCA)@t2 & #t2 < #t )
-            /* or the root CA is compromised */
-    "
-
-lemma cert_sct_auth:
-    "All #t1 CA L1 sct1 L2 sct2. Certified(CA, L1, sct1, L2, sct2)@t1 
-            /* If a CA asserts a public key certificate with sct1 and sct2 */
-      ==>
-       ((Ex #t2 #t3. 
-        LoggerAsserts(L1, sct1)@t2 & LoggerAsserts(L2, sct2)@t3
-        & not (L1 = L2)
-        /* then a logger has previously issued them honestly */
-      )
-    |  (Ex #t2. Compromise()@t2 & #t2 < #t1 ))
-    /* or there has been corruption going on */
-    "
-    
-lemma sct_auth: 
-    "All l1 l2 rootCA ca_fields CA fields #t.
-        BrowserAcceptsChain(CA, fields, rootCA, ca_fields, l1, l2)@t ==>
-            /* If a client accepts a certificate with SCTs from l1 and l2... */
-            (
-            (Ex lid1 lid2 time1 time2 #lt1 #lt2.
-                LoggerComputesAddLogFields(l1, lid1, fields, time1)@lt1
-            &   LoggerComputesAddLogFields(l2, lid2, fields, time2)@lt2
-            & #lt1 < #t
-            & #lt2 < #t 
-                /* then both loggers have added and entry to their log */ 
-            ) 
-            | (Ex #c1. CompromiseLogger(l1)@c1)
-            | (Ex #c2. CompromiseLogger(l2)@c2)
-                /* or they are corrupt */
-        )
-        "
-
-/* ---------------------
-        TRANSPARENCY
-   --------------------- */
-
-/*
-if we instead assume the MMD (ProofRunsAfterMMD) is respected, transparency can still fail if the considered logger is corrupt.
-*/
-lemma transparency_w_MMD:
-    "
-    All CA fields rootCA ca_fields L1 L2 L #t1 #t2.
-        BrowserAcceptsChain(CA, fields, rootCA, ca_fields, L1, L2)@t1
-        & ((L = L1) | (L = L2))
-        & CTTransparencyCheck(L, fields)@t2
-        & #t1 < #t2
-            ==>
-            CTTransparencyCheckSuccess(L, fields)@t2
-    "
-
-
-lemma transparency_w_MMD_honest_log_helper [reuse]:
-    "
-    All L fields #t1.
-        CTTransparencyCheck(L, fields)@t1
-        & not (Ex #t. CompromiseLogger(L)@t)
-            ==>
-            CTTransparencyCheckSuccess(L, fields)@t1
-    "
-/*
-...but if we assume the logger is honest (not corrupt) and the MMD is respected, transparency holds.
-*/
-lemma transparency_w_MMD_honest_log:
-    "
-    All CA fields rootCA ca_fields L1 L2 L #t1 #t2.
-        BrowserAcceptsChain(CA, fields, rootCA, ca_fields, L1, L2)@t1
-        & ((L = L1) | (L = L2))
-        & CTTransparencyCheck(L, fields)@t2
-        & #t1 < #t2
-        & not (Ex #t. CompromiseLogger(L)@t)
-            ==>
-            CTTransparencyCheckSuccess(L, fields)@t2
-    "
-
-
-
-/* Counterexample: without MMD, transparency can fail even if the logger is honest */
-lemma transparency_wo_MMD:
-    "
-    All CA fields rootCA ca_fields L1 L2 L #t1 #t2.
-        BrowserAcceptsChain(CA, fields, rootCA, ca_fields, L1, L2)@t1
-        & ((L = L1) | (L = L2))
-        & CTTransparencyCheck_wo_MMD(L, fields)@t2
-        & #t1 < #t2
-            ==>
-            CTTransparencyCheckSuccess_wo_MMD(L, fields)@t2
-    "
-
-/* ------------------------
-    ACCOUNTABILITY LEMMAS
-   ------------------------ */
-
-/* ----- Accountable Transparency ----- */
-
-
-test client_inclusionViol:
-    "Ex M fields session #t #t1.
-        AssertsNot(M, 'This loggers log currently includes these fields.', L, <fields, session>)@t // L blamed
-        & CTTransparencyCheckSession(L, fields, session)@t1
-    "
-
-lemma T_CT_1:
-    client_inclusionViol accounts for
-    "All CA fields rootCA ca_fields L1 L2 L #t1 #t2.
-        BrowserAcceptsChain(CA, fields, rootCA, ca_fields, L1, L2)@t1
-        & ((L = L1) | (L = L2))
-        & CTTransparencyCheck(L, fields)@t2
-        & #t1 < #t2
-            ==>
-            CTTransparencyCheckSuccess(L, fields)@t2
-    "
-
-/* ======================================
-       End2End Accountable Authenticity
-   ====================================== */
-
-/***** Accountable Authenticity (CT) *****/
-
-/* A_CT: */
-
-
-test ca_auth_on_log:
-    "Ex M rootCA fields ca_fields #t0 #t1 #t2.
-        CTCheck(M, fields, CA, ca_fields)@t0
-        & Asserts(M, 'Blame this CA.', CA, <fields, ca_fields>)@t1
-            /* fields contradicts known ground truth of monitor */
-        & Asserts(rootCA, 'I signed this intermediate CA.', CA, <ca_fields>)@t2
-    "
-
-test root_ca_auth_on_log:
-"Ex M CA fields ca_fields #t0 #t1 #t2.
-    CTCheck(M, fields, CA, ca_fields)@t0
-    & Asserts(M, 'Blame this CA.', CA,
-         <fields, ca_fields>)@t1
-    & Asserts('CCADB', 'No root CA signed this CA.', CA, <ca_fields, rootCA>)@t2
+lemma san_DomainOwnerContract:
+ exists-trace 
+"Ex #t. 
+	San_DomainOwnerContract()@t
+	& not (Ex #t. Compromise()@t)
 "
 
-// find counter-example against A_CT_1_verif_empty
-lemma A_CT_1:
-    ca_auth_on_log, root_ca_auth_on_log accounts for
-    "All CA fields rootCA ca_fields L1 L2 M #t0 #t1. 
-        CTCheck(M, fields, CA, ca_fields)@t0
-        & BrowserAcceptsChain(CA, fields, rootCA, ca_fields, L1, L2)@t1
-            ==> (Ex #t. GroundTruth(CA, fields)@t)
-    "
+lemma san_signReceipt:
+ exists-trace 
+"Ex #t. 
+	San_signReceipt()@t
+	& not (Ex #t. Compromise()@t)
+"
 
-test ca_rogue_honest_log: // CA free
-    "Ex M rootCA fields ca_fields #t0 #t1 #t2.
-        CTCheck(M, fields, CA, ca_fields)@t0
-        & Asserts(M, 'Blame this CA.', CA, <fields, ca_fields>)@t1
-            /* fields contradicts known ground truth of monitor */
-        & Asserts(rootCA, 'I signed this intermediate CA.', CA, <ca_fields>)@t2
-        & not (Ex L #t. CompromiseLogger(L)@t)
-        & not (Ex #t. CompromiseMonitor(M)@t)
-    "
+lemma san_clientReceivesReceipt:
+ exists-trace 
+"Ex #t. 
+	San_clientReceivesReceipt()@t
+	& not (Ex #t. Compromise()@t)
+"
 
-test root_ca_rogue_honest_log: // rootCA free
-    "Ex M CA fields ca_fields #t0 #t1 #t2.
-        CTCheck(M, fields, CA, ca_fields)@t0
-        & Asserts(M, 'Blame this CA.', CA, <fields, ca_fields>)@t1
-            /* fields contradicts known ground truth of monitor */
-        & Asserts('CCADB', 'No root CA signed this CA.', CA, <ca_fields, rootCA>)@t2
-        & not (Ex L #t. CompromiseLogger(L)@t)
-        & not (Ex #t. CompromiseMonitor(M)@t)
-    "
+lemma san_domainOwnerBlamesMonitor:
+ exists-trace 
+"Ex #t. 
+	San_domainOwnerBlamesMonitor()@t
+	& (All #t. Compromise()@t ==> 
+        ((Ex M. CompromiseMonitor(M)@t) 
+        | (Ex CA. CompromiseCA(CA)@t))
+        ) // only monitor and CA corruptions allowed
+"
 
-/* Accountable authenticity under honest logger (transparency) and honest monitor holds */
-/* Scenario 2: Monitor runs authenticity check on log entries (as Scenario 3), but this time the log is assumed to be honest. Given additionally MMD, the following holds: */
-lemma A_CT_2:
-    ca_rogue_honest_log, root_ca_rogue_honest_log accounts for
-    "All CA fields rootCA ca_fields L1 L2 M #t0 #t1. 
-        CTCheck(M, fields, CA, ca_fields)@t0
-        & BrowserAcceptsChain(CA, fields, rootCA, ca_fields, L1, L2)@t1
-        & not (Ex L #t. CompromiseLogger(L)@t)
-        & not (Ex #t. CompromiseMonitor(M)@t)
-            ==> (Ex #t. GroundTruth(CA, fields)@t)
-    "
+lemma san_domainOwnerVerifiesReceipt_1:
+ exists-trace 
+"Ex #t. 
+	San_domainOwnerVerifiesReceipt_1()@t
+	& (All #t. Compromise()@t ==> (Ex CA. CompromiseCA(CA)@t)) // only CA corruptions allowed
+"
+
+lemma san_domainOwnerVerifiesReceipt_2:
+ exists-trace 
+"Ex #t. 
+	San_domainOwnerVerifiesReceipt_2()@t
+	& not (Ex #t. Compromise()@t)
+"
+
+lemma san_SCTReceiptCheck:
+ exists-trace 
+"Ex #t. 
+    San_SCTReceiptCheck()@t
+    & not (Ex #t. Compromise()@t)
+"
+
+/***** Accountable Authenticity *****/
 
 lemma A_uniq1_helper [reuse]:
-    "All CA M rootCA fields ca_fields #t1 #t2.
-        Asserts( M, 'Blame this CA.', CA, <fields, ca_fields>)@t1 
+    "All CA id rootCA fields ca_fields #t1 #t2.
+        AssertsNot( id, 'this is a correct statement', CA, <fields, ca_fields>)@t1 
         & Asserts( rootCA, 'I signed this intermediate CA.', CA, ca_fields)@t2
         ==>
         (Ex #i. Corrupted( CA ) @ #i)
@@ -1596,8 +1560,92 @@ lemma A_uniq1_helper [reuse]:
 
 lemma A_uniq2_helper [reuse]:
     "All rootCA CA ca_fields #t.
-    Asserts('CCADB', 'No root CA signed this CA.', CA, <ca_fields, rootCA>)@t
+    AssertsNot(rootCA, 'I signed this intermediate CA.', CA, <ca_fields>)@t
     ==> (Ex #t. Corrupted(rootCA)@t)"
+
+
+/* Accountable authenticity with receipts */
+
+test receipt_1:
+    "Ex M id fields rootCA ca_fields #t #t1 #t2 #t3.
+    SCTReceiptCheck(M, fields)@t
+    & AssertsNot(id, 'this is a correct statement', CA, <fields, ca_fields>)@t1 // CA blamed
+    & AssertsNot(id, 'This monitor did not react', M, <fields>)@t2 // monitor not blamed
+    & Asserts(rootCA, 'I signed this intermediate CA.', CA, <ca_fields>)@t3 // CA is liable
+    "
+
+test receipt_2:
+    "Ex M id fields CA ca_fields #t #t1 #t2 #t3.
+    SCTReceiptCheck(M, fields)@t
+    & AssertsNot(id, 'this is a correct statement', CA, <fields, ca_fields>)@t1 // CA blamed
+    & AssertsNot(id, 'This monitor did not react', M, <fields>)@t2 // monitor not blamed
+    & AssertsNot(rootCA, 'I signed this intermediate CA.', CA, <ca_fields>)@t3 // rootCA is liable
+    "
+
+test receipt_3:
+    "Ex id fields rootCA ca_fields #t #t1 #t2 #t3.
+    SCTReceiptCheck(M, fields)@t
+    & AssertsNot(id, 'this is a correct statement', CA, <fields, ca_fields>)@t1 // CA blamed
+    & Asserts(id, 'This monitor did not react', M, <fields>)@t2 // monitor blamed
+    & Asserts(rootCA, 'I signed this intermediate CA.', CA, <ca_fields>)@t3 // CA is liable
+    //& not [receipt_1, receipt_2]
+    & not (Ex M id fields CA rootCA ca_fields #t #t1 #t2 #t3.
+    SCTReceiptCheck(M, fields)@t
+    & AssertsNot(id, 'this is a correct statement', CA, <fields, ca_fields>)@t1
+    & AssertsNot(id, 'This monitor did not react', M, <fields>)@t2
+    & Asserts(rootCA, 'I signed this intermediate CA.', CA, <ca_fields>)@t3
+    )
+    & not (Ex M id fields rootCA CA ca_fields #t #t1 #t2 #t3.
+    SCTReceiptCheck(M, fields)@t
+    & AssertsNot(id, 'this is a correct statement', CA, <fields, ca_fields>)@t1
+    & AssertsNot(id, 'This monitor did not react', M, <fields>)@t2
+    & AssertsNot(rootCA, 'I signed this intermediate CA.', CA, <ca_fields>)@t3)
+    "
+
+test receipt_4:
+    "Ex id fields CA ca_fields #t #t1 #t2 #t3.
+    SCTReceiptCheck(M, fields)@t
+    & AssertsNot(id, 'this is a correct statement', CA, <fields, ca_fields>)@t1 // CA blamed
+    & Asserts(id, 'This monitor did not react', M, <fields>)@t2 // monitor blamed
+    & AssertsNot(rootCA, 'I signed this intermediate CA.', CA, <ca_fields>)@t3 // rootCA is liable
+    //& not [receipt_1, receipt_2]
+    & not (Ex M id fields CA rootCA ca_fields #t #t1 #t2 #t3.
+    SCTReceiptCheck(M, fields)@t
+    & AssertsNot(id, 'this is a correct statement', CA, <fields, ca_fields>)@t1
+    & AssertsNot(id, 'This monitor did not react', M, <fields>)@t2
+    & Asserts(rootCA, 'I signed this intermediate CA.', CA, <ca_fields>)@t3
+    )
+    & not (Ex M id fields rootCA CA ca_fields #t #t1 #t2 #t3.
+    SCTReceiptCheck(M, fields)@t
+    & AssertsNot(id, 'this is a correct statement', CA, <fields, ca_fields>)@t1
+    & AssertsNot(id, 'This monitor did not react', M, <fields>)@t2
+    & AssertsNot(rootCA, 'I signed this intermediate CA.', CA, <ca_fields>)@t3)
+    "
+
+lemma A_Receipt:
+    receipt_1, receipt_2, receipt_3, receipt_4
+    accounts for
+    "All CA fields rootCA ca_fields L1 L2 M #t0 #t1.
+    SCTReceiptCheck(M, fields)@t0
+    & BrowserAcceptsChain(CA, fields, rootCA, ca_fields, L1, L2)@t1
+    ==> (Ex CA #t. GroundTruth(CA, fields)@t)"
+
+
+lemma A_Receipt_inj3_helper [reuse]:
+  "All CA M id fields rootCA ca_fields #t1 #t2 #t3.
+    AssertsNot( id, 'this is a correct statement', CA, <fields, ca_fields>)@t1 
+    & Asserts( id, 'This monitor did not react', M, fields)@t2
+    & Asserts( rootCA, 'I signed this intermediate CA.', CA, ca_fields)@t3
+        ==>
+        ((not(CA = M)) & (not(M = CA)))"
+
+lemma A_Receipt_inj4_helper [reuse]:
+  "All CA M id fields rootCA ca_fields #t1 #t2 #t3.
+    AssertsNot( id, 'this is a correct statement', CA, <fields, ca_fields>)@t1 
+    & Asserts( id, 'This monitor did not react', M, fields)@t2
+    & AssertsNot( rootCA, 'I signed this intermediate CA.', CA, ca_fields)@t3
+        ==>
+        ((not(rootCA = M)) & (not(M = rootCA)))"
 
 /* END LEMMAS */
 
@@ -1619,7 +1667,7 @@ restriction Certified_once:
     "All CA1 fields1 fields2 CA2 #t1 #t2. CAAsserts(CA1, fields1)@t1 & CAAsserts(CA2, fields2)@t2 ==> (#t1 = #t2)"
 
 restriction ChainAccept_once:
-    "All L11 L21 rootCA1 ca_fields1 CA1 fields1 #t1 L12 L22 rootCA2 ca_fields2 CA2 fields2 #t2. BrowserAcceptsChain(CA1, fields1, rootCA1, ca_fields1, L11, L21)@t1 & BrowserAcceptsChain(CA2, fields2, rootCA2, ca_fields2, L12, L22)@t2 ==> (#t1 = #t2)"
+    "All L11 L21 rootCA1 ca_fields1 CA1 fields1 #t1 L12 L22 rootCA2 ca_fields2 CA2 fields2 #t2. BrowserAcceptsChain( CA1, fields1, rootCA1,ca_fields1, L11, L21 )@t1 & BrowserAcceptsChain( CA2, fields2, rootCA2, ca_fields2,  L12, L22 )@t2 ==> (#t1 = #t2)"
 
 restriction addtolog_per_logger_once:
     "All L log_id1 chain1 log_id2 fields1 fields2 chain2 ca_cert1 ca_cert2 time1 time2 #t1 #t2. LoggerComputesAddLog(L, log_id1, fields1, ca_cert1, chain1, time1)@t1 & LoggerComputesAddLog(L, log_id2, fields2, ca_cert2, chain2, time2)@t2 ==> (#t1 = #t2)"
@@ -1627,11 +1675,11 @@ restriction addtolog_per_logger_once:
 restriction time_once:
     "All i #t1 #t2. Time(i)@t1 & Time(i)@t2 ==> (#t1 = #t2)"
 
-restriction CTCheck_once:
-    "All M fields CA ca_fields #t1 #t2. CTCheck(M, fields, CA, ca_fields)@t1 & CTCheck(M, fields, CA, ca_fields)@t2 ==> (#t1 = #t2)"
+restriction sctReceiptCheck_once:
+    "All M1 M2 fields1 fields2 #t1 #t2. SCTReceiptCheck(M1, fields1)@t1 & SCTReceiptCheck(M2, fields2)@t2 ==> (#t1 = #t2)"
 
-restriction monitorFindsRogueCertificate_once:
-    "All #t1 #t2. San_monitorFindsRogueCertificate()@t1 & San_monitorFindsRogueCertificate()@t2 ==> (#t1 = #t2)"
+restriction receiptChecks_once:
+    "All #t1 #t2. ReceiptCheck()@t1 & ReceiptCheck()@t2 ==> (#t1 = #t2)"
 
 #endif
 
