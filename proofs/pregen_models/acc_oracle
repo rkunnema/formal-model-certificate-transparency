@@ -1,0 +1,110 @@
+#!/usr/bin/python3
+import sys
+import re
+
+lines = sys.stdin.readlines()
+l = []
+
+deprio = []
+
+lemma = sys.argv[1]
+for line in lines:
+    num = line.split(':')[0]
+
+    if lemma == "A_Gossip_1_rootCA_rogue_gossip_suff":
+        if "∀ different_time chain #t." in line:
+            l.append(num) # deprio
+        else:
+            l = [num] + l # Note: this shuffles the order a bit from default, we could do this properly and only deprio as originally intended, but this tactic works well
+
+    elif lemma == "A_Gossip_1_rootCA_benign_gossip_suff":
+        if "∀ different_time chain #t." in line:
+            l.append(num) # deprio
+        else:
+            l = [num] + l
+
+    elif lemma == "A_Gossip_1_verif_empty":
+        if "( ~skCA" in line:
+            l = [num] + l
+        elif "!CA_s0( $L" in line:
+            l = [num] + l
+        elif "!Monitor( $L" in line:
+            l = [num] + l
+        elif "Corrupted(" in line:
+            l = [num] + l
+        elif "!Root_CA_s0( $L" in line:
+            l = [num] + l
+        elif "!CA_s0( $rootCA" in line:
+            l = [num] + l
+        elif "!Logger_s( $rootCA" in line:
+            l = [num] + l
+        else:
+            continue
+
+    elif lemma == "A_Gossip_2_verif_empty":
+        if "( ~skCA" in line:
+            l = [num] + l
+        elif "!CA_s0( $L" in line:
+            l = [num] + l
+        elif "!Monitor( $L" in line:
+            l = [num] + l
+        elif "Corrupted(" in line:
+            l = [num] + l
+        elif "!Root_CA_s0( $L" in line:
+            l = [num] + l
+        elif "!CA_s0( $rootCA" in line:
+            l = [num] + l
+        elif "!Logger_s( $rootCA" in line:
+            l = [num] + l
+        elif "CompromiseLogger" in line:
+            l = [num] + l
+        elif "CompromiseMonitor" in line:
+            l = [num] + l
+        elif "!Corrupted_Logger" in line:
+            l = [num] + l
+        else:
+            continue
+
+    elif lemma == "A_Gossip_2_rootCA_rogue_gossip_log_honest_verif_nonempty":
+        if "(∃ #t. (CompromiseLogger( L ) @ #t))  ∥ (∃ #t. (CompromiseMonitor( M ) @ #t))  ∥ (∃ CA #t. (GroundTruth( CA, fields ) @ #t))" in line:
+            l = [num] + l
+        elif "'Blame this CA.'" in line:
+            l = [num] + l
+        else:
+            continue
+
+    elif lemma == "A_Gossip_2_rootCA_benign_gossip_log_honest_verif_nonempty":
+        if "(∃ #t. (CompromiseLogger( L ) @ #t))  ∥ (∃ #t. (CompromiseMonitor( M ) @ #t))  ∥ (∃ CA #t. (GroundTruth( CA, fields ) @ #t))" in line:
+            l = [num] + l
+        elif "'Blame this CA.'" in line:
+            l = [num] + l
+        else:
+            continue
+
+    # elif lemma == "T_Gossip_verif_empty":
+    #     if "∀ different_time chain #t." in line:
+    #         deprio.append(num)
+    #     else:
+    #         l.append(num)
+
+    elif lemma == "T_Gossip_gossip_appendOnly_viol_verif_nonempty":
+        if "∀ different_time chain #t." in line:
+            deprio.append(num)
+        else:
+            l.append(num)
+
+    else:
+        # print(f'[ORACLE] Unknown lemma ({lemma}), using default heuristic')
+        exit(0) # instead then use default heuristic (o or O)
+
+    # Add custom behavior here for other lemmas here
+    # elif lemma == "OTHER_LEMMA_NAME":
+    #     if re.match('SOME_REGEX', line):
+    #         l.append(num)
+    #     else:
+    #         exit(0)
+
+for i in l:
+    print(i)
+for i in deprio:
+    print(i) # Add deprio at the end

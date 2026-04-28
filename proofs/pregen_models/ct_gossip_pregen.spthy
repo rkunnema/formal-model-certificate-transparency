@@ -1,0 +1,2555 @@
+/*
+ * Protocol: Certficate Transparency with additions for STH Gossiping
+ * Modeler:  anonymized
+ * Date:     July 2025
+ * Sources:  RFC6962, RFC 9162, "Opt-in SCT Auditing", Emily Stark and Chris Thompson, and partly rooted on "Provable Security for PKI Schemes" by Wrótniak et al.
+ * Status:   working
+ * Notes:    consult README for instructions on evaluating this model
+ */
+
+theory ct_gossip
+begin
+
+functions:
+    pk/1,
+    sign/2,
+    verify/3[destructor], /* sign + verify */
+
+
+    /*Structure of a certificate as tuple with
+    
+    + Normal certificate 
+    <Issuer, Subject, Key, Type, serial number, issued timestamp, valid until timestamp>
+    + SCTs
+    <Logger Identity, 'SCT', timestamp, signature>
+    + Public Key certificate with embedded SCTs
+    <Issuer, Subject, Key, Type, serial number, issued timestamp, valid until timestamp, sct1, sct2>
+
+    Different types are: 
+    1. 'pre-cert'
+    2. 'SCT': Signed Certificate Timestamp
+    3. 'pubKey': Public Key Certificate (finished certificate after issued as PreCert)
+        3.1 'pubKey-CA': Public Key Certificate of a CA
+    4. 'selfCert': Certificate is self signed, usually root of trust
+        4.1 'selfCert-log': Logger's self-signed certificate
+
+    */
+
+    
+    true/0
+
+equations:
+
+    verify(       sign(fields, sk), fields, pk(sk)           ) = true()
+
+/** Specification **/
+
+/* Register a root CA that will later sign other intermediate CA certificates. */
+rule Root_CA_Init [color= #620c97]:
+    let 
+        fields = <$CA, $CA, pk(~skCA), 'selfCert', ~sn, $now, $j>
+        self_sig = sign(fields, ~skCA)
+    in
+    [ Fr(~skCA), Fr(~sn) ]
+    --[ 
+        CA_Registered($CA, ~skCA, pk(~skCA)), 
+        Root_CA_Init($CA),
+
+        Time($now),
+        San_Root_CA_Init()
+    ]->
+    [   Out(fields), Out(self_sig), 
+        Out(<$CA, pk(~skCA)>), /* publicly announce the public key and certificate on the network */
+        !Root_CA_s0($CA, ~skCA, pk(~skCA)), 
+        !Root_CA($CA, pk(~skCA)) ]
+
+/* Register a CA that will later sign other certificates. This CA is assumed to be non-root and has its own certificate signed by a root CA.
+Intermediate CAs created by this rule are defined as legitimate and they are documented by their root CA. See later discussions for checks that require the !CA_Documentation fact.
+*/
+rule Intermediate_CA_Init [color= #c871ff]:
+    let 
+        fields = <$rootCA, $CA, pk(~skCA), 'pubKey-CA', ~sn, $now, $j>
+        self_sig = sign(fields, skRootCA)
+    in
+    [ Fr(~skCA), Fr(~sn), !Root_CA_s0($rootCA, skRootCA, pkRootCA) /* Root CA that signs this CA */  ]
+    --[ 
+        CA_Registered($CA, ~skCA, pk(~skCA)), /* restrictions on CA registrations apply to both CAs and Root CAs */
+        NonRoot_CA_Init($CA),
+        DocumentedCA($rootCA, $CA, fields),
+        
+        Time($now),
+        San_Intermediate_CA_Init()
+    ]->
+    [   Out(fields), Out(self_sig), 
+        Out(<$CA, pk(~skCA)>), /* publicly announce the public key and certificate on the network */
+        !CA_s0($CA, ~skCA, pk(~skCA), fields, self_sig), !CA_Documentation($rootCA, $CA, fields, self_sig) ]
+
+/* The domain owner represents the party on the web, running a server with some domain / Common Name (CN) with a key pair that needs certification by some CA. It is equivalent to a HTTPS server that needs a certificate in order to hand it out to visiting clients; performing a key exchange subsequently. */
+rule Domain_Owner_Init [color= #c6c6c6]:
+    let
+        pubK = pk(~sk)
+    in
+    [ Fr(~sk) ]
+    --[ 
+        Time($now),
+        San_Domain_Owner_Init()
+    ]->
+    [ !DomainOwner($idServer, pubK), /* The DomainOwner fact serves as a proof of identity: If this fact is later used for issuing a certificate, we say that it is honestly issued (i.e., on behalf of the domain owner). see honest rules for issuing a pre-certificate for instace. */ 
+    Out(pubK) /* Public key is announced on the network */ ]
+
+
+/* Initialize a Monitor. A Monitor will later oversee the loggers. Monitoring is either conducted by the domain owner themselves or outsourced to a dedicated entity. */
+rule Monitor_Init:
+    [  ]
+    --[ 
+        Monitor_Registered($M),
+
+        Time($now),
+        San_Monitor_Init()
+     ]->
+    [ !Monitor($M) ]
+
+/* Monitor can choose a logger and start the monitoring process of it. Only these known loggers will later be considered when exploring new certificates. */
+rule StartMonitoring [color= #ffdc4e]:
+    [ !Monitor($M), !Logger($L, pkL) ]
+    --[ 
+        Time($now),
+        San_StartMonitoring()
+    ]->
+    [ !LoggerDict($M, $L) ]
+
+/* This rule can trigger if the logger violates the append-only property and the monitor checks for it. 
+see restriction for 'AppendOnlyViolation'
+In CT, usually this check is not necessary to run by the monitor as they explore all entries and do not rely on STHs that much */ 
+rule monitorFindsAppendOnlyViolation [color= #e65208]:
+    [ !LoggerDict($M, $L), !TLS_L_to_M($L, $M, $snapshot, sth, session, $time) ]
+    --[
+        AppendOnlyViolation($M, $L, sth, session),
+
+        Time($now),
+        San_monitorFindsAppendOnlyViolation()
+    ]->
+    [ ]
+
+rule monitorVerifiesAppendOnly [color= #e65208]:
+    [ !LoggerDict($M, $L), !TLS_L_to_M($L, $M, $snapshot, sth, session, $time) ]
+    --[
+        AppendOnlyVerified($M, $L, sth, session),
+        
+        Time($now),
+        San_monitorVerifiesAppendOnly()
+    ]->
+    [ ]
+
+/* A Monitor receives a subject that it should track which means that if a certificate with this subject is contained in a log, it will compare it to the known truth. */
+rule monitorTrackSubject [color= #fac800]:
+    [ !Monitor($M), !DomainOwner(su, pubK) ]
+    --[ 
+        Time($now), 
+        San_monitorTrackSubject() 
+    ]->
+    [ !TrackSubject($M, su) /* from here on the monitor tracks the subject 'su'. We implicitly include that during their contract the domain owner shares honestly issued certificates with this monitor. The monitor will subsequently in authenticity checks make use of this ground truth knowledge. The checks are formalized below in the restrictions rogueCert and benignCert. */ ]
+
+restriction rogueCert:
+    "All CA fields #t1. RogueCert(CA, fields)@t1 ==> not (Ex #t0. GroundTruth(CA, fields)@t0 & #t0 < #t1)"
+
+restriction benignCert:
+    "All CA fields #t1. BenignCert(CA, fields)@t1 ==> (Ex #t0. GroundTruth(CA, fields)@t0 & #t0 < #t1)"
+
+/******** CT Monitor Log Exploration ********/
+
+/* We use these rules to axiomatically assert later in inclusion proof whether a chain on the log is valid or not */
+rule ChainValidator_Valid:
+    let
+        ca_fields = <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
+        cert_fields = <$CA, $subj, ke, 'pre-cert', sn, $i, $j>
+        chain = <<cert_fields, cert_sig>, <ca_fields, ca_sig>>
+    in
+    [ In(cert_fields), In(cert_sig), In(ca_fields), In(ca_sig), !Root_CA($rootCA, pkRootCA) ]
+    --[
+        Eq(verify(cert_sig, cert_fields, pkCA), true()),
+        Eq(verify(ca_sig, ca_fields, pkRootCA), true()),
+        ChainCheck(chain),
+        ChainValid(chain),
+
+        San_ChainValidator_Valid()
+    ]->
+    [ ]
+
+rule ChainValidator_Invalid:
+    let
+        ca_fields = <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
+        cert_fields = <$CA, $subj, ke, 'pre-cert', sn, $i, $j>
+        chain = <<cert_fields, cert_sig>, <ca_fields, ca_sig>>
+    in
+    [ In(cert_fields), In(cert_sig), In(ca_fields), In(ca_sig), !Root_CA($rootCA, pkRootCA) ]
+    --[
+        _restrict(not (
+            (verify(cert_sig, cert_fields, pkCA) = true()) 
+            & 
+            (verify(ca_sig, ca_fields, pkRootCA) = true())
+          ) /* chain does not verify */
+        ),
+        ChainCheck(chain),
+        ChainInvalid(chain),
+
+        San_ChainValidator_Invalid()
+    ]->
+    [ ]
+
+
+/* 
+The following rules cover monitor exploration via the log to find potentially rogue certificates. When looking for a certificate, there are different outcomes that are encoded in different rules here:
+    1. The monitor finds a rogue certificate in a log, this is reachable as soon as a rogue certificate is contained in the snapshot shared by the logger.
+    2. The monitor finds a benign certificate. No further action is needed
+    3. The monitor does not find any (rogue) certificate. No further action is needed
+    4. The monitor finds a rogue certificate but is itself malicious: It will ignore the finding and not alert the customer. We say that a monitor sleeps on a rogue entry in this case. 
+*/
+
+/* Restrictions formalizing the exploration behavior */
+
+
+/* We formalize whether a snapshot presented contains an entry or not using predicates. */
+predicate: ChainVisible(Logger, fields, ca_cert, log_id, #time, sth_time) <=> 
+    (Ex chain different_time #t.
+        LoggerComputesAddLog(Logger, log_id, fields, ca_cert, chain, different_time)@t /* there has been an addition to log_id prior to #time */
+        & not(sth_time = different_time) /* ...that addition was visible */
+        & #t < #time
+        ) 
+
+predicate: NoChainVisible(Logger, fields, log_id, #time, sth_time) <=>
+    (not (Ex different_time #t. 
+            LoggerComputesAddLogFields(Logger, log_id, fields, different_time)@t
+            & not (sth_time = different_time) /* or there has never been a visible addition to the log */
+            & #t < #time
+        ))
+        /* OR: for all additions with fields, the chain is invalid. The monitor will only react to correctly signed certificates. Especially as we focus on accountability, wrongly signed certificates do not serve as actionable evidence. */
+        | ((All ca_cert different_time chain #t2 #t.
+            LoggerComputesAddLog(Logger, log_id, fields, ca_cert, chain, different_time)@t
+            & not (sth_time = different_time)
+            & #t < #time
+            & ChainCheck(chain)@t2
+            ==> ChainInvalid(chain)@t2
+        ) & (All different_time ca_cert chain #t.
+            LoggerComputesAddLog(Logger, log_id, fields, ca_cert, chain, different_time)@t
+            & #t < #time
+            ==> (Ex #t2. ChainCheck(chain)@t2)
+        ))
+
+
+/* Good case: Monitor was able to find the entry on the log. Note how we turn back to the whole chain here: Monitor exploration also covers the supplemental information a log offers. On the monitor side we also check the validity of this chain */
+restriction logExplorationSucceeds:
+    "All M L fields ca_cert sth session #t5. 
+    MonitorObservesEntry(M, L, fields, ca_cert, sth, session)@t5
+    ==> (Ex log_id time #t2. 
+        LoggerPresentsView(L, M, log_id, time, sth, session)@t2 
+            /* Logger handed out an STH to the recipient... */
+        & #t2 < #t5 /* ...prior to the check */
+        & ChainVisible(L, fields, ca_cert, log_id, #t2, time) 
+            /* ...and the entry is visible in that view */
+        )"
+
+/* There is no entry on the log that is valid and has fields in it. By construction, if the other case occurs and we assume that the monitor explores the log, we force that one case is reachable which then ends up with a succeeding exploration for exactly the certificate that is matching on the log */
+restriction logExplorationFails:
+    "All M L fields sth session #t1. 
+    NothingObserved(M, L, fields, sth, session)@t1
+    ==> (Ex log_id time #t0. 
+        LoggerPresentsView(L, M, log_id, time, sth, session)@t0 
+            /* Logger handed out an STH to the recipient... */
+        & #t0 < #t1 /* ...prior to the check */
+        & NoChainVisible(L, fields, log_id, #t0, time) 
+            /* ...and the entry is not visible in that view */
+        )"
+
+
+
+rule monitorFindsRogueCertificate [color= #f3d664]:
+    let
+        ca_fields = <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
+        pub_fields = <$CA, $subj, ke, 'pubKey', sn, $i, $j, sct1, sct2>
+        fields = <$CA, $subj, ke, 'pubKey', sn, $i, $j>
+    in
+    [ !LoggerDict($M, $L), !TrackSubject($M, su), In(pub_fields), In(cert_sig), In(ca_fields), In(ca_sig), !TLS_L_to_M($L, $M, $snapshot, sth, session, $time), !Root_CA($rootCA, pkRootCA) ]
+    --[ 
+        Eq(verify(cert_sig, pub_fields, pkCA), true()),
+        Eq(verify(ca_sig, ca_fields, pkRootCA), true()),
+        MonitorObservesEntry($M, $L, fields, <ca_fields, ca_sig>, sth, session), /* see restriction */
+        RogueCert($CA, fields), /* see restriction */
+        Asserts($M, 'Blame this CA.', $CA, <fields, ca_fields>),
+        MonitorScanLog(),
+
+        Time($now),
+        San_monitorFindsRogueCertificate()
+    ]->
+    [ MonitorFoundCert($M, $L, fields, $CA, ca_fields, $time, session)  ]
+
+rule monitorCanFindCertificate [color= #f3d664]:
+    let
+        ca_fields = <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
+        pub_fields = <$CA, $subj, ke, 'pubKey', sn, $i, $j, sct1, sct2>
+        fields = <$CA, $subj, ke, 'pubKey', sn, $i, $j>
+    in
+    [ !LoggerDict($M, $L), !TrackSubject($M, $subj), In(pub_fields), In(cert_sig), In(ca_fields), In(ca_sig), !TLS_L_to_M($L, $M, $snapshot, sth, session, $time), !Root_CA($rootCA, pkRootCA) ]
+    --[
+        Eq(verify(cert_sig, pub_fields, pkCA), true()),
+        Eq(verify(ca_sig, ca_fields, pkRootCA), true()),
+        MonitorObservesEntry($M, $L, fields, <ca_fields, ca_sig>, sth, session), /* see restriction */
+        BenignCert($iss, fields), /* cert is found benign, see restriction */
+        AssertsNot($M, 'Blame this CA.', $CA, <fields, ca_fields>),
+        MonitorScanLog(),
+
+        Time($now),
+        San_monitorCanFindCertificate()
+    ]->
+    [ MonitorFoundCert($M, $L, fields, $CA, ca_fields, $time, session) ]
+
+rule monitorCannotFindCertificate [color= #f3d664]:
+    let
+        ca_fields = <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
+        fields = <$CA, $subj, ke, 'pubKey', sn, $i, $j>
+        chain = <<fields, cert_sig>, <ca_fields, ca_sig>>
+    in
+    [ !LoggerDict($M, $L), !TrackSubject($M, su), In(fields), In(cert_sig), In(ca_fields), In(ca_sig), !TLS_L_to_M($L, $M, $snapshot, sth, session, $time), !Root_CA($rootCA, pkRootCA) ]
+    --[ 
+        NothingObserved($M, $L, fields, sth, session), /* see restriction */
+        AssertsNot($M, 'Blame this CA.', $CA, <fields, ca_fields>),
+        MonitorScanLog(),
+
+        Time($now),
+        San_monitorCannotFindCertificate()
+    ]->
+    [ MonitorCouldNotFindCert($M, fields, $L, $CA, ca_fields, $time, session)   ]
+
+rule monitorFindsRogueCertificate_Sleep [color= #af2828]:
+    let
+        ca_fields = <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
+        fields = <$CA, $subj, ke, 'pubKey', sn, $i, $j>
+        pub_fields = <$CA, $subj, ke, 'pubKey', sn, $i, $j, sct1, sct2>
+    in
+    [ !LoggerDict($M, $L), !St_bad_Monitor($M), !TrackSubject($M, su), In(pub_fields), In(cert_sig), In(ca_fields), In(ca_sig), !TLS_L_to_M($L, $M, $snapshot, sth, session, $time), !Root_CA($rootCA, pkRootCA) ]
+    --[
+        Eq(verify(cert_sig, pub_fields, pkCA), true()),
+        Eq(verify(ca_sig, ca_fields, pkRootCA), true()), /* only if it is a correctly signed and rogue cert, sleeping is considered a violation (+ we cannot check for other cases) */
+        MonitorObservesEntry($M, $L, fields, <ca_fields, ca_sig>, sth, session), /* see restriction */
+        RogueCert($CA, fields), /* see restriction */
+        MonitorScanLog(),
+
+        Time($now),
+        San_monitorFindsRogueCertificate_Sleep()
+    ]->
+    [ /* New: */ MonitorFoundCert($M, $L, fields, $CA, ca_fields, $time, session) /* but does not react: there is no assert in this rule, so the A_CT lemma needs to rule out monitor misbehavior (but we already know that it does not hold for other reasons) */ ]
+
+/* ----- Logger rules ----- */
+
+/* Initialize a Logger role. It will later be used to give out SCTs and STHs to others. The CT standard does not further define how authenticity of the loggers keys is ensured, e.g. Wrotniak's model uses self-signed certificates here.
+In general it is senseful to treat loggers like root CAs which we also just trust in this model. In practice, root CA keys are hardcoded in browser, the same holds for loggers. For this reason we also refrain from adding self-signed certificates here. */
+rule Logger_Init [color= #08a358]:
+    [ Fr(~skL)  ]
+    --[ 
+        Logger_Registered($L),
+
+        Time($now),
+        San_Logger_Init()
+    ]->
+    [ !Logger_s($L, ~skL, pk(~skL)), !Logger($L, pk(~skL)) ]
+
+/* We use this rule to start a new log for a Logger. In the honest case, we assume that this only happens once. We distinguish between a 'log' and a 'logger'. A logger maintains 1 or more logs. 'logs' contain the entries and can be inspected. Honest loggers maintain exactly one log, not more. */
+rule Start_Log [color= #08a358]:
+    [ !Logger_s($L, ~skL, pk(~skL)) ]
+    --[ 
+        StartedLog($L, $log_id), 
+        HonestStartedLog($L, $log_id),
+
+        Time($now),
+        San_Start_Log()
+    ]->
+    [ !Log($L, $log_id) ]
+
+/* Honest loggers start a log only once ==> no partition and equivocation possible */
+restriction honestStartLogOnlyOnce: 
+    "All L lid1 lid2 #t1 #t2. HonestStartedLog(L, lid1)@t1 & HonestStartedLog(L, lid2)@t2 ==> #t1 = #t2"
+
+/* when starting a different log, it must have a distinct (although public) log_id, to distinguish the different logs */
+restriction uniqueLogId:
+    "All L log_id #t1 #t2. StartedLog(L, log_id)@t1 & StartedLog(L, log_id)@t2 ==> #t1 = #t2"
+
+/* ...for the dishonest case, this might happen more often, can be seen in the trace then as additional rogue start. */
+rule Start_Log_malicious [color= #d83b0b]:
+    [ !Corrupted_Logger($L, ~skL, pk(~skL)) ]
+    --[ StartedLog($L, $log_id),
+        Time($now),
+        San_Start_Log_malicious()
+    ]->
+    [  ]
+
+/*
+pre-certificate is added to log along with the chain (signer of the precert, and certificate of the intermediate and rootCA). Includes whether the certificate is actually signed by the CA and whether it is still valid (relevant). Loggers are obliged to only add log entries of valid certificate chains for auditing purposes.
+- does NOT include: any checks whether the certificate should be issued, loggers rely on monitors to do that work
+*/
+rule add_preC_to_log [color= #08a358]:
+    let
+        preC_fields = <$CA, $id, pkID, 'pre-cert', sn, $i, $j> 
+        ca_fields = <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
+        fields = <$CA, $id, pkID, 'pubKey', sn, $i, $j>
+
+        sct_fields = <$L, 'SCT', $now, <$CA, $id, pkID, sn, $i, $j>>
+        sct_sig = sign(sct_fields, skL)
+        sct = <$L, 'SCT', $now, sct_sig>
+
+        chain = <<preC_fields, preC_sig>, <ca_fields, ca_sig>>
+    in
+    [ 
+        In(preC_fields), In(preC_sig), In(ca_fields), In(ca_sig), /* incoming pre-cert chain */ 
+        !Logger_s($L, skL, pk(skL)),
+        !Root_CA($rootCA, pkRootCA),
+        !Log($L, $log_id)
+    ]
+    --[
+        Eq(verify(preC_sig, preC_fields, pkCA), true()),
+        Eq(verify(ca_sig, ca_fields, pkRootCA), true()),
+        LoggerComputesAddLogFields($L, $log_id, fields, $now),
+        LoggerComputesAddLog($L, $log_id, fields, <ca_fields, ca_sig>, chain, $now),
+        /* While we add fields with pubKey (instead of the signed pre-cert) for simplicity (otherwise at every rule that looks into the look for a given pubKey certificate we would need to transform the single fields), we cannot do so for the chain: that would of course change the signature of the pre-cert. */
+        LoggerAsserts($L, sct),
+        CheckValidUntil($now, $j),
+
+        Time($now),
+        San_add_preC_to_log()
+    ]->
+    [ Out(sct) ]
+
+
+/* adds an arbitrary certificate to the log with $log_id; considered dishonest. Here we leave out checks and verification of the chain */
+rule forge_log_view [color= #d40808]: 
+    let
+        preC_fields = <$CA, $id, pkID, 'pre-cert', sn, $i, $j> 
+        fields = <$CA, $id, pkID, 'pubKey', sn, $i, $j>
+
+        ca_fields = <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
+
+    in
+    [ In(preC_fields), In(preC_sig), In(ca_fields), In(ca_sig),
+      /* Incoming certificate that is added */ 
+      !Corrupted_Logger($L, skL, pk(skL)) ]
+    --[
+        LoggerComputesAddLogFields($L, $log_id, fields, $now),
+        LoggerComputesAddLog($L, $log_id, fields, <ca_fields, ca_sig>, <<preC_fields, preC_sig>, <ca_fields, ca_sig>>, $now),
+        
+        Time($now),
+        San_forge_log_view()
+    ]->
+    [ ]
+
+
+/* ----- Certification ----- */
+
+/* 
+Invoked by a domain owner (DO): DO wants to have a certificate for its public key signed by CA, 
+CA "checks" identity and then creates a pre certificate to hand out to loggers tmt, sth, session
+The DomainOwner fact serves as a proof of identity, so we assume that invoking this always happens on DO's behalf. 
+Rogue certificates are not issued using this fact but instead by the network attacker using the CA's key (requires CA corruption).
+*/
+rule PreCertify [color= #c871ff]: 
+    let
+        preC_fields = <$CA, $id, pkID, 'pre-cert', ~sn, $now, $j>
+        preC_sig = sign(preC_fields, skCA)
+        preC = <preC_fields, preC_sig>
+    in
+    [ !DomainOwner($id, pkID), /* public key to sign. Using this rule includes an "identity check" which is simplified: There is a DomainOwner fact with this public key. */
+     !CA_s0($CA, skCA, pkCA, ca_fields, ca_sig), Fr(~sn) ]
+    --[ PreCertified($CA, preC), 
+        GroundTruth($CA, <$CA, $id, pkID, 'pubKey', ~sn, $now, $j>), /* used for ground truth comparisons, when a CA issues a pre certificate although that is not yet accepted by end-users, they already need to assert that they performed all necessary checks. */
+        
+        Time($now),
+        San_PreCertify()
+    ]->
+    [ Out(preC_fields), Out(preC_sig), Certificate_Store($CA, preC), Out(ca_fields), Out(ca_sig) ]
+
+/*
+This rule is invoked by the CA again. It takes the issued pre-certificate and generates a corresponding 'pubKey' certificate, after two loggers claimed that they have added the certificate to its logs (given the two SCTs)
+*/
+rule PubKeyCertify [color= #c871ff]:
+    let 
+    preC_fields = <$CA, $id, pkID, 'pre-cert', sn, $i, $j>
+
+    sct1_fields = <$L1, 'SCT', $sct1, <$CA, $id, pkID, sn, $i, $j>>
+    sct2_fields = <$L2, 'SCT', $sct2, <$CA, $id, pkID, sn, $i, $j>>
+
+    sct1 = <$L1, 'SCT', $sct1, sct1_sig>
+    sct2 = <$L2, 'SCT', $sct2, sct2_sig>
+
+    pub_fields = <$CA, $id, pkID, 'pubKey', sn, $i, $j, sct1, sct2>
+    fields = <$CA, $id, pkID, 'pubKey', sn, $i, $j>
+    pub_sig = sign(pub_fields, skCA)
+    in 
+    [ 
+        !CA_s0($CA, skCA, pkCA, ca_fields, CA_sig), 
+        /* 2 SCTs: */  In(sct1), In(sct2), 
+        !Logger($L1, pkL1),
+        !Logger($L2, pkL2),
+        Certificate_Store($CA, <preC_fields, sig_preC>)
+    ] 
+    --[ Eq(verify(sct1_sig, sct1_fields, pkL1), true()), 
+        Eq(verify(sct2_sig, sct2_fields, pkL2), true()), 
+        Eq(verify(sig_preC, preC_fields, pkCA), true()), 
+        _restrict( not ($L1 = $L2) ), /* the 2 SCTs were from distinct loggers */
+        Certified($CA, $L1, sct1, $L2, sct2), 
+        CAAsserts($CA, fields),
+        CheckValidUntil($now, $j),
+
+        Time($now),
+        San_PubKeyCertify()
+    ]-> 
+    [ Out(pub_fields), Out(pub_sig) /* outgoing pubKey cert */ ]
+
+/*
+A client receives a certificate and now validates it. This includes:
+- verifying the signature on the certificate
+- verifying every cert in the chain, which here is just the certificate of the intermediate CA signed by a root CA
+- verifying two SCTs that should correspond to the incoming certificate and come from distinct loggers
+
+verifying always includes validity checks of the timepoints in the certificate, i.e., whether the certificate is still valid at the current time.
+*/
+rule ClientValidate [color= #f2ce03]:
+    let
+        ca_fields = <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
+        sct1_fields = <$L1, 'SCT', $sct1, <$CA, $id, pkID, sn, $i, $j>>
+        sct2_fields = <$L2, 'SCT', $sct2, <$CA, $id, pkID, sn, $i, $j>>
+        sct1 = <$L1, 'SCT', $sct1, sct1_sig>
+        sct2 = <$L2, 'SCT', $sct2, sct2_sig>
+        pub_fields = <$CA, $id, pkID, 'pubKey', sn, $i, $j, sct1, sct2>
+        fields = <$CA, $id, pkID, 'pubKey', sn, $i, $j>
+
+        chain = <<pub_fields, pub_sig>, <ca_fields, ca_sig>>
+    in
+    [   !Root_CA($rootCA, pkRootCA),
+        In(ca_fields),
+        In(ca_sig),
+        In(pub_fields),
+        In(pub_sig), /* incoming certificate (intermediate CA + pubKey certificate) */
+
+        !Logger($L1, pkL1),
+        !Logger($L2, pkL2)
+    ]
+    --[ ClientAcceptsChain($L1, $L2, $rootCA, ca_fields, $CA, fields),
+        Eq(verify(pub_sig, pub_fields, pkCA), true()), 
+        Eq(verify(sct1_sig, sct1_fields, pkL1), true()), 
+        Eq(verify(sct2_sig, sct2_fields, pkL2), true()),
+        Eq(verify(ca_sig, ca_fields, pkRootCA), true()),
+        _restrict( not($L1 = $L2) ), /* SCTs from distinct loggers */
+        CheckValidUntil($now, $j),
+        CheckValidUntil($now, $j0),
+
+        Time($now),
+        San_ClientValidate(),
+    ]->
+    [ !Check(pkL1, fields, <ca_fields, ca_sig>), !Check(pkL2, fields, <ca_fields, ca_sig>) /* each SCT and statement is stored to later run client-side auditing checks, e.g. inclusion proofs */, !BAccept_State($CA, fields, $L1, $sct1, $L2, $sct2), !BAccept_SCT($L1, fields, ca_fields, $sct1), !BAccept_SCT($L2, fields, ca_fields, $sct2)
+    ]
+
+/* ---------- Interaction with the log to verify its properties ---------- */
+
+/*
+After validating a certificate, a client 'may' also inspect the SCTs further and request a proof of inclusion by the loggers for the underlying certificate. We again (like with monitors) distinguish between two kinds here:
+a) The client already checked before AND stored a copy of the log before AND finds a violation (below: rule ClientFindsAppendOnlyViolation, stored via ClientStoresSnapshot prior)
+b) The client may or may not have checked before (this version) and creates a copy locally (ClientStoresSnapshot)
+
+This rule is also used for the monitor to just fetch a view and use the copy later to verify the append-only property.
+*/
+rule MonitorStoresSnapshot:
+    [ !Logger($L, pkL), !Monitor($M), !TLS_L_to_M($L, $M, $snapshot, sth, session, $time) ]
+    --[ 
+        SnapshotStored($M, $L, session, sth),
+
+        Time($now),
+        San_MonitorStoresSnapshot()
+    ]->
+    [  ]
+
+rule ClientStoresSnapshot:
+    [ !Logger($L, pkL), !TLS_L_to_C($L, $C, $snapshot, sth, session) ]
+    --[ 
+        SnapshotStored($C, $L, session, sth),
+
+        Time($now),
+        San_ClientStoresSnapshot()
+    ]->
+    [  ]
+
+/* Client can find a violation, if
+(1) conflicting view for given snapshots (given and one in the past) ==> append-only violated (here)
+(2) a given SCT is not contained in the log (inclusion proof failed, rule below)
+*/
+rule ClientFindsAppendOnlyViolation [color= #e65208]:
+    [ !Logger($L, pkL), !TLS_L_to_C($L, $C, $snapshot, sth, session) ]
+    --[
+        ClientFindsAppendOnlyViolation($L),
+        AppendOnlyViolation($C, $L, sth, session), /* formalizes that the append-only proof would fail (see restriction) */
+        
+        Time($now),
+        San_ClientFindsAppendOnlyViolation()
+    ]->
+    []
+
+/* We deem append-only violated if entries disappear independent of whether they were valid submissions. According to the standard, there are only valid chains allowed on the log, thus this only covers more potential misbehavior of the log. We use these predicates for properties of the Merkle Tree, thus only using the fields directly, and ignoring the chain for now. */
+predicate: EntryMissing(Logger, fields, log_id, #time, sth_time) <=> // TODO: Consider a new variant to formulate append only that strictly checks a given ca_cert (not like this version)
+    not (Ex ca_cert different_time chain #t. 
+            LoggerComputesAddLog(Logger, log_id, fields, ca_cert, chain, different_time)@t
+            & not (sth_time = different_time) /* or there has never been a visible addition to the log */
+            & #t < #time
+        )
+    
+predicate: EntryVisible(Logger, fields, ca_cert, chain, log_id, #time, sth_time) <=> 
+    (Ex different_time #t.
+        LoggerComputesAddLog(Logger, log_id, fields, ca_cert, chain, different_time)@t /* there has been an addition to log_id with the fields prior to #time */
+        & not(sth_time = different_time) /* ...that addition was visible */
+        & #t < #time
+        )
+
+/* the monitor or client can observe a violation of the append-only property:
+
+- if the log gets manipulated 'between' two STH requests, the signatures will not match anymore and the logger will exactly find that 
+- specific to client: client can check whether the certificate it currently checks is in the log (CheckNotContained), this corresponds to the idea of an inclusion proof
+*/
+restriction AppendOnlyFails:
+   "All sth session id L #t6. 
+    AppendOnlyViolation(id, L, sth, session)@t6
+    /* Append-only violation found by id with violating L is only possible if a counterexample is found */
+        ==> (Ex fields ca_cert chain time t log_id1 log_id2 time2 sth2 session2 #t0 #t1 #t2 #t3 #t4 #t5. 
+                LoggerComputesAddLog(L, log_id1, fields, ca_cert, chain, t)@t0
+                & EntryVisible(L, fields, ca_cert, chain, log_id1, #t2, time) 
+                /* there is an entry in the log that is visible at #t2 and time period time in log_id1 */
+                & FetchLogSnapshot(id, L, session2)@t1 
+                /* someone starts fetching a log view */
+                & LoggerPresentsView(L, id, log_id1, time, sth2, session2)@t2 
+                /* The Logger presents the view for log_id1 */
+                & SnapshotStored(id, L, session2, sth2)@t3 
+                /* this view is received stored by id */
+                & FetchLogSnapshot(id, L, session)@t4
+                /* a second view is fetched by id (later) */
+                & LoggerPresentsView(L, id, log_id2, time2, sth, session)@t5
+                /* the logger presents the view of a possibly different log (log_id2) */
+                & EntryMissing(L, fields, log_id2, #t5, time2)
+                /* one entry that was visible in the past is now not visible anymore -> clear append-only violation */
+                & #t0 < #t1 & #t1 < #t2 & #t2 < #t3 
+                & #t2 < #t4 
+                & #t4 < #t5 & #t3 < #t5
+                & #t5 < #t6
+            )"
+
+/* Positive outcome of the append-only check: All old snapshots the client has do not contradict themselves */
+rule ClientVerifiesAppendOnly [color= #c1ff3c]:
+    [ !TLS_L_to_C($L, $C, $snapshot, sth, session), !Logger($L, pkL), In($idUser) ]
+    --[
+        AppendOnlyVerified($idUser, $L, sth, session),
+        
+        Time($now),
+        San_ClientVerifiesAppendOnly()
+    ]->
+    [ ]
+
+restriction appendOnlyWorks:
+   "(All id L sth session time1 t log_id log_id2 fields ca_cert chain sth2 session2 time2 #t0 #t1 #t2 #t4 #t5.
+        AppendOnlyVerified(id, L, sth, session)@t5 
+        /* If an append-only proof is verified, we know that ... */
+        & LoggerComputesAddLog(L, log_id, fields, ca_cert, chain, t)@t0
+        & EntryVisible(L, fields, ca_cert, chain, log_id, #t1, time1) 
+        /* all entries that have been visible at some point */
+        & LoggerPresentsView(L, id, log_id, time1, sth2, session2)@t1
+        & SnapshotStored(id, L, session2, sth2)@t2 
+        /* every snapshot processed in the past by that client */
+        & LoggerPresentsView(L, id, log_id2, time2, sth, session)@t4 
+        /* and every view handed out after these */
+        & #t0 < #t1 & #t1 < #t2 & #t2 < #t4 & #t4 < #t5
+            ==> EntryVisible(L, fields, ca_cert, chain, log_id2, #t4, time2) 
+            /* then this entry is also visible in the newest snapshot */
+    )
+    &
+    (All id L sth session #t5.
+        AppendOnlyVerified(id, L, sth, session)@t5 
+        /* An append-only proof is only valid if all these pre-conditions are satisfied. */
+            ==> 
+                (Ex time1 t log_id log_id2 fields ca_cert chain sth2 session2 time2 #t0 #t1 #t2 #t4. 
+                    LoggerComputesAddLog(L, log_id, fields, ca_cert, chain, t)@t0
+                    & EntryVisible(L, fields, ca_cert, chain, log_id, #t1, time1)
+                    & LoggerPresentsView(L, id, log_id, time1, sth2, session2)@t1
+                    & SnapshotStored(id, L, session2, sth2)@t2
+                    & LoggerPresentsView(L, id, log_id2, time2, sth, session)@t4
+                    & #t0 < #t1 & #t1 < #t2 & #t2 < #t4 & #t4 < #t5
+                )
+    )"
+
+/* Monitor requests a current snapshot of the log */
+rule ProofFetching_M [color= #10bcc5]:
+    [ Fr(~session), !Monitor($M), /* Identity who fetches */ !Logger($L, pkL) ] 
+    --[ 
+        FetchLogSnapshot($M, $L, ~session),
+        
+        Time($now),
+        San_ProofFetching_M()
+    ]->
+    [ TLS_M_to_L($M, $L, ~session, $now) ]
+
+/* A client requests a current view of the log */
+rule ProofFetching_C [color= #10bcc5]:
+    [ Fr(~session), In($C), /* could be fetched by anyone */ !Logger($L, pkL) ] 
+    --[ 
+        FetchLogSnapshot($C, $L, ~session),
+        
+        Time($now),
+        San_ProofFetching_C()
+    ]->
+    [ TLS_C_to_L($C, $L, ~session) ]
+
+/* some protocol participant requests a current view (role not specified) */
+rule ProofFetching_P [color= #10bcc5]:
+    [ Fr(~session), In($P), /* could be fetched by anyone */ !Logger($L, pkL) ] 
+    --[ 
+        FetchLogSnapshot($P, $L, ~session),
+        
+        Time($now),
+        San_ProofFetching_P()
+    ]->
+    [ TLS_P_to_L($P, $L, ~session, $now) ]
+
+/*
+Logger issues a new snapshot of its maintained log. 
+This exact snapshot is relatively abstract, as the log operations are too. We assume that this generates an honest STH which is verifiable, depending on the context it also represents all entries that a monitor can explore then. 
+It is crucial for the outcome of these later checks when a certain snapshot has been created. If it was early in an execution, there might not be any entries yet contained. When going through the lemmas later, you will observe that a party can partly control this by restricting when to request to snapshot.
+*/
+rule LoggerSnapshot_M [color= #22d6d6]:
+    [ !Logger_s($L, skL, pk(skL)), Fr(~sth) /* abstract representation of the STH */, TLS_M_to_L($M, $L, session, $time) ]
+    --[ 
+        LoggerPresentsView($L, $M, $log_id, $now, ~sth, session),
+        LoggerHandsOutSTH($L, ~sth, session),
+        
+        Time($now),
+        San_LoggerSnapshot_M()
+    ]->
+    [ !TLS_L_to_M($L, $M, $snapshot, ~sth, session, $time) ]
+
+rule LoggerSnapshot_C [color= #22d6d6]:
+    [ !Logger_s($L, skL, pk(skL)), Fr(~sth) /* abstract representation of the STH/sth */, TLS_C_to_L($C, $L, session) ]
+    --[ 
+        LoggerPresentsView($L, $C, $log_id, $now, ~sth, session),
+        LoggerHandsOutSTH($L, ~sth, session),
+
+        Time($now),
+        San_LoggerSnapshot_C()
+    ]->
+    [ !TLS_L_to_C($L, $C, $snapshot, ~sth, session)
+    ]
+
+rule LoggerSnapshot_P [color= #22d6d6]:
+    [ !Logger_s($L, skL, pk(skL)), Fr(~sth) /* abstract representation of the STH/sth */, TLS_P_to_L($P, $L, session, $time) ]
+    --[ 
+        LoggerPresentsView($L, $P, $log_id, $now, ~sth, session),
+        LoggerHandsOutSTH($L, ~sth, session),
+        
+        Time($now),
+        San_LoggerSnapshot_P()
+    ]->
+    [ !TLS_L_to_P($L, $P, $snapshot, ~sth, session, $time)
+    ]
+
+/* the $log_id's used when handing out a proof must exist, i.e. started as log prior to handing out a view. In the logger section we imposed further restrictions on the log_id's depending on whether the logger is honest. */
+restriction only_existing_log_ids:
+    "All L idR log_id time sth session #t1. LoggerPresentsView(L, idR, log_id, time, sth, session)@t1 ==> (Ex #t0. StartedLog(L, log_id)@t0 & #t0 < #t1)"
+
+
+rule ParticipantFindsInclusionViolation [color= #e65208]:
+    let
+        fields = <$CA, $id, pkID, 'pubKey', sn, $i, $j>
+    in
+    [ !TLS_L_to_P($L, $P, $snapshot, sth, session, $time), !Logger($L, pkL),In(fields), In(ca_cert), /* entry to check for */ !Monitor($M) ]
+    --[
+        AssertsNot($P, 'This loggers log currently includes these fields.', $L, <fields, session>),
+        InclusionProofFails($P, $L, fields, ca_cert, sth, session), /* entry is not contained in the snapshot, see restriction */
+        
+        Time($now),
+        San_ParticipantFindsInclusionViolation()
+    ]->
+    [ InclusionFailed($P, $L, fields, $time, session) ]
+
+restriction inclusionProofFails:
+    "All IdFetcher L fields ca_cert sth session #t1. 
+    InclusionProofFails(IdFetcher, L, fields, ca_cert, sth, session)@t1
+    ==> (Ex log_id time #t0. 
+        LoggerPresentsView(L, IdFetcher, log_id, time, sth, session)@t0 
+            /* Logger handed out an STH to the recipient... */
+        & #t0 < #t1 /* ...prior to the check */
+        & EntryMissing(L, fields, log_id, #t0, time) 
+            /* ...and the entry is not visible in that view */
+        )"
+
+rule ParticipantVerifiesInclusion [color= #c1ff3c]:
+    let
+        fields = <$CA, $id, pkID, 'pubKey', sn, $i, $j>
+    in
+    [ !TLS_L_to_P($L, $P, $snapshot, sth, session, $time), !Logger($L, pkL),In(fields), In(ca_cert), In(chain), /* entry to check for */ ]
+    --[
+        InclusionProofSucceeds($P, $L, fields, ca_cert, chain, sth, session), /* entry is contained in the snapshot, see restriction */
+        Asserts($P, 'This loggers log currently includes these fields.', $L, <fields, session>),
+        
+        Time($now),
+        San_ParticipantVerifiesInclusion()
+    ]->
+    [ InclusionVerified($P, $L, fields, $time, session, chain) ]
+
+
+restriction inclusionProofWorks:
+    "All IdFetcher L fields ca_cert chain sth session #t5. InclusionProofSucceeds(IdFetcher, L, fields, ca_cert, chain, sth, session)@t5
+    ==> (Ex id log_id time #t2. 
+        LoggerPresentsView(L, id, log_id, time, sth, session)@t2 
+            /* Logger handed out a snapshot to the recipient... */
+        & #t2 < #t5 
+            /* ...prior to the check */
+        & EntryVisible(L, fields, ca_cert, chain, log_id, #t2, time) 
+            /* and the entry is visible in that view */
+        )"
+
+/* ---------- STH Gossiping ---------- */
+
+/*
+Instead of monitors receiving SCTs, they now receive the snapshots in the form of STH's issued by loggers.
+They will be used in the same way as CT (for authenticity checks) and we investigate resulting changes here. 
+We will for authenticity later, in fact, reuse the same rules as for CT again.
+Note that we cannot assume the same outcome of proofs for the shared snapshots, as this would be too strong: Loggers can still (malciously) refuse to open their own STHs that they handed out earlier and did proofs on. 
+Assuming that the proofs have the same results would mean that the gossip also contains the proof itself, including the certificate.
+
+We limit ourselves to gossip between the client and monitor.
+*/
+
+rule clientGossipsToMonitor: // TODO: cleanup: client could be anyone
+    [ !TLS_L_to_P($L, $P, $snapshot, sth, session, $time) ]
+    --[ 
+        Time($now), 
+        San_clientGossipsToMonitor() 
+    ]-> 
+    [ !TLS_C_to_M($P, $M, $snapshot, sth, session) ]
+
+    /* --- Gossip AppendOnly Checks --- */
+    /* In addition to using gossiped snapshots to explore new entries with the help of another fetched snapshot, a different question immediately arises for the monitor: do these snapshots contradict each other? For this, the monitor can use append-only proofs between these two snapshots. The following rules here formalize this and are similar to the append-only proof that we have used in CT with the limitation to just these two snapshots and not restricting anymore that the older snapshot has been stored before. */
+
+rule monitorFindsAppendOnlyViolation_Gossiped [color= #501755]:
+    [ !LoggerDict($M, $L), !TLS_C_to_M($C, $M, $gos_snapshot, gossiped_sth, gossiped_session), !TLS_L_to_M($L, $M, $snapshot, sth, session, $time) ]
+    --[
+        Gos_AppendOnlyViol($M, $L, sth, session, gossiped_sth, gossiped_session), /* see restriction */
+        Asserts($M, 'The log has violated the append-only property between these two snapshots.', $L, <gossiped_session, session>),
+        MonitorReceivesGossip($M, $L, gossiped_session, session),
+        
+        Time($now),
+        San_monitorFindsAppendOnlyViolation_Gossiped(),
+    ]->
+    [ Gossiped($M, gossiped_session, session) ]
+
+/* The gossiped append only proofs assume that both proofs are fixed since we only want to formulate that between gossiped_view -> view there have been no rogue deletions */
+restriction appendOnlyFails_Gossiped:
+   "All M L session sth gossiped_sth gossiped_session #t5. 
+    Gos_AppendOnlyViol(M, L, sth, session, gossiped_sth, gossiped_session)@t5
+        ==> 
+            (Ex id1 fields ca_cert chain time t time2 log_id log_id2 #t0 #t1 #t2 #t3 #t4.
+                LoggerComputesAddLog(L, log_id, fields, ca_cert, chain, t)@t0
+                & EntryVisible(L, fields, ca_cert, chain, log_id, #t2, time) /* There is an entry that was visible... */
+                & FetchLogSnapshot(id1, L, gossiped_session)@t1
+                & LoggerPresentsView(L, id1, log_id, time, gossiped_sth, gossiped_session)@t2 /* ... for a given proof at #t2 */
+                & FetchLogSnapshot(M, L, session)@t3
+                & LoggerPresentsView(L, M, log_id2, time2, sth, session)@t4 /* second view is handed out to the monitor directly (only one of both views is gossiped as assumed) */
+                & EntryMissing(L, fields, log_id2, #t4, time2)
+                /* one entry that was visible in the gossiped view is now not visible anymore -> clearly a violation */
+                & #t0 < #t1 & #t1 < #t2 & #t2 < #t3 & #t3 < #t4 & #t4 < #t5
+            )
+    "
+
+rule monitorVerifiesAppendOnly_Gossiped [color= #501755]:
+    [ !LoggerDict($M, $L), !TLS_C_to_M($C, $M, $gos_snapshot, gossiped_sth, gossiped_session), !TLS_L_to_M($L, $M, $snapshot, sth, session, $time) ]
+    --[
+        AppendOnlyVerified_Gossiped($M, $L, sth, session, gossiped_sth, gossiped_session), /* see restriction */
+        AssertsNot($M, 'The log has violated the append-only property between these two snapshots.', $L, <gossiped_session, session>),
+        MonitorReceivesGossip($M, $L, gossiped_session, session),
+        MonitorReceivesGossip_Verified($M, $L, gossiped_session, session),
+        
+        Time($now),
+        San_monitorVerifiesAppendOnly_Gossiped()
+    ]->
+    [ Gossiped($M, gossiped_session, session) ]
+
+restriction appendOnlyWorks_Gossiped:
+       "(All id1 M L sth session time1 t log_id log_id2 fields ca_cert chain gossiped_sth gossiped_session time2 #t0 #t1 #t4 #t5.
+        AppendOnlyVerified_Gossiped(M, L, sth, session, gossiped_sth, gossiped_session)@t5 
+        /* If an append-only proof is verified, we know that ... */
+        & LoggerComputesAddLog(L, log_id, fields, ca_cert, chain, t)@t0
+        & EntryVisible(L, fields, ca_cert, chain, log_id, #t1, time1)
+        /* all entries that have been visible at some point */
+        & LoggerPresentsView(L, id1, log_id, time1, gossiped_sth, gossiped_session)@t1
+        & LoggerPresentsView(L, M, log_id2, time2, sth, session)@t4 
+        /* and every view handed out after these */
+        & #t0 < #t1 & #t1 < #t4 & #t4 < #t5
+            ==> EntryVisible(L, fields, ca_cert, chain,log_id2, #t4, time2) 
+            /* then this entry is also visible in the newest handout */
+    )
+    &
+    (All M L sth session gossiped_sth gossiped_session #t5.
+        AppendOnlyVerified_Gossiped(M, L, sth, session, gossiped_sth, gossiped_session)@t5
+        /* An append-only proof is only valid if all these pre-conditions are satisfied. By this we ensure that the check is done properly (i.e. premise is fulfilled completely) while still keeping the formula guarded. */
+            ==> 
+                (Ex id1 time1 log_id log_id2 fields ca_cert chain time2 t #t0  #t1 #t4. 
+                    LoggerComputesAddLog(L, log_id, fields, ca_cert, chain, t)@t0
+                    & EntryVisible(L, fields, ca_cert, chain, log_id, #t1, time1)
+                    & LoggerPresentsView(L, id1, log_id, time1, gossiped_sth, gossiped_session)@t1
+                    & LoggerPresentsView(L, M, log_id2, time2, sth, session)@t4
+                    & #t1 < #t4 & #t4 < #t5
+                )
+    )"
+
+/* ------- External CA Legitimacy Test ------- */
+
+/* ------- Root CA Documentation Checks (modelled externally, but every participant has access to the DB that contains them -> everyone can run these)
+------- */
+
+rule ConsultDocumentation_Success:
+    let
+        ca_fields = <$rootCA, $CA, pkCA, 'pubKey-CA', sn, $i, $j>
+        ca_cert = <ca_fields, ca_sig>
+    in
+    [ In(ca_fields), In(ca_sig), !Root_CA($rootCA, pkRCA), !CA_Documentation($rootCA, $CA, ca_fields, ca_sig) /* proof of legitimacy handed out earlier when using the honest issuing process */ ]
+    --[
+        Eq(verify(ca_sig, ca_fields, pkRCA), true()), // signed by root CA
+        Asserts($rootCA, 'I signed this intermediate CA.', $CA, <ca_fields>),
+        ExternalCheckCCADB($rootCA, ca_fields),
+        
+        Time($now),
+        San_ConsultDocumentation_Success()
+    ]->
+    [ CCADBConsulted($rootCA, ca_fields) ]
+
+rule ConsultDocumentation_Fails:
+    let
+        ca_fields = <$rootCA, $CA, pkCA, 'pubKey-CA', sn, $i, $j>
+        ca_cert = <ca_fields, ca_sig>
+    in
+    [ In(ca_fields), In(ca_sig), !Root_CA($rootCA, pkRCA) ]
+    --[
+        UndocumentedIntermediateCA($rootCA, $CA, ca_fields), // see restriction externalCA_no_proof below
+        AssertsNot($rootCA, 'I signed this intermediate CA.', $CA, <ca_fields>),
+        Eq(verify(ca_sig, ca_fields, pkRCA), true()), // signed by root CA
+        ExternalCheckCCADB($rootCA, ca_fields),
+        
+        Time($now),
+        San_ConsultDocumentation_Fails()
+    ]->
+    [ CCADBConsulted($rootCA, ca_fields) ]
+
+/* Responsible root CA is not able to present an identity proof of the intermediate CA (-> it is forged) */
+/* We obviously rely on the soundness of this documentation check. It is an interesting bit to consider how real-world documentations look like, feel free to consult the CCADB yourself for this. TLDR: they are legal documents with auditor firms involved. We do not go beyond this and consider everything around forging such documents out of scope of this work. */
+restriction externalCA_no_proof:
+    "All rootCA CA ca_fields #t1.
+        UndocumentedIntermediateCA(rootCA, CA, ca_fields)@t1
+            ==> not (Ex #t0. DocumentedCA(rootCA, CA, ca_fields)@t0 & #t0 < #t1)"
+
+// ==========================================
+
+/*** Predicate Rules ***/
+
+/* CTCheck with CCADB check included */
+
+rule MonitorCheck_Found_CCADB:
+    [ !BAccept_State($CA, fields, $L1, $sct1, $L2, $sct2),
+      MonitorFoundCert($M, $L, fields, $CA, ca_fields, $time_of_proof_fetch, session), CCADBConsulted($rootCA, ca_fields) ]
+    --[ 
+        CTCheck($M, fields, $CA, ca_fields),
+        _restrict(($L1 = $L) | ($L2 = $L)),
+        
+        San_MonitorCheck_Found()
+    ]->
+    [  ]
+
+rule MonitorCheck_NotFound_CCADB:
+    [ !BAccept_State($CA, fields, $L1, $sct1, $L2, $sct2),
+      MonitorCouldNotFindCert($M, fields, $L1, $CA, ca_fields, $proof1, session1), MonitorCouldNotFindCert($M, fields, $L2, $CA, ca_fields, $proof2, session2),
+      CCADBConsulted($rootCA, ca_fields) ]
+    --[ 
+        CTCheck($M, fields, $CA, ca_fields),
+        MMD_passed($sct1, $proof1), // $sct < $time_of_proof_fetch => MMD passed for both
+        MMD_passed($sct2, $proof2),
+
+        San_MonitorCheck_NotFound()
+    ]->
+    [  ]
+
+restriction mmd_passed: // "before < after"
+    "All before after #t2 #t1 #t0. 
+        MMD_passed(before, after)@t2 & Time(before)@t0 & Time(after)@t1
+        ==> 
+        (#t0 < #t1 & #t1 < #t2 & not(before = after))"
+
+// Gossiping checks
+
+rule GossipingCheck_Found: // similar to CTCheck we have a found and not found variant
+    [ 
+    InclusionVerified($C, $L, fields, $gossiped_proof_time, gossiped_session, chain), /* client on their own verified that L contains fields */
+    Gossiped($M, gossiped_session, session), /* then gossiped this proof to the monitor (proof, session) but without fields. Monitor checks for append only (may or may not hold), if it does not monitor emitted an assert blaming the logger */
+    MonitorFoundCert($M, $L, fields, $CA, ca_fields, $time_of_proof_fetch, session),
+    CCADBConsulted($rootCA, ca_fields)
+]
+    --[
+        // ProofFetchAfterGossip($proof, $time_of_proof_fetch),
+        CTGossipCheck($M, $L, fields, $CA, ca_fields, session, gossiped_session),
+        CTGossipCheck_Found($M, $L, fields, $CA, ca_fields, session, gossiped_session),
+        LContains($L, fields),
+
+        San_GossipingCheck_Found(),
+    ]->
+    [ ]
+
+rule GossipingCheck_NotFound: // similar to CTCheck we have a found and not found variant
+    let
+        ca_fields = <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
+        cert_fields = <$CA, $subj, ke, 'pre-cert', sn, $i, $j>
+        chain = <<cert_fields, cert_sig>, <ca_fields, ca_sig>>
+    in
+    [ 
+    InclusionVerified($C, $L, fields, $gossiped_proof_time, gossiped_session, chain), /* client on their own verified that L contains fields */
+    Gossiped($M, gossiped_session, session), /* then gossiped this proof to the monitor (proof, session) but without fields. Monitor checks for append only (may or may not hold), if it does not monitor emitted an assert blaming the logger */
+    MonitorCouldNotFindCert($M, fields, $L, $CA, ca_fields, $time_of_proof_fetch, session), 
+    CCADBConsulted($rootCA, ca_fields),
+    !Root_CA($rootCA, pkRootCA)
+]
+    --[
+        Eq(verify(cert_sig, cert_fields, pkCA), true()),
+        Eq(verify(ca_sig, ca_fields, pkRootCA), true()), /* We only consider valid chains (if the monitor finds the cert this already implies that the chain is valid) */
+        ProofFetchAfterGossip($gossiped_proof_time, $time_of_proof_fetch),
+        CTGossipCheck($M, $L, fields, $CA, ca_fields, session, gossiped_session),
+        CTGossipCheck_NotFound($M, $L, fields, $CA, ca_fields, session, gossiped_session),
+        LDoesNotContain($L, fields),
+
+        San_GossipingCheck_NotFound()
+    ]->
+    [ ]
+
+restriction proofFetchAfterGossip: // before <= after
+    "All before after #t1 #t2 #t. ProofFetchAfterGossip(before, after)@t & Time(before)@t1 & Time(after)@t2 ==> #t1 < #t2"
+
+// ==========================================
+
+/* ----- General Restrictions ----- */
+
+/* We require that the main roles in our model are conducted by pairwise distinct entities. This is in accordance with the CT standard as CAs should not act as loggers. Everyone can become a monitor in general, but in order to get meaningful results there actual supervision between these roles happens, we require them to be distinct. */
+
+restriction rootCA_CA_distinct:
+    "All rootCA CA #t1 #t2. Root_CA_Init(rootCA)@t1 & NonRoot_CA_Init(CA)@t2 
+    ==> not (rootCA = CA)"
+
+restriction rootCA_Logger_distinct:
+    "All rootCA L #t1 #t2. Root_CA_Init(rootCA)@t1 & Logger_Registered(L)@t2 
+    ==> not (rootCA = L)"
+
+restriction RootCA_Monitor_distinct:
+    "All rootCA M #t1 #t2. Root_CA_Init(rootCA)@t1 & Monitor_Registered(M)@t2 
+    ==> not (rootCA = M)"
+
+restriction CA_Logger_distinct:
+    "All CA L #t1 #t2. NonRoot_CA_Init(CA)@t1 & Logger_Registered(L)@t2 
+    ==> not (CA = L)"
+
+restriction CA_Monitor_distinct:
+    "All CA M #t1 #t2. NonRoot_CA_Init(CA)@t1 & Monitor_Registered(M)@t2 
+    ==> not (CA = M)"
+
+restriction Logger_Monitor_distinct:
+    "All L M #t1 #t2. Logger_Registered(L)@t1 & Monitor_Registered(M)@t2 
+    ==> not (L = M)"
+
+/* identity of loggers is unique and they only have one key pair */
+restriction LoggersUnique:
+    "All L #t1 #t2. Logger_Registered(L)@t1 & Logger_Registered(L)@t2 ==> #t1 = #t2"
+
+/* identity of CAs is unique, they only have one key pair. Note that this property can be violated by a malicious root CA. */
+restriction CAsUnique:
+    "All CA pk1 sk1 pk2 sk2 #t1 #t2. CA_Registered(CA, sk1, pk1)@t1 & CA_Registered(CA, sk2, pk2)@t2 ==> #t1 = #t2"
+
+restriction eq:
+    " All e1 e2 #t. Eq(e1, e2)@t ==> e1 = e2"
+
+restriction time_monotonicity:
+"All t #t1 #t3. Time(t)@t1
+                & Time(t)@t3
+                & #t1 < #t3
+                ==> ( All tp #t2. Time(tp)@t2
+                                & #t1 < #t2
+                                & #t2 < #t3 ==> tp = t )"
+
+
+/* whenever a party checks the validity period of a certificate, that time must not happened before the check, i.e. the time did not pass yet */
+restriction certStillValid:
+    "All currTime valid_till #t1.
+        Time(currTime)@t1 & CheckValidUntil(currTime, valid_till)@t1
+         ==> not (Ex #t2. #t2 < #t1 & Time(valid_till)@t2)"
+
+/* ----------- Compromise Rules ----------- */
+
+/* CA key leakage */
+rule compromiseCA [color= #d40808 ]:
+    [!CA_s0($CA, ~skCA, pk(~skCA), ca_fields, CA_sig)] 
+    --[ 
+        CompromiseCA($CA), 
+        Compromise(),
+        Corrupted($CA),
+
+        San_compromiseCA(),
+        Time($now)
+    ]-> 
+    [ Out(~skCA) ] 
+
+/* Root CA key leakage */
+rule compromiseRootCA [color= #d40808 ]:
+    [ !Root_CA_s0($CA, skCA, pkCA) ] 
+    --[ 
+        CompromiseRootCA($CA), 
+        Compromise(),
+        Corrupted($CA),
+
+        San_compromiseRootCA(),
+        Time($now)
+    ]-> 
+    [ Out(skCA) ]
+
+/* Logger key leakage. !Corrupted_Logger is later additionally used to perform rogue log modifications. */
+rule compromiseLogger [color= #d40808 ]:
+    [ !Logger_s($L, ~skL, pk(~skL)) ] 
+    --[ 
+        CompromiseLogger($L), 
+        CompromiseLoggerUniq(<$L, ~skL, pk(~skL)>),
+        Compromise(),
+        Corrupted($L),
+
+        San_compromiseLogger(),
+        Time($now)
+    ]-> 
+    [ Out(~skL), !Corrupted_Logger($L, ~skL, pk(~skL)) ] 
+
+/* !St_bad_Monitors can sleep when performing checks */
+rule compromiseMonitor [color= #d40808 ]:
+    [ !Monitor($M) ] 
+    --[ 
+        Compromise(),
+        CompromiseMonitor($M),
+        Corrupted($M),
+
+        San_compromiseMonitor(),
+        Time($now)
+    ]-> 
+    [ !St_bad_Monitor($M) ] 
+
+/* BEGIN LEMMAS */
+
+lemma san_Root_CA_Init:
+  exists-trace
+  "∃ #t.
+         (San_Root_CA_Init( ) @ #t) ∧
+         (¬(∃ #t.1. Compromise( ) @ #t.1))"
+
+
+lemma san_Intermediate_CA_Init:
+  exists-trace
+  "∃ #t.
+         (San_Intermediate_CA_Init( ) @ #t) ∧
+         (¬(∃ #t.1. Compromise( ) @ #t.1))"
+
+
+lemma san_Domain_Owner_Init:
+  exists-trace
+  "∃ #t.
+         (San_Domain_Owner_Init( ) @ #t) ∧
+         (¬(∃ #t.1. Compromise( ) @ #t.1))"
+
+
+lemma san_Monitor_Init:
+  exists-trace
+  "∃ #t.
+         (San_Monitor_Init( ) @ #t) ∧
+         (¬(∃ #t.1. Compromise( ) @ #t.1))"
+
+
+lemma san_StartMonitoring:
+  exists-trace
+  "∃ #t.
+         (San_StartMonitoring( ) @ #t) ∧
+         (¬(∃ #t.1. Compromise( ) @ #t.1))"
+
+
+lemma san_monitorFindsAppendOnlyViolation:
+  exists-trace
+  "∃ #t.
+         (San_monitorFindsAppendOnlyViolation( ) @ #t) ∧
+         (∀ #t.1.
+           (Compromise( ) @ #t.1) ⇒ (∃ L. CompromiseLogger( L ) @ #t.1))"
+
+
+lemma san_monitorVerifiesAppendOnly:
+  exists-trace
+  "∃ #t.
+         (San_monitorVerifiesAppendOnly( ) @ #t) ∧
+         (¬(∃ #t.1. Compromise( ) @ #t.1))"
+
+
+lemma san_monitorTrackSubject:
+  exists-trace
+  "∃ #t.
+         (San_monitorTrackSubject( ) @ #t) ∧
+         (¬(∃ #t.1. Compromise( ) @ #t.1))"
+
+
+lemma san_ChainValidator_Valid:
+  exists-trace
+  "∃ #t.
+         (San_ChainValidator_Valid( ) @ #t) ∧
+         (¬(∃ #t.1. Compromise( ) @ #t.1))"
+
+
+lemma san_ChainValidator_Invalid:
+  exists-trace
+  "∃ #t.
+         (San_ChainValidator_Invalid( ) @ #t) ∧
+         (¬(∃ #t.1. Compromise( ) @ #t.1))"
+
+
+lemma san_monitorFindsRogueCertificate:
+  exists-trace
+  "∃ #t.
+         (San_monitorFindsRogueCertificate( ) @ #t) ∧
+         (∀ #t.1.
+           (Compromise( ) @ #t.1) ⇒ (∃ CA. CompromiseCA( CA ) @ #t.1))"
+
+
+lemma san_monitorCanFindCertificate:
+  exists-trace
+  "∃ #t.
+         (San_monitorCanFindCertificate( ) @ #t) ∧
+         (¬(∃ #t.1. Compromise( ) @ #t.1))"
+
+
+lemma san_monitorCannotFindCertificate:
+  exists-trace
+  "∃ #t.
+         (San_monitorCannotFindCertificate( ) @ #t) ∧
+         (¬(∃ #t.1. Compromise( ) @ #t.1))"
+
+
+lemma san_monitorFindsRogueCertificate_Sleep:
+  exists-trace
+  "∃ #t.
+         (San_monitorFindsRogueCertificate_Sleep( ) @ #t) ∧
+         (∀ #t.1.
+           (Compromise( ) @ #t.1) ⇒
+           ((∃ M. CompromiseMonitor( M ) @ #t.1) ∨
+            (∃ CA. CompromiseCA( CA ) @ #t.1)))"
+
+
+lemma san_Logger_Init:
+  exists-trace
+  "∃ #t.
+         (San_Logger_Init( ) @ #t) ∧ (¬(∃ #t.1. Compromise( ) @ #t.1))"
+
+
+lemma san_Start_Log:
+  exists-trace
+  "∃ #t.
+         (San_Start_Log( ) @ #t) ∧ (¬(∃ #t.1. Compromise( ) @ #t.1))"
+
+
+lemma san_Start_Log_malicious:
+  exists-trace
+  "∃ #t.
+         (San_Start_Log_malicious( ) @ #t) ∧
+         (∀ #t.1.
+           (Compromise( ) @ #t.1) ⇒ (∃ L. CompromiseLogger( L ) @ #t.1))"
+
+
+lemma san_add_preC_to_log:
+  exists-trace
+  "∃ #t.
+         (San_add_preC_to_log( ) @ #t) ∧
+         (¬(∃ #t.1. Compromise( ) @ #t.1))"
+
+
+lemma san_forge_log_view:
+  exists-trace
+  "∃ #t.
+         (San_forge_log_view( ) @ #t) ∧
+         (∀ #t.1.
+           (Compromise( ) @ #t.1) ⇒ (∃ L. CompromiseLogger( L ) @ #t.1))"
+
+
+lemma san_PreCertify:
+  exists-trace
+  "∃ #t.
+         (San_PreCertify( ) @ #t) ∧ (¬(∃ #t.1. Compromise( ) @ #t.1))"
+
+
+lemma san_PubKeyCertify:
+  exists-trace
+  "∃ #t.
+         (San_PubKeyCertify( ) @ #t) ∧
+         (¬(∃ #t.1. Compromise( ) @ #t.1))"
+
+
+lemma san_ClientValidate:
+  exists-trace
+  "∃ #t.
+         (San_ClientValidate( ) @ #t) ∧
+         (¬(∃ #t.1. Compromise( ) @ #t.1))"
+
+
+lemma san_MonitorStoresSnapshot:
+  exists-trace
+  "∃ #t.
+         (San_MonitorStoresSnapshot( ) @ #t) ∧
+         (¬(∃ #t.1. Compromise( ) @ #t.1))"
+
+
+lemma san_ClientStoresSnapshot:
+  exists-trace
+  "∃ #t.
+         (San_ClientStoresSnapshot( ) @ #t) ∧
+         (¬(∃ #t.1. Compromise( ) @ #t.1))"
+
+
+lemma san_ClientFindsAppendOnlyViolation:
+  exists-trace
+  "∃ #t.
+         (San_ClientFindsAppendOnlyViolation( ) @ #t) ∧
+         (∀ #t.1.
+           (Compromise( ) @ #t.1) ⇒ (∃ L. CompromiseLogger( L ) @ #t.1))"
+
+
+lemma san_ClientVerifiesAppendOnly:
+  exists-trace
+  "∃ #t.
+         (San_ClientVerifiesAppendOnly( ) @ #t) ∧
+         (¬(∃ #t.1. Compromise( ) @ #t.1))"
+
+
+lemma san_ProofFetching_M:
+  exists-trace
+  "∃ #t.
+         (San_ProofFetching_M( ) @ #t) ∧
+         (¬(∃ #t.1. Compromise( ) @ #t.1))"
+
+
+lemma san_ProofFetching_C:
+  exists-trace
+  "∃ #t.
+         (San_ProofFetching_C( ) @ #t) ∧
+         (¬(∃ #t.1. Compromise( ) @ #t.1))"
+
+
+lemma san_LoggerSnapshot_M:
+  exists-trace
+  "∃ #t.
+         (San_LoggerSnapshot_M( ) @ #t) ∧
+         (¬(∃ #t.1. Compromise( ) @ #t.1))"
+
+
+lemma san_LoggerSnapshot_C:
+  exists-trace
+  "∃ #t.
+         (San_LoggerSnapshot_C( ) @ #t) ∧
+         (¬(∃ #t.1. Compromise( ) @ #t.1))"
+
+
+lemma san_ParticipantFindsInclusionViolation:
+  exists-trace
+  "∃ #t.
+         (San_ParticipantFindsInclusionViolation( ) @ #t) ∧
+         (¬(∃ #t.1. Compromise( ) @ #t.1))"
+
+
+lemma san_ParticipantVerifiesInclusion:
+  exists-trace
+  "∃ #t.
+         (San_ParticipantVerifiesInclusion( ) @ #t) ∧
+         (¬(∃ #t.1. Compromise( ) @ #t.1))"
+
+
+lemma san_clientGossipsToMonitor:
+  exists-trace
+  "∃ #t.
+         (San_clientGossipsToMonitor( ) @ #t) ∧
+         (¬(∃ #t.1. Compromise( ) @ #t.1))"
+
+
+lemma san_monitorFindsAppendOnlyViolation_Gossiped:
+  exists-trace
+  "∃ #t.
+         (San_monitorFindsAppendOnlyViolation_Gossiped( ) @ #t) ∧
+         (∀ #t.1.
+           (Compromise( ) @ #t.1) ⇒ (∃ L. CompromiseLogger( L ) @ #t.1))"
+
+
+lemma san_monitorVerifiesAppendOnly_Gossiped:
+  exists-trace
+  "∃ #t.
+         (San_monitorVerifiesAppendOnly_Gossiped( ) @ #t) ∧
+         (¬(∃ #t.1. Compromise( ) @ #t.1))"
+
+
+lemma san_ConsultDocumentation_Success:
+  exists-trace
+  "∃ #t.
+         (San_ConsultDocumentation_Success( ) @ #t) ∧
+         (¬(∃ #t.1. Compromise( ) @ #t.1))"
+
+
+lemma san_ConsultDocumentation_Fails:
+  exists-trace
+  "∃ #t.
+         (San_ConsultDocumentation_Fails( ) @ #t) ∧
+         (∀ #t.1.
+           (Compromise( ) @ #t.1) ⇒
+           (∃ rootCA. CompromiseRootCA( rootCA ) @ #t.1))"
+
+
+lemma san_MonitorCheck_Found:
+  exists-trace
+  "∃ #t.
+         (San_MonitorCheck_Found( ) @ #t) ∧
+         (¬(∃ #t.1. Compromise( ) @ #t.1))"
+
+
+lemma san_MonitorCheck_NotFound:
+  exists-trace
+  "∃ #t.
+         (San_MonitorCheck_NotFound( ) @ #t) ∧
+         (∀ #t.1.
+           (Compromise( ) @ #t.1) ⇒ (∃ L. CompromiseLogger( L ) @ #t.1))"
+
+
+lemma suff_san_GossipingCheck_Found:
+  exists-trace
+  "∃ #t.
+         (San_GossipingCheck_Found( ) @ #t) ∧
+         (¬(∃ #t.1. Compromise( ) @ #t.1))"
+
+
+lemma suff_san_GossipingCheck_NotFound:
+  exists-trace
+  "∃ #t.
+         (San_GossipingCheck_NotFound( ) @ #t) ∧
+         (∀ #t.1.
+           (Compromise( ) @ #t.1) ⇒ (∃ L. CompromiseLogger( L ) @ #t.1))"
+
+
+lemma san_compromiseCA:
+  exists-trace "∃ #t. San_compromiseCA( ) @ #t"
+
+
+lemma san_compromiseRootCA:
+  exists-trace "∃ #t. San_compromiseRootCA( ) @ #t"
+
+
+lemma san_compromiseLogger:
+  exists-trace "∃ #t. San_compromiseLogger( ) @ #t"
+
+
+lemma san_compromiseMonitor:
+  exists-trace "∃ #t. San_compromiseMonitor( ) @ #t"
+
+
+lemma transparency_Gossip:
+  all-traces
+  "∀ M L CA fields ca_fields session gossiped_session #t.
+         (CTGossipCheck( M, L, fields, CA, ca_fields, session,
+                         gossiped_session
+          ) @ #t) ⇒
+         (∃ #t.1. LContains( L, fields ) @ #t.1)"
+
+
+lemma T_Gossip_verif_empty_helper1 [reuse]:
+  all-traces
+  "∀ M L fields CA ca_fields gossiped_session session #t.
+         ((CTGossipCheck( M, L, fields, CA, ca_fields, session,
+                          gossiped_session
+           ) @ #t) ∧
+          (¬(∃ #t.1.
+              Asserts( M,
+                       'The log has violated the append-only property between these two snapshots.',
+                       L, <gossiped_session, session>
+              ) @ #t.1))) ⇒
+         (∃ #t.1. LContains( L, fields ) @ #t.1)"
+
+
+lemma T_Gossip_verif_empty_helper2 [reuse,
+                                    hide_lemma=T_Gossip_verif_empty_helper1]:
+  all-traces
+  "∀ M L fields CA ca_fields gossiped_session session #t.
+         (CTGossipCheck_NotFound( M, L, fields, CA, ca_fields, session,
+                                  gossiped_session
+          ) @ #t) ⇒
+         (∃ #t.1.
+           Asserts( M,
+                    'The log has violated the append-only property between these two snapshots.',
+                    L, <gossiped_session, session>
+           ) @ #t.1)"
+
+
+lemma T_Gossip_uniq_helper [reuse]:
+  all-traces
+  "∀ M L gossiped_session session #t.
+         (Asserts( M,
+                   'The log has violated the append-only property between these two snapshots.',
+                   L, <gossiped_session, session>
+          ) @ #t) ⇒
+         (∃ #t.1. Corrupted( L ) @ #t.1)"
+
+
+lemma A_CT_2_uniq_helper_intm_CA [reuse]:
+  all-traces
+  "∀ CA M rootCA fields ca_fields #t1 #t2.
+         ((Asserts( M, 'Blame this CA.', CA,
+                    <fields, ca_fields>
+           ) @ #t1) ∧
+          (Asserts( rootCA, 'I signed this intermediate CA.', CA,
+                    ca_fields
+           ) @ #t2)) ⇒
+         (∃ #i. Corrupted( CA ) @ #i)"
+
+
+lemma A_CT_2_uniq_helper_root [reuse]:
+  all-traces
+  "∀ rootCA CA ca_fields #t.
+         (AssertsNot( rootCA, 'I signed this intermediate CA.', CA,
+                      ca_fields
+          ) @ #t) ⇒
+         (∃ #t.1. Corrupted( rootCA ) @ #t.1)"
+
+
+lemma A_Gossip_helper [reuse]:
+  all-traces
+  "∀ M L fields CA ca_fields session gossiped_session #t.
+         (((CTGossipCheck( M, L, fields, CA, ca_fields, session,
+                           gossiped_session
+            ) @ #t) ∧
+           (¬(∃ #t.1. CompromiseMonitor( M ) @ #t.1))) ∧
+          (¬(∃ #t.1. CompromiseLogger( L ) @ #t.1))) ⇒
+         (∃ #t.1.
+           CTGossipCheck_Found( M, L, fields, CA, ca_fields, session,
+                                gossiped_session
+           ) @ #t.1)"
+
+
+lemma A_Gossip_1_nonempty_helper1 [reuse]:
+  all-traces
+  "∀ M fields CA ca_fields #t1.
+         (Asserts( M, 'Blame this CA.', CA,
+                   <fields, ca_fields>
+          ) @ #t1) ⇒
+         (¬(∃ CA.1 #t0.
+             (GroundTruth( CA.1, fields ) @ #t0) ∧ (#t0 < #t1)))"
+
+
+lemma T_Gossip_gossip_appendOnly_viol_suff [heuristic=o "acc_oracle"]:
+  exists-trace
+  "∃ L M fields CA ca_fields session gossiped_session #t #t1.
+         (((CTGossipCheck_NotFound( M, L, fields, CA, ca_fields, session,
+                                    gossiped_session
+            ) @ #t) ∧
+           (Asserts( M,
+                     'The log has violated the append-only property between these two snapshots.',
+                     L, <gossiped_session, session>
+            ) @ #t1)) ∧
+          (∀ L.1 M.1 fields.1 CA.1 ca_fields.1 session.1 gossiped_session.1
+             #t.1 #t1.1.
+            ((CTGossipCheck_NotFound( M.1, L.1, fields.1, CA.1, ca_fields.1,
+                                      session.1, gossiped_session.1
+              ) @ #t.1) ∧
+             (Asserts( M.1,
+                       'The log has violated the append-only property between these two snapshots.',
+                       L.1, <gossiped_session.1, session.1>
+              ) @ #t1.1)) ⇒
+            (L.1 = L))) ∧
+         (∀ a #i. (Corrupted( a ) @ #i) ⇒ (a = L))"
+
+
+lemma T_Gossip_verif_empty [heuristic=o "acc_oracle"]:
+  all-traces
+  "(¬(∃ L M fields CA ca_fields session gossiped_session #t #t1.
+            (CTGossipCheck_NotFound( M, L, fields, CA, ca_fields, session,
+                                     gossiped_session
+             ) @ #t) ∧
+            (Asserts( M,
+                      'The log has violated the append-only property between these two snapshots.',
+                      L, <gossiped_session, session>
+             ) @ #t1))) ⇒
+        (∀ M L fields CA ca_fields session gossiped_session #t1.
+          (CTGossipCheck( M, L, fields, CA, ca_fields, session,
+                          gossiped_session
+           ) @ #t1) ⇒
+          (LContains( L, fields ) @ #t1))"
+
+
+lemma T_Gossip_gossip_appendOnly_viol_verif_nonempty [heuristic=o "acc_oracle"]:
+  all-traces
+  "∀ L M fields CA ca_fields session gossiped_session #t #t1.
+         ((CTGossipCheck_NotFound( M, L, fields, CA, ca_fields, session,
+                                   gossiped_session
+           ) @ #t) ∧
+          (Asserts( M,
+                    'The log has violated the append-only property between these two snapshots.',
+                    L, <gossiped_session, session>
+           ) @ #t1)) ⇒
+         (¬(∀ M.1 L.1 fields.1 CA.1 ca_fields.1 session.1 gossiped_session.1
+              #t1.1.
+             (CTGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1, session.1,
+                             gossiped_session.1
+              ) @ #t1.1) ⇒
+             (LContains( L.1, fields.1 ) @ #t1.1)))"
+
+
+lemma T_Gossip_gossip_appendOnly_viol_min [heuristic=o "acc_oracle"]:
+  all-traces
+  "∀ L M fields CA ca_fields session gossiped_session #t #t1.
+         ((CTGossipCheck_NotFound( M, L, fields, CA, ca_fields, session,
+                                   gossiped_session
+           ) @ #t) ∧
+          (Asserts( M,
+                    'The log has violated the append-only property between these two snapshots.',
+                    L, <gossiped_session, session>
+           ) @ #t1)) ⇒
+         (¬(∃ L.1 M.1 fields.1 CA.1 ca_fields.1 session.1 gossiped_session.1
+              #t.1 #t1.1.
+             ((CTGossipCheck_NotFound( M.1, L.1, fields.1, CA.1, ca_fields.1,
+                                       session.1, gossiped_session.1
+               ) @ #t.1) ∧
+              (Asserts( M.1,
+                        'The log has violated the append-only property between these two snapshots.',
+                        L.1, <gossiped_session.1, session.1>
+               ) @ #t1.1)) ∧
+             ((L.1 = L) ∧ (¬(L = L.1)))))"
+
+
+lemma T_Gossip_gossip_appendOnly_viol_uniq [heuristic=o "acc_oracle"]:
+  all-traces
+  "∀ L M fields CA ca_fields session gossiped_session #t #t1.
+         ((CTGossipCheck_NotFound( M, L, fields, CA, ca_fields, session,
+                                   gossiped_session
+           ) @ #t) ∧
+          (Asserts( M,
+                    'The log has violated the append-only property between these two snapshots.',
+                    L, <gossiped_session, session>
+           ) @ #t1)) ⇒
+         (∃ #i. Corrupted( L ) @ #i)"
+
+
+lemma T_Gossip_gossip_appendOnly_viol_inj [heuristic=o "acc_oracle"]:
+  all-traces "⊤"
+
+
+lemma T_Gossip_gossip_appendOnly_viol_single [heuristic=o "acc_oracle"]:
+  exists-trace
+  "∃ L M fields CA ca_fields session gossiped_session #t #t1.
+         ((CTGossipCheck_NotFound( M, L, fields, CA, ca_fields, session,
+                                   gossiped_session
+           ) @ #t) ∧
+          (Asserts( M,
+                    'The log has violated the append-only property between these two snapshots.',
+                    L, <gossiped_session, session>
+           ) @ #t1)) ∧
+         (∀ L.1 M.1 fields.1 CA.1 ca_fields.1 session.1 gossiped_session.1
+            #t.1 #t1.1.
+           ((CTGossipCheck_NotFound( M.1, L.1, fields.1, CA.1, ca_fields.1,
+                                     session.1, gossiped_session.1
+             ) @ #t.1) ∧
+            (Asserts( M.1,
+                      'The log has violated the append-only property between these two snapshots.',
+                      L.1, <gossiped_session.1, session.1>
+             ) @ #t1.1)) ⇒
+           (L.1 = L))"
+
+
+lemma A_Gossip_1_rootCA_rogue_gossip_suff [heuristic=o "acc_oracle",
+                                           hide_lemma=T_Gossip_verif_empty_helper1,
+                                           hide_lemma=T_Gossip_verif_empty_helper2]:
+  exists-trace
+  "∃ rootCA M L fields CA ca_fields session gossiped_session #t
+          #t1 #t2.
+         (((((CTGossipCheck( M, L, fields, CA, ca_fields, session,
+                             gossiped_session
+              ) @ #t) ∧
+             (Asserts( M, 'Blame this CA.', CA,
+                       <fields, ca_fields>
+              ) @ #t1)) ∧
+            (AssertsNot( rootCA, 'I signed this intermediate CA.', CA,
+                         ca_fields
+             ) @ #t2)) ∧
+           (¬(∃ #t.1. CompromiseMonitor( M ) @ #t.1))) ∧
+          (∀ rootCA.1 M.1 L.1 fields.1 CA.1 ca_fields.1 session.1
+             gossiped_session.1 #t.1 #t1.1 #t2.1.
+            ((((CTGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
+                               session.1, gossiped_session.1
+                ) @ #t.1) ∧
+               (Asserts( M.1, 'Blame this CA.', CA.1,
+                         <fields.1, ca_fields.1>
+                ) @ #t1.1)) ∧
+              (AssertsNot( rootCA.1, 'I signed this intermediate CA.',
+                           CA.1, ca_fields.1
+               ) @ #t2.1)) ∧
+             (¬(∃ #t.2. CompromiseMonitor( M.1 ) @ #t.2))) ⇒
+            (rootCA.1 = rootCA))) ∧
+         ((∀ a #i. (Corrupted( a ) @ #i) ⇒ (a = rootCA)) ∧
+          (¬(∃ CA.1 M.1 L.1 fields.1 rootCA.1 ca_fields.1 session.1
+               gossiped_session.1 #t.1 #t1.1 #t2.1.
+              (((CTGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1, session.1,
+                                gossiped_session.1
+                 ) @ #t.1) ∧
+                (Asserts( M.1, 'Blame this CA.', CA.1,
+                          <fields.1, ca_fields.1>
+                 ) @ #t1.1)) ∧
+               (Asserts( rootCA.1, 'I signed this intermediate CA.', CA.1,
+                         ca_fields.1
+                ) @ #t2.1)) ∧
+              (¬(∃ #t.2. CompromiseMonitor( M.1 ) @ #t.2)))))"
+
+
+lemma A_Gossip_1_rootCA_benign_gossip_suff [heuristic=o "acc_oracle",
+                                            hide_lemma=T_Gossip_verif_empty_helper1,
+                                            hide_lemma=T_Gossip_verif_empty_helper2]:
+  exists-trace
+  "∃ CA M L fields rootCA ca_fields session gossiped_session #t
+          #t1 #t2.
+         (((((CTGossipCheck( M, L, fields, CA, ca_fields, session,
+                             gossiped_session
+              ) @ #t) ∧
+             (Asserts( M, 'Blame this CA.', CA,
+                       <fields, ca_fields>
+              ) @ #t1)) ∧
+            (Asserts( rootCA, 'I signed this intermediate CA.', CA,
+                      ca_fields
+             ) @ #t2)) ∧
+           (¬(∃ #t.1. CompromiseMonitor( M ) @ #t.1))) ∧
+          (∀ CA.1 M.1 L.1 fields.1 rootCA.1 ca_fields.1 session.1
+             gossiped_session.1 #t.1 #t1.1 #t2.1.
+            ((((CTGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
+                               session.1, gossiped_session.1
+                ) @ #t.1) ∧
+               (Asserts( M.1, 'Blame this CA.', CA.1,
+                         <fields.1, ca_fields.1>
+                ) @ #t1.1)) ∧
+              (Asserts( rootCA.1, 'I signed this intermediate CA.', CA.1,
+                        ca_fields.1
+               ) @ #t2.1)) ∧
+             (¬(∃ #t.2. CompromiseMonitor( M.1 ) @ #t.2))) ⇒
+            (CA.1 = CA))) ∧
+         ((∀ a #i. (Corrupted( a ) @ #i) ⇒ (a = CA)) ∧
+          (¬(∃ rootCA.1 M.1 L.1 fields.1 CA.1 ca_fields.1 session.1
+               gossiped_session.1 #t.1 #t1.1 #t2.1.
+              (((CTGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1, session.1,
+                                gossiped_session.1
+                 ) @ #t.1) ∧
+                (Asserts( M.1, 'Blame this CA.', CA.1,
+                          <fields.1, ca_fields.1>
+                 ) @ #t1.1)) ∧
+               (AssertsNot( rootCA.1, 'I signed this intermediate CA.',
+                            CA.1, ca_fields.1
+                ) @ #t2.1)) ∧
+              (¬(∃ #t.2. CompromiseMonitor( M.1 ) @ #t.2)))))"
+
+
+lemma A_Gossip_1_verif_empty [heuristic=o "acc_oracle",
+                              hide_lemma=T_Gossip_verif_empty_helper1,
+                              hide_lemma=T_Gossip_verif_empty_helper2]:
+  all-traces
+  "(¬((∃ rootCA M L fields CA ca_fields session gossiped_session
+              #t #t1 #t2.
+             (((CTGossipCheck( M, L, fields, CA, ca_fields, session,
+                               gossiped_session
+                ) @ #t) ∧
+               (Asserts( M, 'Blame this CA.', CA,
+                         <fields, ca_fields>
+                ) @ #t1)) ∧
+              (AssertsNot( rootCA, 'I signed this intermediate CA.', CA,
+                           ca_fields
+               ) @ #t2)) ∧
+             (¬(∃ #t.1. CompromiseMonitor( M ) @ #t.1))) ∨
+           (∃ CA M L fields rootCA ca_fields session gossiped_session #t #t1
+              #t2.
+             (((CTGossipCheck( M, L, fields, CA, ca_fields, session,
+                               gossiped_session
+                ) @ #t) ∧
+               (Asserts( M, 'Blame this CA.', CA,
+                         <fields, ca_fields>
+                ) @ #t1)) ∧
+              (Asserts( rootCA, 'I signed this intermediate CA.', CA,
+                        ca_fields
+               ) @ #t2)) ∧
+             (¬(∃ #t.1. CompromiseMonitor( M ) @ #t.1))))) ⇒
+        (∀ M L fields CA ca_fields session gossiped_session #t.
+          ((CTGossipCheck( M, L, fields, CA, ca_fields, session,
+                           gossiped_session
+            ) @ #t) ∧
+           (¬(∃ #t.1. CompromiseMonitor( M ) @ #t.1))) ⇒
+          (∃ #t.1. GroundTruth( CA, fields ) @ #t.1))"
+
+
+lemma A_Gossip_1_rootCA_rogue_gossip_verif_nonempty [heuristic=o "acc_oracle",
+                                                     hide_lemma=T_Gossip_verif_empty_helper1,
+                                                     hide_lemma=T_Gossip_verif_empty_helper2]:
+  all-traces
+  "∀ rootCA M L fields CA ca_fields session gossiped_session #t
+          #t1 #t2.
+         ((((CTGossipCheck( M, L, fields, CA, ca_fields, session,
+                            gossiped_session
+             ) @ #t) ∧
+            (Asserts( M, 'Blame this CA.', CA,
+                      <fields, ca_fields>
+             ) @ #t1)) ∧
+           (AssertsNot( rootCA, 'I signed this intermediate CA.', CA,
+                        ca_fields
+            ) @ #t2)) ∧
+          (¬(∃ #t.1. CompromiseMonitor( M ) @ #t.1))) ⇒
+         (¬(∀ M.1 L.1 fields.1 CA.1 ca_fields.1 session.1 gossiped_session.1
+              #t.1.
+             ((CTGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1, session.1,
+                              gossiped_session.1
+               ) @ #t.1) ∧
+              (¬(∃ #t.2. CompromiseMonitor( M.1 ) @ #t.2))) ⇒
+             (∃ #t.2. GroundTruth( CA.1, fields.1 ) @ #t.2)))"
+
+
+lemma A_Gossip_1_rootCA_benign_gossip_verif_nonempty [heuristic=o "acc_oracle",
+                                                      hide_lemma=T_Gossip_verif_empty_helper1,
+                                                      hide_lemma=T_Gossip_verif_empty_helper2]:
+  all-traces
+  "∀ CA M L fields rootCA ca_fields session gossiped_session #t
+          #t1 #t2.
+         ((((CTGossipCheck( M, L, fields, CA, ca_fields, session,
+                            gossiped_session
+             ) @ #t) ∧
+            (Asserts( M, 'Blame this CA.', CA,
+                      <fields, ca_fields>
+             ) @ #t1)) ∧
+           (Asserts( rootCA, 'I signed this intermediate CA.', CA,
+                     ca_fields
+            ) @ #t2)) ∧
+          (¬(∃ #t.1. CompromiseMonitor( M ) @ #t.1))) ⇒
+         (¬(∀ M.1 L.1 fields.1 CA.1 ca_fields.1 session.1 gossiped_session.1
+              #t.1.
+             ((CTGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1, session.1,
+                              gossiped_session.1
+               ) @ #t.1) ∧
+              (¬(∃ #t.2. CompromiseMonitor( M.1 ) @ #t.2))) ⇒
+             (∃ #t.2. GroundTruth( CA.1, fields.1 ) @ #t.2)))"
+
+
+lemma A_Gossip_1_rootCA_rogue_gossip_min [heuristic=o "acc_oracle",
+                                          hide_lemma=T_Gossip_verif_empty_helper1,
+                                          hide_lemma=T_Gossip_verif_empty_helper2]:
+  all-traces
+  "∀ rootCA M L fields CA ca_fields session gossiped_session #t
+          #t1 #t2.
+         ((((CTGossipCheck( M, L, fields, CA, ca_fields, session,
+                            gossiped_session
+             ) @ #t) ∧
+            (Asserts( M, 'Blame this CA.', CA,
+                      <fields, ca_fields>
+             ) @ #t1)) ∧
+           (AssertsNot( rootCA, 'I signed this intermediate CA.', CA,
+                        ca_fields
+            ) @ #t2)) ∧
+          (¬(∃ #t.1. CompromiseMonitor( M ) @ #t.1))) ⇒
+         ((¬(∃ rootCA.1 M.1 L.1 fields.1 CA.1 ca_fields.1 session.1
+               gossiped_session.1 #t.1 #t1.1 #t2.1.
+              ((((CTGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
+                                 session.1, gossiped_session.1
+                  ) @ #t.1) ∧
+                 (Asserts( M.1, 'Blame this CA.', CA.1,
+                           <fields.1, ca_fields.1>
+                  ) @ #t1.1)) ∧
+                (AssertsNot( rootCA.1, 'I signed this intermediate CA.',
+                             CA.1, ca_fields.1
+                 ) @ #t2.1)) ∧
+               (¬(∃ #t.2. CompromiseMonitor( M.1 ) @ #t.2))) ∧
+              ((rootCA.1 = rootCA) ∧ (¬(rootCA = rootCA.1))))) ∧
+          (¬(∃ CA.1 M.1 L.1 fields.1 rootCA.1 ca_fields.1 session.1
+               gossiped_session.1 #t.1 #t1.1 #t2.1.
+              ((((CTGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
+                                 session.1, gossiped_session.1
+                  ) @ #t.1) ∧
+                 (Asserts( M.1, 'Blame this CA.', CA.1,
+                           <fields.1, ca_fields.1>
+                  ) @ #t1.1)) ∧
+                (Asserts( rootCA.1, 'I signed this intermediate CA.', CA.1,
+                          ca_fields.1
+                 ) @ #t2.1)) ∧
+               (¬(∃ #t.2. CompromiseMonitor( M.1 ) @ #t.2))) ∧
+              ((CA.1 = rootCA) ∧ (¬(rootCA = CA.1))))))"
+
+
+lemma A_Gossip_1_rootCA_benign_gossip_min [heuristic=o "acc_oracle",
+                                           hide_lemma=T_Gossip_verif_empty_helper1,
+                                           hide_lemma=T_Gossip_verif_empty_helper2]:
+  all-traces
+  "∀ CA M L fields rootCA ca_fields session gossiped_session #t
+          #t1 #t2.
+         ((((CTGossipCheck( M, L, fields, CA, ca_fields, session,
+                            gossiped_session
+             ) @ #t) ∧
+            (Asserts( M, 'Blame this CA.', CA,
+                      <fields, ca_fields>
+             ) @ #t1)) ∧
+           (Asserts( rootCA, 'I signed this intermediate CA.', CA,
+                     ca_fields
+            ) @ #t2)) ∧
+          (¬(∃ #t.1. CompromiseMonitor( M ) @ #t.1))) ⇒
+         ((¬(∃ rootCA.1 M.1 L.1 fields.1 CA.1 ca_fields.1 session.1
+               gossiped_session.1 #t.1 #t1.1 #t2.1.
+              ((((CTGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
+                                 session.1, gossiped_session.1
+                  ) @ #t.1) ∧
+                 (Asserts( M.1, 'Blame this CA.', CA.1,
+                           <fields.1, ca_fields.1>
+                  ) @ #t1.1)) ∧
+                (AssertsNot( rootCA.1, 'I signed this intermediate CA.',
+                             CA.1, ca_fields.1
+                 ) @ #t2.1)) ∧
+               (¬(∃ #t.2. CompromiseMonitor( M.1 ) @ #t.2))) ∧
+              ((rootCA.1 = CA) ∧ (¬(CA = rootCA.1))))) ∧
+          (¬(∃ CA.1 M.1 L.1 fields.1 rootCA.1 ca_fields.1 session.1
+               gossiped_session.1 #t.1 #t1.1 #t2.1.
+              ((((CTGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
+                                 session.1, gossiped_session.1
+                  ) @ #t.1) ∧
+                 (Asserts( M.1, 'Blame this CA.', CA.1,
+                           <fields.1, ca_fields.1>
+                  ) @ #t1.1)) ∧
+                (Asserts( rootCA.1, 'I signed this intermediate CA.', CA.1,
+                          ca_fields.1
+                 ) @ #t2.1)) ∧
+               (¬(∃ #t.2. CompromiseMonitor( M.1 ) @ #t.2))) ∧
+              ((CA.1 = CA) ∧ (¬(CA = CA.1))))))"
+
+
+lemma A_Gossip_1_rootCA_rogue_gossip_uniq [heuristic=o "acc_oracle",
+                                           hide_lemma=T_Gossip_verif_empty_helper1,
+                                           hide_lemma=T_Gossip_verif_empty_helper2]:
+  all-traces
+  "∀ rootCA M L fields CA ca_fields session gossiped_session #t
+          #t1 #t2.
+         ((((CTGossipCheck( M, L, fields, CA, ca_fields, session,
+                            gossiped_session
+             ) @ #t) ∧
+            (Asserts( M, 'Blame this CA.', CA,
+                      <fields, ca_fields>
+             ) @ #t1)) ∧
+           (AssertsNot( rootCA, 'I signed this intermediate CA.', CA,
+                        ca_fields
+            ) @ #t2)) ∧
+          (¬(∃ #t.1. CompromiseMonitor( M ) @ #t.1))) ⇒
+         (∃ #i. Corrupted( rootCA ) @ #i)"
+
+
+lemma A_Gossip_1_rootCA_benign_gossip_uniq [heuristic=o "acc_oracle",
+                                            hide_lemma=T_Gossip_verif_empty_helper1,
+                                            hide_lemma=T_Gossip_verif_empty_helper2]:
+  all-traces
+  "∀ CA M L fields rootCA ca_fields session gossiped_session #t
+          #t1 #t2.
+         ((((CTGossipCheck( M, L, fields, CA, ca_fields, session,
+                            gossiped_session
+             ) @ #t) ∧
+            (Asserts( M, 'Blame this CA.', CA,
+                      <fields, ca_fields>
+             ) @ #t1)) ∧
+           (Asserts( rootCA, 'I signed this intermediate CA.', CA,
+                     ca_fields
+            ) @ #t2)) ∧
+          (¬(∃ #t.1. CompromiseMonitor( M ) @ #t.1))) ⇒
+         (∃ #i. Corrupted( CA ) @ #i)"
+
+
+lemma A_Gossip_1_rootCA_rogue_gossip_inj [heuristic=o "acc_oracle",
+                                          hide_lemma=T_Gossip_verif_empty_helper1,
+                                          hide_lemma=T_Gossip_verif_empty_helper2]:
+  all-traces "⊤"
+
+
+lemma A_Gossip_1_rootCA_benign_gossip_inj [heuristic=o "acc_oracle",
+                                           hide_lemma=T_Gossip_verif_empty_helper1,
+                                           hide_lemma=T_Gossip_verif_empty_helper2]:
+  all-traces "⊤"
+
+
+lemma A_Gossip_1_rootCA_rogue_gossip_single [heuristic=o "acc_oracle",
+                                             hide_lemma=T_Gossip_verif_empty_helper1,
+                                             hide_lemma=T_Gossip_verif_empty_helper2]:
+  exists-trace
+  "∃ rootCA M L fields CA ca_fields session gossiped_session #t
+          #t1 #t2.
+         (((((CTGossipCheck( M, L, fields, CA, ca_fields, session,
+                             gossiped_session
+              ) @ #t) ∧
+             (Asserts( M, 'Blame this CA.', CA,
+                       <fields, ca_fields>
+              ) @ #t1)) ∧
+            (AssertsNot( rootCA, 'I signed this intermediate CA.', CA,
+                         ca_fields
+             ) @ #t2)) ∧
+           (¬(∃ #t.1. CompromiseMonitor( M ) @ #t.1))) ∧
+          (∀ rootCA.1 M.1 L.1 fields.1 CA.1 ca_fields.1 session.1
+             gossiped_session.1 #t.1 #t1.1 #t2.1.
+            ((((CTGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
+                               session.1, gossiped_session.1
+                ) @ #t.1) ∧
+               (Asserts( M.1, 'Blame this CA.', CA.1,
+                         <fields.1, ca_fields.1>
+                ) @ #t1.1)) ∧
+              (AssertsNot( rootCA.1, 'I signed this intermediate CA.',
+                           CA.1, ca_fields.1
+               ) @ #t2.1)) ∧
+             (¬(∃ #t.2. CompromiseMonitor( M.1 ) @ #t.2))) ⇒
+            (rootCA.1 = rootCA))) ∧
+         (¬(∃ CA.1 M.1 L.1 fields.1 rootCA.1 ca_fields.1 session.1
+              gossiped_session.1 #t.1 #t1.1 #t2.1.
+             (((CTGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1, session.1,
+                               gossiped_session.1
+                ) @ #t.1) ∧
+               (Asserts( M.1, 'Blame this CA.', CA.1,
+                         <fields.1, ca_fields.1>
+                ) @ #t1.1)) ∧
+              (Asserts( rootCA.1, 'I signed this intermediate CA.', CA.1,
+                        ca_fields.1
+               ) @ #t2.1)) ∧
+             (¬(∃ #t.2. CompromiseMonitor( M.1 ) @ #t.2))))"
+
+
+lemma A_Gossip_1_rootCA_benign_gossip_single [heuristic=o "acc_oracle",
+                                              hide_lemma=T_Gossip_verif_empty_helper1,
+                                              hide_lemma=T_Gossip_verif_empty_helper2]:
+  exists-trace
+  "∃ CA M L fields rootCA ca_fields session gossiped_session #t
+          #t1 #t2.
+         (((((CTGossipCheck( M, L, fields, CA, ca_fields, session,
+                             gossiped_session
+              ) @ #t) ∧
+             (Asserts( M, 'Blame this CA.', CA,
+                       <fields, ca_fields>
+              ) @ #t1)) ∧
+            (Asserts( rootCA, 'I signed this intermediate CA.', CA,
+                      ca_fields
+             ) @ #t2)) ∧
+           (¬(∃ #t.1. CompromiseMonitor( M ) @ #t.1))) ∧
+          (∀ CA.1 M.1 L.1 fields.1 rootCA.1 ca_fields.1 session.1
+             gossiped_session.1 #t.1 #t1.1 #t2.1.
+            ((((CTGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
+                               session.1, gossiped_session.1
+                ) @ #t.1) ∧
+               (Asserts( M.1, 'Blame this CA.', CA.1,
+                         <fields.1, ca_fields.1>
+                ) @ #t1.1)) ∧
+              (Asserts( rootCA.1, 'I signed this intermediate CA.', CA.1,
+                        ca_fields.1
+               ) @ #t2.1)) ∧
+             (¬(∃ #t.2. CompromiseMonitor( M.1 ) @ #t.2))) ⇒
+            (CA.1 = CA))) ∧
+         (¬(∃ rootCA.1 M.1 L.1 fields.1 CA.1 ca_fields.1 session.1
+              gossiped_session.1 #t.1 #t1.1 #t2.1.
+             (((CTGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1, session.1,
+                               gossiped_session.1
+                ) @ #t.1) ∧
+               (Asserts( M.1, 'Blame this CA.', CA.1,
+                         <fields.1, ca_fields.1>
+                ) @ #t1.1)) ∧
+              (AssertsNot( rootCA.1, 'I signed this intermediate CA.',
+                           CA.1, ca_fields.1
+               ) @ #t2.1)) ∧
+             (¬(∃ #t.2. CompromiseMonitor( M.1 ) @ #t.2))))"
+
+
+lemma A_Gossip_2_rootCA_rogue_gossip_log_honest_suff [heuristic=o "acc_oracle",
+                                                      hide_lemma=T_Gossip_verif_empty_helper1,
+                                                      hide_lemma=T_Gossip_verif_empty_helper2]:
+  exists-trace
+  "∃ rootCA M L fields CA ca_fields session gossiped_session #t
+          #t1 #t2.
+         ((((((CTGossipCheck( M, L, fields, CA, ca_fields, session,
+                              gossiped_session
+               ) @ #t) ∧
+              (Asserts( M, 'Blame this CA.', CA,
+                        <fields, ca_fields>
+               ) @ #t1)) ∧
+             (AssertsNot( rootCA, 'I signed this intermediate CA.', CA,
+                          ca_fields
+              ) @ #t2)) ∧
+            (¬(∃ #t.1. CompromiseLogger( L ) @ #t.1))) ∧
+           (¬(∃ #t.1. CompromiseMonitor( M ) @ #t.1))) ∧
+          (∀ rootCA.1 M.1 L.1 fields.1 CA.1 ca_fields.1 session.1
+             gossiped_session.1 #t.1 #t1.1 #t2.1.
+            (((((CTGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
+                                session.1, gossiped_session.1
+                 ) @ #t.1) ∧
+                (Asserts( M.1, 'Blame this CA.', CA.1,
+                          <fields.1, ca_fields.1>
+                 ) @ #t1.1)) ∧
+               (AssertsNot( rootCA.1, 'I signed this intermediate CA.',
+                            CA.1, ca_fields.1
+                ) @ #t2.1)) ∧
+              (¬(∃ #t.2. CompromiseLogger( L.1 ) @ #t.2))) ∧
+             (¬(∃ #t.2. CompromiseMonitor( M.1 ) @ #t.2))) ⇒
+            (rootCA.1 = rootCA))) ∧
+         ((∀ a #i. (Corrupted( a ) @ #i) ⇒ (a = rootCA)) ∧
+          (¬(∃ CA.1 M.1 L.1 fields.1 rootCA.1 ca_fields.1 session.1
+               gossiped_session.1 #t.1 #t1.1 #t2.1.
+              ((((CTGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
+                                 session.1, gossiped_session.1
+                  ) @ #t.1) ∧
+                 (Asserts( M.1, 'Blame this CA.', CA.1,
+                           <fields.1, ca_fields.1>
+                  ) @ #t1.1)) ∧
+                (Asserts( rootCA.1, 'I signed this intermediate CA.', CA.1,
+                          ca_fields.1
+                 ) @ #t2.1)) ∧
+               (¬(∃ #t.2. CompromiseLogger( L.1 ) @ #t.2))) ∧
+              (¬(∃ #t.2. CompromiseMonitor( M.1 ) @ #t.2)))))"
+
+
+lemma A_Gossip_2_rootCA_benign_gossip_log_honest_suff [heuristic=o "acc_oracle",
+                                                       hide_lemma=T_Gossip_verif_empty_helper1,
+                                                       hide_lemma=T_Gossip_verif_empty_helper2]:
+  exists-trace
+  "∃ CA M L fields rootCA ca_fields session gossiped_session #t
+          #t1 #t2.
+         ((((((CTGossipCheck( M, L, fields, CA, ca_fields, session,
+                              gossiped_session
+               ) @ #t) ∧
+              (Asserts( M, 'Blame this CA.', CA,
+                        <fields, ca_fields>
+               ) @ #t1)) ∧
+             (Asserts( rootCA, 'I signed this intermediate CA.', CA,
+                       ca_fields
+              ) @ #t2)) ∧
+            (¬(∃ #t.1. CompromiseLogger( L ) @ #t.1))) ∧
+           (¬(∃ #t.1. CompromiseMonitor( M ) @ #t.1))) ∧
+          (∀ CA.1 M.1 L.1 fields.1 rootCA.1 ca_fields.1 session.1
+             gossiped_session.1 #t.1 #t1.1 #t2.1.
+            (((((CTGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
+                                session.1, gossiped_session.1
+                 ) @ #t.1) ∧
+                (Asserts( M.1, 'Blame this CA.', CA.1,
+                          <fields.1, ca_fields.1>
+                 ) @ #t1.1)) ∧
+               (Asserts( rootCA.1, 'I signed this intermediate CA.', CA.1,
+                         ca_fields.1
+                ) @ #t2.1)) ∧
+              (¬(∃ #t.2. CompromiseLogger( L.1 ) @ #t.2))) ∧
+             (¬(∃ #t.2. CompromiseMonitor( M.1 ) @ #t.2))) ⇒
+            (CA.1 = CA))) ∧
+         ((∀ a #i. (Corrupted( a ) @ #i) ⇒ (a = CA)) ∧
+          (¬(∃ rootCA.1 M.1 L.1 fields.1 CA.1 ca_fields.1 session.1
+               gossiped_session.1 #t.1 #t1.1 #t2.1.
+              ((((CTGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
+                                 session.1, gossiped_session.1
+                  ) @ #t.1) ∧
+                 (Asserts( M.1, 'Blame this CA.', CA.1,
+                           <fields.1, ca_fields.1>
+                  ) @ #t1.1)) ∧
+                (AssertsNot( rootCA.1, 'I signed this intermediate CA.',
+                             CA.1, ca_fields.1
+                 ) @ #t2.1)) ∧
+               (¬(∃ #t.2. CompromiseLogger( L.1 ) @ #t.2))) ∧
+              (¬(∃ #t.2. CompromiseMonitor( M.1 ) @ #t.2)))))"
+
+
+lemma A_Gossip_2_verif_empty [heuristic=o "acc_oracle",
+                              hide_lemma=T_Gossip_verif_empty_helper1,
+                              hide_lemma=T_Gossip_verif_empty_helper2]:
+  all-traces
+  "(¬((∃ rootCA M L fields CA ca_fields session gossiped_session
+              #t #t1 #t2.
+             ((((CTGossipCheck( M, L, fields, CA, ca_fields, session,
+                                gossiped_session
+                 ) @ #t) ∧
+                (Asserts( M, 'Blame this CA.', CA,
+                          <fields, ca_fields>
+                 ) @ #t1)) ∧
+               (AssertsNot( rootCA, 'I signed this intermediate CA.', CA,
+                            ca_fields
+                ) @ #t2)) ∧
+              (¬(∃ #t.1. CompromiseLogger( L ) @ #t.1))) ∧
+             (¬(∃ #t.1. CompromiseMonitor( M ) @ #t.1))) ∨
+           (∃ CA M L fields rootCA ca_fields session gossiped_session #t #t1
+              #t2.
+             ((((CTGossipCheck( M, L, fields, CA, ca_fields, session,
+                                gossiped_session
+                 ) @ #t) ∧
+                (Asserts( M, 'Blame this CA.', CA,
+                          <fields, ca_fields>
+                 ) @ #t1)) ∧
+               (Asserts( rootCA, 'I signed this intermediate CA.', CA,
+                         ca_fields
+                ) @ #t2)) ∧
+              (¬(∃ #t.1. CompromiseLogger( L ) @ #t.1))) ∧
+             (¬(∃ #t.1. CompromiseMonitor( M ) @ #t.1))))) ⇒
+        (∀ M L fields CA ca_fields session gossiped_session #t.
+          (((CTGossipCheck( M, L, fields, CA, ca_fields, session,
+                            gossiped_session
+             ) @ #t) ∧
+            (¬(∃ #t.1. CompromiseLogger( L ) @ #t.1))) ∧
+           (¬(∃ #t.1. CompromiseMonitor( M ) @ #t.1))) ⇒
+          (∃ #t.1. GroundTruth( CA, fields ) @ #t.1))"
+
+
+lemma A_Gossip_2_rootCA_rogue_gossip_log_honest_verif_nonempty [heuristic=o "acc_oracle",
+                                                                hide_lemma=T_Gossip_verif_empty_helper1,
+                                                                hide_lemma=T_Gossip_verif_empty_helper2]:
+  all-traces
+  "∀ rootCA M L fields CA ca_fields session gossiped_session #t
+          #t1 #t2.
+         (((((CTGossipCheck( M, L, fields, CA, ca_fields, session,
+                             gossiped_session
+              ) @ #t) ∧
+             (Asserts( M, 'Blame this CA.', CA,
+                       <fields, ca_fields>
+              ) @ #t1)) ∧
+            (AssertsNot( rootCA, 'I signed this intermediate CA.', CA,
+                         ca_fields
+             ) @ #t2)) ∧
+           (¬(∃ #t.1. CompromiseLogger( L ) @ #t.1))) ∧
+          (¬(∃ #t.1. CompromiseMonitor( M ) @ #t.1))) ⇒
+         (¬(∀ M.1 L.1 fields.1 CA.1 ca_fields.1 session.1 gossiped_session.1
+              #t.1.
+             (((CTGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1, session.1,
+                               gossiped_session.1
+                ) @ #t.1) ∧
+               (¬(∃ #t.2. CompromiseLogger( L.1 ) @ #t.2))) ∧
+              (¬(∃ #t.2. CompromiseMonitor( M.1 ) @ #t.2))) ⇒
+             (∃ #t.2. GroundTruth( CA.1, fields.1 ) @ #t.2)))"
+
+
+lemma A_Gossip_2_rootCA_benign_gossip_log_honest_verif_nonempty [heuristic=o "acc_oracle",
+                                                                 hide_lemma=T_Gossip_verif_empty_helper1,
+                                                                 hide_lemma=T_Gossip_verif_empty_helper2]:
+  all-traces
+  "∀ CA M L fields rootCA ca_fields session gossiped_session #t
+          #t1 #t2.
+         (((((CTGossipCheck( M, L, fields, CA, ca_fields, session,
+                             gossiped_session
+              ) @ #t) ∧
+             (Asserts( M, 'Blame this CA.', CA,
+                       <fields, ca_fields>
+              ) @ #t1)) ∧
+            (Asserts( rootCA, 'I signed this intermediate CA.', CA,
+                      ca_fields
+             ) @ #t2)) ∧
+           (¬(∃ #t.1. CompromiseLogger( L ) @ #t.1))) ∧
+          (¬(∃ #t.1. CompromiseMonitor( M ) @ #t.1))) ⇒
+         (¬(∀ M.1 L.1 fields.1 CA.1 ca_fields.1 session.1 gossiped_session.1
+              #t.1.
+             (((CTGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1, session.1,
+                               gossiped_session.1
+                ) @ #t.1) ∧
+               (¬(∃ #t.2. CompromiseLogger( L.1 ) @ #t.2))) ∧
+              (¬(∃ #t.2. CompromiseMonitor( M.1 ) @ #t.2))) ⇒
+             (∃ #t.2. GroundTruth( CA.1, fields.1 ) @ #t.2)))"
+
+
+lemma A_Gossip_2_rootCA_rogue_gossip_log_honest_min [heuristic=o "acc_oracle",
+                                                     hide_lemma=T_Gossip_verif_empty_helper1,
+                                                     hide_lemma=T_Gossip_verif_empty_helper2]:
+  all-traces
+  "∀ rootCA M L fields CA ca_fields session gossiped_session #t
+          #t1 #t2.
+         (((((CTGossipCheck( M, L, fields, CA, ca_fields, session,
+                             gossiped_session
+              ) @ #t) ∧
+             (Asserts( M, 'Blame this CA.', CA,
+                       <fields, ca_fields>
+              ) @ #t1)) ∧
+            (AssertsNot( rootCA, 'I signed this intermediate CA.', CA,
+                         ca_fields
+             ) @ #t2)) ∧
+           (¬(∃ #t.1. CompromiseLogger( L ) @ #t.1))) ∧
+          (¬(∃ #t.1. CompromiseMonitor( M ) @ #t.1))) ⇒
+         ((¬(∃ rootCA.1 M.1 L.1 fields.1 CA.1 ca_fields.1 session.1
+               gossiped_session.1 #t.1 #t1.1 #t2.1.
+              (((((CTGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
+                                  session.1, gossiped_session.1
+                   ) @ #t.1) ∧
+                  (Asserts( M.1, 'Blame this CA.', CA.1,
+                            <fields.1, ca_fields.1>
+                   ) @ #t1.1)) ∧
+                 (AssertsNot( rootCA.1, 'I signed this intermediate CA.',
+                              CA.1, ca_fields.1
+                  ) @ #t2.1)) ∧
+                (¬(∃ #t.2. CompromiseLogger( L.1 ) @ #t.2))) ∧
+               (¬(∃ #t.2. CompromiseMonitor( M.1 ) @ #t.2))) ∧
+              ((rootCA.1 = rootCA) ∧ (¬(rootCA = rootCA.1))))) ∧
+          (¬(∃ CA.1 M.1 L.1 fields.1 rootCA.1 ca_fields.1 session.1
+               gossiped_session.1 #t.1 #t1.1 #t2.1.
+              (((((CTGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
+                                  session.1, gossiped_session.1
+                   ) @ #t.1) ∧
+                  (Asserts( M.1, 'Blame this CA.', CA.1,
+                            <fields.1, ca_fields.1>
+                   ) @ #t1.1)) ∧
+                 (Asserts( rootCA.1, 'I signed this intermediate CA.', CA.1,
+                           ca_fields.1
+                  ) @ #t2.1)) ∧
+                (¬(∃ #t.2. CompromiseLogger( L.1 ) @ #t.2))) ∧
+               (¬(∃ #t.2. CompromiseMonitor( M.1 ) @ #t.2))) ∧
+              ((CA.1 = rootCA) ∧ (¬(rootCA = CA.1))))))"
+
+
+lemma A_Gossip_2_rootCA_benign_gossip_log_honest_min [heuristic=o "acc_oracle",
+                                                      hide_lemma=T_Gossip_verif_empty_helper1,
+                                                      hide_lemma=T_Gossip_verif_empty_helper2]:
+  all-traces
+  "∀ CA M L fields rootCA ca_fields session gossiped_session #t
+          #t1 #t2.
+         (((((CTGossipCheck( M, L, fields, CA, ca_fields, session,
+                             gossiped_session
+              ) @ #t) ∧
+             (Asserts( M, 'Blame this CA.', CA,
+                       <fields, ca_fields>
+              ) @ #t1)) ∧
+            (Asserts( rootCA, 'I signed this intermediate CA.', CA,
+                      ca_fields
+             ) @ #t2)) ∧
+           (¬(∃ #t.1. CompromiseLogger( L ) @ #t.1))) ∧
+          (¬(∃ #t.1. CompromiseMonitor( M ) @ #t.1))) ⇒
+         ((¬(∃ rootCA.1 M.1 L.1 fields.1 CA.1 ca_fields.1 session.1
+               gossiped_session.1 #t.1 #t1.1 #t2.1.
+              (((((CTGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
+                                  session.1, gossiped_session.1
+                   ) @ #t.1) ∧
+                  (Asserts( M.1, 'Blame this CA.', CA.1,
+                            <fields.1, ca_fields.1>
+                   ) @ #t1.1)) ∧
+                 (AssertsNot( rootCA.1, 'I signed this intermediate CA.',
+                              CA.1, ca_fields.1
+                  ) @ #t2.1)) ∧
+                (¬(∃ #t.2. CompromiseLogger( L.1 ) @ #t.2))) ∧
+               (¬(∃ #t.2. CompromiseMonitor( M.1 ) @ #t.2))) ∧
+              ((rootCA.1 = CA) ∧ (¬(CA = rootCA.1))))) ∧
+          (¬(∃ CA.1 M.1 L.1 fields.1 rootCA.1 ca_fields.1 session.1
+               gossiped_session.1 #t.1 #t1.1 #t2.1.
+              (((((CTGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
+                                  session.1, gossiped_session.1
+                   ) @ #t.1) ∧
+                  (Asserts( M.1, 'Blame this CA.', CA.1,
+                            <fields.1, ca_fields.1>
+                   ) @ #t1.1)) ∧
+                 (Asserts( rootCA.1, 'I signed this intermediate CA.', CA.1,
+                           ca_fields.1
+                  ) @ #t2.1)) ∧
+                (¬(∃ #t.2. CompromiseLogger( L.1 ) @ #t.2))) ∧
+               (¬(∃ #t.2. CompromiseMonitor( M.1 ) @ #t.2))) ∧
+              ((CA.1 = CA) ∧ (¬(CA = CA.1))))))"
+
+
+lemma A_Gossip_2_rootCA_rogue_gossip_log_honest_uniq [heuristic=o "acc_oracle",
+                                                      hide_lemma=T_Gossip_verif_empty_helper1,
+                                                      hide_lemma=T_Gossip_verif_empty_helper2]:
+  all-traces
+  "∀ rootCA M L fields CA ca_fields session gossiped_session #t
+          #t1 #t2.
+         (((((CTGossipCheck( M, L, fields, CA, ca_fields, session,
+                             gossiped_session
+              ) @ #t) ∧
+             (Asserts( M, 'Blame this CA.', CA,
+                       <fields, ca_fields>
+              ) @ #t1)) ∧
+            (AssertsNot( rootCA, 'I signed this intermediate CA.', CA,
+                         ca_fields
+             ) @ #t2)) ∧
+           (¬(∃ #t.1. CompromiseLogger( L ) @ #t.1))) ∧
+          (¬(∃ #t.1. CompromiseMonitor( M ) @ #t.1))) ⇒
+         (∃ #i. Corrupted( rootCA ) @ #i)"
+
+
+lemma A_Gossip_2_rootCA_benign_gossip_log_honest_uniq [heuristic=o "acc_oracle",
+                                                       hide_lemma=T_Gossip_verif_empty_helper1,
+                                                       hide_lemma=T_Gossip_verif_empty_helper2]:
+  all-traces
+  "∀ CA M L fields rootCA ca_fields session gossiped_session #t
+          #t1 #t2.
+         (((((CTGossipCheck( M, L, fields, CA, ca_fields, session,
+                             gossiped_session
+              ) @ #t) ∧
+             (Asserts( M, 'Blame this CA.', CA,
+                       <fields, ca_fields>
+              ) @ #t1)) ∧
+            (Asserts( rootCA, 'I signed this intermediate CA.', CA,
+                      ca_fields
+             ) @ #t2)) ∧
+           (¬(∃ #t.1. CompromiseLogger( L ) @ #t.1))) ∧
+          (¬(∃ #t.1. CompromiseMonitor( M ) @ #t.1))) ⇒
+         (∃ #i. Corrupted( CA ) @ #i)"
+
+
+lemma A_Gossip_2_rootCA_rogue_gossip_log_honest_inj [heuristic=o "acc_oracle",
+                                                     hide_lemma=T_Gossip_verif_empty_helper1,
+                                                     hide_lemma=T_Gossip_verif_empty_helper2]:
+  all-traces "⊤"
+
+
+lemma A_Gossip_2_rootCA_benign_gossip_log_honest_inj [heuristic=o "acc_oracle",
+                                                      hide_lemma=T_Gossip_verif_empty_helper1,
+                                                      hide_lemma=T_Gossip_verif_empty_helper2]:
+  all-traces "⊤"
+
+
+lemma A_Gossip_2_rootCA_rogue_gossip_log_honest_single [heuristic=o "acc_oracle",
+                                                        hide_lemma=T_Gossip_verif_empty_helper1,
+                                                        hide_lemma=T_Gossip_verif_empty_helper2]:
+  exists-trace
+  "∃ rootCA M L fields CA ca_fields session gossiped_session #t
+          #t1 #t2.
+         ((((((CTGossipCheck( M, L, fields, CA, ca_fields, session,
+                              gossiped_session
+               ) @ #t) ∧
+              (Asserts( M, 'Blame this CA.', CA,
+                        <fields, ca_fields>
+               ) @ #t1)) ∧
+             (AssertsNot( rootCA, 'I signed this intermediate CA.', CA,
+                          ca_fields
+              ) @ #t2)) ∧
+            (¬(∃ #t.1. CompromiseLogger( L ) @ #t.1))) ∧
+           (¬(∃ #t.1. CompromiseMonitor( M ) @ #t.1))) ∧
+          (∀ rootCA.1 M.1 L.1 fields.1 CA.1 ca_fields.1 session.1
+             gossiped_session.1 #t.1 #t1.1 #t2.1.
+            (((((CTGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
+                                session.1, gossiped_session.1
+                 ) @ #t.1) ∧
+                (Asserts( M.1, 'Blame this CA.', CA.1,
+                          <fields.1, ca_fields.1>
+                 ) @ #t1.1)) ∧
+               (AssertsNot( rootCA.1, 'I signed this intermediate CA.',
+                            CA.1, ca_fields.1
+                ) @ #t2.1)) ∧
+              (¬(∃ #t.2. CompromiseLogger( L.1 ) @ #t.2))) ∧
+             (¬(∃ #t.2. CompromiseMonitor( M.1 ) @ #t.2))) ⇒
+            (rootCA.1 = rootCA))) ∧
+         (¬(∃ CA.1 M.1 L.1 fields.1 rootCA.1 ca_fields.1 session.1
+              gossiped_session.1 #t.1 #t1.1 #t2.1.
+             ((((CTGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
+                                session.1, gossiped_session.1
+                 ) @ #t.1) ∧
+                (Asserts( M.1, 'Blame this CA.', CA.1,
+                          <fields.1, ca_fields.1>
+                 ) @ #t1.1)) ∧
+               (Asserts( rootCA.1, 'I signed this intermediate CA.', CA.1,
+                         ca_fields.1
+                ) @ #t2.1)) ∧
+              (¬(∃ #t.2. CompromiseLogger( L.1 ) @ #t.2))) ∧
+             (¬(∃ #t.2. CompromiseMonitor( M.1 ) @ #t.2))))"
+
+
+lemma A_Gossip_2_rootCA_benign_gossip_log_honest_single [heuristic=o "acc_oracle",
+                                                         hide_lemma=T_Gossip_verif_empty_helper1,
+                                                         hide_lemma=T_Gossip_verif_empty_helper2]:
+  exists-trace
+  "∃ CA M L fields rootCA ca_fields session gossiped_session #t
+          #t1 #t2.
+         ((((((CTGossipCheck( M, L, fields, CA, ca_fields, session,
+                              gossiped_session
+               ) @ #t) ∧
+              (Asserts( M, 'Blame this CA.', CA,
+                        <fields, ca_fields>
+               ) @ #t1)) ∧
+             (Asserts( rootCA, 'I signed this intermediate CA.', CA,
+                       ca_fields
+              ) @ #t2)) ∧
+            (¬(∃ #t.1. CompromiseLogger( L ) @ #t.1))) ∧
+           (¬(∃ #t.1. CompromiseMonitor( M ) @ #t.1))) ∧
+          (∀ CA.1 M.1 L.1 fields.1 rootCA.1 ca_fields.1 session.1
+             gossiped_session.1 #t.1 #t1.1 #t2.1.
+            (((((CTGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
+                                session.1, gossiped_session.1
+                 ) @ #t.1) ∧
+                (Asserts( M.1, 'Blame this CA.', CA.1,
+                          <fields.1, ca_fields.1>
+                 ) @ #t1.1)) ∧
+               (Asserts( rootCA.1, 'I signed this intermediate CA.', CA.1,
+                         ca_fields.1
+                ) @ #t2.1)) ∧
+              (¬(∃ #t.2. CompromiseLogger( L.1 ) @ #t.2))) ∧
+             (¬(∃ #t.2. CompromiseMonitor( M.1 ) @ #t.2))) ⇒
+            (CA.1 = CA))) ∧
+         (¬(∃ rootCA.1 M.1 L.1 fields.1 CA.1 ca_fields.1 session.1
+              gossiped_session.1 #t.1 #t1.1 #t2.1.
+             ((((CTGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
+                                session.1, gossiped_session.1
+                 ) @ #t.1) ∧
+                (Asserts( M.1, 'Blame this CA.', CA.1,
+                          <fields.1, ca_fields.1>
+                 ) @ #t1.1)) ∧
+               (AssertsNot( rootCA.1, 'I signed this intermediate CA.',
+                            CA.1, ca_fields.1
+                ) @ #t2.1)) ∧
+              (¬(∃ #t.2. CompromiseLogger( L.1 ) @ #t.2))) ∧
+             (¬(∃ #t.2. CompromiseMonitor( M.1 ) @ #t.2))))"
+
+
+
+/* END LEMMAS */
+
+// ==============================================================================
+
+#ifdef SUFFICIENCY_PROOF
+/* These restrictions are intended to simplify sufficiency proofs for some of the accountability properties. There, we want to show the existence of some specific traces. Limiting the number of certain rules, we can speed up finding traces that fulfill our requirements for sufficiency. These restrictions should not be used in any other lemmas. */
+
+restriction CA_Registr_once:
+    "All rootCA1 #t1 rootCA2 #t2. Root_CA_Init(rootCA1)@t1 & Root_CA_Init(rootCA2)@t2 ==> (#t1 = #t2)"
+
+restriction NonRoot_CA_Registr_once:
+    "All CA1 #t1 CA2 #t2. NonRoot_CA_Init(CA1)@t1 & NonRoot_CA_Init(CA2)@t2 ==> (#t1 = #t2)"
+
+restriction PreCertified_once:
+    "All CA1 preC1 CA2 preC2 #t1 #t2. PreCertified(CA1, preC1)@t1 & PreCertified(CA2, preC2)@t2 ==> (#t1 = #t2)"
+
+restriction Certified_once:
+    "All CA1 fields1 fields2 CA2 #t1 #t2. CAAsserts(CA1, fields1)@t1 & CAAsserts(CA2, fields2)@t2 ==> (#t1 = #t2)"
+
+restriction ChainAccept_once:
+    "All L11 L21 rootCA1 ca_fields1 CA1 fields1 #t1 L12 L22 rootCA2 ca_fields2 CA2 fields2 #t2. ClientAcceptsChain( L11, L21, rootCA1,ca_fields1, CA1, fields1)@t1 & ClientAcceptsChain( L12, L22, rootCA2, ca_fields2, CA2, fields2)@t2 ==> (#t1 = #t2)"
+
+restriction add_to_log_number_restriction:
+    "All L log_id1 chain1 log_id2 fields1 fields2 chain2 ca_cert1 ca_cert2 time1 time2 #t1 #t2. LoggerComputesAddLog(L, log_id1, fields1, ca_cert1, chain1, time1)@t1 & LoggerComputesAddLog(L, log_id2, fields2, ca_cert2, chain2, time2)@t2 ==> (#t1 = #t2)"
+
+restriction time_once:
+    "All i #t1 #t2. Time(i)@t1 & Time(i)@t2 ==> (#t1 = #t2)"
+
+restriction CTCheck_once:
+    "All M fields CA ca_fields #t1 #t2. CTCheck(M, fields, CA, ca_fields)@t1 & CTCheck(M, fields, CA, ca_fields)@t2 ==> (#t1 = #t2)"
+
+restriction monitorFindsRogueCertificate_once:
+    "All #t1 #t2. San_monitorFindsRogueCertificate()@t1 & San_monitorFindsRogueCertificate()@t2 ==> (#t1 = #t2)"
+
+restriction CTGossipCheck_once:
+    "All M L fields CA ca_fields session gossiped_session #t1 #t2. 
+    CTGossipCheck(M, L, fields, CA, ca_fields, session, gossiped_session)@t1 
+    & CTGossipCheck(M, L, fields, CA, ca_fields, session, gossiped_session)@t2 
+    ==> (#t1 = #t2)"
+
+restriction appendOnlyCheck_Gossip_once:
+    "All M1 L1 gossiped_session1 session1 M2 L2 gossiped_session2 session2 #t1 #t2.
+    MonitorReceivesGossip(M1, L1, gossiped_session1, session1)@t1
+    & MonitorReceivesGossip(M2, L2, gossiped_session2, session2)@t2
+    ==> (#t1 = #t2)"
+
+restriction ScanLog_once:
+        "All #t1 #t2. MonitorScanLog()@t1 & MonitorScanLog()@t2 ==> (#t1 = #t2)"
+
+restriction no_rogue_addition:
+    "not (Ex #t. San_forge_log_view() @ #t)"
+
+restriction all_monitors_honest:
+    "not (Ex M #t. CompromiseMonitor(M) @ #t)"
+
+restriction CCADBConsulted_once:
+    "All rootCA1 rootCA2 ca_fields1 ca_fields2 #t1 #t2. ExternalCheckCCADB(rootCA1, ca_fields1)@t1 & ExternalCheckCCADB(rootCA2, ca_fields2)@t2 ==> (#t1 = #t2)"
+
+#endif
+
+// ==============================================================================
+
+end

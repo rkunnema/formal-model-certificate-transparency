@@ -1,0 +1,84 @@
+{
+	"config": {
+		"global_max_cores": 16,
+		"global_max_memory": 14,
+		"default_timeout": 180,
+		"output_directory": "./results/ct_receipt/"
+	},
+  "tamarin_versions": {
+    "default": {
+      "path": "tamarin-prover"
+    }
+  },
+  "tasks": {
+    "normal": {
+      "theory_file": "pregen_models/ct_receipt_pregen.spthy",
+			"tamarin_versions": ["default"],
+      "output_file_prefix": "",
+			"tamarin_options": ["--derivcheck-timeout=99999"],
+            "resources": {
+				"max_cores": 16,
+				"max_memory": 14,
+				"timeout": 1200
+			},
+      "lemmas": [
+        {"name": "san_*"}
+      ]
+    },
+    "acc_authenticity": {
+      "theory_file": "pregen_models/ct_receipt_pregen.spthy",
+			"tamarin_versions": ["default"],
+      "output_file_prefix": "",
+			"tamarin_options": ["--derivcheck-timeout=99999"],
+            "resources": {
+				"max_cores": 16,
+				"max_memory": 14,
+				"timeout": 300
+			},
+      "lemmas": [
+        {"name": "A_uniq1_helper"},
+        {"name": "A_uniq2_helper"},
+        {"name": "A_Receipt_inj3_helper"},
+        {"name": "A_Receipt_inj4_helper"},
+        {"name": "A_Receipt_verif_empty"},
+        {"name": "A_Receipt_receipt_1_verif_nonempty"},
+        {"name": "A_Receipt_receipt_2_verif_nonempty"},
+        {"name": "A_Receipt_receipt_3_verif_nonempty"},
+        {"name": "A_Receipt_receipt_4_verif_nonempty"},
+        {"name": "A_Receipt_receipt_1_min"},
+        {"name": "A_Receipt_receipt_2_min"},
+        {"name": "A_Receipt_receipt_3_min"},
+        {"name": "A_Receipt_receipt_4_min"},
+        {"name": "A_Receipt_receipt_1_uniq"},
+        {"name": "A_Receipt_receipt_2_uniq"},
+        {"name": "A_Receipt_receipt_3_uniq"},
+        {"name": "A_Receipt_receipt_4_uniq"},
+        {"name": "A_Receipt_receipt_1_inj"},
+        {"name": "A_Receipt_receipt_2_inj"},
+        {"name": "A_Receipt_receipt_3_inj"},
+        {"name": "A_Receipt_receipt_4_inj"}
+      ]
+    },
+    "manual": {
+      "theory_file": "pregen_models/ct_receipt_pregen.spthy",
+			"tamarin_versions": ["default"],
+      "output_file_prefix": "SUFFICIENCY_PROOF",
+			"tamarin_options": ["--derivcheck-timeout=99999", "--defines=SUFFICIENCY_PROOF"],
+            "resources": {
+				"max_cores": 16,
+				"max_memory": 14,
+				"timeout": 600
+			},
+      "lemmas": [
+        {"name": "A_Receipt_receipt_1_suff"},
+        {"name": "A_Receipt_receipt_2_suff"},
+        {"name": "A_Receipt_receipt_3_suff"},
+        {"name": "A_Receipt_receipt_4_suff"},
+        {"name": "A_Receipt_receipt_1_single"},
+        {"name": "A_Receipt_receipt_2_single"},
+        {"name": "A_Receipt_receipt_3_single"},
+        {"name": "A_Receipt_receipt_4_single"}
+      ]
+    }
+  }
+}

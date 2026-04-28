@@ -1,29 +1,32 @@
 {
   "task_id": "--A_PKI_Ext_CAfalseAsserts_rootNotBlamed_suff--default",
   "warnings": [],
-  "tamarin_timing": 0.76,
+  "tamarin_timing": 1.91,
   "wrapper_measures": {
-    "time": 0.882758617401123,
-    "avg_memory": 0.37890625,
-    "peak_memory": 0.37890625
+    "time": 2.102088451385498,
+    "avg_memory": 64.353515625,
+    "peak_memory": 128.69921875
   },
   "output_spthy": "results/pki/proofs/--A_PKI_Ext_CAfalseAsserts_rootNotBlamed_suff--default.spthy",
   "verified_lemma": {
     "A_PKI_Ext_CAfalseAsserts_rootNotBlamed_suff": {
-      "steps": 10,
+      "steps": 12,
       "analysis_type": "exists-trace"
     }
   },
   "falsified_lemma": {},
   "unterminated_lemma": [
-    "san_PKI_Root_CA_Init",
-    "san_PKI_NonRoot_CA_Init",
-    "san_PKI_Certify",
-    "san_PKI_ClientValidate",
-    "san_PKI_RequestLegitimacyProof_Success",
-    "san_PKI_RequestLegitimacyProof_Illegal",
-    "san_PKIExt_external_check_true",
-    "san_PKIExt_external_check_false",
+    "san_Root_CA_Init",
+    "san_Intermediate_CA_Init",
+    "san_Domain_Owner_Init",
+    "san_PubKeyCertify",
+    "san_ClientValidate",
+    "san_ConsultDocumentation_Success",
+    "san_ConsultDocumentation_Fails",
+    "san_external_check_true",
+    "san_external_check_false",
+    "san_compromiseCA",
+    "san_compromiseRootCA",
     "CA_auth_w_compromise",
     "authenticity",
     "cert_auth",

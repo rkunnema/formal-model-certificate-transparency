@@ -1,0 +1,86 @@
+{
+	"config": {
+		"global_max_cores": 16,
+		"global_max_memory": 8,
+		"default_timeout": 180,
+		"output_directory": "./results/sct_audit/"
+	},
+  "tamarin_versions": {
+    "default": {
+      "path": "tamarin-prover"
+    }
+  },
+  "tasks": {
+    "normal": {
+      "theory_file": "pregen_models/sct_audit_pregen.spthy",
+			"tamarin_versions": ["default"],
+      "output_file_prefix": "",
+			"tamarin_options": ["--derivcheck-timeout=99999"],
+            "resources": {
+				"max_cores": 16,
+				"max_memory": 8,
+				"timeout": 600
+			},
+      "lemmas": [
+        {"name": "san_*"}
+      ]
+    },
+    "acc_authenticity": {
+      "theory_file": "pregen_models/sct_audit_pregen.spthy",
+			"tamarin_versions": ["default"],
+      "output_file_prefix": "",
+			"tamarin_options": ["--derivcheck-timeout=99999"],
+            "resources": {
+				"max_cores": 16,
+				"max_memory": 8,
+				"timeout": 600
+			},
+      "lemmas": [
+        {"name": "A_CTAudit_1_ca_rogue_audit_mon_honest_suff"},
+        {"name": "A_CTAudit_1_root_ca_rogue_audit_mon_honest_suff"},
+        {"name": "A_CTAudit_1_verif_empty"},
+        {"name": "A_CTAudit_1_ca_rogue_audit_mon_honest_verif_nonempty"},
+        {"name": "A_CTAudit_1_root_ca_rogue_audit_mon_honest_verif_nonempty"},
+        {"name": "A_CTAudit_1_ca_rogue_audit_mon_honest_min"},
+        {"name": "A_CTAudit_1_root_ca_rogue_audit_mon_honest_min"},
+        {"name": "A_CTAudit_1_ca_rogue_audit_mon_honest_uniq"},
+        {"name": "A_CTAudit_1_root_ca_rogue_audit_mon_honest_uniq"},
+        {"name": "A_CTAudit_1_ca_rogue_audit_mon_honest_inj"},
+        {"name": "A_CTAudit_1_root_ca_rogue_audit_mon_honest_inj"},
+        {"name": "A_CTAudit_1_root_ca_rogue_audit_mon_honest_single"},
+        {"name": "A_CTAudit_2*"},
+        {"name": "A_uniq1_helper"},
+        {"name": "A_uniq2_helper"}
+      ]
+    },
+    "acc_transparency": {
+      "theory_file": "pregen_models/sct_audit_pregen.spthy",
+			"tamarin_versions": ["default"],
+      "output_file_prefix": "",
+			"tamarin_options": ["--derivcheck-timeout=99999"],
+            "resources": {
+				"max_cores": 16,
+				"max_memory": 8,
+				"timeout": 180
+			},
+      "lemmas": [
+        {"name": "T_Audit_*"}
+      ]
+    },
+    "manual": {
+      "theory_file": "pregen_models/sct_audit_pregen.spthy",
+			"tamarin_versions": ["default"],
+      "output_file_prefix": "SUFFICIENCY_PROOF",
+			"tamarin_options": ["--derivcheck-timeout=99999", "--defines=SUFFICIENCY_PROOF"],
+            "resources": {
+				"max_cores": 16,
+				"max_memory": 8,
+				"timeout": 300
+			},
+      "lemmas": [
+        {"name": "transparency_SCT_Auditing"},
+        {"name": "A_CTAudit_1_ca_rogue_audit_mon_honest_single"}
+      ]
+    }
+  }
+}

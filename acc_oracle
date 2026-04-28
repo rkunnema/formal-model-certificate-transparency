@@ -1,58 +1,100 @@
 #!/usr/bin/python3
 import sys
+import re
 
 lines = sys.stdin.readlines()
 l = []
+
+deprio = []
 
 lemma = sys.argv[1]
 for line in lines:
     num = line.split(':')[0]
 
-    if lemma == "T_Gossip_verif_empty":
-        if "LoggerComputesAddLog(" in line:
-            l.append(num)
-        elif "InclusionProof(" in line:
+    if lemma == "A_Gossip_1_rootCA_rogue_gossip_suff":
+        if "∀ different_time chain #t." in line:
+            l.append(num) # deprio
+        else:
+            l = [num] + l # Note: this shuffles the order a bit from default, we could do this properly and only deprio as originally intended, but this tactic works well
+
+    elif lemma == "A_Gossip_1_rootCA_benign_gossip_suff":
+        if "∀ different_time chain #t." in line:
+            l.append(num) # deprio
+        else:
             l = [num] + l
-        elif "Gos_AppendOnlyCheck(" in line:
+
+    elif lemma == "A_Gossip_1_verif_empty":
+        if "( ~skCA" in line:
             l = [num] + l
-        elif "LoggerPresentsView(" in line:
+        elif "!CA_s0( $L" in line:
+            l = [num] + l
+        elif "!Monitor( $L" in line:
+            l = [num] + l
+        elif "Corrupted(" in line:
+            l = [num] + l
+        elif "!Root_CA_s0( $L" in line:
+            l = [num] + l
+        elif "!CA_s0( $rootCA" in line:
+            l = [num] + l
+        elif "!Logger_s( $rootCA" in line:
             l = [num] + l
         else:
             continue
 
-    elif ((lemma == "A_CTExt_3_ca_rogue_logger_blamed_min")):
-        if "(∃ idCA.1 stmt ca_fields ca_fields2 rootCA idM idL.1 idL1 idL2 sth    session #t0 #t1 #t2 #t3 #t4.   (CAFakesCert( idCA.1, stmt, ca_fields ) @ #t0) ∧   (DocumentedIntermediateCA( rootCA, ca_fields, idCA.1 ) @ #t1) ∧   (ClientAcceptsChain( idL1, idL2, rootCA, ca_fields2, idCA.1, stmt    ) @ #t2) ∧   (MonitorFetchesLogSnapshot( idM, idL.1, session ) @ #t3) ∧   (MonitorFindsCert( idM, idL.1, stmt, ca_fields, sth, session    ) @ #t4)  ∧   (((idL.1 = idL1) ∨ (idL.1 = idL2))) ∧   (∀ IdFetcher log_id time #t1.1.     (LoggerPresentsView( idL.1, IdFetcher, log_id, time, sth, session      ) @ #t1.1)    ⇒     ∀ #t0.1. (Time( time ) @ #t0.1) ⇒ ¬(#t0.1 < #t1.1)) ∧   (#t2 < #t3) ∧   (((idCA.1 = $idCA) ∨ (idCA.1 = $idL))) ∧   (((¬($idCA = idCA.1)) ∨ (¬($idL = idCA.1)))))  ∥ (∃ idCA.1 idL.1 stmt ca_fields ca_fields2 rootCA idM idL1 idL2 sth    session #t0 #t1 #t2 #t3 #t4.   (CAFakesCert( idCA.1, stmt, ca_fields ) @ #t0) ∧" in line:
+    elif lemma == "A_Gossip_2_verif_empty":
+        if "( ~skCA" in line:
             l = [num] + l
-        elif "($idCA.1 = $idCA)  ∥ ($idCA.1 = $idL)" in line:
+        elif "!CA_s0( $L" in line:
             l = [num] + l
-        elif "($idL.1 = $idL1.1)  ∥ ($idL.1 = $idL2.1)" in line:
+        elif "!Monitor( $L" in line:
             l = [num] + l
-        elif "($idL.1 = $idCA)  ∥ ($idL.1 = $idL)" in line:
+        elif "Corrupted(" in line:
             l = [num] + l
-        elif "!Logger( $idCA, pkL.1 ) ▶₃ #t4.1" in line:
+        elif "!Root_CA_s0( $L" in line:
             l = [num] + l
-        elif "($idCA.1 = $idCA) ∥ ($idCA.1 = $idL)" in line:
+        elif "!CA_s0( $rootCA" in line:
             l = [num] + l
-        elif "!CA_Documentation( $rootCA.2, $idCA,                   <$rootCA.2, $idCA, pk(x.7), 'pubKey-CA', snCA.2, $i0.2, $j0.2>,                   sign(<$rootCA.2, $idCA, pk(x.7), 'pubKey-CA', snCA.2, $i0.2, $j0.2                        >,                        x.9)) ▶₃ #t1.1" in line:
+        elif "!Logger_s( $rootCA" in line:
             l = [num] + l
-        elif "!Logger( $idCA, pkL.1 ) ▶₂ #t3.1" in line:
+        elif "CompromiseLogger" in line:
             l = [num] + l
-        elif "!CA_Documentation( $rootCA.3, $idL,                   <$rootCA.3, $idL, pk(x.7), 'pubKey-CA', snCA.2, $i0.2, $j0.2>,                   sign(<$rootCA.3, $idL, pk(x.7), 'pubKey-CA', snCA.2, $i0.2, $j0.2>,                        x.9)) ▶₃ #t1.1" in line:
+        elif "CompromiseMonitor" in line:
             l = [num] + l
-        elif "!Logger( $idL, pkL.1 ) ▶₂ #t3.1" in line:
-            l = [num] + l
-        elif "($rootCA.2 = $idCA)  ∥ ($rootCA.2 = $idL)" in line:
-            l = [num] + l
-        elif "!Root_CA( $idCA, pk(x.9) ) ▶₂ #t1.1" in line:
-            l = [num] + l
-        elif "!Root_CA( $idL" in line:
-            l = [num] + l
-        elif "!Logger( $idL," in line:
+        elif "!Corrupted_Logger" in line:
             l = [num] + l
         else:
             continue
+
+    elif lemma == "A_Gossip_2_rootCA_rogue_gossip_log_honest_verif_nonempty":
+        if "(∃ #t. (CompromiseLogger( L ) @ #t))  ∥ (∃ #t. (CompromiseMonitor( M ) @ #t))  ∥ (∃ CA #t. (GroundTruth( CA, fields ) @ #t))" in line:
+            l = [num] + l
+        elif "'Blame this CA.'" in line:
+            l = [num] + l
+        else:
+            continue
+
+    elif lemma == "A_Gossip_2_rootCA_benign_gossip_log_honest_verif_nonempty":
+        if "(∃ #t. (CompromiseLogger( L ) @ #t))  ∥ (∃ #t. (CompromiseMonitor( M ) @ #t))  ∥ (∃ CA #t. (GroundTruth( CA, fields ) @ #t))" in line:
+            l = [num] + l
+        elif "'Blame this CA.'" in line:
+            l = [num] + l
+        else:
+            continue
+
+    # elif lemma == "T_Gossip_verif_empty":
+    #     if "∀ different_time chain #t." in line:
+    #         deprio.append(num)
+    #     else:
+    #         l.append(num)
+
+    # elif lemma == "T_Gossip_gossip_appendOnly_viol_verif_nonempty":
+    #     if "∀ different_time chain #t." in line:
+    #         deprio.append(num)
+    #     else:
+    #         l.append(num)
 
     else:
+        # print(f'[ORACLE] Unknown lemma ({lemma}), using default heuristic')
         exit(0) # instead then use default heuristic (o or O)
 
     # Add custom behavior here for other lemmas here
@@ -64,3 +106,5 @@ for line in lines:
 
 for i in l:
     print(i)
+for i in deprio:
+    print(i) # Add deprio at the end

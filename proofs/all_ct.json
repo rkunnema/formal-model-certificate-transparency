@@ -1,0 +1,138 @@
+{
+	"config": {
+		"global_max_cores": 16,
+		"global_max_memory": 14,
+		"default_timeout": 180,
+		"output_directory": "./results/ct/"
+	},
+  "tamarin_versions": {
+    "default": {
+      "path": "tamarin-prover"
+    }
+  },
+  "tasks": {
+    "normal": {
+      "theory_file": "pregen_models/ct_pregen.spthy",
+			"tamarin_versions": ["default"],
+      "output_file_prefix": "",
+			"tamarin_options": ["--derivcheck-timeout=99999"],
+            "resources": {
+				"max_cores": 16,
+				"max_memory": 14,
+				"timeout": 300
+			},
+      "lemmas": [
+        {"name": "san_*"},
+        {"name": "authenticity"},
+        {"name": "CA_auth_w_compromise"},
+        {"name": "authenticity_honest"},
+        {"name": "cert_sct_auth"},
+        {"name": "sct_auth"}
+      ]
+    },
+    "transparency": {
+      "theory_file": "pregen_models/ct_pregen.spthy",
+			"tamarin_versions": ["default"],
+      "output_file_prefix": "",
+			"tamarin_options": ["--derivcheck-timeout=99999"],
+            "resources": {
+				"max_cores": 16,
+				"max_memory": 14,
+				"timeout": 300
+			},
+      "lemmas": [
+        {"name": "transparency_w_MMD_honest_log_helper"},
+        {"name": "transparency_w_MMD_honest_log"}
+      ]
+    },
+    "acc_authenticity": {
+      "theory_file": "pregen_models/ct_pregen.spthy",
+			"tamarin_versions": ["default"],
+      "output_file_prefix": "",
+			"tamarin_options": ["--derivcheck-timeout=99999"],
+            "resources": {
+				"max_cores": 16,
+				"max_memory": 14,
+				"timeout": 600
+			},
+      "lemmas": [
+        {"name": "A_CT_1_ca_auth_on_log_suff"},
+        {"name": "A_CT_1_verif_empty"},
+        {"name": "A_CT_1_ca_auth_on_log_verif_nonempty"},
+        {"name": "A_CT_1_root_ca_auth_on_log_verif_nonempty"},
+        {"name": "A_CT_1_ca_auth_on_log_min"},
+        {"name": "A_CT_1_root_ca_auth_on_log_min"},
+        {"name": "A_CT_1_ca_auth_on_log_uniq"},
+        {"name": "A_CT_1_root_ca_auth_on_log_uniq"},
+        {"name": "A_CT_1_ca_auth_on_log_inj"},
+        {"name": "A_CT_1_root_ca_auth_on_log_inj"},
+        {"name": "A_uniq1_helper"},
+        {"name": "A_uniq2_helper"},
+        {"name": "A_CT_2_ca_rogue_honest_log_suff"},
+        {"name": "A_CT_2_verif_empty"},
+        {"name": "A_CT_2_ca_rogue_honest_log_verif_nonempty"},
+        {"name": "A_CT_2_root_ca_rogue_honest_log_verif_nonempty"},
+        {"name": "A_CT_2_ca_rogue_honest_log_min"},
+        {"name": "A_CT_2_root_ca_rogue_honest_log_min"},
+        {"name": "A_CT_2_ca_rogue_honest_log_uniq"},
+        {"name": "A_CT_2_root_ca_rogue_honest_log_uniq"},
+        {"name": "A_CT_2_ca_rogue_honest_log_inj"},
+        {"name": "A_CT_2_root_ca_rogue_honest_log_inj"},
+        {"name": "A_CT_2_ca_rogue_honest_log_single"},
+        {"name": "A_CT_2_root_ca_rogue_honest_log_single"}
+      ]
+    },
+    "acc_transparency": {
+      "theory_file": "pregen_models/ct_pregen.spthy",
+			"tamarin_versions": ["default"],
+      "output_file_prefix": "",
+			"tamarin_options": ["--derivcheck-timeout=99999"],
+            "resources": {
+				"max_cores": 16,
+				"max_memory": 14,
+				"timeout": 180
+			},
+      "lemmas": [
+        {"name": "T_CT_1_client_inclusionViol_suff"},
+        {"name": "T_CT_1_verif_empty"},
+        {"name": "T_CT_1_client_inclusionViol_verif_nonempty"},
+        {"name": "T_CT_1_client_inclusionViol_min"},
+        {"name": "T_CT_1_client_inclusionViol_uniq"},
+        {"name": "T_CT_1_client_inclusionViol_inj"},
+        {"name": "T_CT_1_client_inclusionViol_single"}
+      ]
+    },
+    "long_execution": {
+      "theory_file": "pregen_models/ct_pregen.spthy",
+			"tamarin_versions": ["default"],
+      "output_file_prefix": "",
+			"tamarin_options": ["--derivcheck-timeout=99999"],
+            "resources": {
+				"max_cores": 16,
+				"max_memory": 14,
+				"timeout": 1200
+			},
+      "lemmas": [
+        {"name": "A_CT_1_ca_auth_on_log_single"},
+        {"name": "A_CT_1_root_ca_auth_on_log_single"}
+      ]
+    },
+    "manual": {
+      "theory_file": "pregen_models/ct_pregen.spthy",
+			"tamarin_versions": ["default"],
+      "output_file_prefix": "SUFFICIENCY_PROOF",
+			"tamarin_options": ["--derivcheck-timeout=99999", "--defines=SUFFICIENCY_PROOF"],
+            "resources": {
+				"max_cores": 16,
+				"max_memory": 14,
+				"timeout": 300
+			},
+      "lemmas": [
+        {"name": "A_CT_1_root_ca_auth_on_log_suff"},
+        {"name": "A_CT_2_root_ca_rogue_honest_log_suff"},
+        {"name": "transparency_wo_MMD"},
+        {"name": "transparency_w_MMD"}
+      ]
+    }
+  }
+}

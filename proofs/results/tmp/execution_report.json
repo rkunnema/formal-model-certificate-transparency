@@ -1,0 +1,65 @@
+{
+  "recipe": "rerun.json",
+  "config": {
+    "global_max_cores": 16,
+    "global_max_memory": 14,
+    "default_timeout": 300,
+    "output_directory": "results/tmp"
+  },
+  "tamarin_versions": {
+    "default": {
+      "path": "tamarin-prover",
+      "version": "v1.10.0"
+    }
+  },
+  "execution_metadata": {
+    "total_tasks": 1,
+    "total_successes": 1,
+    "total_failures": 0,
+    "total_cache_hit": 0,
+    "total_runtime": 22.0707688331604,
+    "total_memory": 269.859375,
+    "max_runtime": 22.0707688331604,
+    "max_memory": 269.859375
+  },
+  "tasks": {
+    "Manual_rerun": {
+      "theory_file": "pregen_models/ct_gossip_pregen.spthy",
+      "subtasks": {
+        "--A_Gossip_2_rootCA_benign_gossip_log_honest_verif_nonempty--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_Gossip_2_rootCA_benign_gossip_log_honest_verif_nonempty",
+            "output_theory_file": "results/tmp/proofs/--A_Gossip_2_rootCA_benign_gossip_log_honest_verif_nonempty--default.spthy",
+            "output_trace_file": "results/tmp/traces/--A_Gossip_2_rootCA_benign_gossip_log_honest_verif_nonempty--default.json",
+            "options": [
+              "--derivcheck-timeout=9999"
+            ],
+            "resources": {
+              "cores": 16,
+              "memory": 14,
+              "timeout": 600
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2026-04-18T20:09:53.274098",
+            "exec_end": "2026-04-18T20:10:15.344867",
+            "exec_duration_monotonic": 22.0707688331604,
+            "avg_memory": 148.45330255681822,
+            "peak_memory": 269.859375
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 21.85,
+            "lemma_result": "verified",
+            "steps": 6,
+            "analysis_type": "all-traces"
+          }
+        }
+      }
+    }
+  }
+}

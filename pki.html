@@ -1,0 +1,451 @@
+<style>
+.hl-code { white-space: pre; font-family: monospace; background: #f8f8f8; padding: 1em; border-radius: 6px; }
+.lemma\.identifier { color: #0074d9; font-weight: bold; }
+.rule\.identifier { color: #b80000; font-weight: bold; }
+.keyword { color: #008000; font-weight: bold; }
+.punctuation { color: #666; }
+</style>
+<pre class="hl-code">
+/*
+ * Protocol: Certficate Transparency with additions for SCT Auditing, STH Gossiping
+ * Modeler:  anonymized
+ * Date:     July 2025
+ * Sources:  RFC6962, RFC 9162, &#34;Opt-in SCT Auditing&#34;, Emily Stark and Chris Thompson, and partly rooted on &#34;Provable Security for PKI Schemes&#34; by Wrótniak et al.
+ * Status:   working
+ * Notes:    consult README for instructions on evaluating this model
+ */
+
+<span class="keyword">theory</span> pki
+<span class="keyword">begin</span>
+
+functions:
+    pk/1,
+    sign/2,
+    verify/3[destructor], /* sign + verify */
+
+
+    /*Structure of a certificate as tuple with
+    
+    + Normal certificate 
+    &lt;Issuer, Subject, Key, Type, serial number, issued timestamp, valid until timestamp&gt;
+    + SCTs
+    &lt;Logger Identity, &#39;SCT&#39;, timestamp, signature&gt;
+    + Public Key certificate with embedded SCTs
+    &lt;Issuer, Subject, Key, Type, serial number, issued timestamp, valid until timestamp, sct1, sct2&gt;
+
+    Different types are: 
+    1. &#39;pre-cert&#39;
+    2. &#39;SCT&#39;: Signed Certificate Timestamp
+    3. &#39;pubKey&#39;: Public Key Certificate (finished certificate after issued as PreCert)
+        3.1 &#39;pubKey-CA&#39;: Public Key Certificate of a CA
+    4. &#39;selfCert&#39;: Certificate is self signed, usually root of trust
+        4.1 &#39;selfCert-log&#39;: Logger&#39;s self-signed certificate
+
+    */
+
+    
+    true/0
+
+equations:
+
+    verify(       sign(fields, sk), fields, pk(sk)           ) = true()
+
+/** Specification **/
+
+/* Register a root CA that will later sign other intermediate CA certificates. */
+<span class="keyword">rule</span> <a name="rule:Root_CA_Init"></a><span class="rule.identifier">Root_CA_Init</span> [color= #620c97]<a name="lem::"></a><span class="lemma.identifier">:</span>
+    let 
+        fields = &lt;$CA, $CA, pk(~skCA), &#39;selfCert&#39;, ~sn, $now, $j&gt;
+        self_sig = sign(fields, ~skCA)
+    in
+    [ Fr(~skCA), Fr(~sn) ]
+    --[ 
+        CA_Registered($CA, ~skCA, pk(~skCA)), 
+        Root_CA_Init($CA),
+
+        Time($now),
+        San_Root_CA_Init()
+    ]-&gt;
+    [   Out(fields), Out(self_sig), 
+        Out(&lt;$CA, pk(~skCA)&gt;), /* publicly announce the public key and certificate on the network */
+        !Root_CA_s0($CA, ~skCA, pk(~skCA)), 
+        !Root_CA($CA, pk(~skCA)) ]
+
+/* Register a CA that will later sign other certificates. This CA is assumed to be non-root and has its own certificate signed by a root CA.
+Intermediate CAs created by this rule are defined as legitimate and they are documented by their root CA. See later discussions for checks that require the !CA_Documentation fact.
+*/
+<span class="keyword">rule</span> <a name="rule:Intermediate_CA_Init"></a><span class="rule.identifier">Intermediate_CA_Init</span> [color= #c871ff]<a name="lem::"></a><span class="lemma.identifier">:</span>
+    let 
+        fields = &lt;$rootCA, $CA, pk(~skCA), &#39;pubKey-CA&#39;, ~sn, $now, $j&gt;
+        self_sig = sign(fields, skRootCA)
+    in
+    [ Fr(~skCA), Fr(~sn), !Root_CA_s0($rootCA, skRootCA, pkRootCA) /* Root CA that signs this CA */  ]
+    --[ 
+        CA_Registered($CA, ~skCA, pk(~skCA)), /* restrictions on CA registrations apply to both CAs and Root CAs */
+        NonRoot_CA_Init($CA),
+        DocumentedCA($rootCA, $CA, fields),
+        
+        Time($now),
+        San_Intermediate_CA_Init()
+    ]-&gt;
+    [   Out(fields), Out(self_sig), 
+        Out(&lt;$CA, pk(~skCA)&gt;), /* publicly announce the public key and certificate on the network */
+        !CA_s0($CA, ~skCA, pk(~skCA), fields, self_sig), !CA_Documentation($rootCA, $CA, fields, self_sig) ]
+
+/* The domain owner represents the party on the web, running a server with some domain / Common Name (CN) with a key pair that needs certification by some CA. It is equivalent to a HTTPS server that needs a certificate in order to hand it out to visiting clients; performing a key exchange subsequently. */
+<span class="keyword">rule</span> <a name="rule:Domain_Owner_Init"></a><span class="rule.identifier">Domain_Owner_Init</span> [color= #c6c6c6]<a name="lem::"></a><span class="lemma.identifier">:</span>
+    let
+        pubK = pk(~sk)
+    in
+    [ Fr(~sk) ]
+    --[ 
+        Time($now),
+        San_Domain_Owner_Init()
+    ]-&gt;
+    [ !DomainOwner($idServer, pubK), /* The DomainOwner fact serves as a proof of identity: If this fact is later used for issuing a certificate, we say that it is honestly issued (i.e., on behalf of the domain owner). see honest rules for issuing a pre-certificate for instace. */ 
+    Out(pubK) /* Public key is announced on the network */ ]
+
+<span class="keyword">restriction</span> rogueCert:
+    &#34;All CA fields #t1. RogueCert(CA, fields)@t1 ==&gt; not (Ex #t0. GroundTruth(CA, fields)@t0 &amp; #t0 &lt; #t1)&#34;
+
+<span class="keyword">restriction</span> benignCert:
+    &#34;All CA fields #t1. BenignCert(CA, fields)@t1 ==&gt; (Ex #t0. GroundTruth(CA, fields)@t0 &amp; #t0 &lt; #t1)&#34;
+
+/* ----- Certification ----- */
+
+/* 
+Invoked by a domain owner (DO): DO wants to have a certificate for its public key signed by CA, 
+CA &#34;checks&#34; identity and then creates a pre certificate to hand out to loggers tmt, sth, session
+The DomainOwner fact serves as a proof of identity, so we assume that invoking this always happens on DO&#39;s behalf. 
+Rogue certificates are not issued using this fact but instead by the network attacker using the CA&#39;s key (requires CA corruption).
+*/
+<span class="keyword">rule</span> <a name="rule:PubKeyCertify"></a><span class="rule.identifier">PubKeyCertify</span> [color= #c871ff]<a name="lem::"></a><span class="lemma.identifier">:</span> 
+    let
+        fields = &lt;$CA, $id, pkID, &#39;pubKey&#39;, ~sn, $now, $j&gt;
+        fields_sig = sign(fields, skCA)
+        cert = &lt;fields, fields_sig&gt;
+    in
+    [ !DomainOwner($id, pkID), /* public key to sign. Using this rule includes an &#34;identity check&#34; which is simplified: There is a DomainOwner fact with this public key. */
+     !CA_s0($CA, skCA, pkCA, ca_fields, ca_sig), Fr(~sn) ]
+    --[ 
+        GroundTruth($CA, &lt;$CA, $id, pkID, &#39;pubKey&#39;, ~sn, $now, $j&gt;), /* used for ground truth comparisons, when a CA issues a pre certificate although that is not yet accepted by end-users, they already need to assert that they performed all necessary checks. */
+        CAAsserts($CA, fields),
+        
+        Time($now),
+        San_PubKeyCertify()
+    ]-&gt;
+    [ Out(fields), Out(fields_sig), Certificate_Store($CA, cert), Out(ca_fields), Out(ca_sig) ]
+
+<span class="keyword">rule</span> <a name="rule:ClientValidate"></a><span class="rule.identifier">ClientValidate</span> [color= #f2ce03]<a name="lem::"></a><span class="lemma.identifier">:</span>
+    let
+        ca_fields = &lt;$rootCA, $CA, pkCA, &#39;pubKey-CA&#39;, snCA, $i0, $j0&gt;
+        fields = &lt;$CA, $id, pkID, &#39;pubKey&#39;, sn, $i, $j&gt;
+
+        chain = &lt;&lt;fields, pub_sig&gt;, &lt;ca_fields, ca_sig&gt;&gt;
+    in
+    [   !Root_CA($rootCA, pkRootCA),
+        In(chain), /* incoming certificate (intermediate CA + pubKey certificate) */
+    ]
+    --[ BrowserAcceptsChain($CA, fields, $rootCA, ca_fields),
+        Eq(verify(pub_sig, fields, pkCA), true()),
+        Eq(verify(ca_sig, ca_fields, pkRootCA), true()),
+        CheckValidUntil($now, $j),
+        CheckValidUntil($now, $j0),
+
+        Time($now),
+        San_ClientValidate(),
+    ]-&gt;
+    [ ]
+
+/* ------- External CA Legitimacy Test ------- */
+
+/* ------- Root CA Documentation Checks (modelled externally, but every participant has access to the DB that contains them -&gt; everyone can run these)
+------- */
+
+rule ConsultDocumentation_Success:
+    let
+        ca_fields = &lt;$rootCA, $CA, pkCA, &#39;pubKey-CA&#39;, sn, $i, $j&gt;
+        ca_cert = &lt;ca_fields, ca_sig&gt;
+    in
+    [ In(ca_fields), In(ca_sig), !Root_CA($rootCA, pkRCA), !CA_Documentation($rootCA, $CA, ca_fields, ca_sig) /* proof of legitimacy handed out earlier when using the honest issuing process */ ]
+    --[
+        Eq(verify(ca_sig, ca_fields, pkRCA), true()), // signed by root CA
+        Asserts($rootCA, &#39;I signed this intermediate CA.&#39;, $CA, &lt;ca_fields&gt;),
+        ExternalCheckCCADB($rootCA, ca_fields),
+        
+        Time($now),
+        San_ConsultDocumentation_Success()
+    ]-&gt;
+    [ CCADBConsulted($rootCA, ca_fields) ]
+
+<span class="keyword">rule</span> <a name="rule:ConsultDocumentation_Fails"></a><span class="rule.identifier">ConsultDocumentation_Fails</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+    let
+        ca_fields = &lt;$rootCA, $CA, pkCA, &#39;pubKey-CA&#39;, sn, $i, $j&gt;
+        ca_cert = &lt;ca_fields, ca_sig&gt;
+    in
+    [ In(ca_fields), In(ca_sig), !Root_CA($rootCA, pkRCA) ]
+    --[
+        UndocumentedIntermediateCA($rootCA, $CA, ca_fields), // see restriction externalCA_no_proof below
+        Asserts(&#39;CCADB&#39;, &#39;No root CA signed this CA.&#39;, $CA, &lt;ca_fields,$rootCA&gt;),
+        Eq(verify(ca_sig, ca_fields, pkRCA), true()), // signed by root CA
+        ExternalCheckCCADB($rootCA, ca_fields),
+        
+        Time($now),
+        San_ConsultDocumentation_Fails()
+    ]-&gt;
+    [ CCADBConsulted($rootCA, ca_fields) ]
+
+/* Responsible root CA is not able to present an identity proof of the intermediate CA (-&gt; it is forged) */
+/* We obviously rely on the soundness of this documentation check. It is an interesting bit to consider how real-world documentations look like, feel free to consult the CCADB yourself for this. TLDR: they are legal documents with auditor firms involved. We do not go beyond this and consider everything around forging such documents out of scope of this work. */
+<span class="keyword">restriction</span> externalCA_no_proof:
+    &#34;All rootCA CA ca_fields #t1.
+        UndocumentedIntermediateCA(rootCA, CA, ca_fields)@t1
+            ==&gt; not (Ex #t0. DocumentedCA(rootCA, CA, ca_fields)@t0 &amp; #t0 &lt; #t1)&#34;
+
+/* ------ External Validator (PKI) */
+
+<span class="keyword">rule</span> <a name="rule:external_check_true"></a><span class="rule.identifier">external_check_true</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+    let
+        fields = &lt;$CA, $id, pkID, &#39;pubKey&#39;, sn, $i, $j&gt;
+        ca_fields = &lt;$rootCA, $CA, pkCA, &#39;pubKey-CA&#39;, snCA, $i0, $j0&gt;
+        ca_cert = &lt;ca_fields, ca_sig&gt;
+    in
+    [ In(fields), In(pub_sig), In(ca_fields), In(ca_sig),
+      !Root_CA($rootCA, pkRootCA), CCADBConsulted($rootCA, ca_fields) ] 
+    --[        
+        Eq(verify(pub_sig, fields, pkCA), true()),
+        Eq(verify(ca_sig, ca_fields, pkRootCA), true()),
+        ExternalAuditorCheck(ca_fields, fields),
+        BenignCert($CA, fields),
+        Asserts(&#39;external auditor&#39;, &#39;This CA signed a correct statement&#39;, $CA, &lt;fields&gt;),
+
+        Time($now),
+        San_external_check_true()
+    ]-&gt;
+    [ ] 
+
+<span class="keyword">rule</span> <a name="rule:external_check_false"></a><span class="rule.identifier">external_check_false</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+    let
+        fields = &lt;$CA, $id, pkID, &#39;pubKey&#39;, sn, $i, $j&gt;
+        ca_fields = &lt;$rootCA, $CA, pkCA, &#39;pubKey-CA&#39;, snCA, $i0, $j0&gt;
+        ca_cert = &lt;ca_fields, ca_sig&gt;
+    in
+    [ In(fields), In(pub_sig), In(ca_fields), In(ca_sig),
+      !Root_CA($rootCA, pkRootCA), CCADBConsulted($rootCA, ca_fields) ] 
+    --[ 
+        Eq(verify(pub_sig, fields, pkCA), true()),
+        Eq(verify(ca_sig, ca_fields, pkRootCA), true()),
+        Asserts(&#39;external auditor&#39;, &#39;That intermediary CA signed the following incorrect statement and the validation chain says the following about that CA.&#39;, $CA, &lt;fields, ca_fields&gt;),
+        RogueCert($CA, fields),
+        ExternalAuditorCheck(ca_fields, fields),
+        
+        Time($now),
+        San_external_check_false()
+    ]-&gt;
+    []
+
+/* ----- General Restrictions ----- */
+
+/* We require that the main roles in our model are conducted by pairwise distinct entities. This is in accordance with the CT standard as CAs should not act as loggers. Everyone can become a monitor in general, but in order to get meaningful results there actual supervision between these roles happens, we require them to be distinct. */
+
+<span class="keyword">restriction</span> rootCA_CA_distinct:
+    &#34;All rootCA CA #t1 #t2. Root_CA_Init(rootCA)@t1 &amp; NonRoot_CA_Init(CA)@t2 
+    ==&gt; not (rootCA = CA)&#34;
+
+/* identity of CAs is unique, they only have one key pair. Note that this property can be violated by a malicious root CA. */
+<span class="keyword">restriction</span> CAsUnique:
+    &#34;All CA pk1 sk1 pk2 sk2 #t1 #t2. CA_Registered(CA, sk1, pk1)@t1 &amp; CA_Registered(CA, sk2, pk2)@t2 ==&gt; #t1 = #t2&#34;
+
+<span class="keyword">restriction</span> eq:
+    &#34; All e1 e2 #t. Eq(e1, e2)@t ==&gt; e1 = e2&#34;
+
+<span class="keyword">restriction</span> time_monotonicity:
+&#34;All t #t1 #t3. Time(t)@t1
+                &amp; Time(t)@t3
+                &amp; #t1 &lt; #t3
+                ==&gt; ( All tp #t2. Time(tp)@t2
+                                &amp; #t1 &lt; #t2
+                                &amp; #t2 &lt; #t3 ==&gt; tp = t )&#34;
+
+
+/* whenever a party checks the validity period of a certificate, that time must not happened before the check, i.e. the time did not pass yet */
+<span class="keyword">restriction</span> certStillValid:
+    &#34;All currTime valid_till #t1.
+        Time(currTime)@t1 &amp; CheckValidUntil(currTime, valid_till)@t1
+         ==&gt; not (Ex #t2. #t2 &lt; #t1 &amp; Time(valid_till)@t2)&#34;
+
+/* ----------- Compromise Rules ----------- */
+
+/* CA key leakage */
+<span class="keyword">rule</span> <a name="rule:compromiseCA"></a><span class="rule.identifier">compromiseCA</span> [color= #d40808 ]<a name="lem::"></a><span class="lemma.identifier">:</span>
+    [!CA_s0($CA, ~skCA, pk(~skCA), ca_fields, CA_sig)] 
+    --[ 
+        CompromiseCA($CA), 
+        Compromise(),
+        Corrupted($CA),
+
+        San_compromiseCA(),
+        Time($now)
+    ]-&gt; 
+    [ Out(~skCA) ] 
+
+/* Root CA key leakage */
+<span class="keyword">rule</span> <a name="rule:compromiseRootCA"></a><span class="rule.identifier">compromiseRootCA</span> [color= #d40808 ]<a name="lem::"></a><span class="lemma.identifier">:</span>
+    [ !Root_CA_s0($CA, skCA, pkCA) ] 
+    --[ 
+        CompromiseRootCA($CA), 
+        Compromise(),
+        Corrupted($CA),
+
+        San_compromiseRootCA(),
+        Time($now)
+    ]-&gt; 
+    [ Out(skCA) ]
+
+/* BEGIN LEMMAS */
+
+<span class="keyword">lemma</span> <span class="punctuation">san_Root_CA_Init</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+ exists-trace 
+&#34;Ex #t. 
+	San_Root_CA_Init()@t
+	&amp; not (Ex #t. Compromise()@t)
+&#34;
+
+<span class="keyword">lemma</span> <span class="punctuation">san_Intermediate_CA_Init</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+ exists-trace 
+&#34;Ex #t. 
+	San_Intermediate_CA_Init()@t
+	&amp; not (Ex #t. Compromise()@t)
+&#34;
+
+<span class="keyword">lemma</span> <span class="punctuation">san_Domain_Owner_Init</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+ exists-trace 
+&#34;Ex #t. 
+	San_Domain_Owner_Init()@t
+	&amp; not (Ex #t. Compromise()@t)
+&#34;
+
+<span class="keyword">lemma</span> <span class="punctuation">san_PubKeyCertify</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+ exists-trace 
+&#34;Ex #t. 
+	San_PubKeyCertify()@t
+	&amp; not (Ex #t. Compromise()@t)
+&#34;
+
+<span class="keyword">lemma</span> <span class="punctuation">san_ClientValidate</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+ exists-trace 
+&#34;Ex #t. 
+	San_ClientValidate()@t
+	&amp; not (Ex #t. Compromise()@t)
+&#34;
+
+<span class="keyword">lemma</span> <span class="punctuation">san_ConsultDocumentation_Success</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+ exists-trace 
+&#34;Ex #t. 
+	San_ConsultDocumentation_Success()@t
+	&amp; not (Ex #t. Compromise()@t)
+&#34;
+
+<span class="keyword">lemma</span> <span class="punctuation">san_ConsultDocumentation_Fails</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+ exists-trace 
+&#34;Ex #t. 
+	San_ConsultDocumentation_Fails()@t
+	&amp; (All #t. Compromise()@t ==&gt; (Ex rootCA. CompromiseRootCA(rootCA)@t))
+&#34;
+
+<span class="keyword">lemma</span> <span class="punctuation">san_external_check_true</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+ exists-trace 
+&#34;Ex #t. 
+	San_external_check_true()@t
+	&amp; not (Ex #t. Compromise()@t)
+&#34;
+
+<span class="keyword">lemma</span> <span class="punctuation">san_external_check_false</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+ exists-trace 
+&#34;Ex #t. 
+	San_external_check_false()@t
+	&amp; (All #t. Compromise()@t ==&gt; (Ex CA. CompromiseCA(CA)@t))
+&#34;
+
+<span class="keyword">lemma</span> <span class="punctuation">san_compromiseCA</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+ exists-trace 
+&#34;Ex #t. 
+	San_compromiseCA()@t
+&#34;
+
+<span class="keyword">lemma</span> <span class="punctuation">san_compromiseRootCA</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+ exists-trace 
+&#34;Ex #t. 
+	San_compromiseRootCA()@t
+&#34;
+
+/* ------------------------------ */
+
+/* Authenticity */
+
+<span class="keyword">lemma</span> <span class="punctuation">CA_auth_w_compromise</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+    exists-trace
+    &#34;(Ex rootCA ca_fields CA fields #t. BrowserAcceptsChain(CA, fields, rootCA, ca_fields)@t 
+    &amp; not (Ex #t1. CAAsserts(CA, fields)@t1))&#34;
+
+// Counterexample to authenticity
+<span class="keyword">lemma</span> <span class="punctuation">authenticity</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+    exists-trace
+    &#34;Ex rootCA ca_fields CA fields #j.
+        BrowserAcceptsChain(CA, fields, rootCA, ca_fields)@j 
+        &amp; not (Ex #i. GroundTruth(CA, fields)@i &amp; #i &lt; #j)&#34;
+
+<span class="keyword">lemma</span> <span class="punctuation">cert_auth</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+    &#34;All rootCA ca_fields CA fields #t. BrowserAcceptsChain(CA, fields, rootCA, ca_fields)@t ==&gt; 
+                /* If client accepted cert signed by CA */
+          (Ex #t1. CAAsserts(CA, fields)@t1) 
+            /* then CA asserts this certificate */
+        | (Ex #t2. CompromiseCA(CA)@t2 &amp; #t2 &lt; #t ) 
+            /* or that particular CA is compromised */
+        | (Ex #t2. CompromiseRootCA(rootCA)@t2 &amp; #t2 &lt; #t )
+            /* or the root CA is compromised */
+    &#34;
+
+/* ======================================
+       End2End Accountable Authenticity
+   ====================================== */
+
+/* --- Accountable Authenticity with external validator --- */
+
+// auth is violated but intermediate CA cert is not documented. Thus only root CA is blamed
+test CAfalseAsserts_rootBlamed: 
+  &#34;Ex CA fields ca_fields #t0 #t1 #t2. /* rootCA free */
+    Asserts(&#39;external auditor&#39;, &#39;That intermediary CA signed the following incorrect statement and the validation chain says the following about that CA.&#39;, CA, &lt;fields, ca_fields&gt;)@t0
+    // assessment finds the certificate incorrect... 
+    &amp; Asserts(&#39;CCADB&#39;, &#39;No root CA signed this CA.&#39;, CA, &lt;ca_fields, rootCA&gt;)@t1
+    // ...and the involved CA is not documented, hence rootCA is blamed.
+    &amp; BrowserAcceptsChain(CA, fields, rootCA, ca_fields)@t2
+    &#34;
+
+// intermediate CA is documented, rootCA is not blamed but intermediate is
+test CAfalseAsserts_rootNotBlamed:
+  &#34;Ex rootCA fields ca_fields #t0 #t1 #t2. /* CA free */
+    /* externally we found that the assertion encoded in the certificate is untrue ... */
+    Asserts(&#39;external auditor&#39;, &#39;That intermediary CA signed the following incorrect statement and the validation chain says the following about that CA.&#39;, CA, &lt;fields, ca_fields&gt;)@t0 // CA is blamed
+    // assessment finds the certificate incorrect...
+    &amp; Asserts(rootCA, &#39;I signed this intermediate CA.&#39;, CA, &lt;ca_fields&gt;)@t1
+    // ...and the involved CA is documented, hence blamed.
+    &amp; BrowserAcceptsChain(CA, fields, rootCA, ca_fields)@t2
+    &#34;
+
+/* Scenario: Accountable authenticity under PKI with external auth check. Result: autoproven */
+lemma A_PKI_Ext:
+  CAfalseAsserts_rootBlamed, CAfalseAsserts_rootNotBlamed accounts for 
+    &#34;All CA rootCA ca_fields fields #t0 #t1.
+        ExternalAuditorCheck(ca_fields, fields)@t0
+        // if the certificate&#39;s statement is checked externally...
+        &amp; BrowserAcceptsChain(CA, fields, rootCA, ca_fields)@t1
+        ==&gt;
+          (Ex #t. GroundTruth(CA, fields)@t)&#34;
+            // ...the certificate&#39;s statement is correct
+
+/* END LEMMAS */
+
+<span class="keyword">end</span>
+
+</pre>

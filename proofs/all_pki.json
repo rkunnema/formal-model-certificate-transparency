@@ -1,8 +1,8 @@
 {
 	"config": {
-		"global_max_cores": 10,
-		"global_max_memory": "max",
-		"default_timeout": 300,
+		"global_max_cores": 16,
+		"global_max_memory": 8,
+		"default_timeout": 180,
 		"output_directory": "./results/pki/"
 	},
   "tamarin_versions": {
@@ -12,34 +12,34 @@
   },
   "tasks": {
     "normal": {
-      "theory_file": "../pki_lemma_pregen.spthy",
+      "theory_file": "pregen_models/pki_pregen.spthy",
 			"tamarin_versions": ["default"],
       "output_file_prefix": "",
-			"tamarin_options": ["--derivcheck-timeout=0"],
+			"tamarin_options": ["--derivcheck-timeout=99999"],
             "resources": {
-				"max_cores": 10,
-				"max_memory": 6,
-				"timeout": 300
+				"max_cores": 16,
+				"max_memory": 8,
+				"timeout": 200
 			},
       "lemmas": [
-        {"name": "san_"},
+        {"name": "san_*"},
         {"name": "authenticity"},
         {"name": "CA_auth_w_compromise"},
         {"name": "cert_auth"}
       ]
     },
     "acc": {
-      "theory_file": "../pki_lemma_pregen.spthy",
+      "theory_file": "pregen_models/pki_pregen.spthy",
 			"tamarin_versions": ["default"],
       "output_file_prefix": "",
-			"tamarin_options": ["--derivcheck-timeout=0"],
+			"tamarin_options": ["--derivcheck-timeout=99999"],
             "resources": {
-				"max_cores": 10,
-				"max_memory": 6,
-				"timeout": 300
+				"max_cores": 16,
+				"max_memory": 8,
+				"timeout": 200
 			},
       "lemmas": [
-        {"name": "A_PKI_Ext"}
+        {"name": "A_PKI_Ext_*"}
       ]
     }
   }

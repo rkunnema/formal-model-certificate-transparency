@@ -1,9 +1,9 @@
 {
   "recipe": "all_pki.json",
   "config": {
-    "global_max_cores": 10,
-    "global_max_memory": 15,
-    "default_timeout": 300,
+    "global_max_cores": 16,
+    "global_max_memory": 8,
+    "default_timeout": 180,
     "output_directory": "results/pki"
   },
   "tamarin_versions": {
@@ -13,280 +13,379 @@
     }
   },
   "execution_metadata": {
-    "total_tasks": 24,
-    "total_successes": 24,
+    "total_tasks": 27,
+    "total_successes": 27,
     "total_failures": 0,
-    "total_cache_hit": 24,
-    "total_runtime": 14.048261642456055,
-    "total_memory": 138.84375,
-    "max_runtime": 1.0881307125091553,
-    "max_memory": 130.12890625
+    "total_cache_hit": 0,
+    "total_runtime": 44.02944040298462,
+    "total_memory": 3363.828125,
+    "max_runtime": 2.946521282196045,
+    "max_memory": 156.32421875
   },
   "tasks": {
     "normal": {
-      "theory_file": "../pki_lemma_pregen.spthy",
+      "theory_file": "pregen_models/pki_pregen.spthy",
       "subtasks": {
-        "--san_PKIExt_external_check_false--default": {
+        "--san_compromiseRootCA--default": {
           "task_config": {
             "tamarin_alias": "default",
-            "lemma": "san_PKIExt_external_check_false",
-            "output_theory_file": "results/pki/proofs/--san_PKIExt_external_check_false--default.spthy",
-            "output_trace_file": "results/pki/traces/--san_PKIExt_external_check_false--default.json",
+            "lemma": "san_compromiseRootCA",
+            "output_theory_file": "results/pki/proofs/--san_compromiseRootCA--default.spthy",
+            "output_trace_file": "results/pki/traces/--san_compromiseRootCA--default.json",
             "options": [
-              "--derivcheck-timeout=0"
+              "--derivcheck-timeout=99999"
             ],
             "resources": {
-              "cores": 10,
-              "memory": 6,
-              "timeout": 300
+              "cores": 16,
+              "memory": 8,
+              "timeout": 200
             }
           },
           "task_execution_metadata": {
             "command": [],
             "status": "completed",
-            "cache_hit": true,
-            "exec_start": "2025-11-09T14:59:03.442983",
-            "exec_end": "2025-11-09T14:59:04.462282",
-            "exec_duration_monotonic": 1.0192983150482178,
-            "avg_memory": 0.37890625,
-            "peak_memory": 0.37890625
+            "cache_hit": false,
+            "exec_start": "2026-04-11T19:32:51.033041",
+            "exec_end": "2026-04-11T19:32:52.276805",
+            "exec_duration_monotonic": 1.2437632083892822,
+            "avg_memory": 61.640625,
+            "peak_memory": 123.2734375
           },
           "task_result": {
             "warnings": [],
-            "real_time_tamarin_measure": 0.92,
-            "lemma_result": "verified",
-            "steps": 8,
-            "analysis_type": "exists-trace"
-          }
-        },
-        "--san_PKI_NonRoot_CA_Init--default": {
-          "task_config": {
-            "tamarin_alias": "default",
-            "lemma": "san_PKI_NonRoot_CA_Init",
-            "output_theory_file": "results/pki/proofs/--san_PKI_NonRoot_CA_Init--default.spthy",
-            "output_trace_file": "results/pki/traces/--san_PKI_NonRoot_CA_Init--default.json",
-            "options": [
-              "--derivcheck-timeout=0"
-            ],
-            "resources": {
-              "cores": 10,
-              "memory": 6,
-              "timeout": 300
-            }
-          },
-          "task_execution_metadata": {
-            "command": [],
-            "status": "completed",
-            "cache_hit": true,
-            "exec_start": "2025-11-09T14:59:06.087933",
-            "exec_end": "2025-11-09T14:59:06.420794",
-            "exec_duration_monotonic": 0.33286046981811523,
-            "avg_memory": 0.37890625,
-            "peak_memory": 0.37890625
-          },
-          "task_result": {
-            "warnings": [],
-            "real_time_tamarin_measure": 0.21,
+            "real_time_tamarin_measure": 1.08,
             "lemma_result": "verified",
             "steps": 3,
             "analysis_type": "exists-trace"
           }
         },
-        "--san_PKI_ClientValidate--default": {
+        "--san_ConsultDocumentation_Fails--default": {
           "task_config": {
             "tamarin_alias": "default",
-            "lemma": "san_PKI_ClientValidate",
-            "output_theory_file": "results/pki/proofs/--san_PKI_ClientValidate--default.spthy",
-            "output_trace_file": "results/pki/traces/--san_PKI_ClientValidate--default.json",
+            "lemma": "san_ConsultDocumentation_Fails",
+            "output_theory_file": "results/pki/proofs/--san_ConsultDocumentation_Fails--default.spthy",
+            "output_trace_file": "results/pki/traces/--san_ConsultDocumentation_Fails--default.json",
             "options": [
-              "--derivcheck-timeout=0"
+              "--derivcheck-timeout=99999"
             ],
             "resources": {
-              "cores": 10,
-              "memory": 6,
-              "timeout": 300
+              "cores": 16,
+              "memory": 8,
+              "timeout": 200
             }
           },
           "task_execution_metadata": {
             "command": [],
             "status": "completed",
-            "cache_hit": true,
-            "exec_start": "2025-11-09T14:59:06.494858",
-            "exec_end": "2025-11-09T14:59:07.582989",
-            "exec_duration_monotonic": 1.0881307125091553,
-            "avg_memory": 65.25390625,
-            "peak_memory": 130.12890625
+            "cache_hit": false,
+            "exec_start": "2026-04-11T19:32:52.346436",
+            "exec_end": "2026-04-11T19:32:53.659678",
+            "exec_duration_monotonic": 1.3132424354553223,
+            "avg_memory": 63.349609375,
+            "peak_memory": 126.69140625
           },
           "task_result": {
             "warnings": [],
-            "real_time_tamarin_measure": 0.97,
+            "real_time_tamarin_measure": 1.14,
             "lemma_result": "verified",
-            "steps": 8,
+            "steps": 5,
             "analysis_type": "exists-trace"
           }
         },
-        "--san_PKIExt_external_check_true--default": {
+        "--san_ConsultDocumentation_Success--default": {
           "task_config": {
             "tamarin_alias": "default",
-            "lemma": "san_PKIExt_external_check_true",
-            "output_theory_file": "results/pki/proofs/--san_PKIExt_external_check_true--default.spthy",
-            "output_trace_file": "results/pki/traces/--san_PKIExt_external_check_true--default.json",
+            "lemma": "san_ConsultDocumentation_Success",
+            "output_theory_file": "results/pki/proofs/--san_ConsultDocumentation_Success--default.spthy",
+            "output_trace_file": "results/pki/traces/--san_ConsultDocumentation_Success--default.json",
             "options": [
-              "--derivcheck-timeout=0"
+              "--derivcheck-timeout=99999"
             ],
             "resources": {
-              "cores": 10,
-              "memory": 6,
-              "timeout": 300
+              "cores": 16,
+              "memory": 8,
+              "timeout": 200
             }
           },
           "task_execution_metadata": {
             "command": [],
             "status": "completed",
-            "cache_hit": true,
-            "exec_start": "2025-11-09T14:59:09.548051",
-            "exec_end": "2025-11-09T14:59:10.548054",
-            "exec_duration_monotonic": 1.000002145767212,
-            "avg_memory": 0.37890625,
-            "peak_memory": 0.37890625
+            "cache_hit": false,
+            "exec_start": "2026-04-11T19:32:53.759050",
+            "exec_end": "2026-04-11T19:32:55.357949",
+            "exec_duration_monotonic": 1.5988996028900146,
+            "avg_memory": 59.595703125,
+            "peak_memory": 119.18359375
           },
           "task_result": {
             "warnings": [],
-            "real_time_tamarin_measure": 0.87,
-            "lemma_result": "verified",
-            "steps": 13,
-            "analysis_type": "exists-trace"
-          }
-        },
-        "--san_PKI_RequestLegitimacyProof_Success--default": {
-          "task_config": {
-            "tamarin_alias": "default",
-            "lemma": "san_PKI_RequestLegitimacyProof_Success",
-            "output_theory_file": "results/pki/proofs/--san_PKI_RequestLegitimacyProof_Success--default.spthy",
-            "output_trace_file": "results/pki/traces/--san_PKI_RequestLegitimacyProof_Success--default.json",
-            "options": [
-              "--derivcheck-timeout=0"
-            ],
-            "resources": {
-              "cores": 10,
-              "memory": 6,
-              "timeout": 300
-            }
-          },
-          "task_execution_metadata": {
-            "command": [],
-            "status": "completed",
-            "cache_hit": true,
-            "exec_start": "2025-11-09T14:59:11.078652",
-            "exec_end": "2025-11-09T14:59:11.685373",
-            "exec_duration_monotonic": 0.6067211627960205,
-            "avg_memory": 0.37890625,
-            "peak_memory": 0.37890625
-          },
-          "task_result": {
-            "warnings": [],
-            "real_time_tamarin_measure": 0.49,
+            "real_time_tamarin_measure": 1.42,
             "lemma_result": "verified",
             "steps": 7,
             "analysis_type": "exists-trace"
           }
         },
-        "--san_PKI_Certify--default": {
+        "--san_Root_CA_Init--default": {
           "task_config": {
             "tamarin_alias": "default",
-            "lemma": "san_PKI_Certify",
-            "output_theory_file": "results/pki/proofs/--san_PKI_Certify--default.spthy",
-            "output_trace_file": "results/pki/traces/--san_PKI_Certify--default.json",
+            "lemma": "san_Root_CA_Init",
+            "output_theory_file": "results/pki/proofs/--san_Root_CA_Init--default.spthy",
+            "output_trace_file": "results/pki/traces/--san_Root_CA_Init--default.json",
             "options": [
-              "--derivcheck-timeout=0"
+              "--derivcheck-timeout=99999"
             ],
             "resources": {
-              "cores": 10,
-              "memory": 6,
-              "timeout": 300
+              "cores": 16,
+              "memory": 8,
+              "timeout": 200
             }
           },
           "task_execution_metadata": {
             "command": [],
             "status": "completed",
-            "cache_hit": true,
-            "exec_start": "2025-11-09T14:59:11.795165",
-            "exec_end": "2025-11-09T14:59:12.176216",
-            "exec_duration_monotonic": 0.38105082511901855,
-            "avg_memory": 0.37890625,
-            "peak_memory": 0.37890625
+            "cache_hit": false,
+            "exec_start": "2026-04-11T19:32:55.368223",
+            "exec_end": "2026-04-11T19:32:56.554910",
+            "exec_duration_monotonic": 1.1866867542266846,
+            "avg_memory": 64.869140625,
+            "peak_memory": 129.73046875
           },
           "task_result": {
             "warnings": [],
-            "real_time_tamarin_measure": 0.25,
-            "lemma_result": "verified",
-            "steps": 4,
-            "analysis_type": "exists-trace"
-          }
-        },
-        "--san_PKI_Root_CA_Init--default": {
-          "task_config": {
-            "tamarin_alias": "default",
-            "lemma": "san_PKI_Root_CA_Init",
-            "output_theory_file": "results/pki/proofs/--san_PKI_Root_CA_Init--default.spthy",
-            "output_trace_file": "results/pki/traces/--san_PKI_Root_CA_Init--default.json",
-            "options": [
-              "--derivcheck-timeout=0"
-            ],
-            "resources": {
-              "cores": 10,
-              "memory": 6,
-              "timeout": 300
-            }
-          },
-          "task_execution_metadata": {
-            "command": [],
-            "status": "completed",
-            "cache_hit": true,
-            "exec_start": "2025-11-09T14:59:15.802237",
-            "exec_end": "2025-11-09T14:59:16.042965",
-            "exec_duration_monotonic": 0.24072837829589844,
-            "avg_memory": 0.37890625,
-            "peak_memory": 0.37890625
-          },
-          "task_result": {
-            "warnings": [],
-            "real_time_tamarin_measure": 0.12,
+            "real_time_tamarin_measure": 1.0,
             "lemma_result": "verified",
             "steps": 2,
             "analysis_type": "exists-trace"
           }
         },
-        "--san_PKI_RequestLegitimacyProof_Illegal--default": {
+        "--san_external_check_false--default": {
           "task_config": {
             "tamarin_alias": "default",
-            "lemma": "san_PKI_RequestLegitimacyProof_Illegal",
-            "output_theory_file": "results/pki/proofs/--san_PKI_RequestLegitimacyProof_Illegal--default.spthy",
-            "output_trace_file": "results/pki/traces/--san_PKI_RequestLegitimacyProof_Illegal--default.json",
+            "lemma": "san_external_check_false",
+            "output_theory_file": "results/pki/proofs/--san_external_check_false--default.spthy",
+            "output_trace_file": "results/pki/traces/--san_external_check_false--default.json",
             "options": [
-              "--derivcheck-timeout=0"
+              "--derivcheck-timeout=99999"
             ],
             "resources": {
-              "cores": 10,
-              "memory": 6,
-              "timeout": 300
+              "cores": 16,
+              "memory": 8,
+              "timeout": 200
             }
           },
           "task_execution_metadata": {
             "command": [],
             "status": "completed",
-            "cache_hit": true,
-            "exec_start": "2025-11-09T14:59:16.339081",
-            "exec_end": "2025-11-09T14:59:16.796165",
-            "exec_duration_monotonic": 0.45708441734313965,
-            "avg_memory": 0.37890625,
-            "peak_memory": 0.37890625
+            "cache_hit": false,
+            "exec_start": "2026-04-11T19:32:56.580214",
+            "exec_end": "2026-04-11T19:32:58.347147",
+            "exec_duration_monotonic": 1.7669329643249512,
+            "avg_memory": 60.216796875,
+            "peak_memory": 120.42578125
           },
           "task_result": {
             "warnings": [],
-            "real_time_tamarin_measure": 0.34,
+            "real_time_tamarin_measure": 1.57,
             "lemma_result": "verified",
-            "steps": 5,
+            "steps": 8,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--san_compromiseCA--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "san_compromiseCA",
+            "output_theory_file": "results/pki/proofs/--san_compromiseCA--default.spthy",
+            "output_trace_file": "results/pki/traces/--san_compromiseCA--default.json",
+            "options": [
+              "--derivcheck-timeout=99999"
+            ],
+            "resources": {
+              "cores": 16,
+              "memory": 8,
+              "timeout": 200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2026-04-11T19:32:58.407877",
+            "exec_end": "2026-04-11T19:32:59.717466",
+            "exec_duration_monotonic": 1.309589147567749,
+            "avg_memory": 57.603515625,
+            "peak_memory": 115.19921875
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 1.11,
+            "lemma_result": "verified",
+            "steps": 3,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--san_Domain_Owner_Init--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "san_Domain_Owner_Init",
+            "output_theory_file": "results/pki/proofs/--san_Domain_Owner_Init--default.spthy",
+            "output_trace_file": "results/pki/traces/--san_Domain_Owner_Init--default.json",
+            "options": [
+              "--derivcheck-timeout=99999"
+            ],
+            "resources": {
+              "cores": 16,
+              "memory": 8,
+              "timeout": 200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2026-04-11T19:32:59.733352",
+            "exec_end": "2026-04-11T19:33:00.832039",
+            "exec_duration_monotonic": 1.0986862182617188,
+            "avg_memory": 0.00390625,
+            "peak_memory": 0.0078125
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 0.9,
+            "lemma_result": "verified",
+            "steps": 2,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--san_external_check_true--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "san_external_check_true",
+            "output_theory_file": "results/pki/proofs/--san_external_check_true--default.spthy",
+            "output_trace_file": "results/pki/traces/--san_external_check_true--default.json",
+            "options": [
+              "--derivcheck-timeout=99999"
+            ],
+            "resources": {
+              "cores": 16,
+              "memory": 8,
+              "timeout": 200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2026-04-11T19:33:00.842453",
+            "exec_end": "2026-04-11T19:33:03.020881",
+            "exec_duration_monotonic": 2.1784279346466064,
+            "avg_memory": 90.36197916666667,
+            "peak_memory": 154.26953125
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 2.0,
+            "lemma_result": "verified",
+            "steps": 11,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--san_ClientValidate--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "san_ClientValidate",
+            "output_theory_file": "results/pki/proofs/--san_ClientValidate--default.spthy",
+            "output_trace_file": "results/pki/traces/--san_ClientValidate--default.json",
+            "options": [
+              "--derivcheck-timeout=99999"
+            ],
+            "resources": {
+              "cores": 16,
+              "memory": 8,
+              "timeout": 200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2026-04-11T19:33:03.068129",
+            "exec_end": "2026-04-11T19:33:06.014651",
+            "exec_duration_monotonic": 2.946521282196045,
+            "avg_memory": 95.76171875,
+            "peak_memory": 156.32421875
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 2.79,
+            "lemma_result": "verified",
+            "steps": 9,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--san_PubKeyCertify--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "san_PubKeyCertify",
+            "output_theory_file": "results/pki/proofs/--san_PubKeyCertify--default.spthy",
+            "output_trace_file": "results/pki/traces/--san_PubKeyCertify--default.json",
+            "options": [
+              "--derivcheck-timeout=99999"
+            ],
+            "resources": {
+              "cores": 16,
+              "memory": 8,
+              "timeout": 200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2026-04-11T19:33:06.094816",
+            "exec_end": "2026-04-11T19:33:07.539679",
+            "exec_duration_monotonic": 1.4448630809783936,
+            "avg_memory": 66.34375,
+            "peak_memory": 132.6796875
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 1.25,
+            "lemma_result": "verified",
+            "steps": 4,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--san_Intermediate_CA_Init--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "san_Intermediate_CA_Init",
+            "output_theory_file": "results/pki/proofs/--san_Intermediate_CA_Init--default.spthy",
+            "output_trace_file": "results/pki/traces/--san_Intermediate_CA_Init--default.json",
+            "options": [
+              "--derivcheck-timeout=99999"
+            ],
+            "resources": {
+              "cores": 16,
+              "memory": 8,
+              "timeout": 200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2026-04-11T19:33:07.615191",
+            "exec_end": "2026-04-11T19:33:09.012835",
+            "exec_duration_monotonic": 1.39764404296875,
+            "avg_memory": 60.73046875,
+            "peak_memory": 121.453125
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 1.21,
+            "lemma_result": "verified",
+            "steps": 3,
             "analysis_type": "exists-trace"
           }
         },
@@ -297,27 +396,27 @@
             "output_theory_file": "results/pki/proofs/--authenticity--default.spthy",
             "output_trace_file": "results/pki/traces/--authenticity--default.json",
             "options": [
-              "--derivcheck-timeout=0"
+              "--derivcheck-timeout=99999"
             ],
             "resources": {
-              "cores": 10,
-              "memory": 6,
-              "timeout": 300
+              "cores": 16,
+              "memory": 8,
+              "timeout": 200
             }
           },
           "task_execution_metadata": {
             "command": [],
             "status": "completed",
-            "cache_hit": true,
-            "exec_start": "2025-11-09T14:59:13.958259",
-            "exec_end": "2025-11-09T14:59:14.768084",
-            "exec_duration_monotonic": 0.8098251819610596,
-            "avg_memory": 0.37890625,
-            "peak_memory": 0.37890625
+            "cache_hit": false,
+            "exec_start": "2026-04-11T19:33:09.035037",
+            "exec_end": "2026-04-11T19:33:10.987151",
+            "exec_duration_monotonic": 1.9521143436431885,
+            "avg_memory": 62.94921875,
+            "peak_memory": 125.890625
           },
           "task_result": {
             "warnings": [],
-            "real_time_tamarin_measure": 0.69,
+            "real_time_tamarin_measure": 1.8,
             "lemma_result": "falsified",
             "steps": 0,
             "analysis_type": "all-traces"
@@ -330,27 +429,27 @@
             "output_theory_file": "results/pki/proofs/--CA_auth_w_compromise--default.spthy",
             "output_trace_file": "results/pki/traces/--CA_auth_w_compromise--default.json",
             "options": [
-              "--derivcheck-timeout=0"
+              "--derivcheck-timeout=99999"
             ],
             "resources": {
-              "cores": 10,
-              "memory": 6,
-              "timeout": 300
+              "cores": 16,
+              "memory": 8,
+              "timeout": 200
             }
           },
           "task_execution_metadata": {
             "command": [],
             "status": "completed",
-            "cache_hit": true,
-            "exec_start": "2025-11-09T14:59:13.138099",
-            "exec_end": "2025-11-09T14:59:13.855215",
-            "exec_duration_monotonic": 0.7171158790588379,
-            "avg_memory": 0.37890625,
-            "peak_memory": 0.37890625
+            "cache_hit": false,
+            "exec_start": "2026-04-11T19:33:11.056232",
+            "exec_end": "2026-04-11T19:33:12.997443",
+            "exec_duration_monotonic": 1.9412109851837158,
+            "avg_memory": 65.478515625,
+            "peak_memory": 130.94921875
           },
           "task_result": {
             "warnings": [],
-            "real_time_tamarin_measure": 0.61,
+            "real_time_tamarin_measure": 1.78,
             "lemma_result": "verified",
             "steps": 8,
             "analysis_type": "exists-trace"
@@ -363,27 +462,27 @@
             "output_theory_file": "results/pki/proofs/--cert_auth--default.spthy",
             "output_trace_file": "results/pki/traces/--cert_auth--default.json",
             "options": [
-              "--derivcheck-timeout=0"
+              "--derivcheck-timeout=99999"
             ],
             "resources": {
-              "cores": 10,
-              "memory": 6,
-              "timeout": 300
+              "cores": 16,
+              "memory": 8,
+              "timeout": 200
             }
           },
           "task_execution_metadata": {
             "command": [],
             "status": "completed",
-            "cache_hit": true,
-            "exec_start": "2025-11-09T14:59:18.315100",
-            "exec_end": "2025-11-09T14:59:18.865157",
-            "exec_duration_monotonic": 0.5500571727752686,
-            "avg_memory": 0.37890625,
-            "peak_memory": 0.37890625
+            "cache_hit": false,
+            "exec_start": "2026-04-11T19:33:13.083549",
+            "exec_end": "2026-04-11T19:33:14.667684",
+            "exec_duration_monotonic": 1.5841350555419922,
+            "avg_memory": 67.451171875,
+            "peak_memory": 134.89453125
           },
           "task_result": {
             "warnings": [],
-            "real_time_tamarin_measure": 0.42,
+            "real_time_tamarin_measure": 1.38,
             "lemma_result": "verified",
             "steps": 13,
             "analysis_type": "all-traces"
@@ -392,41 +491,8 @@
       }
     },
     "acc": {
-      "theory_file": "../pki_lemma_pregen.spthy",
+      "theory_file": "pregen_models/pki_pregen.spthy",
       "subtasks": {
-        "--A_PKI_Ext_CAfalseAsserts_rootNotBlamed_inj--default": {
-          "task_config": {
-            "tamarin_alias": "default",
-            "lemma": "A_PKI_Ext_CAfalseAsserts_rootNotBlamed_inj",
-            "output_theory_file": "results/pki/proofs/--A_PKI_Ext_CAfalseAsserts_rootNotBlamed_inj--default.spthy",
-            "output_trace_file": "results/pki/traces/--A_PKI_Ext_CAfalseAsserts_rootNotBlamed_inj--default.json",
-            "options": [
-              "--derivcheck-timeout=0"
-            ],
-            "resources": {
-              "cores": 10,
-              "memory": 6,
-              "timeout": 300
-            }
-          },
-          "task_execution_metadata": {
-            "command": [],
-            "status": "completed",
-            "cache_hit": true,
-            "exec_start": "2025-11-09T14:59:04.556749",
-            "exec_end": "2025-11-09T14:59:04.736130",
-            "exec_duration_monotonic": 0.1793813705444336,
-            "avg_memory": 0.37890625,
-            "peak_memory": 0.37890625
-          },
-          "task_result": {
-            "warnings": [],
-            "real_time_tamarin_measure": 0.07,
-            "lemma_result": "verified",
-            "steps": 1,
-            "analysis_type": "all-traces"
-          }
-        },
         "--A_PKI_Ext_CAfalseAsserts_rootNotBlamed_verif_nonempty--default": {
           "task_config": {
             "tamarin_alias": "default",
@@ -434,30 +500,162 @@
             "output_theory_file": "results/pki/proofs/--A_PKI_Ext_CAfalseAsserts_rootNotBlamed_verif_nonempty--default.spthy",
             "output_trace_file": "results/pki/traces/--A_PKI_Ext_CAfalseAsserts_rootNotBlamed_verif_nonempty--default.json",
             "options": [
-              "--derivcheck-timeout=0"
+              "--derivcheck-timeout=99999"
             ],
             "resources": {
-              "cores": 10,
-              "memory": 6,
-              "timeout": 300
+              "cores": 16,
+              "memory": 8,
+              "timeout": 200
             }
           },
           "task_execution_metadata": {
             "command": [],
             "status": "completed",
-            "cache_hit": true,
-            "exec_start": "2025-11-09T14:59:04.764016",
-            "exec_end": "2025-11-09T14:59:05.153469",
-            "exec_duration_monotonic": 0.3894531726837158,
-            "avg_memory": 0.37890625,
-            "peak_memory": 0.37890625
+            "cache_hit": false,
+            "exec_start": "2026-04-11T19:33:14.707153",
+            "exec_end": "2026-04-11T19:33:16.263752",
+            "exec_duration_monotonic": 1.5565993785858154,
+            "avg_memory": 64.244140625,
+            "peak_memory": 128.48046875
           },
           "task_result": {
             "warnings": [],
-            "real_time_tamarin_measure": 0.27,
+            "real_time_tamarin_measure": 1.36,
             "lemma_result": "verified",
-            "steps": 7,
+            "steps": 8,
             "analysis_type": "all-traces"
+          }
+        },
+        "--A_PKI_Ext_CAfalseAsserts_rootBlamed_uniq--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_PKI_Ext_CAfalseAsserts_rootBlamed_uniq",
+            "output_theory_file": "results/pki/proofs/--A_PKI_Ext_CAfalseAsserts_rootBlamed_uniq--default.spthy",
+            "output_trace_file": "results/pki/traces/--A_PKI_Ext_CAfalseAsserts_rootBlamed_uniq--default.json",
+            "options": [
+              "--derivcheck-timeout=99999"
+            ],
+            "resources": {
+              "cores": 16,
+              "memory": 8,
+              "timeout": 200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2026-04-11T19:33:16.328601",
+            "exec_end": "2026-04-11T19:33:17.892315",
+            "exec_duration_monotonic": 1.563713550567627,
+            "avg_memory": 61.587890625,
+            "peak_memory": 123.16796875
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 1.39,
+            "lemma_result": "verified",
+            "steps": 10,
+            "analysis_type": "all-traces"
+          }
+        },
+        "--A_PKI_Ext_CAfalseAsserts_rootNotBlamed_inj--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_PKI_Ext_CAfalseAsserts_rootNotBlamed_inj",
+            "output_theory_file": "results/pki/proofs/--A_PKI_Ext_CAfalseAsserts_rootNotBlamed_inj--default.spthy",
+            "output_trace_file": "results/pki/traces/--A_PKI_Ext_CAfalseAsserts_rootNotBlamed_inj--default.json",
+            "options": [
+              "--derivcheck-timeout=99999"
+            ],
+            "resources": {
+              "cores": 16,
+              "memory": 8,
+              "timeout": 200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2026-04-11T19:33:17.954646",
+            "exec_end": "2026-04-11T19:33:19.126667",
+            "exec_duration_monotonic": 1.172020673751831,
+            "avg_memory": 65.58203125,
+            "peak_memory": 131.15625
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 1.01,
+            "lemma_result": "verified",
+            "steps": 1,
+            "analysis_type": "all-traces"
+          }
+        },
+        "--A_PKI_Ext_CAfalseAsserts_rootNotBlamed_uniq--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_PKI_Ext_CAfalseAsserts_rootNotBlamed_uniq",
+            "output_theory_file": "results/pki/proofs/--A_PKI_Ext_CAfalseAsserts_rootNotBlamed_uniq--default.spthy",
+            "output_trace_file": "results/pki/traces/--A_PKI_Ext_CAfalseAsserts_rootNotBlamed_uniq--default.json",
+            "options": [
+              "--derivcheck-timeout=99999"
+            ],
+            "resources": {
+              "cores": 16,
+              "memory": 8,
+              "timeout": 200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2026-04-11T19:33:19.178894",
+            "exec_end": "2026-04-11T19:33:20.784615",
+            "exec_duration_monotonic": 1.6057205200195312,
+            "avg_memory": 63.548828125,
+            "peak_memory": 127.08984375
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 1.39,
+            "lemma_result": "verified",
+            "steps": 10,
+            "analysis_type": "all-traces"
+          }
+        },
+        "--A_PKI_Ext_CAfalseAsserts_rootNotBlamed_single--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_PKI_Ext_CAfalseAsserts_rootNotBlamed_single",
+            "output_theory_file": "results/pki/proofs/--A_PKI_Ext_CAfalseAsserts_rootNotBlamed_single--default.spthy",
+            "output_trace_file": "results/pki/traces/--A_PKI_Ext_CAfalseAsserts_rootNotBlamed_single--default.json",
+            "options": [
+              "--derivcheck-timeout=99999"
+            ],
+            "resources": {
+              "cores": 16,
+              "memory": 8,
+              "timeout": 200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2026-04-11T19:33:20.806926",
+            "exec_end": "2026-04-11T19:33:22.863561",
+            "exec_duration_monotonic": 2.0566349029541016,
+            "avg_memory": 65.787109375,
+            "peak_memory": 131.56640625
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 1.84,
+            "lemma_result": "verified",
+            "steps": 12,
+            "analysis_type": "exists-trace"
           }
         },
         "--A_PKI_Ext_verif_empty--default": {
@@ -467,27 +665,27 @@
             "output_theory_file": "results/pki/proofs/--A_PKI_Ext_verif_empty--default.spthy",
             "output_trace_file": "results/pki/traces/--A_PKI_Ext_verif_empty--default.json",
             "options": [
-              "--derivcheck-timeout=0"
+              "--derivcheck-timeout=99999"
             ],
             "resources": {
-              "cores": 10,
-              "memory": 6,
-              "timeout": 300
+              "cores": 16,
+              "memory": 8,
+              "timeout": 200
             }
           },
           "task_execution_metadata": {
             "command": [],
             "status": "completed",
-            "cache_hit": true,
-            "exec_start": "2025-11-09T14:59:05.171810",
-            "exec_end": "2025-11-09T14:59:05.571020",
-            "exec_duration_monotonic": 0.39920997619628906,
-            "avg_memory": 0.37890625,
-            "peak_memory": 0.37890625
+            "cache_hit": false,
+            "exec_start": "2026-04-11T19:33:22.938606",
+            "exec_end": "2026-04-11T19:33:24.369871",
+            "exec_duration_monotonic": 1.431265115737915,
+            "avg_memory": 63.966796875,
+            "peak_memory": 127.92578125
           },
           "task_result": {
             "warnings": [],
-            "real_time_tamarin_measure": 0.29,
+            "real_time_tamarin_measure": 1.25,
             "lemma_result": "verified",
             "steps": 7,
             "analysis_type": "all-traces"
@@ -500,27 +698,27 @@
             "output_theory_file": "results/pki/proofs/--A_PKI_Ext_CAfalseAsserts_rootBlamed_min--default.spthy",
             "output_trace_file": "results/pki/traces/--A_PKI_Ext_CAfalseAsserts_rootBlamed_min--default.json",
             "options": [
-              "--derivcheck-timeout=0"
+              "--derivcheck-timeout=99999"
             ],
             "resources": {
-              "cores": 10,
-              "memory": 6,
-              "timeout": 300
+              "cores": 16,
+              "memory": 8,
+              "timeout": 200
             }
           },
           "task_execution_metadata": {
             "command": [],
             "status": "completed",
-            "cache_hit": true,
-            "exec_start": "2025-11-09T14:59:05.579283",
-            "exec_end": "2025-11-09T14:59:06.001920",
-            "exec_duration_monotonic": 0.4226362705230713,
-            "avg_memory": 0.37890625,
-            "peak_memory": 0.37890625
+            "cache_hit": false,
+            "exec_start": "2026-04-11T19:33:24.467641",
+            "exec_end": "2026-04-11T19:33:25.842693",
+            "exec_duration_monotonic": 1.375051736831665,
+            "avg_memory": 65.65625,
+            "peak_memory": 131.3046875
           },
           "task_result": {
             "warnings": [],
-            "real_time_tamarin_measure": 0.29,
+            "real_time_tamarin_measure": 1.21,
             "lemma_result": "verified",
             "steps": 4,
             "analysis_type": "all-traces"
@@ -533,194 +731,29 @@
             "output_theory_file": "results/pki/proofs/--A_PKI_Ext_CAfalseAsserts_rootNotBlamed_suff--default.spthy",
             "output_trace_file": "results/pki/traces/--A_PKI_Ext_CAfalseAsserts_rootNotBlamed_suff--default.json",
             "options": [
-              "--derivcheck-timeout=0"
+              "--derivcheck-timeout=99999"
             ],
             "resources": {
-              "cores": 10,
-              "memory": 6,
-              "timeout": 300
+              "cores": 16,
+              "memory": 8,
+              "timeout": 200
             }
           },
           "task_execution_metadata": {
             "command": [],
             "status": "completed",
-            "cache_hit": true,
-            "exec_start": "2025-11-09T14:59:07.608041",
-            "exec_end": "2025-11-09T14:59:08.490799",
-            "exec_duration_monotonic": 0.882758617401123,
-            "avg_memory": 0.37890625,
-            "peak_memory": 0.37890625
+            "cache_hit": false,
+            "exec_start": "2026-04-11T19:33:25.893903",
+            "exec_end": "2026-04-11T19:33:27.995991",
+            "exec_duration_monotonic": 2.102088451385498,
+            "avg_memory": 64.353515625,
+            "peak_memory": 128.69921875
           },
           "task_result": {
             "warnings": [],
-            "real_time_tamarin_measure": 0.76,
+            "real_time_tamarin_measure": 1.91,
             "lemma_result": "verified",
-            "steps": 10,
-            "analysis_type": "exists-trace"
-          }
-        },
-        "--A_PKI_Ext_CAfalseAsserts_rootNotBlamed_uniq--default": {
-          "task_config": {
-            "tamarin_alias": "default",
-            "lemma": "A_PKI_Ext_CAfalseAsserts_rootNotBlamed_uniq",
-            "output_theory_file": "results/pki/proofs/--A_PKI_Ext_CAfalseAsserts_rootNotBlamed_uniq--default.spthy",
-            "output_trace_file": "results/pki/traces/--A_PKI_Ext_CAfalseAsserts_rootNotBlamed_uniq--default.json",
-            "options": [
-              "--derivcheck-timeout=0"
-            ],
-            "resources": {
-              "cores": 10,
-              "memory": 6,
-              "timeout": 300
-            }
-          },
-          "task_execution_metadata": {
-            "command": [],
-            "status": "completed",
-            "cache_hit": true,
-            "exec_start": "2025-11-09T14:59:08.523250",
-            "exec_end": "2025-11-09T14:59:08.962740",
-            "exec_duration_monotonic": 0.43949007987976074,
-            "avg_memory": 0.37890625,
-            "peak_memory": 0.37890625
-          },
-          "task_result": {
-            "warnings": [],
-            "real_time_tamarin_measure": 0.31,
-            "lemma_result": "verified",
-            "steps": 8,
-            "analysis_type": "all-traces"
-          }
-        },
-        "--A_PKI_Ext_CAfalseAsserts_rootBlamed_verif_nonempty--default": {
-          "task_config": {
-            "tamarin_alias": "default",
-            "lemma": "A_PKI_Ext_CAfalseAsserts_rootBlamed_verif_nonempty",
-            "output_theory_file": "results/pki/proofs/--A_PKI_Ext_CAfalseAsserts_rootBlamed_verif_nonempty--default.spthy",
-            "output_trace_file": "results/pki/traces/--A_PKI_Ext_CAfalseAsserts_rootBlamed_verif_nonempty--default.json",
-            "options": [
-              "--derivcheck-timeout=0"
-            ],
-            "resources": {
-              "cores": 10,
-              "memory": 6,
-              "timeout": 300
-            }
-          },
-          "task_execution_metadata": {
-            "command": [],
-            "status": "completed",
-            "cache_hit": true,
-            "exec_start": "2025-11-09T14:59:09.034966",
-            "exec_end": "2025-11-09T14:59:09.475802",
-            "exec_duration_monotonic": 0.44083547592163086,
-            "avg_memory": 0.37890625,
-            "peak_memory": 0.37890625
-          },
-          "task_result": {
-            "warnings": [],
-            "real_time_tamarin_measure": 0.32,
-            "lemma_result": "verified",
-            "steps": 6,
-            "analysis_type": "all-traces"
-          }
-        },
-        "--A_PKI_Ext_CAfalseAsserts_rootBlamed_uniq--default": {
-          "task_config": {
-            "tamarin_alias": "default",
-            "lemma": "A_PKI_Ext_CAfalseAsserts_rootBlamed_uniq",
-            "output_theory_file": "results/pki/proofs/--A_PKI_Ext_CAfalseAsserts_rootBlamed_uniq--default.spthy",
-            "output_trace_file": "results/pki/traces/--A_PKI_Ext_CAfalseAsserts_rootBlamed_uniq--default.json",
-            "options": [
-              "--derivcheck-timeout=0"
-            ],
-            "resources": {
-              "cores": 10,
-              "memory": 6,
-              "timeout": 300
-            }
-          },
-          "task_execution_metadata": {
-            "command": [],
-            "status": "completed",
-            "cache_hit": true,
-            "exec_start": "2025-11-09T14:59:10.564378",
-            "exec_end": "2025-11-09T14:59:10.993755",
-            "exec_duration_monotonic": 0.42937731742858887,
-            "avg_memory": 0.37890625,
-            "peak_memory": 0.37890625
-          },
-          "task_result": {
-            "warnings": [],
-            "real_time_tamarin_measure": 0.3,
-            "lemma_result": "verified",
-            "steps": 8,
-            "analysis_type": "all-traces"
-          }
-        },
-        "--A_PKI_Ext_CAfalseAsserts_rootNotBlamed_single--default": {
-          "task_config": {
-            "tamarin_alias": "default",
-            "lemma": "A_PKI_Ext_CAfalseAsserts_rootNotBlamed_single",
-            "output_theory_file": "results/pki/proofs/--A_PKI_Ext_CAfalseAsserts_rootNotBlamed_single--default.spthy",
-            "output_trace_file": "results/pki/traces/--A_PKI_Ext_CAfalseAsserts_rootNotBlamed_single--default.json",
-            "options": [
-              "--derivcheck-timeout=0"
-            ],
-            "resources": {
-              "cores": 10,
-              "memory": 6,
-              "timeout": 300
-            }
-          },
-          "task_execution_metadata": {
-            "command": [],
-            "status": "completed",
-            "cache_hit": true,
-            "exec_start": "2025-11-09T14:59:12.214907",
-            "exec_end": "2025-11-09T14:59:13.094353",
-            "exec_duration_monotonic": 0.8794457912445068,
-            "avg_memory": 0.37890625,
-            "peak_memory": 0.37890625
-          },
-          "task_result": {
-            "warnings": [],
-            "real_time_tamarin_measure": 0.75,
-            "lemma_result": "verified",
-            "steps": 10,
-            "analysis_type": "exists-trace"
-          }
-        },
-        "--A_PKI_Ext_CAfalseAsserts_rootBlamed_suff--default": {
-          "task_config": {
-            "tamarin_alias": "default",
-            "lemma": "A_PKI_Ext_CAfalseAsserts_rootBlamed_suff",
-            "output_theory_file": "results/pki/proofs/--A_PKI_Ext_CAfalseAsserts_rootBlamed_suff--default.spthy",
-            "output_trace_file": "results/pki/traces/--A_PKI_Ext_CAfalseAsserts_rootBlamed_suff--default.json",
-            "options": [
-              "--derivcheck-timeout=0"
-            ],
-            "resources": {
-              "cores": 10,
-              "memory": 6,
-              "timeout": 300
-            }
-          },
-          "task_execution_metadata": {
-            "command": [],
-            "status": "completed",
-            "cache_hit": true,
-            "exec_start": "2025-11-09T14:59:14.876986",
-            "exec_end": "2025-11-09T14:59:15.747614",
-            "exec_duration_monotonic": 0.8706285953521729,
-            "avg_memory": 0.37890625,
-            "peak_memory": 0.37890625
-          },
-          "task_result": {
-            "warnings": [],
-            "real_time_tamarin_measure": 0.76,
-            "lemma_result": "verified",
-            "steps": 8,
+            "steps": 12,
             "analysis_type": "exists-trace"
           }
         },
@@ -731,27 +764,27 @@
             "output_theory_file": "results/pki/proofs/--A_PKI_Ext_CAfalseAsserts_rootBlamed_inj--default.spthy",
             "output_trace_file": "results/pki/traces/--A_PKI_Ext_CAfalseAsserts_rootBlamed_inj--default.json",
             "options": [
-              "--derivcheck-timeout=0"
+              "--derivcheck-timeout=99999"
             ],
             "resources": {
-              "cores": 10,
-              "memory": 6,
-              "timeout": 300
+              "cores": 16,
+              "memory": 8,
+              "timeout": 200
             }
           },
           "task_execution_metadata": {
             "command": [],
             "status": "completed",
-            "cache_hit": true,
-            "exec_start": "2025-11-09T14:59:16.117515",
-            "exec_end": "2025-11-09T14:59:16.308772",
-            "exec_duration_monotonic": 0.19125652313232422,
-            "avg_memory": 0.37890625,
-            "peak_memory": 0.37890625
+            "cache_hit": false,
+            "exec_start": "2026-04-11T19:33:28.023277",
+            "exec_end": "2026-04-11T19:33:29.223037",
+            "exec_duration_monotonic": 1.1997594833374023,
+            "avg_memory": 63.8515625,
+            "peak_memory": 127.6953125
           },
           "task_result": {
             "warnings": [],
-            "real_time_tamarin_measure": 0.07,
+            "real_time_tamarin_measure": 1.04,
             "lemma_result": "verified",
             "steps": 1,
             "analysis_type": "all-traces"
@@ -764,29 +797,29 @@
             "output_theory_file": "results/pki/proofs/--A_PKI_Ext_CAfalseAsserts_rootBlamed_single--default.spthy",
             "output_trace_file": "results/pki/traces/--A_PKI_Ext_CAfalseAsserts_rootBlamed_single--default.json",
             "options": [
-              "--derivcheck-timeout=0"
+              "--derivcheck-timeout=99999"
             ],
             "resources": {
-              "cores": 10,
-              "memory": 6,
-              "timeout": 300
+              "cores": 16,
+              "memory": 8,
+              "timeout": 200
             }
           },
           "task_execution_metadata": {
             "command": [],
             "status": "completed",
-            "cache_hit": true,
-            "exec_start": "2025-11-09T14:59:16.862914",
-            "exec_end": "2025-11-09T14:59:17.727096",
-            "exec_duration_monotonic": 0.8641819953918457,
-            "avg_memory": 0.37890625,
-            "peak_memory": 0.37890625
+            "cache_hit": false,
+            "exec_start": "2026-04-11T19:33:29.245448",
+            "exec_end": "2026-04-11T19:33:31.294643",
+            "exec_duration_monotonic": 2.0491950511932373,
+            "avg_memory": 64.3515625,
+            "peak_memory": 128.6953125
           },
           "task_result": {
             "warnings": [],
-            "real_time_tamarin_measure": 0.75,
+            "real_time_tamarin_measure": 1.87,
             "lemma_result": "verified",
-            "steps": 8,
+            "steps": 11,
             "analysis_type": "exists-trace"
           }
         },
@@ -797,30 +830,96 @@
             "output_theory_file": "results/pki/proofs/--A_PKI_Ext_CAfalseAsserts_rootNotBlamed_min--default.spthy",
             "output_trace_file": "results/pki/traces/--A_PKI_Ext_CAfalseAsserts_rootNotBlamed_min--default.json",
             "options": [
-              "--derivcheck-timeout=0"
+              "--derivcheck-timeout=99999"
             ],
             "resources": {
-              "cores": 10,
-              "memory": 6,
-              "timeout": 300
+              "cores": 16,
+              "memory": 8,
+              "timeout": 200
             }
           },
           "task_execution_metadata": {
             "command": [],
             "status": "completed",
-            "cache_hit": true,
-            "exec_start": "2025-11-09T14:59:17.789431",
-            "exec_end": "2025-11-09T14:59:18.246163",
-            "exec_duration_monotonic": 0.45673179626464844,
-            "avg_memory": 0.37890625,
-            "peak_memory": 0.37890625
+            "cache_hit": false,
+            "exec_start": "2026-04-11T19:33:31.372996",
+            "exec_end": "2026-04-11T19:33:32.777883",
+            "exec_duration_monotonic": 1.4048871994018555,
+            "avg_memory": 66.283203125,
+            "peak_memory": 132.55859375
           },
           "task_result": {
             "warnings": [],
-            "real_time_tamarin_measure": 0.34,
+            "real_time_tamarin_measure": 1.22,
             "lemma_result": "verified",
             "steps": 4,
             "analysis_type": "all-traces"
+          }
+        },
+        "--A_PKI_Ext_CAfalseAsserts_rootBlamed_verif_nonempty--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_PKI_Ext_CAfalseAsserts_rootBlamed_verif_nonempty",
+            "output_theory_file": "results/pki/proofs/--A_PKI_Ext_CAfalseAsserts_rootBlamed_verif_nonempty--default.spthy",
+            "output_trace_file": "results/pki/traces/--A_PKI_Ext_CAfalseAsserts_rootBlamed_verif_nonempty--default.json",
+            "options": [
+              "--derivcheck-timeout=99999"
+            ],
+            "resources": {
+              "cores": 16,
+              "memory": 8,
+              "timeout": 200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2026-04-11T19:33:32.798629",
+            "exec_end": "2026-04-11T19:33:34.313953",
+            "exec_duration_monotonic": 1.5153241157531738,
+            "avg_memory": 65.333984375,
+            "peak_memory": 130.66015625
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 1.34,
+            "lemma_result": "verified",
+            "steps": 7,
+            "analysis_type": "all-traces"
+          }
+        },
+        "--A_PKI_Ext_CAfalseAsserts_rootBlamed_suff--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "A_PKI_Ext_CAfalseAsserts_rootBlamed_suff",
+            "output_theory_file": "results/pki/proofs/--A_PKI_Ext_CAfalseAsserts_rootBlamed_suff--default.spthy",
+            "output_trace_file": "results/pki/traces/--A_PKI_Ext_CAfalseAsserts_rootBlamed_suff--default.json",
+            "options": [
+              "--derivcheck-timeout=99999"
+            ],
+            "resources": {
+              "cores": 16,
+              "memory": 8,
+              "timeout": 200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2026-04-11T19:33:34.422119",
+            "exec_end": "2026-04-11T19:33:36.456582",
+            "exec_duration_monotonic": 2.0344631671905518,
+            "avg_memory": 61.931640625,
+            "peak_memory": 123.85546875
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 1.85,
+            "lemma_result": "verified",
+            "steps": 11,
+            "analysis_type": "exists-trace"
           }
         }
       }

@@ -1,11 +1,11 @@
 {
   "task_id": "--CA_auth_w_compromise--default",
   "warnings": [],
-  "tamarin_timing": 0.61,
+  "tamarin_timing": 1.78,
   "wrapper_measures": {
-    "time": 0.7171158790588379,
-    "avg_memory": 0.37890625,
-    "peak_memory": 0.37890625
+    "time": 1.9412109851837158,
+    "avg_memory": 65.478515625,
+    "peak_memory": 130.94921875
   },
   "output_spthy": "results/pki/proofs/--CA_auth_w_compromise--default.spthy",
   "verified_lemma": {
@@ -16,14 +16,17 @@
   },
   "falsified_lemma": {},
   "unterminated_lemma": [
-    "san_PKI_Root_CA_Init",
-    "san_PKI_NonRoot_CA_Init",
-    "san_PKI_Certify",
-    "san_PKI_ClientValidate",
-    "san_PKI_RequestLegitimacyProof_Success",
-    "san_PKI_RequestLegitimacyProof_Illegal",
-    "san_PKIExt_external_check_true",
-    "san_PKIExt_external_check_false",
+    "san_Root_CA_Init",
+    "san_Intermediate_CA_Init",
+    "san_Domain_Owner_Init",
+    "san_PubKeyCertify",
+    "san_ClientValidate",
+    "san_ConsultDocumentation_Success",
+    "san_ConsultDocumentation_Fails",
+    "san_external_check_true",
+    "san_external_check_false",
+    "san_compromiseCA",
+    "san_compromiseRootCA",
     "authenticity",
     "cert_auth",
     "A_PKI_Ext_CAfalseAsserts_rootBlamed_suff",
