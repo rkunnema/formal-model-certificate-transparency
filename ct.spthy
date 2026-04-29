@@ -275,7 +275,7 @@ rule monitorFindsRogueCertificate [color= #f3d664]:
         Eq(verify(ca_sig, ca_fields, pkRootCA), true()),
         MonitorObservesEntry($M, $L, fields, <ca_fields, ca_sig>, sth, session), /* see restriction */
         RogueCert($CA, fields), /* see restriction */
-        Asserts($M, 'Blame this CA.', $CA, <fields, ca_fields>),
+        Asserts($M, 'This CA is rogue.', $CA, <fields, ca_fields>),
 
         Time($now),
         San_monitorFindsRogueCertificate()
@@ -294,7 +294,7 @@ rule monitorCanFindCertificate [color= #f3d664]:
         Eq(verify(ca_sig, ca_fields, pkRootCA), true()),
         MonitorObservesEntry($M, $L, fields, <ca_fields, ca_sig>, sth, session), /* see restriction */
         BenignCert($iss, fields), /* cert is found benign, see restriction */
-        AssertsNot($M, 'Blame this CA.', $CA, <fields, ca_fields>),
+        AssertsNot($M, 'This CA is rogue.', $CA, <fields, ca_fields>),
 
         Time($now),
         San_monitorCanFindCertificate()
@@ -310,7 +310,7 @@ rule monitorCannotFindCertificate [color= #f3d664]:
     [ !LoggerDict($M, $L), !TrackSubject($M, su), In(fields), In(cert_sig), In(ca_fields), In(ca_sig), !TLS_L_to_M($L, $M, $snapshot, sth, session, $time), !Root_CA($rootCA, pkRootCA) ]
     --[ 
         NothingObserved($M, $L, fields, sth, session), /* see restriction */
-        AssertsNot($M, 'Blame this CA.', $CA, <fields, ca_fields>),
+        AssertsNot($M, 'This CA is rogue.', $CA, <fields, ca_fields>),
 
         Time($now),
         San_monitorCannotFindCertificate()
@@ -1532,7 +1532,7 @@ lemma T_CT_1:
 test ca_auth_on_log:
     "Ex M rootCA fields ca_fields #t0 #t1 #t2.
         CTCheck(M, fields, CA, ca_fields)@t0
-        & Asserts(M, 'Blame this CA.', CA, <fields, ca_fields>)@t1
+        & Asserts(M, 'This CA is rogue.', CA, <fields, ca_fields>)@t1
             /* fields contradicts known ground truth of monitor */
         & Asserts(rootCA, 'I signed this intermediate CA.', CA, <ca_fields>)@t2
     "
@@ -1540,7 +1540,7 @@ test ca_auth_on_log:
 test root_ca_auth_on_log:
 "Ex M CA fields ca_fields #t0 #t1 #t2.
     CTCheck(M, fields, CA, ca_fields)@t0
-    & Asserts(M, 'Blame this CA.', CA,
+    & Asserts(M, 'This CA is rogue.', CA,
          <fields, ca_fields>)@t1
     & Asserts('CCADB', 'No root CA signed this CA.', CA, <ca_fields, rootCA>)@t2
 "
@@ -1557,7 +1557,7 @@ lemma A_CT_1:
 test ca_rogue_honest_log: // CA free
     "Ex M rootCA fields ca_fields #t0 #t1 #t2.
         CTCheck(M, fields, CA, ca_fields)@t0
-        & Asserts(M, 'Blame this CA.', CA, <fields, ca_fields>)@t1
+        & Asserts(M, 'This CA is rogue.', CA, <fields, ca_fields>)@t1
             /* fields contradicts known ground truth of monitor */
         & Asserts(rootCA, 'I signed this intermediate CA.', CA, <ca_fields>)@t2
         & not (Ex L #t. CompromiseLogger(L)@t)
@@ -1567,7 +1567,7 @@ test ca_rogue_honest_log: // CA free
 test root_ca_rogue_honest_log: // rootCA free
     "Ex M CA fields ca_fields #t0 #t1 #t2.
         CTCheck(M, fields, CA, ca_fields)@t0
-        & Asserts(M, 'Blame this CA.', CA, <fields, ca_fields>)@t1
+        & Asserts(M, 'This CA is rogue.', CA, <fields, ca_fields>)@t1
             /* fields contradicts known ground truth of monitor */
         & Asserts('CCADB', 'No root CA signed this CA.', CA, <ca_fields, rootCA>)@t2
         & not (Ex L #t. CompromiseLogger(L)@t)
@@ -1588,7 +1588,7 @@ lemma A_CT_2:
 
 lemma A_uniq1_helper [reuse]:
     "All CA M rootCA fields ca_fields #t1 #t2.
-        Asserts( M, 'Blame this CA.', CA, <fields, ca_fields>)@t1 
+        Asserts( M, 'This CA is rogue.', CA, <fields, ca_fields>)@t1 
         & Asserts( rootCA, 'I signed this intermediate CA.', CA, ca_fields)@t2
         ==>
         (Ex #i. Corrupted( CA ) @ #i)

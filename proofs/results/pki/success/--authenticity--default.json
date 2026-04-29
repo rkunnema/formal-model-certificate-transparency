@@ -1,20 +1,20 @@
 {
   "task_id": "--authenticity--default",
   "warnings": [],
-  "tamarin_timing": 1.8,
+  "tamarin_timing": 2.66,
   "wrapper_measures": {
-    "time": 1.9521143436431885,
-    "avg_memory": 62.94921875,
-    "peak_memory": 125.890625
+    "time": 2.860759973526001,
+    "avg_memory": 85.83203125,
+    "peak_memory": 131.8671875
   },
   "output_spthy": "results/pki/proofs/--authenticity--default.spthy",
-  "verified_lemma": {},
-  "falsified_lemma": {
+  "verified_lemma": {
     "authenticity": {
-      "steps": 0,
-      "analysis_type": "all-traces"
+      "steps": 8,
+      "analysis_type": "exists-trace"
     }
   },
+  "falsified_lemma": {},
   "unterminated_lemma": [
     "san_Root_CA_Init",
     "san_Intermediate_CA_Init",

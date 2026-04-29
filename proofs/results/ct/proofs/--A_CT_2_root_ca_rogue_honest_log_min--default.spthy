@@ -5084,9 +5084,15 @@ by sorry
 /*
 Generated from:
 Tamarin version 1.10.0
+<<<<<<< HEAD
+Maude version 2.7.1
+Git revision: UNKNOWN, branch: UNKNOWN
+Compiled at: 2024-10-30 14:56:23.355649243 UTC
+=======
 Maude version 3.4
 Git revision: UNKNOWN, branch: UNKNOWN
 Compiled at: 2025-11-06 13:03:12.032661 UTC
+>>>>>>> eecd20276527e4b69d3a558d6b9418dbd93dd7d8
 */
 
 end

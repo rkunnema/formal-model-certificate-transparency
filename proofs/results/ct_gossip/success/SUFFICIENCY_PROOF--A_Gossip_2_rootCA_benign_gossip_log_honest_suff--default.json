@@ -1,11 +1,11 @@
 {
   "task_id": "SUFFICIENCY_PROOF--A_Gossip_2_rootCA_benign_gossip_log_honest_suff--default",
   "warnings": [],
-  "tamarin_timing": 78.24,
+  "tamarin_timing": 78.25,
   "wrapper_measures": {
-    "time": 78.4547712802887,
-    "avg_memory": 418.88221153846143,
-    "peak_memory": 591.1953125
+    "time": 78.4625654220581,
+    "avg_memory": 390.6408253205128,
+    "peak_memory": 542.375
   },
   "output_spthy": "results/ct_gossip/proofs/SUFFICIENCY_PROOF--A_Gossip_2_rootCA_benign_gossip_log_honest_suff--default.spthy",
   "verified_lemma": {

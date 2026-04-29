@@ -1,11 +1,11 @@
 {
   "task_id": "--san_compromiseLogger--default",
   "warnings": [],
-  "tamarin_timing": 35.35,
+  "tamarin_timing": 58.42,
   "wrapper_measures": {
-    "time": 35.61740469932556,
-    "avg_memory": 178.21126302083334,
-    "peak_memory": 385.50390625
+    "time": 58.73140263557434,
+    "avg_memory": 526.9677568855932,
+    "peak_memory": 1086.30859375
   },
   "output_spthy": "results/ct_receipt/proofs/--san_compromiseLogger--default.spthy",
   "verified_lemma": {
@@ -54,15 +54,6 @@
     "san_ParticipantVerifiesInclusion",
     "san_ConsultDocumentation_Success",
     "san_ConsultDocumentation_Fails",
-    "san_MonitorCheck_Found",
-    "san_MonitorCheck_NotFound",
-    "san_InclusionCheck_Found",
-    "san_InclusionCheck_NotFound",
-    "san_InclusionCheck_Found_wo_MMD",
-    "san_InclusionCheck_NotFound_wo_MMD",
-    "san_SCTAuditTransparencyCheck_Found",
-    "san_SCTAuditTransparencyCheck_NotFound",
-    "san_SCTAuditCheck",
     "san_compromiseCA",
     "san_compromiseRootCA",
     "san_compromiseMonitor",
@@ -73,8 +64,8 @@
     "san_domainOwnerVerifiesReceipt_1",
     "san_domainOwnerVerifiesReceipt_2",
     "san_SCTReceiptCheck",
-    "A_Ext_uniq_helper_intm_CA",
-    "A_Ext_uniq_helper_root",
+    "A_uniq1_helper",
+    "A_uniq2_helper",
     "A_Receipt_inj3_helper",
     "A_Receipt_inj4_helper",
     "A_Receipt_receipt_1_suff",

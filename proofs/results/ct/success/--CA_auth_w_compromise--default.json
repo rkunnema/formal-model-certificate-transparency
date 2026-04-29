@@ -1,11 +1,19 @@
 {
   "task_id": "--CA_auth_w_compromise--default",
   "warnings": [],
+<<<<<<< HEAD
+  "tamarin_timing": 22.87,
+  "wrapper_measures": {
+    "time": 23.080934286117554,
+    "avg_memory": 196.88485054347825,
+    "peak_memory": 453.2109375
+=======
   "tamarin_timing": 12.75,
   "wrapper_measures": {
     "time": 12.906985998153687,
     "avg_memory": 203.90144230769232,
     "peak_memory": 454.28125
+>>>>>>> eecd20276527e4b69d3a558d6b9418dbd93dd7d8
   },
   "output_spthy": "results/ct/proofs/--CA_auth_w_compromise--default.spthy",
   "verified_lemma": {

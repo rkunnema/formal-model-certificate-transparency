@@ -3591,7 +3591,138 @@ guarded formula characterizing all satisfying traces:
  ∧
   ∀ #t.1. (Compromise( ) @ #t.1) ⇒ ⊥"
 */
+<<<<<<< HEAD
 by sorry
+=======
+<<<<<<<< HEAD:ct/proofs/results/ct/proofs/--san_TransparencyCheck_wo_MMD_failed--default.spthy
+simplify
+solve( !BAccept_SCT( $L, fields,
+                     <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, $sct
+       ) ▶₀ #t )
+  case ClientValidate_case_1
+  solve( InclusionFalsified( $P, $L,
+                             <$CA, $id, pkID, 'pubKey', sn, $i, $j>, $proof, session,
+                             <$rootCA, $CA, pk(x), 'pubKey-CA', snCA, $i0, $j0>
+         ) ▶₁ #t )
+    case ParticipantFindsInclusionViolation
+    solve( LoggerPresentsView( $L, $P, log_id.1, time, ~sth, ~session
+           ) @ #t0 )
+      case LoggerSnapshot_P
+      solve( StartedLog( $L, $log_id ) @ #t0.1 )
+        case Start_Log
+        solve( !Logger_s( $L, ~skL.2, pk(~skL.2) ) ▶₀ #t0.1 )
+          case Logger_Init
+          solve( !KU( sign(<$rootCA, $CA, pk(x), 'pubKey-CA', snCA, $i0, $j0>,
+                           ~skCA)
+                 ) @ #vk.16 )
+            case Intermediate_CA_Init
+            solve( !KU( sign(<$L, 'SCT', $sct, $CA, $id, pkID, sn, $i, $j>, ~skL)
+                   ) @ #vk.43 )
+              case add_preC_to_log
+              solve( ($now = $sct)  ∥ (¬(#vr.8 < #t0)) )
+                case case_1
+                solve( (¬(#t0 < #vr.8))  ∥
+                       (∀ tp #t2.
+                         (Time( tp ) @ #t2) ⇒ ((¬(#t0 < #t2)) ∨ (¬(#t2 < #vr.8)) ∨ (tp = $now))) )
+                  case case_1
+                  solve( (¬(#vr.8 < #vr.1))  ∥ (¬(#vr.1 < #t0))  ∥ ($now.3 = $now) )
+                    case case_1
+                    solve( (¬(#vr.8 < #vr.3))  ∥ (¬(#vr.3 < #t0))  ∥ ($now.5 = $now) )
+                      case case_1
+                      solve( (¬(#vr.8 < #vr.5))  ∥ (¬(#vr.5 < #t0))  ∥ ($now.7 = $now) )
+                        case case_1
+                        solve( (¬(#vr.8 < #vr.7))  ∥ (¬(#vr.7 < #t0))  ∥ ($i0 = $now) )
+                          case case_1
+                          solve( (¬(#vr < #t0))  ∥ ($now.1 = $now) )
+                            case case_1
+                            solve( (¬(#vr.8 < #vr.6))  ∥ ($proof = $now) )
+                              case case_1
+                              solve( !KU( sign(<$L2, 'SCT', $sct2, $CA, $id, pkID, sn, $i, $j>, ~skL.1)
+                                     ) @ #vk.55 )
+                                case add_preC_to_log
+                                solve( (¬(#vr.8 < #vr.13))  ∥ (¬(#vr.13 < #t0))  ∥ ($sct2 = $now) )
+                                  case case_1
+                                  solve( (¬(#vr.8 < #vr.17))  ∥ (¬(#vr.17 < #t0))  ∥ ($now.9 = $now) )
+                                    case case_1
+                                    solve( (¬(#vr.8 < #vr.18))  ∥ (¬(#vr.18 < #t0))  ∥ ($now.10 = $now) )
+                                      case case_1
+                                      solve( (#vr.8 = #vr.13)  ∥ (#vr.13 < #vr.8) )
+                                        case case_2
+                                        solve( !KU( sign(<$CA, $id, pkID, 'pubKey', sn, $i, $j, 
+                                                          <$L, 'SCT', $now, 
+                                                           sign(<$L, 'SCT', $now, $CA, $id, pkID, sn, $i, $j>,
+                                                                ~skL)
+                                                          >, 
+                                                          $L2, 'SCT', $sct2, 
+                                                          sign(<$L2, 'SCT', $sct2, $CA, $id, pkID, sn, $i, $j
+                                                               >,
+                                                               ~skL.1)
+                                                         >,
+                                                         ~skCA)
+                                               ) @ #vk.60 )
+                                          case PubKeyCertify
+                                          solve( (¬(#vr.19 < #t0))  ∥ ($now.11 = $now) )
+                                            case case_1
+                                            solve( !KU( sign(<$CA, $id, pk(~sk), 'pre-cert', ~sn, $i, $j>, x)
+                                                   ) @ #vk.64 )
+                                              case PreCertify
+                                              solve( !KU( sign(<$rootCA.1, $CA, pk(~skCA), 'pubKey-CA', snCA, 
+                                                                $i0.1, $j0.1>,
+                                                               ~skCA.2)
+                                                     ) @ #vk.71 )
+                                                case Intermediate_CA_Init
+                                                solve( !KU( sign(<$CA, $id, pk(~sk), 'pre-cert', ~sn, $i, $j>,
+                                                                 x)
+                                                       ) @ #vk.61 )
+                                                  case PreCertify
+                                                  solve( !KU( sign(<$rootCA.1, $CA, pk(~skCA), 'pubKey-CA', 
+                                                                    snCA, $i0.1, $j0.1>,
+                                                                   ~skCA.2)
+                                                         ) @ #vk.67 )
+                                                    case Intermediate_CA_Init
+                                                    solve( !KU( ~sn.1 ) @ #vk.31 )
+                                                      case Intermediate_CA_Init
+                                                      solve( !KU( ~sn ) @ #vk.43 )
+                                                        case PreCertify
+                                                        solve( !KU( pk(~skCA) ) @ #vk.31 )
+                                                          case Intermediate_CA_Init_case_1
+                                                          solve( !KU( pk(~sk) ) @ #vk.42 )
+                                                            case Domain_Owner_Init
+                                                            SOLVED // trace found
+                                                          qed
+                                                        qed
+                                                      qed
+                                                    qed
+                                                  qed
+                                                qed
+                                              qed
+                                            qed
+                                          qed
+                                        qed
+                                      qed
+                                    qed
+                                  qed
+                                qed
+                              qed
+                            qed
+                          qed
+                        qed
+                      qed
+                    qed
+                  qed
+                qed
+              qed
+            qed
+          qed
+        qed
+      qed
+    qed
+  qed
+qed
+========
+by sorry
+>>>>>>>> eecd20276527e4b69d3a558d6b9418dbd93dd7d8:ct/proofs/results/ct/proofs/SUFFICIENCY_PROOF--transparency_w_MMD--default.spthy
+>>>>>>> eecd20276527e4b69d3a558d6b9418dbd93dd7d8
 
 lemma san_compromiseCA:
   exists-trace "∃ #t. San_compromiseCA( ) @ #t"
@@ -3735,6 +3866,24 @@ guarded formula characterizing all counter-examples:
   (((L = L1) ∨ (L = L2))) ∧
   (#t1 < #t2) ∧
   (¬(CTTransparencyCheckSuccess( L, fields ) @ #t2))"
+<<<<<<< HEAD
+=======
+<<<<<<<< HEAD:ct/proofs/results/ct/proofs/--san_TransparencyCheck_wo_MMD_failed--default.spthy
+*/
+by sorry
+
+lemma transparency_w_MMD_honest_log_helper [reuse]:
+  all-traces
+  "∀ L fields #t1.
+    ((CTTransparencyCheck( L, fields ) @ #t1) ∧
+     (¬(∃ #t. CompromiseLogger( L ) @ #t))) ⇒
+    (CTTransparencyCheckSuccess( L, fields ) @ #t1)"
+/*
+guarded formula characterizing all counter-examples:
+"∃ L fields #t1.
+  (CTTransparencyCheck( L, fields ) @ #t1)
+========
+>>>>>>> eecd20276527e4b69d3a558d6b9418dbd93dd7d8
 */
 simplify
 solve( (L = $L1)  ∥ (L = $L2) )
@@ -3910,10 +4059,43 @@ guarded formula characterizing all counter-examples:
 "∃ CA fields rootCA ca_fields L1 L2 L #t1 #t2.
   (BrowserAcceptsChain( CA, fields, rootCA, ca_fields, L1, L2 ) @ #t1) ∧
   (CTTransparencyCheck( L, fields ) @ #t2)
+<<<<<<< HEAD
+=======
+>>>>>>>> eecd20276527e4b69d3a558d6b9418dbd93dd7d8:ct/proofs/results/ct/proofs/SUFFICIENCY_PROOF--transparency_w_MMD--default.spthy
+>>>>>>> eecd20276527e4b69d3a558d6b9418dbd93dd7d8
  ∧
   (((L = L1) ∨ (L = L2))) ∧
   (#t1 < #t2) ∧
   (∀ #t. (CompromiseLogger( L ) @ #t) ⇒ ⊥) ∧
+<<<<<<< HEAD
+=======
+<<<<<<<< HEAD:ct/proofs/results/ct/proofs/--san_TransparencyCheck_wo_MMD_failed--default.spthy
+  (¬(CTTransparencyCheckSuccess( L, fields ) @ #t1))"
+*/
+by sorry
+
+lemma transparency_w_MMD_honest_log:
+  all-traces
+  "∀ CA fields rootCA ca_fields L1 L2 L #t1 #t2.
+    (((((BrowserAcceptsChain( CA, fields, rootCA, ca_fields, L1, L2
+         ) @ #t1) ∧
+        ((L = L1) ∨ (L = L2))) ∧
+       (CTTransparencyCheck( L, fields ) @ #t2)) ∧
+      (#t1 < #t2)) ∧
+     (¬(∃ #t. CompromiseLogger( L ) @ #t))) ⇒
+    (CTTransparencyCheckSuccess( L, fields ) @ #t2)"
+/*
+guarded formula characterizing all counter-examples:
+"∃ CA fields rootCA ca_fields L1 L2 L #t1 #t2.
+  (BrowserAcceptsChain( CA, fields, rootCA, ca_fields, L1, L2 ) @ #t1) ∧
+  (CTTransparencyCheck( L, fields ) @ #t2)
+ ∧
+  (((L = L1) ∨ (L = L2))) ∧
+  (#t1 < #t2) ∧
+  (∀ #t. (CompromiseLogger( L ) @ #t) ⇒ ⊥) ∧
+========
+>>>>>>>> eecd20276527e4b69d3a558d6b9418dbd93dd7d8:ct/proofs/results/ct/proofs/SUFFICIENCY_PROOF--transparency_w_MMD--default.spthy
+>>>>>>> eecd20276527e4b69d3a558d6b9418dbd93dd7d8
   (¬(CTTransparencyCheckSuccess( L, fields ) @ #t2))"
 */
 by sorry
@@ -5274,9 +5456,15 @@ Restriction actions
 /*
 Generated from:
 Tamarin version 1.10.0
+<<<<<<< HEAD
+Maude version 2.7.1
+Git revision: UNKNOWN, branch: UNKNOWN
+Compiled at: 2024-10-30 14:56:23.355649243 UTC
+=======
 Maude version 3.4
 Git revision: UNKNOWN, branch: UNKNOWN
 Compiled at: 2025-11-06 13:03:12.032661 UTC
+>>>>>>> eecd20276527e4b69d3a558d6b9418dbd93dd7d8
 */
 
 end

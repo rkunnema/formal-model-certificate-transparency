@@ -1,11 +1,19 @@
 {
   "task_id": "--cert_sct_auth--default",
   "warnings": [],
+<<<<<<< HEAD
+  "tamarin_timing": 17.04,
+  "wrapper_measures": {
+    "time": 17.253153324127197,
+    "avg_memory": 150.5972222222222,
+    "peak_memory": 264.1953125
+=======
   "tamarin_timing": 10.1,
   "wrapper_measures": {
     "time": 10.257058143615723,
     "avg_memory": 166.72585227272728,
     "peak_memory": 280.671875
+>>>>>>> eecd20276527e4b69d3a558d6b9418dbd93dd7d8
   },
   "output_spthy": "results/ct/proofs/--cert_sct_auth--default.spthy",
   "verified_lemma": {

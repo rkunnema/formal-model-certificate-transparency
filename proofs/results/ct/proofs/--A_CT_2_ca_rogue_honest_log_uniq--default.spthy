@@ -4362,7 +4362,12 @@ guarded formula characterizing all counter-examples:
  ∧
   ∀ #i. (Corrupted( rootCA ) @ #i) ⇒ ⊥"
 */
+<<<<<<< HEAD
 by sorry
+=======
+simplify
+by contradiction /* from formulas */
+>>>>>>> eecd20276527e4b69d3a558d6b9418dbd93dd7d8
 
 lemma A_CT_1_ca_auth_on_log_inj:
   all-traces "⊤"
@@ -4876,8 +4881,12 @@ guarded formula characterizing all counter-examples:
   (∀ #t. (CompromiseMonitor( M ) @ #t) ⇒ ⊥) ∧
   (∀ #i. (Corrupted( CA ) @ #i) ⇒ ⊥)"
 */
+<<<<<<< HEAD
+by sorry
+=======
 simplify
 by contradiction /* from formulas */
+>>>>>>> eecd20276527e4b69d3a558d6b9418dbd93dd7d8
 
 lemma A_CT_2_root_ca_rogue_honest_log_uniq:
   all-traces
@@ -4901,7 +4910,12 @@ guarded formula characterizing all counter-examples:
   (∀ #t. (CompromiseMonitor( M ) @ #t) ⇒ ⊥) ∧
   (∀ #i. (Corrupted( rootCA ) @ #i) ⇒ ⊥)"
 */
+<<<<<<< HEAD
+simplify
+by contradiction /* from formulas */
+=======
 by sorry
+>>>>>>> eecd20276527e4b69d3a558d6b9418dbd93dd7d8
 
 lemma A_CT_2_ca_rogue_honest_log_inj:
   all-traces "⊤"

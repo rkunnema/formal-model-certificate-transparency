@@ -275,7 +275,7 @@ rule monitorFindsRogueCertificate [color= #f3d664]:
         Eq(verify(ca_sig, ca_fields, pkRootCA), true()),
         MonitorObservesEntry($M, $L, fields, <ca_fields, ca_sig>, sth, session), /* see restriction */
         RogueCert($CA, fields), /* see restriction */
-        Asserts($M, 'Blame this CA.', $CA, <fields, ca_fields>),
+        Asserts($M, '.', $CA, <fields, ca_fields>),
 
         Time($now),
         San_monitorFindsRogueCertificate()
@@ -294,7 +294,7 @@ rule monitorCanFindCertificate [color= #f3d664]:
         Eq(verify(ca_sig, ca_fields, pkRootCA), true()),
         MonitorObservesEntry($M, $L, fields, <ca_fields, ca_sig>, sth, session), /* see restriction */
         BenignCert($iss, fields), /* cert is found benign, see restriction */
-        AssertsNot($M, 'Blame this CA.', $CA, <fields, ca_fields>),
+        AssertsNot($M, '.', $CA, <fields, ca_fields>),
 
         Time($now),
         San_monitorCanFindCertificate()
@@ -310,7 +310,7 @@ rule monitorCannotFindCertificate [color= #f3d664]:
     [ !LoggerDict($M, $L), !TrackSubject($M, su), In(fields), In(cert_sig), In(ca_fields), In(ca_sig), !TLS_L_to_M($L, $M, $snapshot, sth, session, $time), !Root_CA($rootCA, pkRootCA) ]
     --[ 
         NothingObserved($M, $L, fields, sth, session), /* see restriction */
-        AssertsNot($M, 'Blame this CA.', $CA, <fields, ca_fields>),
+        AssertsNot($M, '.', $CA, <fields, ca_fields>),
 
         Time($now),
         San_monitorCannotFindCertificate()
@@ -989,7 +989,10 @@ rule SCTAuditTransparencyCheck_Success:
     let
         ca_fields = <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
     in
-    [ MAudit_SCT($M, $L, fields, ca_fields, $sct), InclusionVerified($P, $L, fields, $proof, session) ]
+    [ MAudit_SCT($M, $L, fields, ca_fields, $sct),
+      // some party checked for inclusion (typically a browser that accepted
+      // a certificate, but can be run by auditor itself)
+      InclusionVerified($P, $L, fields, $proof, session) ]
     --[
         SCTAuditTransparencyCheck($L, fields),
         SCTAuditTransparencyCheckSuccess($L, fields),

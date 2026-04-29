@@ -1,11 +1,11 @@
 {
   "task_id": "--san_compromiseCA--default",
   "warnings": [],
-  "tamarin_timing": 1.11,
+  "tamarin_timing": 1.38,
   "wrapper_measures": {
-    "time": 1.309589147567749,
-    "avg_memory": 57.603515625,
-    "peak_memory": 115.19921875
+    "time": 1.5825364589691162,
+    "avg_memory": 62.0859375,
+    "peak_memory": 124.1640625
   },
   "output_spthy": "results/pki/proofs/--san_compromiseCA--default.spthy",
   "verified_lemma": {

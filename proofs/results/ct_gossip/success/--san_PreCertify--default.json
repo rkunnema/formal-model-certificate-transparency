@@ -1,11 +1,11 @@
 {
   "task_id": "--san_PreCertify--default",
   "warnings": [],
-  "tamarin_timing": 19.14,
+  "tamarin_timing": 19.34,
   "wrapper_measures": {
-    "time": 19.35055184364319,
-    "avg_memory": 151.22773437499998,
-    "peak_memory": 287.6640625
+    "time": 19.578485012054443,
+    "avg_memory": 147.548828125,
+    "peak_memory": 279.6796875
   },
   "output_spthy": "results/ct_gossip/proofs/--san_PreCertify--default.spthy",
   "verified_lemma": {

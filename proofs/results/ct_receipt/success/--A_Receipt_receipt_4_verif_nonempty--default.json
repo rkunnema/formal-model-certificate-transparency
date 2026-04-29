@@ -1,16 +1,16 @@
 {
   "task_id": "--A_Receipt_receipt_4_verif_nonempty--default",
   "warnings": [],
-  "tamarin_timing": 35.23,
+  "tamarin_timing": 63.57,
   "wrapper_measures": {
-    "time": 35.48039102554321,
-    "avg_memory": 203.955078125,
-    "peak_memory": 484.19140625
+    "time": 63.89901542663574,
+    "avg_memory": 564.9937744140626,
+    "peak_memory": 1093.51171875
   },
   "output_spthy": "results/ct_receipt/proofs/--A_Receipt_receipt_4_verif_nonempty--default.spthy",
   "verified_lemma": {
     "A_Receipt_receipt_4_verif_nonempty": {
-      "steps": 39,
+      "steps": 40,
       "analysis_type": "all-traces"
     }
   },
@@ -54,15 +54,6 @@
     "san_ParticipantVerifiesInclusion",
     "san_ConsultDocumentation_Success",
     "san_ConsultDocumentation_Fails",
-    "san_MonitorCheck_Found",
-    "san_MonitorCheck_NotFound",
-    "san_InclusionCheck_Found",
-    "san_InclusionCheck_NotFound",
-    "san_InclusionCheck_Found_wo_MMD",
-    "san_InclusionCheck_NotFound_wo_MMD",
-    "san_SCTAuditTransparencyCheck_Found",
-    "san_SCTAuditTransparencyCheck_NotFound",
-    "san_SCTAuditCheck",
     "san_compromiseCA",
     "san_compromiseRootCA",
     "san_compromiseLogger",
@@ -74,8 +65,8 @@
     "san_domainOwnerVerifiesReceipt_1",
     "san_domainOwnerVerifiesReceipt_2",
     "san_SCTReceiptCheck",
-    "A_Ext_uniq_helper_intm_CA",
-    "A_Ext_uniq_helper_root",
+    "A_uniq1_helper",
+    "A_uniq2_helper",
     "A_Receipt_inj3_helper",
     "A_Receipt_inj4_helper",
     "A_Receipt_receipt_1_suff",

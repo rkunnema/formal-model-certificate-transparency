@@ -1,11 +1,19 @@
 {
   "task_id": "--authenticity_honest--default",
   "warnings": [],
+<<<<<<< HEAD
+  "tamarin_timing": 19.05,
+  "wrapper_measures": {
+    "time": 19.26605534553528,
+    "avg_memory": 147.02441406250003,
+    "peak_memory": 266.73046875
+=======
   "tamarin_timing": 11.02,
   "wrapper_measures": {
     "time": 11.179734945297241,
     "avg_memory": 177.45703125,
     "peak_memory": 301.109375
+>>>>>>> eecd20276527e4b69d3a558d6b9418dbd93dd7d8
   },
   "output_spthy": "results/ct/proofs/--authenticity_honest--default.spthy",
   "verified_lemma": {

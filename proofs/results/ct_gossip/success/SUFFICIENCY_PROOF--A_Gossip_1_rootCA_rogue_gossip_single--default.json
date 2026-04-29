@@ -1,11 +1,11 @@
 {
   "task_id": "SUFFICIENCY_PROOF--A_Gossip_1_rootCA_rogue_gossip_single--default",
   "warnings": [],
-  "tamarin_timing": 154.8,
+  "tamarin_timing": 155.09,
   "wrapper_measures": {
-    "time": 155.02675247192383,
-    "avg_memory": 880.1968344155844,
-    "peak_memory": 1157.91796875
+    "time": 155.3361382484436,
+    "avg_memory": 876.6597757711039,
+    "peak_memory": 1167.60546875
   },
   "output_spthy": "results/ct_gossip/proofs/SUFFICIENCY_PROOF--A_Gossip_1_rootCA_rogue_gossip_single--default.spthy",
   "verified_lemma": {

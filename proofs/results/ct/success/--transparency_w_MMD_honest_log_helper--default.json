@@ -1,11 +1,19 @@
 {
   "task_id": "--transparency_w_MMD_honest_log_helper--default",
   "warnings": [],
+<<<<<<< HEAD
+  "tamarin_timing": 19.62,
+  "wrapper_measures": {
+    "time": 19.796101331710815,
+    "avg_memory": 162.49882812500002,
+    "peak_memory": 266.48046875
+=======
   "tamarin_timing": 11.37,
   "wrapper_measures": {
     "time": 11.523931980133057,
     "avg_memory": 178.42578125,
     "peak_memory": 292.03125
+>>>>>>> eecd20276527e4b69d3a558d6b9418dbd93dd7d8
   },
   "output_spthy": "results/ct/proofs/--transparency_w_MMD_honest_log_helper--default.spthy",
   "verified_lemma": {

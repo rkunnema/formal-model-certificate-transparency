@@ -12,15 +12,15 @@
     }
   },
   "tasks": {
-    "acc_authenticity": {
+    "normal": {
       "theory_file": "pregen_models/ct_gossip_pregen.spthy",
       "tamarin_versions": [
         "default"
       ],
-      "output_file_prefix": "acc_authenticity",
+      "output_file_prefix": "normal",
       "lemmas": [
         {
-          "name": "A_Gossip_2_verif_empty",
+          "name": "san_ClientFindsAppendOnlyViolation",
           "tamarin_options": [
             "--derivcheck-timeout=99999"
           ],

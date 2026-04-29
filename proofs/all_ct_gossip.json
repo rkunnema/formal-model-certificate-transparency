@@ -77,7 +77,7 @@
             "resources": {
 				"max_cores": 16,
 				"max_memory": 14,
-				"timeout": 180
+				"timeout": 1200
 			},
       "lemmas": [
         {"name": "T_Gossip_verif_empty"},
@@ -129,8 +129,9 @@
         {"name": "A_Gossip_2_rootCA_rogue_gossip_log_honest_single"},
         {"name": "A_Gossip_2_rootCA_benign_gossip_log_honest_single"},
         {"name": "A_Gossip_1_verif_empty"},
-        {"name": "suff_san_GossipingCheck_Found"},
-        {"name": "suff_san_GossipingCheck_NotFound"}
+        {"name": "suff_san_GossipTransparencyCheck_Success"},
+        {"name": "suff_san_GossipTransparencyCheck_Failed"},
+        {"name": "suff_san_GossipingCheck_Found"}
       ]
     }
   }

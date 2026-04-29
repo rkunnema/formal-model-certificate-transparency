@@ -3151,7 +3151,132 @@ guarded formula characterizing all satisfying traces:
  ∧
   ∀ #t.1. (Compromise( ) @ #t.1) ⇒ ∃ L. (CompromiseLogger( L ) @ #t.1)"
 */
+<<<<<<< HEAD
 by sorry
+=======
+<<<<<<<< HEAD:ct/proofs/results/ct/proofs/--san_monitorFindsAppendOnlyViolation--default.spthy
+simplify
+solve( !LoggerDict( $M, $L ) ▶₀ #t )
+  case StartMonitoring
+  solve( !TLS_L_to_M( $L, $M, $snapshot, sth, session, $time ) ▶₁ #t )
+    case LoggerSnapshot_M
+    solve( LoggerComputesAddLog( $L, log_id1, fields, ca_cert, chain, t.2
+           ) @ #t0 )
+      case add_preC_to_log
+      solve( !Logger_s( $L, skL, pk(skL) ) ▶₄ #t0 )
+        case Logger_Init
+        solve( !Root_CA( $rootCA, pk(x.1) ) ▶₅ #t0 )
+          case Root_CA_Init
+          solve( !Log( $L, $log_id ) ▶₆ #t0 )
+            case Start_Log
+            solve( FetchLogSnapshot( $M, $L, session2 ) @ #t1 )
+              case ProofFetching_C
+              solve( !Logger( $L, pkL ) ▶₂ #t1 )
+                case Logger_Init
+                solve( LoggerPresentsView( $L, $M, $log_id, time.1, sth2, ~session.1
+                       ) @ #t2 )
+                  case LoggerSnapshot_C
+                  solve( !Logger_s( $L, skL.1, pk(skL.1) ) ▶₀ #t2 )
+                    case Logger_Init
+                    solve( TLS_C_to_L( $M, $L, ~session.1 ) ▶₂ #t2 )
+                      case ProofFetching_C
+                      solve( SnapshotStored( $M, $L, ~session.1, ~sth.1 ) @ #t3 )
+                        case ClientStoresSnapshot
+                        solve( !Logger( $L, pkL ) ▶₀ #t3 )
+                          case Logger_Init
+                          solve( !TLS_L_to_C( $L, $M, $snapshot.2, ~sth.1, ~session.1 ) ▶₁ #t3 )
+                            case LoggerSnapshot_C
+                            solve( FetchLogSnapshot( $M, $L, ~session ) @ #t4 )
+                              case ProofFetching_M
+                              solve( LoggerPresentsView( $L, $M, log_id2, time2, ~sth, ~session
+                                     ) @ #t5 )
+                                case LoggerSnapshot_M
+                                solve( LoggerComputesAddLog( $L, $log_id,
+                                                             <$CA, $id, pkID, 'pubKey', sn, $i, $j>,
+                                                             <
+                                                              <$rootCA, $CA, pk(x), 'pubKey-CA', snCA, $i0, 
+                                                               $j0>, 
+                                                              sign(<$rootCA, $CA, pk(x), 'pubKey-CA', snCA, 
+                                                                    $i0, $j0>,
+                                                                   ~skCA)
+                                                             >,
+                                                             <
+                                                              <<$CA, $id, pkID, 'pre-cert', sn, $i, $j>, 
+                                                               sign(<$CA, $id, pkID, 'pre-cert', sn, $i, $j>,
+                                                                    x)
+                                                              >, 
+                                                              <$rootCA, $CA, pk(x), 'pubKey-CA', snCA, $i0, 
+                                                               $j0>, 
+                                                              sign(<$rootCA, $CA, pk(x), 'pubKey-CA', snCA, 
+                                                                    $i0, $j0>,
+                                                                   ~skCA)
+                                                             >,
+                                                             different_time
+                                       ) @ #t.1 )
+                                  case add_preC_to_log
+                                  solve( !Logger_s( $L, skL.1, pk(skL.1) ) ▶₄ #t.1 )
+                                    case Logger_Init
+                                    solve( !Root_CA( $rootCA, pk(~skCA) ) ▶₅ #t.1 )
+                                      case Root_CA_Init
+                                      solve( !Log( $L, $log_id ) ▶₆ #t.1 )
+                                        case Start_Log
+                                        solve( StartedLog( $L, $log_id ) @ #t0.1 )
+                                          case Start_Log
+                                          solve( StartedLog( $L, $log_id.1 ) @ #t0.2 )
+                                            case Start_Log_malicious
+                                            solve( !Corrupted_Logger( $L, ~skL.1, pk(~skL.1) ) ▶₀ #t0.2 )
+                                              case compromiseLogger
+                                              solve( !KU( sign(<$rootCA, $CA, pk(x), 'pubKey-CA', snCA, $i0, 
+                                                                $j0>,
+                                                               ~skCA)
+                                                     ) @ #vk.26 )
+                                                case Intermediate_CA_Init
+                                                solve( !KU( sign(<$CA, $id, pkID, 'pre-cert', sn, $i, $j>,
+                                                                 ~skCA)
+                                                       ) @ #vk.16 )
+                                                  case PreCertify
+                                                  solve( !KU( ~sn.1 ) @ #vk.23 )
+                                                    case Intermediate_CA_Init
+                                                    solve( !KU( ~sn ) @ #vk.14 )
+                                                      case PreCertify
+                                                      solve( !KU( pk(~skCA) ) @ #vk.22 )
+                                                        case Intermediate_CA_Init_case_1
+                                                        solve( !KU( pk(~sk) ) @ #vk.16 )
+                                                          case Domain_Owner_Init
+                                                          SOLVED // trace found
+                                                        qed
+                                                      qed
+                                                    qed
+                                                  qed
+                                                qed
+                                              qed
+                                            qed
+                                          qed
+                                        qed
+                                      qed
+                                    qed
+                                  qed
+                                qed
+                              qed
+                            qed
+                          qed
+                        qed
+                      qed
+                    qed
+                  qed
+                qed
+              qed
+            qed
+          qed
+        qed
+      qed
+    qed
+  qed
+qed
+========
+by sorry
+>>>>>>>> eecd20276527e4b69d3a558d6b9418dbd93dd7d8:ct/proofs/results/ct/proofs/SUFFICIENCY_PROOF--transparency_wo_MMD--default.spthy
+>>>>>>> eecd20276527e4b69d3a558d6b9418dbd93dd7d8
 
 lemma san_monitorVerifiesAppendOnly:
   exists-trace
@@ -5263,9 +5388,15 @@ Restriction actions
 /*
 Generated from:
 Tamarin version 1.10.0
+<<<<<<< HEAD
+Maude version 2.7.1
+Git revision: UNKNOWN, branch: UNKNOWN
+Compiled at: 2024-10-30 14:56:23.355649243 UTC
+=======
 Maude version 3.4
 Git revision: UNKNOWN, branch: UNKNOWN
 Compiled at: 2025-11-06 13:03:12.032661 UTC
+>>>>>>> eecd20276527e4b69d3a558d6b9418dbd93dd7d8
 */
 
 end

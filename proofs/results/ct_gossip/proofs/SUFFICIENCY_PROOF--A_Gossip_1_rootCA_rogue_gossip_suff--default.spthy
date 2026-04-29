@@ -4342,245 +4342,895 @@ guarded formula characterizing all satisfying traces:
     ∃ #t.2. (CompromiseMonitor( M.1 ) @ #t.2))"
 */
 simplify
-solve( CTGossipCheck( M, L, fields, CA, ca_fields, session,
-                      gossiped_session
-       ) @ #t )
-  case GossipingCheck_Found
-  solve( Asserts( $M, 'Blame this CA.', $CA, <fields, ca_fields> ) @ #t1 )
-    case monitorFindsRogueCertificate
-    solve( AssertsNot( rootCA.2, 'I signed this intermediate CA.', $CA,
-                       <$rootCA, $CA, pk(x), 'pubKey-CA', snCA, $i0, $j0>
-           ) @ #t2.1 )
-      case ConsultDocumentation_Fails
-      solve( (∃ #t. (CompromiseMonitor( $M ) @ #t))  ∥
-             (∃ #t. (CompromiseLogger( $L ) @ #t))  ∥
-             (∃ #t.
-               (CTGossipCheck_Found( $M, $L, <$CA, $subj, ke, 'pubKey', sn, $i, $j>,
-                                     $CA, <$rootCA, $CA, pk(x), 'pubKey-CA', snCA, $i0, $j0>, session,
-                                     gossiped_session
-                ) @ #t)) )
-        case case_3
-        solve( Corrupted( $rootCA ) @ #t.2 )
+solve( Corrupted( rootCA ) @ #t.1 )
+  case compromiseRootCA
+  solve( !Root_CA_s0( $CA, skCA, pkCA ) ▶₀ #t )
+    case Root_CA_Init
+    solve( (∃ #t. (CompromiseMonitor( M ) @ #t))  ∥
+           (∃ #t. (CompromiseLogger( L ) @ #t))  ∥
+           (∃ #t.
+             (CTGossipCheck_Found( M, L, fields, CA.1, ca_fields, session,
+                                   gossiped_session
+              ) @ #t)) )
+      case case_3
+      solve( CCADBConsulted( $rootCA, ca_fields ) ▶₃ #t.1 )
+        case ConsultDocumentation_Fails
+        solve( Corrupted( $CA ) @ #t.2 )
           case compromiseRootCA
-          solve( InclusionVerified( $C, $L, <$CA, $subj, ke, 'pubKey', sn, $i, $j>,
-                                    $gossiped_proof_time, gossiped_session, chain
-                 ) ▶₀ #t )
-            case ParticipantVerifiesInclusion
-            solve( Gossiped( $M, ~session, session.1 ) ▶₁ #t )
-              case monitorVerifiesAppendOnly_Gossiped
-              solve( MonitorFoundCert( $M, $L, <$CA, $subj, ke, 'pubKey', sn, $i, $j>,
-                                       $CA, <$rootCA, $CA, pk(x), 'pubKey-CA', snCA, $i0, $j0>,
-                                       $time_of_proof_fetch, ~session.1
-                     ) ▶₂ #t )
-                case monitorFindsRogueCertificate
-                solve( CCADBConsulted( $rootCA.1,
-                                       <$rootCA, $CA, pk(x), 'pubKey-CA', snCA, $i0, $j0>
-                       ) ▶₃ #t )
-                  case ConsultDocumentation_Fails
-                  solve( LoggerPresentsView( $L, $M, log_id.3, time.1, ~sth, ~session.1
-                         ) @ #t2.1 )
-                    case LoggerSnapshot_M
-                    solve( LoggerComputesAddLog( $L, $log_id,
-                                                 <$CA, $subj, ke, 'pubKey', sn, $i, $j>,
-                                                 <<$rootCA, $CA, pk(x), 'pubKey-CA', snCA, $i0, $j0>, 
-                                                  sign(<$rootCA, $CA, pk(x), 'pubKey-CA', snCA, $i0, $j0>,
-                                                       ~skCA)
-                                                 >,
-                                                 chain.2, different_time.3
-                           ) @ #t.2 )
-                      case add_preC_to_log
-                      solve( !KU( sign(<$CA, $subj, ke, 'pubKey', sn, $i, $j, sct1, sct2>, x)
-                             ) @ #vk.29 )
-                        case c_sign
-                        solve( !KU( pk(x) ) @ #vk.32 )
-                          case Root_CA_Init_case_1
-                          solve( !KU( sign(<$rootCA, $CA, pk(~skCA), 'pubKey-CA', snCA, $i0, $j0>,
-                                           ~skCA)
-                                 ) @ #vk.40 )
-                            case c_sign
-                            solve( StartedLog( $L, $log_id ) @ #t0 )
-                              case Start_Log
-                              solve( !Root_CA_s0( $rootCA, skCA.1, pkCA ) ▶₀ #t.1 )
-                                case Root_CA_Init
-                                solve( LoggerPresentsView( $L, id, log_id.4, time.2, ~sth.1, ~session
-                                       ) @ #t2.2 )
-                                  case LoggerSnapshot_P
-                                  solve( LoggerComputesAddLog( $L, $log_id.1,
-                                                               <$CA, $subj, ke, 'pubKey', sn, $i, $j>,
-                                                               ca_cert, chain, different_time.2
-                                         ) @ #t.2 )
-                                    case add_preC_to_log
-                                    solve( LoggerComputesAddLog( $L, log_id.2, fields, ca_cert, chain, t.3
-                                           ) @ #t.2 )
-                                      case add_preC_to_log
-                                      solve( LoggerPresentsView( $L, id1, $log_id, time1, ~sth.1, ~session
-                                             ) @ #t1.1 )
-                                        case LoggerSnapshot_P
-                                        solve( LoggerPresentsView( $L, $M, log_id2, time2, ~sth, ~session.1
-                                               ) @ #t4 )
-                                          case LoggerSnapshot_M
-                                          solve( LoggerComputesAddLog( $L, $log_id,
-                                                                       <$CA, $subj, ke, 'pubKey', sn, $i, $j>,
-                                                                       <
-                                                                        <$rootCA, $CA, pk(~skCA), 
-                                                                         'pubKey-CA', snCA, $i0, $j0>, 
-                                                                        sign(<$rootCA, $CA, pk(~skCA), 
-                                                                              'pubKey-CA', snCA, $i0, $j0>,
-                                                                             ~skCA)
-                                                                       >,
-                                                                       <
-                                                                        <
-                                                                         <$CA, $subj, ke, 'pre-cert', sn, $i, 
-                                                                          $j>, 
-                                                                         sign(<$CA, $subj, ke, 'pre-cert', 
-                                                                               sn, $i, $j>,
-                                                                              ~skCA)
-                                                                        >, 
-                                                                        <$rootCA, $CA, pk(~skCA), 
-                                                                         'pubKey-CA', snCA, $i0, $j0>, 
-                                                                        sign(<$rootCA, $CA, pk(~skCA), 
-                                                                              'pubKey-CA', snCA, $i0, $j0>,
-                                                                             ~skCA)
-                                                                       >,
+          solve( !Root_CA_s0( $CA, skCA.1, pkCA.1 ) ▶₀ #t.2 )
+            case Root_CA_Init
+            solve( !KU( sign(<$CA, $CA.2, pkCA, 'pubKey-CA', sn.1, $i, $j.1>, ~skCA)
+                   ) @ #vk.13 )
+              case c_sign
+              solve( !KU( ~skCA ) @ #vk.14 )
+                case compromiseRootCA
+                solve( MonitorFoundCert( $M, $L, fields, $CA.2,
+                                         <$CA, $CA.1, pkCA, 'pubKey-CA', sn, $i, $j>, $time_of_proof_fetch,
+                                         session
+                       ) ▶₂ #t.1 )
+                  case monitorFindsRogueCertificate
+                  solve( StartedLog( $L, log_id.1 ) @ #t0.1 )
+                    case Start_Log
+                    solve( !Logger_s( $L, ~skL, pk(~skL) ) ▶₀ #t0 )
+                      case Logger_Init
+                      solve( LoggerComputesAddLog( $L, $log_id,
+                                                   <$CA.1, $subj, ke, 'pubKey', sn.2, $i.1, $j.2>,
+                                                   <<$CA, $CA.1, pk(x), 'pubKey-CA', sn, $i, $j>, 
+                                                    sign(<$CA, $CA.1, pk(x), 'pubKey-CA', sn, $i, $j>, ~skCA)
+                                                   >,
+                                                   chain.1, different_time
+                             ) @ #t.3 )
+                        case add_preC_to_log
+                        solve( !KU( sign(<$CA.1, $subj, ke, 'pre-cert', sn.2, $i.1, $j.2>, x)
+                               ) @ #vk.39 )
+                          case c_sign
+                          solve( !Log( $L, $log_id ) ▶₆ #t.3 )
+                            case Start_Log
+                            solve( !Root_CA( $CA, pk(~skCA) ) ▶₅ #t.3 )
+                              case Root_CA_Init
+                              solve( !Logger_s( $L, skL.1, pk(skL.1) ) ▶₄ #t.3 )
+                                case Logger_Init
+                                solve( LoggerPresentsView( $L, $M, $log_id, time, ~sth, ~session
+                                       ) @ #t2 )
+                                  case LoggerSnapshot_M
+                                  solve( !KU( pk(x) ) @ #vk.10 )
+                                    case Root_CA_Init_case_1
+                                    solve( !KU( sign(<$CA.1, $subj, ke, 'pubKey', sn.2, $i.1, $j.2, sct1, 
+                                                      sct2>,
+                                                     ~skCA)
+                                           ) @ #vk.38 )
+                                      case c_sign
+                                      solve( Gossiped( $M, gossiped_session, ~session ) ▶₁ #t.1 )
+                                        case monitorVerifiesAppendOnly_Gossiped
+                                        solve( (∀ different_time #t.
+                                                 (LoggerComputesAddLog( $L, log_id.2, fields, ca_cert,
+                                                                        chain.1, different_time
+                                                  ) @ #t)
+                                                ⇒
+                                                 ((time1 = different_time) ∨ (¬(#t < #t1))))  ∥
+                                               (∃ different_time #t.
+                                                 (LoggerComputesAddLog( $L, log_id2, fields, ca_cert, chain.1,
+                                                                        different_time
+                                                  ) @ #t)
+                                                ∧
+                                                 (¬(time2 = different_time)) ∧ (#t < #t4)) )
+                                          case case_2
+                                          solve( LoggerComputesAddLog( $L, log_id2, fields, ca_cert, chain.1,
                                                                        different_time.1
-                                                 ) @ #t.2 )
+                                                 ) @ #t.3 )
                                             case add_preC_to_log
                                             solve( (∀ different_time #t.
-                                                     (LoggerComputesAddLog( $L, $log_id,
-                                                                            <$CA, $subj, ke, 'pubKey', sn, 
-                                                                             $i, $j>,
+                                                     (LoggerComputesAddLog( $L, log_id.2,
+                                                                            <$CA.1, $subj, ke, 'pubKey', 
+                                                                             sn.2, $i.1, $j.2>,
                                                                             <
-                                                                             <$rootCA, $CA, pk(~skCA), 
-                                                                              'pubKey-CA', snCA, $i0, $j0>, 
-                                                                             sign(<$rootCA, $CA, pk(~skCA), 
-                                                                                   'pubKey-CA', snCA, $i0, $j0
-                                                                                  >,
+                                                                             <$CA, $CA.1, pk(~skCA), 
+                                                                              'pubKey-CA', sn, $i, $j>, 
+                                                                             sign(<$CA, $CA.1, pk(~skCA), 
+                                                                                   'pubKey-CA', sn, $i, $j>,
                                                                                   ~skCA)
                                                                             >,
                                                                             <
                                                                              <
-                                                                              <$CA, $subj, ke, 'pre-cert', 
-                                                                               sn, $i, $j>, 
-                                                                              sign(<$CA, $subj, ke, 
-                                                                                    'pre-cert', sn, $i, $j>,
+                                                                              <$CA.1, $subj, ke, 'pre-cert', 
+                                                                               sn.2, $i.1, $j.2>, 
+                                                                              sign(<$CA.1, $subj, ke, 
+                                                                                    'pre-cert', sn.2, $i.1, 
+                                                                                    $j.2>,
                                                                                    ~skCA)
                                                                              >, 
-                                                                             <$rootCA, $CA, pk(~skCA), 
-                                                                              'pubKey-CA', snCA, $i0, $j0>, 
-                                                                             sign(<$rootCA, $CA, pk(~skCA), 
-                                                                                   'pubKey-CA', snCA, $i0, $j0
-                                                                                  >,
+                                                                             <$CA, $CA.1, pk(~skCA), 
+                                                                              'pubKey-CA', sn, $i, $j>, 
+                                                                             sign(<$CA, $CA.1, pk(~skCA), 
+                                                                                   'pubKey-CA', sn, $i, $j>,
                                                                                   ~skCA)
                                                                             >,
                                                                             different_time
                                                       ) @ #t)
                                                     ⇒
-                                                     (($now.7 = different_time) ∨ (¬(#t < #t1.1))))  ∥
+                                                     ((time1 = different_time) ∨ (¬(#t < #t1))))  ∥
+                                                   (¬(#t1 < #t2))  ∥
                                                    (∃ different_time #t.
                                                      (LoggerComputesAddLog( $L, $log_id,
-                                                                            <$CA, $subj, ke, 'pubKey', sn, 
-                                                                             $i, $j>,
+                                                                            <$CA.1, $subj, ke, 'pubKey', 
+                                                                             sn.2, $i.1, $j.2>,
                                                                             <
-                                                                             <$rootCA, $CA, pk(~skCA), 
-                                                                              'pubKey-CA', snCA, $i0, $j0>, 
-                                                                             sign(<$rootCA, $CA, pk(~skCA), 
-                                                                                   'pubKey-CA', snCA, $i0, $j0
-                                                                                  >,
+                                                                             <$CA, $CA.1, pk(~skCA), 
+                                                                              'pubKey-CA', sn, $i, $j>, 
+                                                                             sign(<$CA, $CA.1, pk(~skCA), 
+                                                                                   'pubKey-CA', sn, $i, $j>,
                                                                                   ~skCA)
                                                                             >,
                                                                             <
                                                                              <
-                                                                              <$CA, $subj, ke, 'pre-cert', 
-                                                                               sn, $i, $j>, 
-                                                                              sign(<$CA, $subj, ke, 
-                                                                                    'pre-cert', sn, $i, $j>,
+                                                                              <$CA.1, $subj, ke, 'pre-cert', 
+                                                                               sn.2, $i.1, $j.2>, 
+                                                                              sign(<$CA.1, $subj, ke, 
+                                                                                    'pre-cert', sn.2, $i.1, 
+                                                                                    $j.2>,
                                                                                    ~skCA)
                                                                              >, 
-                                                                             <$rootCA, $CA, pk(~skCA), 
-                                                                              'pubKey-CA', snCA, $i0, $j0>, 
-                                                                             sign(<$rootCA, $CA, pk(~skCA), 
-                                                                                   'pubKey-CA', snCA, $i0, $j0
-                                                                                  >,
+                                                                             <$CA, $CA.1, pk(~skCA), 
+                                                                              'pubKey-CA', sn, $i, $j>, 
+                                                                             sign(<$CA, $CA.1, pk(~skCA), 
+                                                                                   'pubKey-CA', sn, $i, $j>,
                                                                                   ~skCA)
                                                                             >,
                                                                             different_time
                                                       ) @ #t)
                                                     ∧
-                                                     (¬($now.3 = different_time)) ∧ (#t < #t4)) )
-                                              case case_2
-                                              solve( LoggerPresentsView( $L, $M, log_id.1, time.1, ~sth,
-                                                                         ~session.1
-                                                     ) @ #t2.1 )
-                                                case LoggerSnapshot_M
-                                                solve( LoggerComputesAddLog( $L, $log_id,
-                                                                             <$CA, $subj, ke, 'pubKey', sn, 
-                                                                              $i, $j>,
-                                                                             <
-                                                                              <$rootCA, $CA, pk(~skCA), 
-                                                                               'pubKey-CA', snCA, $i0, $j0>, 
-                                                                              sign(<$rootCA, $CA, pk(~skCA), 
-                                                                                    'pubKey-CA', snCA, $i0, 
-                                                                                    $j0>,
-                                                                                   ~skCA)
-                                                                             >,
-                                                                             chain, different_time
-                                                       ) @ #t.2 )
-                                                  case add_preC_to_log
-                                                  solve( !Logger_s( $L, skL.2, pk(skL.2) ) ▶₄ #t.2 )
-                                                    case Logger_Init
-                                                    solve( !Root_CA( $rootCA, pk(~skCA) ) ▶₅ #t.2 )
-                                                      case Root_CA_Init
-                                                      solve( !Log( $L, $log_id ) ▶₆ #t.2 )
-                                                        case Start_Log
-                                                        solve( !KU( sign(<$CA, $subj, ke, 'pre-cert', sn, $i, 
-                                                                          $j>,
-                                                                         ~skCA)
-                                                               ) @ #vk.46 )
-                                                          case c_sign
-                                                          solve( !KU( ~skCA ) @ #vk.47 )
-                                                            case compromiseRootCA
-                                                            solve( LoggerComputesAddLog( $L, $log_id,
-                                                                                         <$CA, $subj, ke, 
-                                                                                          'pubKey', sn, $i, $j
-                                                                                         >,
-                                                                                         <
-                                                                                          <$rootCA, $CA, 
-                                                                                           pk(~skCA), 
-                                                                                           'pubKey-CA', snCA, 
-                                                                                           $i0, $j0>, 
-                                                                                          sign(<$rootCA, $CA, 
-                                                                                                pk(~skCA), 
-                                                                                                'pubKey-CA', 
-                                                                                                snCA, $i0, $j0
-                                                                                               >,
-                                                                                               ~skCA)
-                                                                                         >,
-                                                                                         <
+                                                     (¬($now.2 = different_time)) ∧ (#t < #t2)) )
+                                              case case_3
+                                              solve( LoggerComputesAddLog( $L, $log_id,
+                                                                           <$CA.1, $subj, ke, 'pubKey', sn.2, 
+                                                                            $i.1, $j.2>,
+                                                                           <
+                                                                            <$CA, $CA.1, pk(~skCA), 
+                                                                             'pubKey-CA', sn, $i, $j>, 
+                                                                            sign(<$CA, $CA.1, pk(~skCA), 
+                                                                                  'pubKey-CA', sn, $i, $j>,
+                                                                                 ~skCA)
+                                                                           >,
+                                                                           <
+                                                                            <
+                                                                             <$CA.1, $subj, ke, 'pre-cert', 
+                                                                              sn.2, $i.1, $j.2>, 
+                                                                             sign(<$CA.1, $subj, ke, 
+                                                                                   'pre-cert', sn.2, $i.1, 
+                                                                                   $j.2>,
+                                                                                  ~skCA)
+                                                                            >, 
+                                                                            <$CA, $CA.1, pk(~skCA), 
+                                                                             'pubKey-CA', sn, $i, $j>, 
+                                                                            sign(<$CA, $CA.1, pk(~skCA), 
+                                                                                  'pubKey-CA', sn, $i, $j>,
+                                                                                 ~skCA)
+                                                                           >,
+                                                                           different_time.1
+                                                     ) @ #t.3 )
+                                                case add_preC_to_log
+                                                solve( StartedLog( $L, log_id.2 ) @ #t0.2 )
+                                                  case Start_Log
+                                                  solve( LoggerComputesAddLog( $L, $log_id,
+                                                                               <$CA.1, $subj, ke, 'pubKey', 
+                                                                                sn.2, $i.1, $j.2>,
+                                                                               <
+                                                                                <$CA, $CA.1, pk(~skCA), 
+                                                                                 'pubKey-CA', sn, $i, $j>, 
+                                                                                sign(<$CA, $CA.1, pk(~skCA), 
+                                                                                      'pubKey-CA', sn, $i, $j
+                                                                                     >,
+                                                                                     ~skCA)
+                                                                               >,
+                                                                               <
+                                                                                <
+                                                                                 <$CA.1, $subj, ke, 
+                                                                                  'pre-cert', sn.2, $i.1, $j.2
+                                                                                 >, 
+                                                                                 sign(<$CA.1, $subj, ke, 
+                                                                                       'pre-cert', sn.2, 
+                                                                                       $i.1, $j.2>,
+                                                                                      ~skCA)
+                                                                                >, 
+                                                                                <$CA, $CA.1, pk(~skCA), 
+                                                                                 'pubKey-CA', sn, $i, $j>, 
+                                                                                sign(<$CA, $CA.1, pk(~skCA), 
+                                                                                      'pubKey-CA', sn, $i, $j
+                                                                                     >,
+                                                                                     ~skCA)
+                                                                               >,
+                                                                               different_time
+                                                         ) @ #t.3 )
+                                                    case add_preC_to_log
+                                                    solve( LoggerPresentsView( $L, $M, $log_id, time2, ~sth,
+                                                                               ~session
+                                                           ) @ #t4 )
+                                                      case LoggerSnapshot_M
+                                                      solve( LoggerPresentsView( $L, id1, $log_id, time1,
+                                                                                 ~sth.1, ~session.1
+                                                             ) @ #t1 )
+                                                        case LoggerSnapshot_P
+                                                        solve( LoggerComputesAddLog( $L, $log_id,
+                                                                                     <$CA.1, $subj, ke, 
+                                                                                      'pubKey', sn.2, $i.1, 
+                                                                                      $j.2>,
+                                                                                     <
+                                                                                      <$CA, $CA.1, pk(~skCA), 
+                                                                                       'pubKey-CA', sn, $i, $j
+                                                                                      >, 
+                                                                                      sign(<$CA, $CA.1, 
+                                                                                            pk(~skCA), 
+                                                                                            'pubKey-CA', sn, 
+                                                                                            $i, $j>,
+                                                                                           ~skCA)
+                                                                                     >,
+                                                                                     <
+                                                                                      <
+                                                                                       <$CA.1, $subj, ke, 
+                                                                                        'pre-cert', sn.2, 
+                                                                                        $i.1, $j.2>, 
+                                                                                       sign(<$CA.1, $subj, 
+                                                                                             ke, 'pre-cert', 
+                                                                                             sn.2, $i.1, $j.2
+                                                                                            >,
+                                                                                            ~skCA)
+                                                                                      >, 
+                                                                                      <$CA, $CA.1, pk(~skCA), 
+                                                                                       'pubKey-CA', sn, $i, $j
+                                                                                      >, 
+                                                                                      sign(<$CA, $CA.1, 
+                                                                                            pk(~skCA), 
+                                                                                            'pubKey-CA', sn, 
+                                                                                            $i, $j>,
+                                                                                           ~skCA)
+                                                                                     >,
+                                                                                     t.4
+                                                               ) @ #t.3 )
+                                                          case add_preC_to_log
+                                                          solve( InclusionVerified( $C.1, $L,
+                                                                                    <$CA.1, $subj, ke, 
+                                                                                     'pubKey', sn.2, $i.1, 
+                                                                                     $j.2>,
+                                                                                    $gossiped_proof_time,
+                                                                                    ~session, chain
+                                                                 ) ▶₀ #t.1 )
+                                                            case ParticipantVerifiesInclusion
+                                                            solve( (∀ different_time #t.
+                                                                     (LoggerComputesAddLog( $L, log_id.1,
+                                                                                            <$CA.1, $subj, 
+                                                                                             ke, 'pubKey', 
+                                                                                             sn.2, $i.1, $j.2
+                                                                                            >,
+                                                                                            ca_cert, chain,
+                                                                                            different_time
+                                                                      ) @ #t)
+                                                                    ⇒
+                                                                     ((time = different_time) ∨
+                                                                      (¬(#t < #t2.1))))  ∥
+                                                                   (¬(#t2.1 < #t2))  ∥
+                                                                   (∃ different_time #t.
+                                                                     (LoggerComputesAddLog( $L, $log_id,
+                                                                                            <$CA.1, $subj, 
+                                                                                             ke, 'pubKey', 
+                                                                                             sn.2, $i.1, $j.2
+                                                                                            >,
+                                                                                            ca_cert, chain,
+                                                                                            different_time
+                                                                      ) @ #t)
+                                                                    ∧
+                                                                     (¬($now.3 = different_time)) ∧
+                                                                     (#t < #t2)) )
+                                                              case case_3
+                                                              solve( (∀ different_time #t.
+                                                                       (LoggerComputesAddLog( $L, $log_id,
+                                                                                              <$CA.1, $subj, 
+                                                                                               ke, 'pubKey', 
+                                                                                               sn.2, $i.1, 
+                                                                                               $j.2>,
+                                                                                              ca_cert, chain,
+                                                                                              different_time
+                                                                        ) @ #t)
+                                                                      ⇒
+                                                                       (($now.2 = different_time) ∨
+                                                                        (¬(#t < #t1))))  ∥
+                                                                     (∃ different_time #t.
+                                                                       (LoggerComputesAddLog( $L, $log_id,
+                                                                                              <$CA.1, $subj, 
+                                                                                               ke, 'pubKey', 
+                                                                                               sn.2, $i.1, 
+                                                                                               $j.2>,
+                                                                                              ca_cert, chain,
+                                                                                              different_time
+                                                                        ) @ #t)
+                                                                      ∧
+                                                                       (¬($now.3 = different_time)) ∧
+                                                                       (#t < #t2)) )
+                                                                case case_2
+                                                                solve( LoggerComputesAddLog( $L, $log_id,
+                                                                                             <$CA.1, $subj, 
+                                                                                              ke, 'pubKey', 
+                                                                                              sn.2, $i.1, $j.2
+                                                                                             >,
+                                                                                             ca_cert, chain,
+                                                                                             different_time.1
+                                                                       ) @ #t.3 )
+                                                                  case add_preC_to_log
+                                                                  solve( StartedLog( $L, log_id.1 ) @ #t0.1 )
+                                                                    case Start_Log
+                                                                    solve( LoggerComputesAddLog( $L, $log_id,
+                                                                                                 <$CA.1, 
+                                                                                                  $subj, ke, 
+                                                                                                  'pubKey', 
+                                                                                                  sn.2, $i.1, 
+                                                                                                  $j.2>,
+                                                                                                 <
+                                                                                                  <$CA, 
+                                                                                                   $CA.1, 
+                                                                                                   pk(~skCA), 
+                                                                                                   'pubKey-CA', 
+                                                                                                   sn, $i, $j
+                                                                                                  >, 
+                                                                                                  sign(<$CA, 
+                                                                                                        $CA.1, 
+                                                                                                        pk(~skCA), 
+                                                                                                        'pubKey-CA', 
+                                                                                                        sn, 
+                                                                                                        $i, $j
+                                                                                                       >,
+                                                                                                       ~skCA)
+                                                                                                 >,
+                                                                                                 <
+                                                                                                  <
+                                                                                                   <$CA.1, 
+                                                                                                    $subj, 
+                                                                                                    ke, 
+                                                                                                    'pre-cert', 
+                                                                                                    sn.2, 
+                                                                                                    $i.1, $j.2
+                                                                                                   >, 
+                                                                                                   sign(<
+                                                                                                         $CA.1, 
+                                                                                                         $subj, 
+                                                                                                         ke, 
+                                                                                                         'pre-cert', 
+                                                                                                         sn.2, 
+                                                                                                         $i.1, 
+                                                                                                         $j.2
+                                                                                                        >,
+                                                                                                        ~skCA)
+                                                                                                  >, 
+                                                                                                  <$CA, 
+                                                                                                   $CA.1, 
+                                                                                                   pk(~skCA), 
+                                                                                                   'pubKey-CA', 
+                                                                                                   sn, $i, $j
+                                                                                                  >, 
+                                                                                                  sign(<$CA, 
+                                                                                                        $CA.1, 
+                                                                                                        pk(~skCA), 
+                                                                                                        'pubKey-CA', 
+                                                                                                        sn, 
+                                                                                                        $i, $j
+                                                                                                       >,
+                                                                                                       ~skCA)
+                                                                                                 >,
+                                                                                                 different_time
+                                                                           ) @ #t.3 )
+                                                                      case add_preC_to_log
+                                                                      solve( LoggerPresentsView( $L, id,
+                                                                                                 $log_id,
+                                                                                                 time, ~sth,
+                                                                                                 ~session
+                                                                             ) @ #t2.1 )
+                                                                        case LoggerSnapshot_P
+                                                                        solve( AssertsNot( $CA,
+                                                                                           'I signed this intermediate CA.',
+                                                                                           $CA.1,
+                                                                                           <$CA, $CA.1, 
+                                                                                            pk(~skCA), 
+                                                                                            'pubKey-CA', sn, 
+                                                                                            $i, $j>
+                                                                               ) @ #t2.1 )
+                                                                          case ConsultDocumentation_Fails
+                                                                          solve( Asserts( $M,
+                                                                                          'Blame this CA.',
+                                                                                          $CA.1,
                                                                                           <
-                                                                                           <$CA, $subj, ke, 
-                                                                                            'pre-cert', sn, 
-                                                                                            $i, $j>, 
-                                                                                           sign(<$CA, $subj, 
-                                                                                                 ke, 
-                                                                                                 'pre-cert', 
-                                                                                                 sn, $i, $j>,
-                                                                                                ~skCA)
-                                                                                          >, 
-                                                                                          <$rootCA, $CA, 
+                                                                                           <$CA.1, $subj, ke, 
+                                                                                            'pubKey', sn.2, 
+                                                                                            $i.1, $j.2>, 
+                                                                                           $CA, $CA.1, 
                                                                                            pk(~skCA), 
-                                                                                           'pubKey-CA', snCA, 
-                                                                                           $i0, $j0>, 
-                                                                                          sign(<$rootCA, $CA, 
-                                                                                                pk(~skCA), 
-                                                                                                'pubKey-CA', 
-                                                                                                snCA, $i0, $j0
-                                                                                               >,
-                                                                                               ~skCA)
-                                                                                         >,
-                                                                                         different_time
-                                                                   ) @ #t.2 )
-                                                              case add_preC_to_log
-                                                              SOLVED // trace found
+                                                                                           'pubKey-CA', sn, 
+                                                                                           $i, $j>
+                                                                                 ) @ #t1.1 )
+                                                                            case monitorFindsRogueCertificate
+                                                                            solve( (∀ different_time #t.
+                                                                                     (LoggerComputesAddLog( $L,
+                                                                                                            $log_id,
+                                                                                                            <
+                                                                                                             $CA.1, 
+                                                                                                             $subj, 
+                                                                                                             ke, 
+                                                                                                             'pubKey', 
+                                                                                                             sn.2, 
+                                                                                                             $i.1, 
+                                                                                                             $j.2
+                                                                                                            >,
+                                                                                                            <
+                                                                                                             <
+                                                                                                              $CA, 
+                                                                                                              $CA.1, 
+                                                                                                              pk(~skCA), 
+                                                                                                              'pubKey-CA', 
+                                                                                                              sn, 
+                                                                                                              $i, 
+                                                                                                              $j
+                                                                                                             >, 
+                                                                                                             sign(<
+                                                                                                                   $CA, 
+                                                                                                                   $CA.1, 
+                                                                                                                   pk(~skCA), 
+                                                                                                                   'pubKey-CA', 
+                                                                                                                   sn, 
+                                                                                                                   $i, 
+                                                                                                                   $j
+                                                                                                                  >,
+                                                                                                                  ~skCA)
+                                                                                                            >,
+                                                                                                            <
+                                                                                                             <
+                                                                                                              <
+                                                                                                               $CA.1, 
+                                                                                                               $subj, 
+                                                                                                               ke, 
+                                                                                                               'pre-cert', 
+                                                                                                               sn.2, 
+                                                                                                               $i.1, 
+                                                                                                               $j.2
+                                                                                                              >, 
+                                                                                                              sign(<
+                                                                                                                    $CA.1, 
+                                                                                                                    $subj, 
+                                                                                                                    ke, 
+                                                                                                                    'pre-cert', 
+                                                                                                                    sn.2, 
+                                                                                                                    $i.1, 
+                                                                                                                    $j.2
+                                                                                                                   >,
+                                                                                                                   ~skCA)
+                                                                                                             >, 
+                                                                                                             <
+                                                                                                              $CA, 
+                                                                                                              $CA.1, 
+                                                                                                              pk(~skCA), 
+                                                                                                              'pubKey-CA', 
+                                                                                                              sn, 
+                                                                                                              $i, 
+                                                                                                              $j
+                                                                                                             >, 
+                                                                                                             sign(<
+                                                                                                                   $CA, 
+                                                                                                                   $CA.1, 
+                                                                                                                   pk(~skCA), 
+                                                                                                                   'pubKey-CA', 
+                                                                                                                   sn, 
+                                                                                                                   $i, 
+                                                                                                                   $j
+                                                                                                                  >,
+                                                                                                                  ~skCA)
+                                                                                                            >,
+                                                                                                            different_time
+                                                                                      ) @ #t)
+                                                                                    ⇒
+                                                                                     (($now.2 =
+                                                                                       different_time) ∨
+                                                                                      (¬(#t < #t1))))  ∥
+                                                                                   (¬(#t1 < #t2.2))  ∥
+                                                                                   (¬(#t2.2 < #vr.13))  ∥
+                                                                                   (∃ different_time #t.
+                                                                                     (LoggerComputesAddLog( $L,
+                                                                                                            log_id.1,
+                                                                                                            <
+                                                                                                             $CA.1, 
+                                                                                                             $subj, 
+                                                                                                             ke, 
+                                                                                                             'pubKey', 
+                                                                                                             sn.2, 
+                                                                                                             $i.1, 
+                                                                                                             $j.2
+                                                                                                            >,
+                                                                                                            <
+                                                                                                             <
+                                                                                                              $CA, 
+                                                                                                              $CA.1, 
+                                                                                                              pk(~skCA), 
+                                                                                                              'pubKey-CA', 
+                                                                                                              sn, 
+                                                                                                              $i, 
+                                                                                                              $j
+                                                                                                             >, 
+                                                                                                             sign(<
+                                                                                                                   $CA, 
+                                                                                                                   $CA.1, 
+                                                                                                                   pk(~skCA), 
+                                                                                                                   'pubKey-CA', 
+                                                                                                                   sn, 
+                                                                                                                   $i, 
+                                                                                                                   $j
+                                                                                                                  >,
+                                                                                                                  ~skCA)
+                                                                                                            >,
+                                                                                                            <
+                                                                                                             <
+                                                                                                              <
+                                                                                                               $CA.1, 
+                                                                                                               $subj, 
+                                                                                                               ke, 
+                                                                                                               'pre-cert', 
+                                                                                                               sn.2, 
+                                                                                                               $i.1, 
+                                                                                                               $j.2
+                                                                                                              >, 
+                                                                                                              sign(<
+                                                                                                                    $CA.1, 
+                                                                                                                    $subj, 
+                                                                                                                    ke, 
+                                                                                                                    'pre-cert', 
+                                                                                                                    sn.2, 
+                                                                                                                    $i.1, 
+                                                                                                                    $j.2
+                                                                                                                   >,
+                                                                                                                   ~skCA)
+                                                                                                             >, 
+                                                                                                             <
+                                                                                                              $CA, 
+                                                                                                              $CA.1, 
+                                                                                                              pk(~skCA), 
+                                                                                                              'pubKey-CA', 
+                                                                                                              sn, 
+                                                                                                              $i, 
+                                                                                                              $j
+                                                                                                             >, 
+                                                                                                             sign(<
+                                                                                                                   $CA, 
+                                                                                                                   $CA.1, 
+                                                                                                                   pk(~skCA), 
+                                                                                                                   'pubKey-CA', 
+                                                                                                                   sn, 
+                                                                                                                   $i, 
+                                                                                                                   $j
+                                                                                                                  >,
+                                                                                                                  ~skCA)
+                                                                                                            >,
+                                                                                                            different_time
+                                                                                      ) @ #t)
+                                                                                    ∧
+                                                                                     (¬(time =
+                                                                                        different_time)) ∧
+                                                                                     (#t < #t2.2)) )
+                                                                              case case_4
+                                                                              solve( LoggerComputesAddLog( $L,
+                                                                                                           log_id.1,
+                                                                                                           <
+                                                                                                            $CA.1, 
+                                                                                                            $subj, 
+                                                                                                            ke, 
+                                                                                                            'pubKey', 
+                                                                                                            sn.2, 
+                                                                                                            $i.1, 
+                                                                                                            $j.2
+                                                                                                           >,
+                                                                                                           <
+                                                                                                            <
+                                                                                                             $CA, 
+                                                                                                             $CA.1, 
+                                                                                                             pk(~skCA), 
+                                                                                                             'pubKey-CA', 
+                                                                                                             sn, 
+                                                                                                             $i, 
+                                                                                                             $j
+                                                                                                            >, 
+                                                                                                            sign(<
+                                                                                                                  $CA, 
+                                                                                                                  $CA.1, 
+                                                                                                                  pk(~skCA), 
+                                                                                                                  'pubKey-CA', 
+                                                                                                                  sn, 
+                                                                                                                  $i, 
+                                                                                                                  $j
+                                                                                                                 >,
+                                                                                                                 ~skCA)
+                                                                                                           >,
+                                                                                                           <
+                                                                                                            <
+                                                                                                             <
+                                                                                                              $CA.1, 
+                                                                                                              $subj, 
+                                                                                                              ke, 
+                                                                                                              'pre-cert', 
+                                                                                                              sn.2, 
+                                                                                                              $i.1, 
+                                                                                                              $j.2
+                                                                                                             >, 
+                                                                                                             sign(<
+                                                                                                                   $CA.1, 
+                                                                                                                   $subj, 
+                                                                                                                   ke, 
+                                                                                                                   'pre-cert', 
+                                                                                                                   sn.2, 
+                                                                                                                   $i.1, 
+                                                                                                                   $j.2
+                                                                                                                  >,
+                                                                                                                  ~skCA)
+                                                                                                            >, 
+                                                                                                            <
+                                                                                                             $CA, 
+                                                                                                             $CA.1, 
+                                                                                                             pk(~skCA), 
+                                                                                                             'pubKey-CA', 
+                                                                                                             sn, 
+                                                                                                             $i, 
+                                                                                                             $j
+                                                                                                            >, 
+                                                                                                            sign(<
+                                                                                                                  $CA, 
+                                                                                                                  $CA.1, 
+                                                                                                                  pk(~skCA), 
+                                                                                                                  'pubKey-CA', 
+                                                                                                                  sn, 
+                                                                                                                  $i, 
+                                                                                                                  $j
+                                                                                                                 >,
+                                                                                                                 ~skCA)
+                                                                                                           >,
+                                                                                                           different_time.1
+                                                                                     ) @ #t.3 )
+                                                                                case add_preC_to_log
+                                                                                solve( (∀ different_time #t.
+                                                                                         (LoggerComputesAddLog( $L,
+                                                                                                                $log_id,
+                                                                                                                <
+                                                                                                                 $CA.1, 
+                                                                                                                 $subj, 
+                                                                                                                 ke, 
+                                                                                                                 'pubKey', 
+                                                                                                                 sn.2, 
+                                                                                                                 $i.1, 
+                                                                                                                 $j.2
+                                                                                                                >,
+                                                                                                                <
+                                                                                                                 <
+                                                                                                                  $CA, 
+                                                                                                                  $CA.1, 
+                                                                                                                  pk(~skCA), 
+                                                                                                                  'pubKey-CA', 
+                                                                                                                  sn, 
+                                                                                                                  $i, 
+                                                                                                                  $j
+                                                                                                                 >, 
+                                                                                                                 sign(<
+                                                                                                                       $CA, 
+                                                                                                                       $CA.1, 
+                                                                                                                       pk(~skCA), 
+                                                                                                                       'pubKey-CA', 
+                                                                                                                       sn, 
+                                                                                                                       $i, 
+                                                                                                                       $j
+                                                                                                                      >,
+                                                                                                                      ~skCA)
+                                                                                                                >,
+                                                                                                                chain,
+                                                                                                                different_time
+                                                                                          ) @ #t)
+                                                                                        ⇒
+                                                                                         (($now.2 =
+                                                                                           different_time) ∨
+                                                                                          (¬(#t < #t1))))  ∥
+                                                                                       (¬(#t1 < #t2.2))  ∥
+                                                                                       (¬(#t2.2 < #vr.13))  ∥
+                                                                                       (∃ different_time #t.
+                                                                                         (LoggerComputesAddLog( $L,
+                                                                                                                $log_id,
+                                                                                                                <
+                                                                                                                 $CA.1, 
+                                                                                                                 $subj, 
+                                                                                                                 ke, 
+                                                                                                                 'pubKey', 
+                                                                                                                 sn.2, 
+                                                                                                                 $i.1, 
+                                                                                                                 $j.2
+                                                                                                                >,
+                                                                                                                <
+                                                                                                                 <
+                                                                                                                  $CA, 
+                                                                                                                  $CA.1, 
+                                                                                                                  pk(~skCA), 
+                                                                                                                  'pubKey-CA', 
+                                                                                                                  sn, 
+                                                                                                                  $i, 
+                                                                                                                  $j
+                                                                                                                 >, 
+                                                                                                                 sign(<
+                                                                                                                       $CA, 
+                                                                                                                       $CA.1, 
+                                                                                                                       pk(~skCA), 
+                                                                                                                       'pubKey-CA', 
+                                                                                                                       sn, 
+                                                                                                                       $i, 
+                                                                                                                       $j
+                                                                                                                      >,
+                                                                                                                      ~skCA)
+                                                                                                                >,
+                                                                                                                chain,
+                                                                                                                different_time
+                                                                                          ) @ #t)
+                                                                                        ∧
+                                                                                         (¬(time =
+                                                                                            different_time)) ∧
+                                                                                         (#t < #t2.2)) )
+                                                                                  case case_4
+                                                                                  solve( LoggerComputesAddLog( $L,
+                                                                                                               $log_id,
+                                                                                                               <
+                                                                                                                $CA.1, 
+                                                                                                                $subj, 
+                                                                                                                ke, 
+                                                                                                                'pubKey', 
+                                                                                                                sn.2, 
+                                                                                                                $i.1, 
+                                                                                                                $j.2
+                                                                                                               >,
+                                                                                                               <
+                                                                                                                <
+                                                                                                                 $CA, 
+                                                                                                                 $CA.1, 
+                                                                                                                 pk(~skCA), 
+                                                                                                                 'pubKey-CA', 
+                                                                                                                 sn, 
+                                                                                                                 $i, 
+                                                                                                                 $j
+                                                                                                                >, 
+                                                                                                                sign(<
+                                                                                                                      $CA, 
+                                                                                                                      $CA.1, 
+                                                                                                                      pk(~skCA), 
+                                                                                                                      'pubKey-CA', 
+                                                                                                                      sn, 
+                                                                                                                      $i, 
+                                                                                                                      $j
+                                                                                                                     >,
+                                                                                                                     ~skCA)
+                                                                                                               >,
+                                                                                                               chain,
+                                                                                                               different_time.1
+                                                                                         ) @ #t.3 )
+                                                                                    case add_preC_to_log
+                                                                                    solve( LoggerComputesAddLog( $L,
+                                                                                                                 $log_id,
+                                                                                                                 <
+                                                                                                                  $CA.1, 
+                                                                                                                  $subj, 
+                                                                                                                  ke, 
+                                                                                                                  'pubKey', 
+                                                                                                                  sn.2, 
+                                                                                                                  $i.1, 
+                                                                                                                  $j.2
+                                                                                                                 >,
+                                                                                                                 <
+                                                                                                                  <
+                                                                                                                   $CA, 
+                                                                                                                   $CA.1, 
+                                                                                                                   pk(~skCA), 
+                                                                                                                   'pubKey-CA', 
+                                                                                                                   sn, 
+                                                                                                                   $i, 
+                                                                                                                   $j
+                                                                                                                  >, 
+                                                                                                                  sign(<
+                                                                                                                        $CA, 
+                                                                                                                        $CA.1, 
+                                                                                                                        pk(~skCA), 
+                                                                                                                        'pubKey-CA', 
+                                                                                                                        sn, 
+                                                                                                                        $i, 
+                                                                                                                        $j
+                                                                                                                       >,
+                                                                                                                       ~skCA)
+                                                                                                                 >,
+                                                                                                                 <
+                                                                                                                  <
+                                                                                                                   <
+                                                                                                                    $CA.1, 
+                                                                                                                    $subj, 
+                                                                                                                    ke, 
+                                                                                                                    'pre-cert', 
+                                                                                                                    sn.2, 
+                                                                                                                    $i.1, 
+                                                                                                                    $j.2
+                                                                                                                   >, 
+                                                                                                                   sign(<
+                                                                                                                         $CA.1, 
+                                                                                                                         $subj, 
+                                                                                                                         ke, 
+                                                                                                                         'pre-cert', 
+                                                                                                                         sn.2, 
+                                                                                                                         $i.1, 
+                                                                                                                         $j.2
+                                                                                                                        >,
+                                                                                                                        ~skCA)
+                                                                                                                  >, 
+                                                                                                                  <
+                                                                                                                   $CA, 
+                                                                                                                   $CA.1, 
+                                                                                                                   pk(~skCA), 
+                                                                                                                   'pubKey-CA', 
+                                                                                                                   sn, 
+                                                                                                                   $i, 
+                                                                                                                   $j
+                                                                                                                  >, 
+                                                                                                                  sign(<
+                                                                                                                        $CA, 
+                                                                                                                        $CA.1, 
+                                                                                                                        pk(~skCA), 
+                                                                                                                        'pubKey-CA', 
+                                                                                                                        sn, 
+                                                                                                                        $i, 
+                                                                                                                        $j
+                                                                                                                       >,
+                                                                                                                       ~skCA)
+                                                                                                                 >,
+                                                                                                                 different_time
+                                                                                           ) @ #t.3 )
+                                                                                      case add_preC_to_log
+                                                                                      solve( LoggerPresentsView( $L,
+                                                                                                                 $M,
+                                                                                                                 $log_id,
+                                                                                                                 time,
+                                                                                                                 ~sth.1,
+                                                                                                                 ~session.1
+                                                                                             ) @ #t2.2 )
+                                                                                        case LoggerSnapshot_M
+                                                                                        solve( CTGossipCheck( $M,
+                                                                                                              $L,
+                                                                                                              <
+                                                                                                               $CA.1, 
+                                                                                                               $subj, 
+                                                                                                               ke, 
+                                                                                                               'pubKey', 
+                                                                                                               sn.2, 
+                                                                                                               $i.1, 
+                                                                                                               $j.2
+                                                                                                              >,
+                                                                                                              $CA.1,
+                                                                                                              <
+                                                                                                               $CA, 
+                                                                                                               $CA.1, 
+                                                                                                               pk(~skCA), 
+                                                                                                               'pubKey-CA', 
+                                                                                                               sn, 
+                                                                                                               $i, 
+                                                                                                               $j
+                                                                                                              >,
+                                                                                                              ~session.1,
+                                                                                                              ~session
+                                                                                               ) @ #t.1 )
+                                                                                          case GossipingCheck_Found
+                                                                                          SOLVED // trace found
+                                                                                        qed
+                                                                                      qed
+                                                                                    qed
+                                                                                  qed
+                                                                                qed
+                                                                              qed
+                                                                            qed
+                                                                          qed
+                                                                        qed
+                                                                      qed
+                                                                    qed
+                                                                  qed
+                                                                qed
+                                                              qed
                                                             qed
                                                           qed
                                                         qed

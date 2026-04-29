@@ -1,11 +1,11 @@
 {
   "task_id": "SUFFICIENCY_PROOF--A_Gossip_1_verif_empty--default",
   "warnings": [],
-  "tamarin_timing": 284.86,
+  "tamarin_timing": 289.18,
   "wrapper_measures": {
-    "time": 285.09991574287415,
-    "avg_memory": 580.5170605123675,
-    "peak_memory": 667.8984375
+    "time": 289.38519501686096,
+    "avg_memory": 561.6823730468753,
+    "peak_memory": 645.51171875
   },
   "output_spthy": "results/ct_gossip/proofs/SUFFICIENCY_PROOF--A_Gossip_1_verif_empty--default.spthy",
   "verified_lemma": {},

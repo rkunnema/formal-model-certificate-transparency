@@ -4365,6 +4365,10 @@ guarded formula characterizing all counter-examples:
 by sorry
 
 lemma A_CT_1_ca_auth_on_log_inj:
+<<<<<<< HEAD
+<<<<<<<< HEAD:ct/proofs/results/ct/proofs/--A_CT_1_root_ca_auth_on_log_inj--default.spthy
+=======
+>>>>>>> eecd20276527e4b69d3a558d6b9418dbd93dd7d8
   all-traces "⊤"
 /*
 guarded formula characterizing all counter-examples:
@@ -4373,6 +4377,11 @@ guarded formula characterizing all counter-examples:
 by sorry
 
 lemma A_CT_1_root_ca_auth_on_log_inj:
+<<<<<<< HEAD
+========
+>>>>>>>> eecd20276527e4b69d3a558d6b9418dbd93dd7d8:ct/proofs/results/ct/proofs/--A_CT_1_ca_auth_on_log_inj--default.spthy
+=======
+>>>>>>> eecd20276527e4b69d3a558d6b9418dbd93dd7d8
   all-traces "⊤"
 /*
 guarded formula characterizing all counter-examples:
@@ -4380,6 +4389,20 @@ guarded formula characterizing all counter-examples:
 */
 by contradiction /* from formulas */
 
+<<<<<<< HEAD
+<<<<<<<< HEAD:ct/proofs/results/ct/proofs/--A_CT_1_root_ca_auth_on_log_inj--default.spthy
+========
+lemma A_CT_1_root_ca_auth_on_log_inj:
+  all-traces "⊤"
+/*
+guarded formula characterizing all counter-examples:
+"⊥"
+*/
+by sorry
+
+>>>>>>>> eecd20276527e4b69d3a558d6b9418dbd93dd7d8:ct/proofs/results/ct/proofs/--A_CT_1_ca_auth_on_log_inj--default.spthy
+=======
+>>>>>>> eecd20276527e4b69d3a558d6b9418dbd93dd7d8
 lemma A_CT_1_ca_auth_on_log_single:
   exists-trace
   "∃ CA M rootCA fields ca_fields #t0 #t1 #t2.

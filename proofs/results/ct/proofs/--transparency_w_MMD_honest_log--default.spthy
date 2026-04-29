@@ -3751,6 +3751,35 @@ guarded formula characterizing all counter-examples:
  ∧
   (∀ #t. (CompromiseLogger( L ) @ #t) ⇒ ⊥) ∧
   (¬(CTTransparencyCheckSuccess( L, fields ) @ #t1))"
+<<<<<<< HEAD
+=======
+<<<<<<<< HEAD:ct/proofs/results/ct/proofs/--san_monitorCannotFindCertificate--default.spthy
+*/
+by sorry
+
+lemma transparency_w_MMD_honest_log:
+  all-traces
+  "∀ CA fields rootCA ca_fields L1 L2 L #t1 #t2.
+    (((((BrowserAcceptsChain( CA, fields, rootCA, ca_fields, L1, L2
+         ) @ #t1) ∧
+        ((L = L1) ∨ (L = L2))) ∧
+       (CTTransparencyCheck( L, fields ) @ #t2)) ∧
+      (#t1 < #t2)) ∧
+     (¬(∃ #t. CompromiseLogger( L ) @ #t))) ⇒
+    (CTTransparencyCheckSuccess( L, fields ) @ #t2)"
+/*
+guarded formula characterizing all counter-examples:
+"∃ CA fields rootCA ca_fields L1 L2 L #t1 #t2.
+  (BrowserAcceptsChain( CA, fields, rootCA, ca_fields, L1, L2 ) @ #t1) ∧
+  (CTTransparencyCheck( L, fields ) @ #t2)
+ ∧
+  (((L = L1) ∨ (L = L2))) ∧
+  (#t1 < #t2) ∧
+  (∀ #t. (CompromiseLogger( L ) @ #t) ⇒ ⊥) ∧
+  (¬(CTTransparencyCheckSuccess( L, fields ) @ #t2))"
+========
+>>>>>>>> eecd20276527e4b69d3a558d6b9418dbd93dd7d8:ct/proofs/results/ct/proofs/--transparency_w_MMD_honest_log--default.spthy
+>>>>>>> eecd20276527e4b69d3a558d6b9418dbd93dd7d8
 */
 by sorry
 
@@ -5080,9 +5109,15 @@ by sorry
 /*
 Generated from:
 Tamarin version 1.10.0
+<<<<<<< HEAD
+Maude version 2.7.1
+Git revision: UNKNOWN, branch: UNKNOWN
+Compiled at: 2024-10-30 14:56:23.355649243 UTC
+=======
 Maude version 3.4
 Git revision: UNKNOWN, branch: UNKNOWN
 Compiled at: 2025-11-06 13:03:12.032661 UTC
+>>>>>>> eecd20276527e4b69d3a558d6b9418dbd93dd7d8
 */
 
 end

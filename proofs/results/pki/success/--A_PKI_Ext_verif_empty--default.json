@@ -1,16 +1,16 @@
 {
   "task_id": "--A_PKI_Ext_verif_empty--default",
   "warnings": [],
-  "tamarin_timing": 1.25,
+  "tamarin_timing": 1.87,
   "wrapper_measures": {
-    "time": 1.431265115737915,
-    "avg_memory": 63.966796875,
-    "peak_memory": 127.92578125
+    "time": 2.040316343307495,
+    "avg_memory": 62.810546875,
+    "peak_memory": 125.61328125
   },
   "output_spthy": "results/pki/proofs/--A_PKI_Ext_verif_empty--default.spthy",
   "verified_lemma": {
     "A_PKI_Ext_verif_empty": {
-      "steps": 7,
+      "steps": 8,
       "analysis_type": "all-traces"
     }
   },

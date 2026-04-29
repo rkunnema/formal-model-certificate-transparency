@@ -1,11 +1,11 @@
 {
   "task_id": "--san_Monitor_Init--default",
   "warnings": [],
-  "tamarin_timing": 17.13,
+  "tamarin_timing": 16.83,
   "wrapper_measures": {
-    "time": 17.322190284729004,
-    "avg_memory": 137.34027777777777,
-    "peak_memory": 151.765625
+    "time": 17.048180103302002,
+    "avg_memory": 136.97288602941177,
+    "peak_memory": 153.25390625
   },
   "output_spthy": "results/ct_gossip/proofs/--san_Monitor_Init--default.spthy",
   "verified_lemma": {

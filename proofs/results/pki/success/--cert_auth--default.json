@@ -1,11 +1,11 @@
 {
   "task_id": "--cert_auth--default",
   "warnings": [],
-  "tamarin_timing": 1.38,
+  "tamarin_timing": 1.84,
   "wrapper_measures": {
-    "time": 1.5841350555419922,
-    "avg_memory": 67.451171875,
-    "peak_memory": 134.89453125
+    "time": 2.0169200897216797,
+    "avg_memory": 62.685546875,
+    "peak_memory": 125.36328125
   },
   "output_spthy": "results/pki/proofs/--cert_auth--default.spthy",
   "verified_lemma": {

@@ -1,11 +1,11 @@
 {
   "task_id": "--T_Gossip_uniq_helper--default",
   "warnings": [],
-  "tamarin_timing": 24.42,
+  "tamarin_timing": 23.8,
   "wrapper_measures": {
-    "time": 24.61908984184265,
-    "avg_memory": 149.93587239583334,
-    "peak_memory": 285.13671875
+    "time": 24.00571846961975,
+    "avg_memory": 150.40234374999997,
+    "peak_memory": 295.11328125
   },
   "output_spthy": "results/ct_gossip/proofs/--T_Gossip_uniq_helper--default.spthy",
   "verified_lemma": {

@@ -1,11 +1,19 @@
 {
   "task_id": "--A_CT_1_ca_auth_on_log_single--default",
   "warnings": [],
+<<<<<<< HEAD
+  "tamarin_timing": 211.86,
+  "wrapper_measures": {
+    "time": 212.30633568763733,
+    "avg_memory": 1718.6678761848345,
+    "peak_memory": 3750.0078125
+=======
   "tamarin_timing": 105.01,
   "wrapper_measures": {
     "time": 105.18757796287537,
     "avg_memory": 1753.0113095238098,
     "peak_memory": 3675.203125
+>>>>>>> eecd20276527e4b69d3a558d6b9418dbd93dd7d8
   },
   "output_spthy": "results/ct/proofs/--A_CT_1_ca_auth_on_log_single--default.spthy",
   "verified_lemma": {

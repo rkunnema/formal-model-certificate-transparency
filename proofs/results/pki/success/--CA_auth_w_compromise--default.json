@@ -1,11 +1,11 @@
 {
   "task_id": "--CA_auth_w_compromise--default",
   "warnings": [],
-  "tamarin_timing": 1.78,
+  "tamarin_timing": 2.36,
   "wrapper_measures": {
-    "time": 1.9412109851837158,
-    "avg_memory": 65.478515625,
-    "peak_memory": 130.94921875
+    "time": 2.589151382446289,
+    "avg_memory": 88.45182291666667,
+    "peak_memory": 141.484375
   },
   "output_spthy": "results/pki/proofs/--CA_auth_w_compromise--default.spthy",
   "verified_lemma": {

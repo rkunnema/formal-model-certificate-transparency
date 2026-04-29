@@ -1,11 +1,11 @@
 {
   "task_id": "--san_LoggerSnapshot_M--default",
   "warnings": [],
-  "tamarin_timing": 19.24,
+  "tamarin_timing": 19.14,
   "wrapper_measures": {
-    "time": 19.466447353363037,
-    "avg_memory": 151.11132812499997,
-    "peak_memory": 282.640625
+    "time": 19.358779907226562,
+    "avg_memory": 150.66757812500003,
+    "peak_memory": 280.83984375
   },
   "output_spthy": "results/ct_gossip/proofs/--san_LoggerSnapshot_M--default.spthy",
   "verified_lemma": {

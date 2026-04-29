@@ -1,11 +1,19 @@
 {
   "task_id": "--A_CT_2_verif_empty--default",
   "warnings": [],
+<<<<<<< HEAD
+  "tamarin_timing": 37.88,
+  "wrapper_measures": {
+    "time": 38.07693123817444,
+    "avg_memory": 221.82370476973682,
+    "peak_memory": 313.66796875
+=======
   "tamarin_timing": 20.16,
   "wrapper_measures": {
     "time": 20.330835819244385,
     "avg_memory": 242.49330357142856,
     "peak_memory": 337.390625
+>>>>>>> eecd20276527e4b69d3a558d6b9418dbd93dd7d8
   },
   "output_spthy": "results/ct/proofs/--A_CT_2_verif_empty--default.spthy",
   "verified_lemma": {

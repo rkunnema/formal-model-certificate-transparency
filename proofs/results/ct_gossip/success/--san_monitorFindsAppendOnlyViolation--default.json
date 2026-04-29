@@ -1,11 +1,11 @@
 {
   "task_id": "--san_monitorFindsAppendOnlyViolation--default",
   "warnings": [],
-  "tamarin_timing": 24.38,
+  "tamarin_timing": 24.37,
   "wrapper_measures": {
-    "time": 24.576669931411743,
-    "avg_memory": 176.3090625,
-    "peak_memory": 284.53125
+    "time": 24.606339693069458,
+    "avg_memory": 173.34406249999995,
+    "peak_memory": 280.59765625
   },
   "output_spthy": "results/ct_gossip/proofs/--san_monitorFindsAppendOnlyViolation--default.spthy",
   "verified_lemma": {

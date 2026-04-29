@@ -1,16 +1,16 @@
 {
   "task_id": "--A_PKI_Ext_CAfalseAsserts_rootNotBlamed_verif_nonempty--default",
   "warnings": [],
-  "tamarin_timing": 1.36,
+  "tamarin_timing": 1.73,
   "wrapper_measures": {
-    "time": 1.5565993785858154,
-    "avg_memory": 64.244140625,
-    "peak_memory": 128.48046875
+    "time": 1.9437968730926514,
+    "avg_memory": 61.3125,
+    "peak_memory": 122.6171875
   },
   "output_spthy": "results/pki/proofs/--A_PKI_Ext_CAfalseAsserts_rootNotBlamed_verif_nonempty--default.spthy",
   "verified_lemma": {
     "A_PKI_Ext_CAfalseAsserts_rootNotBlamed_verif_nonempty": {
-      "steps": 8,
+      "steps": 4,
       "analysis_type": "all-traces"
     }
   },

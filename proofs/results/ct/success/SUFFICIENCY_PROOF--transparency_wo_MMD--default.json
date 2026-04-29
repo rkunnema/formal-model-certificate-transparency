@@ -3,11 +3,19 @@
   "warnings": [
     "2 wellformedness check failed!"
   ],
+<<<<<<< HEAD
+  "tamarin_timing": 62.49,
+  "wrapper_measures": {
+    "time": 62.71086573600769,
+    "avg_memory": 587.3819934475807,
+    "peak_memory": 1339.46484375
+=======
   "tamarin_timing": 29.27,
   "wrapper_measures": {
     "time": 29.438241243362427,
     "avg_memory": 600.0390625,
     "peak_memory": 1362.609375
+>>>>>>> eecd20276527e4b69d3a558d6b9418dbd93dd7d8
   },
   "output_spthy": "results/ct/proofs/SUFFICIENCY_PROOF--transparency_wo_MMD--default.spthy",
   "verified_lemma": {},

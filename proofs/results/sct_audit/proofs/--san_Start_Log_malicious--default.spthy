@@ -2661,7 +2661,7 @@ rule (modulo E) PubKeyCertify[color=#c871ff]:
 
 rule (modulo E) ClientInitiatesAuditing:
    [
-   In( ca_fields ), In( ca_sig ), In( pub_fields ), In( pub_sig ), In( sct )
+   !BAccept_SCT( <<pub_fields, pub_sig>, ca_fields, ca_sig>, sct ), In( $M )
    ]
   --[ Time( $now ), San_ClientInitiatesAuditing( ) ]->
    [
@@ -2685,9 +2685,8 @@ rule (modulo E) ClientValidate[color=#f2ce03]:
    In( pub_sig ), !Logger( $L1, pkL1 ), !Logger( $L2, pkL2 )
    ]
   --[
-  ClientAcceptsChain( $L1, $L2, $rootCA,
-                      <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, $CA,
-                      <$CA, $id, pkID, 'pubKey', sn, $i, $j>
+  BrowserAcceptsChain( $CA, <$CA, $id, pkID, 'pubKey', sn, $i, $j>,
+                       $rootCA, <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, $L1, $L2
   ),
   Eq( verify(pub_sig,
              <$CA, $id, pkID, 'pubKey', sn, $i, $j, <$L1, 'SCT', $sct1, sct1_sig>, 
@@ -2711,20 +2710,24 @@ rule (modulo E) ClientValidate[color=#f2ce03]:
   San_ClientValidate( ), Restr_ClientValidate_1( $L1, $L2 )
   ]->
    [
-   !Check( pkL1, <$CA, $id, pkID, 'pubKey', sn, $i, $j>,
-           <<$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, ca_sig>
-   ),
-   !Check( pkL2, <$CA, $id, pkID, 'pubKey', sn, $i, $j>,
-           <<$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, ca_sig>
-   ),
    !BAccept_State( $CA, <$CA, $id, pkID, 'pubKey', sn, $i, $j>, $L1, $sct1,
                    $L2, $sct2
    ),
-   !BAccept_SCT( $L1, <$CA, $id, pkID, 'pubKey', sn, $i, $j>,
-                 <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, $sct1
+   !BAccept_SCT( <
+                  <
+                   <$CA, $id, pkID, 'pubKey', sn, $i, $j, <$L1, 'SCT', $sct1, sct1_sig>, 
+                    $L2, 'SCT', $sct2, sct2_sig>, 
+                   pub_sig>, 
+                  <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, ca_sig>,
+                 <$L1, 'SCT', $sct1, sct1_sig>
    ),
-   !BAccept_SCT( $L2, <$CA, $id, pkID, 'pubKey', sn, $i, $j>,
-                 <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, $sct2
+   !BAccept_SCT( <
+                  <
+                   <$CA, $id, pkID, 'pubKey', sn, $i, $j, <$L1, 'SCT', $sct1, sct1_sig>, 
+                    $L2, 'SCT', $sct2, sct2_sig>, 
+                   pub_sig>, 
+                  <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, ca_sig>,
+                 <$L2, 'SCT', $sct2, sct2_sig>
    )
    ]
 
@@ -2739,29 +2742,32 @@ rule (modulo E) ClientValidate[color=#f2ce03]:
      In( pub_sig ), !Logger( $L1, pkL1 ), !Logger( $L2, pkL2 )
      ]
     --[
-    ClientAcceptsChain( $L1, $L2, $rootCA,
-                        <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, $CA,
-                        <$CA, $id, pkID, 'pubKey', sn, $i, $j>
+    BrowserAcceptsChain( $CA, <$CA, $id, pkID, 'pubKey', sn, $i, $j>,
+                         $rootCA, <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, $L1, $L2
     ),
     Eq( z, true ), Eq( z.1, true ), Eq( z.2, true ), Eq( z.3, true ),
     CheckValidUntil( $now, $j ), CheckValidUntil( $now, $j0 ), Time( $now ),
     San_ClientValidate( ), Restr_ClientValidate_1( $L1, $L2 )
     ]->
      [
-     !Check( pkL1, <$CA, $id, pkID, 'pubKey', sn, $i, $j>,
-             <<$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, ca_sig>
-     ),
-     !Check( pkL2, <$CA, $id, pkID, 'pubKey', sn, $i, $j>,
-             <<$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, ca_sig>
-     ),
      !BAccept_State( $CA, <$CA, $id, pkID, 'pubKey', sn, $i, $j>, $L1, $sct1,
                      $L2, $sct2
      ),
-     !BAccept_SCT( $L1, <$CA, $id, pkID, 'pubKey', sn, $i, $j>,
-                   <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, $sct1
+     !BAccept_SCT( <
+                    <
+                     <$CA, $id, pkID, 'pubKey', sn, $i, $j, <$L1, 'SCT', $sct1, sct1_sig>, 
+                      $L2, 'SCT', $sct2, sct2_sig>, 
+                     pub_sig>, 
+                    <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, ca_sig>,
+                   <$L1, 'SCT', $sct1, sct1_sig>
      ),
-     !BAccept_SCT( $L2, <$CA, $id, pkID, 'pubKey', sn, $i, $j>,
-                   <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, $sct2
+     !BAccept_SCT( <
+                    <
+                     <$CA, $id, pkID, 'pubKey', sn, $i, $j, <$L1, 'SCT', $sct1, sct1_sig>, 
+                      $L2, 'SCT', $sct2, sct2_sig>, 
+                     pub_sig>, 
+                    <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, ca_sig>,
+                   <$L2, 'SCT', $sct2, sct2_sig>
      )
      ]
     variants (modulo AC)
@@ -3568,7 +3574,9 @@ predicate: EntryMissing( Logger, fields, log_id, #time, sth_time )<=>¬(∃ ca_c
     (¬(sth_time = different_time))) ∧
    (#t < #time))
 
-predicate: EntryVisible( Logger, fields, ca_cert, log_id, #time, sth_time )<=>∃ different_time chain #t.
+predicate: EntryVisible( Logger, fields, ca_cert, chain, log_id, #time,
+              sth_time
+)<=>∃ different_time #t.
  ((LoggerComputesAddLog( Logger, log_id, fields, ca_cert, chain,
                          different_time
    ) @ #t) ∧
@@ -3582,8 +3590,8 @@ restriction AppendOnlyFails:
        #t1 #t2 #t3 #t4 #t5.
       ((((((((((((((LoggerComputesAddLog( L, log_id1, fields, ca_cert, chain, t
                     ) @ #t0) ∧
-                   (∃ different_time chain.1 #t.1.
-                     ((LoggerComputesAddLog( L, log_id1, fields, ca_cert, chain.1,
+                   (∃ different_time #t.1.
+                     ((LoggerComputesAddLog( L, log_id1, fields, ca_cert, chain,
                                              different_time
                        ) @ #t.1) ∧
                       (¬(time = different_time))) ∧
@@ -3625,9 +3633,8 @@ restriction appendOnlyWorks:
       session2 time2 #t0 #t1 #t2 #t4 #t5.
      ((((((((((AppendOnlyVerified( id, L, sth, session ) @ #t5) ∧
               (LoggerComputesAddLog( L, log_id, fields, ca_cert, chain, t ) @ #t0)) ∧
-             (∃ different_time chain.1 #t.1.
-               ((LoggerComputesAddLog( L, log_id, fields, ca_cert, chain.1,
-                                       different_time
+             (∃ different_time #t.1.
+               ((LoggerComputesAddLog( L, log_id, fields, ca_cert, chain, different_time
                  ) @ #t.1) ∧
                 (¬(time1 = different_time))) ∧
                (#t.1 < #t1))) ∧
@@ -3638,8 +3645,8 @@ restriction appendOnlyWorks:
         (#t1 < #t2)) ∧
        (#t2 < #t4)) ∧
       (#t4 < #t5)) ⇒
-     (∃ different_time chain.1 #t.1.
-       ((LoggerComputesAddLog( L, log_id2, fields, ca_cert, chain.1,
+     (∃ different_time #t.1.
+       ((LoggerComputesAddLog( L, log_id2, fields, ca_cert, chain,
                                different_time
          ) @ #t.1) ∧
         (¬(time2 = different_time))) ∧
@@ -3650,9 +3657,8 @@ restriction appendOnlyWorks:
         #t1 #t2 #t4.
        ((((((((LoggerComputesAddLog( L, log_id, fields, ca_cert, chain, t
                ) @ #t0) ∧
-              (∃ different_time chain.1 #t.1.
-                ((LoggerComputesAddLog( L, log_id, fields, ca_cert, chain.1,
-                                        different_time
+              (∃ different_time #t.1.
+                ((LoggerComputesAddLog( L, log_id, fields, ca_cert, chain, different_time
                   ) @ #t.1) ∧
                  (¬(time1 = different_time))) ∧
                 (#t.1 < #t1))) ∧
@@ -3744,20 +3750,20 @@ rule (modulo E) ParticipantFindsInclusionViolation[color=#e65208]:
    [
    !TLS_L_to_P( $L, $P, $snapshot, sth, session, $time ),
    !Logger( $L, pkL ), In( <$CA, $id, pkID, 'pubKey', sn, $i, $j> ),
-   In( ca_cert ), !Monitor( $M )
+   In( <ca_fields, ca_sig> )
    ]
   --[
   AssertsNot( $P, 'This loggers log currently includes these fields.', $L,
               <<$CA, $id, pkID, 'pubKey', sn, $i, $j>, session>
   ),
   InclusionProofFails( $P, $L, <$CA, $id, pkID, 'pubKey', sn, $i, $j>,
-                       ca_cert, sth, session
+                       <ca_fields, ca_sig>, sth, session
   ),
   Time( $now ), San_ParticipantFindsInclusionViolation( )
   ]->
    [
-   InclusionFailed( $P, $L, <$CA, $id, pkID, 'pubKey', sn, $i, $j>, $time,
-                    session
+   InclusionFalsified( $P, $L, <$CA, $id, pkID, 'pubKey', sn, $i, $j>,
+                       $time, session, ca_fields
    )
    ]
 
@@ -3781,11 +3787,11 @@ rule (modulo E) ParticipantVerifiesInclusion[color=#c1ff3c]:
    [
    !TLS_L_to_P( $L, $P, $snapshot, sth, session, $time ),
    !Logger( $L, pkL ), In( <$CA, $id, pkID, 'pubKey', sn, $i, $j> ),
-   In( ca_cert )
+   In( ca_cert ), In( chain )
    ]
   --[
   InclusionProofSucceeds( $P, $L, <$CA, $id, pkID, 'pubKey', sn, $i, $j>,
-                          ca_cert, sth, session
+                          ca_cert, chain, sth, session
   ),
   Asserts( $P, 'This loggers log currently includes these fields.', $L,
            <<$CA, $id, pkID, 'pubKey', sn, $i, $j>, session>
@@ -3801,13 +3807,14 @@ rule (modulo E) ParticipantVerifiesInclusion[color=#c1ff3c]:
   /* has exactly the trivial AC variant */
 
 restriction inclusionProofWorks:
-  "∀ IdFetcher L fields ca_cert sth session #t5.
-    (InclusionProofSucceeds( IdFetcher, L, fields, ca_cert, sth, session
+  "∀ IdFetcher L fields ca_cert chain sth session #t5.
+    (InclusionProofSucceeds( IdFetcher, L, fields, ca_cert, chain, sth,
+                             session
      ) @ #t5) ⇒
     (∃ id log_id time #t2.
       ((LoggerPresentsView( L, id, log_id, time, sth, session ) @ #t2) ∧
        (#t2 < #t5)) ∧
-      (∃ different_time chain #t.
+      (∃ different_time #t.
         ((LoggerComputesAddLog( L, log_id, fields, ca_cert, chain, different_time
           ) @ #t) ∧
          (¬(time = different_time))) ∧
@@ -4010,33 +4017,6 @@ rule (modulo E) MonitorCheck_NotFound_CCADB:
 
   /* has exactly the trivial AC variant */
 
-rule (modulo E) InclusionCheck_Found:
-   [
-   !BAccept_SCT( $L, fields, ca_fields, $sct ),
-   InclusionVerified( $P, $L, fields, $proof, session )
-   ]
-  --[
-  CTTransparencyCheck( $L, fields, session ), LContains( $L, fields ),
-  San_InclusionCheck_Found( )
-  ]->
-   [ ]
-
-  /* has exactly the trivial AC variant */
-
-rule (modulo E) InclusionCheck_NotFound:
-   [
-   !BAccept_SCT( $L, fields, ca_fields, $sct ),
-   InclusionFailed( $P, $L, fields, $proof, session )
-   ]
-  --[
-  CTTransparencyCheck( $L, fields, session ),
-  LDoesNotContain( $L, fields ), MMD_passed( $sct, $proof ),
-  San_InclusionCheck_NotFound( )
-  ]->
-   [ ]
-
-  /* has exactly the trivial AC variant */
-
 restriction mmd_passed:
   "∀ before after #t2 #t1 #t0.
     (((MMD_passed( before, after ) @ #t2) ∧ (Time( before ) @ #t0)) ∧
@@ -4044,54 +4024,36 @@ restriction mmd_passed:
     (((#t0 < #t1) ∧ (#t1 < #t2)) ∧ (¬(before = after)))"
   // safety formula
 
-rule (modulo E) InclusionCheck_Found_wo_MMD:
+rule (modulo E) SCTAuditTransparencyCheck_Success:
    [
-   !BAccept_SCT( $L, fields, ca_fields, $sct ),
+   MAudit_SCT( $M, $L, fields,
+               <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, $sct
+   ),
    InclusionVerified( $P, $L, fields, $proof, session )
    ]
   --[
-  CTTransparencyCheck_wo_MMD( $L, fields, session ),
-  LContains( $L, fields ), San_InclusionCheck_Found_wo_MMD( )
+  SCTAuditTransparencyCheck( $L, fields ),
+  SCTAuditTransparencyCheckSuccess( $L, fields ),
+  SCTAuditTransparencyCheckSession( $L, fields, session ),
+  San_SCTAuditTransparencyCheck_Success( )
   ]->
    [ ]
 
   /* has exactly the trivial AC variant */
 
-rule (modulo E) InclusionCheck_NotFound_wo_MMD:
+rule (modulo E) SCTAuditTransparencyCheck_Failed:
    [
-   !BAccept_SCT( $L, fields, ca_fields, $sct ),
-   InclusionFailed( $P, $L, fields, $proof, session )
+   MAudit_SCT( $M, $L, fields,
+               <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, $sct
+   ),
+   InclusionFalsified( $P, $L, fields, $proof, session,
+                       <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
+   )
    ]
   --[
-  CTTransparencyCheck_wo_MMD( $L, fields, session ),
-  LDoesNotContain( $L, fields ), San_InclusionCheck_NotFound_wo_MMD( )
-  ]->
-   [ ]
-
-  /* has exactly the trivial AC variant */
-
-rule (modulo E) SCTAuditTransparencyCheck_Found:
-   [
-   MAudit_SCT( $M, $L, fields, ca_fields, $sct ),
-   InclusionVerified( $P, $L, fields, $proof, session )
-   ]
-  --[
-  SCTAuditTransparencyCheck( $L, fields, session ),
-  LContains( $L, fields ), San_SCTAuditTransparencyCheck_Found( )
-  ]->
-   [ ]
-
-  /* has exactly the trivial AC variant */
-
-rule (modulo E) SCTAuditTransparencyCheck_NotFound:
-   [
-   MAudit_SCT( $M, $L, fields, ca_fields, $sct ),
-   InclusionFailed( $P, $L, fields, $proof, session )
-   ]
-  --[
-  SCTAuditTransparencyCheck( $L, fields, session ),
-  LDoesNotContain( $L, fields ), MMD_passed( $sct, $proof ),
-  San_SCTAuditTransparencyCheck_NotFound( )
+  SCTAuditTransparencyCheck( $L, fields ),
+  SCTAuditTransparencyCheckSession( $L, fields, session ),
+  MMD_passed( $sct, $proof ), San_SCTAuditTransparencyCheck_Failed( )
   ]->
    [ ]
 
@@ -4712,70 +4674,29 @@ guarded formula characterizing all satisfying traces:
 */
 by sorry
 
-lemma san_InclusionCheck_Found:
+lemma san_SCTAuditTransparencyCheck_Success:
   exists-trace
   "∃ #t.
-    (San_InclusionCheck_Found( ) @ #t) ∧ (¬(∃ #t.1. Compromise( ) @ #t.1))"
-/*
-guarded formula characterizing all satisfying traces:
-"∃ #t.
-  (San_InclusionCheck_Found( ) @ #t) ∧ ∀ #t.1. (Compromise( ) @ #t.1) ⇒ ⊥"
-*/
-by sorry
-
-lemma san_InclusionCheck_NotFound:
-  exists-trace
-  "∃ #t.
-    (San_InclusionCheck_NotFound( ) @ #t) ∧
-    (∀ #t.1. (Compromise( ) @ #t.1) ⇒ (∃ L. CompromiseLogger( L ) @ #t.1))"
-/*
-guarded formula characterizing all satisfying traces:
-"∃ #t.
-  (San_InclusionCheck_NotFound( ) @ #t)
- ∧
-  ∀ #t.1. (Compromise( ) @ #t.1) ⇒ ∃ L. (CompromiseLogger( L ) @ #t.1)"
-*/
-by sorry
-
-lemma san_InclusionCheck_Found_wo_MMD:
-  exists-trace "∃ #t. San_InclusionCheck_Found_wo_MMD( ) @ #t"
-/*
-guarded formula characterizing all satisfying traces:
-"∃ #t. (San_InclusionCheck_Found_wo_MMD( ) @ #t)"
-*/
-by sorry
-
-lemma san_InclusionCheck_NotFound_wo_MMD:
-  exists-trace "∃ #t. San_InclusionCheck_NotFound_wo_MMD( ) @ #t"
-/*
-guarded formula characterizing all satisfying traces:
-"∃ #t. (San_InclusionCheck_NotFound_wo_MMD( ) @ #t)"
-*/
-by sorry
-
-lemma san_SCTAuditTransparencyCheck_Found:
-  exists-trace
-  "∃ #t.
-    (San_SCTAuditTransparencyCheck_Found( ) @ #t) ∧
+    (San_SCTAuditTransparencyCheck_Success( ) @ #t) ∧
     (¬(∃ #t.1. Compromise( ) @ #t.1))"
 /*
 guarded formula characterizing all satisfying traces:
 "∃ #t.
-  (San_SCTAuditTransparencyCheck_Found( ) @ #t)
+  (San_SCTAuditTransparencyCheck_Success( ) @ #t)
  ∧
   ∀ #t.1. (Compromise( ) @ #t.1) ⇒ ⊥"
 */
 by sorry
 
-lemma san_SCTAuditTransparencyCheck_NotFound:
+lemma san_SCTAuditTransparencyCheck_Failed:
   exists-trace
   "∃ #t.
-    (San_SCTAuditTransparencyCheck_NotFound( ) @ #t) ∧
+    (San_SCTAuditTransparencyCheck_Failed( ) @ #t) ∧
     (∀ #t.1. (Compromise( ) @ #t.1) ⇒ (∃ L. CompromiseLogger( L ) @ #t.1))"
 /*
 guarded formula characterizing all satisfying traces:
 "∃ #t.
-  (San_SCTAuditTransparencyCheck_NotFound( ) @ #t)
+  (San_SCTAuditTransparencyCheck_Failed( ) @ #t)
  ∧
   ∀ #t.1. (Compromise( ) @ #t.1) ⇒ ∃ L. (CompromiseLogger( L ) @ #t.1)"
 */
@@ -4823,29 +4744,41 @@ by sorry
 
 lemma transparency_SCT_Auditing:
   all-traces
-  "∀ L fields session #t1.
-    (SCTAuditTransparencyCheck( L, fields, session ) @ #t1) ⇒
-    (∃ #t. LContains( L, fields ) @ #t)"
+  "∀ CA fields rootCA ca_fields L1 L2 L #t1 #t2.
+    ((((BrowserAcceptsChain( CA, fields, rootCA, ca_fields, L1, L2 ) @ #t1) ∧
+       ((L = L1) ∨ (L = L2))) ∧
+      (SCTAuditTransparencyCheck( L, fields ) @ #t2)) ∧
+     (#t1 < #t2)) ⇒
+    (SCTAuditTransparencyCheckSuccess( L, fields ) @ #t2)"
 /*
 guarded formula characterizing all counter-examples:
-"∃ L fields session #t1.
-  (SCTAuditTransparencyCheck( L, fields, session ) @ #t1)
+"∃ CA fields rootCA ca_fields L1 L2 L #t1 #t2.
+  (BrowserAcceptsChain( CA, fields, rootCA, ca_fields, L1, L2 ) @ #t1) ∧
+  (SCTAuditTransparencyCheck( L, fields ) @ #t2)
  ∧
-  ∀ #t. (LContains( L, fields ) @ #t) ⇒ ⊥"
+  (((L = L1) ∨ (L = L2))) ∧
+  (#t1 < #t2) ∧
+  (¬(SCTAuditTransparencyCheckSuccess( L, fields ) @ #t2))"
 */
 by sorry
 
-lemma A_CT_2_uniq_helper_intm_CA [reuse]:
+lemma A_uniq1_helper [reuse]:
   all-traces
   "∀ CA M rootCA fields ca_fields #t1 #t2.
-    ((Asserts( M, 'Blame this CA.', CA, <fields, ca_fields> ) @ #t1) ∧
+    ((Asserts( M,
+               'This CA has the following fields and it failed the SCT audit for the following fields.',
+               CA, <fields, ca_fields>
+      ) @ #t1) ∧
      (Asserts( rootCA, 'I signed this intermediate CA.', CA, ca_fields
       ) @ #t2)) ⇒
     (∃ #i. Corrupted( CA ) @ #i)"
 /*
 guarded formula characterizing all counter-examples:
 "∃ CA M rootCA fields ca_fields #t1 #t2.
-  (Asserts( M, 'Blame this CA.', CA, <fields, ca_fields> ) @ #t1) ∧
+  (Asserts( M,
+            'This CA has the following fields and it failed the SCT audit for the following fields.',
+            CA, <fields, ca_fields>
+   ) @ #t1) ∧
   (Asserts( rootCA, 'I signed this intermediate CA.', CA, ca_fields
    ) @ #t2)
  ∧
@@ -4853,7 +4786,7 @@ guarded formula characterizing all counter-examples:
 */
 by sorry
 
-lemma A_CT_2_uniq_helper_root [reuse]:
+lemma A_uniq2_helper [reuse]:
   all-traces
   "∀ rootCA CA ca_fields #t.
     (AssertsNot( rootCA, 'I signed this intermediate CA.', CA, ca_fields
@@ -4875,12 +4808,12 @@ lemma T_Audit_audit_inclusionViol_suff:
     (((AssertsNot( M, 'This loggers log currently includes these fields.', L,
                    <fields, session>
        ) @ #t) ∧
-      (SCTAuditTransparencyCheck( L, fields, session ) @ #t1)) ∧
+      (SCTAuditTransparencyCheckSession( L, fields, session ) @ #t1)) ∧
      (∀ L.1 M.1 fields.1 session.1 #t.1 #t1.1.
        ((AssertsNot( M.1, 'This loggers log currently includes these fields.',
                      L.1, <fields.1, session.1>
          ) @ #t.1) ∧
-        (SCTAuditTransparencyCheck( L.1, fields.1, session.1 ) @ #t1.1)) ⇒
+        (SCTAuditTransparencyCheckSession( L.1, fields.1, session.1 ) @ #t1.1)) ⇒
        (L.1 = L))) ∧
     (∀ a #i. (Corrupted( a ) @ #i) ⇒ (a = L))"
 /*
@@ -4889,13 +4822,13 @@ guarded formula characterizing all satisfying traces:
   (AssertsNot( M, 'This loggers log currently includes these fields.', L,
                <fields, session>
    ) @ #t) ∧
-  (SCTAuditTransparencyCheck( L, fields, session ) @ #t1)
+  (SCTAuditTransparencyCheckSession( L, fields, session ) @ #t1)
  ∧
   (∀ L.1 M.1 fields.1 session.1 #t.1 #t1.1.
     (AssertsNot( M.1, 'This loggers log currently includes these fields.',
                  L.1, <fields.1, session.1>
      ) @ #t.1) ∧
-    (SCTAuditTransparencyCheck( L.1, fields.1, session.1 ) @ #t1.1)
+    (SCTAuditTransparencyCheckSession( L.1, fields.1, session.1 ) @ #t1.1)
    ⇒
     L.1 = L) ∧
   (∀ a #i. (Corrupted( a ) @ #i) ⇒ a = L)"
@@ -4908,23 +4841,29 @@ lemma T_Audit_verif_empty:
        (AssertsNot( M, 'This loggers log currently includes these fields.', L,
                     <fields, session>
         ) @ #t) ∧
-       (SCTAuditTransparencyCheck( L, fields, session ) @ #t1))) ⇒
-   (∀ L fields session #t1.
-     (SCTAuditTransparencyCheck( L, fields, session ) @ #t1) ⇒
-     (LContains( L, fields ) @ #t1))"
+       (SCTAuditTransparencyCheckSession( L, fields, session ) @ #t1))) ⇒
+   (∀ CA fields rootCA ca_fields L1 L2 L #t1 #t2.
+     ((((BrowserAcceptsChain( CA, fields, rootCA, ca_fields, L1, L2 ) @ #t1) ∧
+        ((L = L1) ∨ (L = L2))) ∧
+       (SCTAuditTransparencyCheck( L, fields ) @ #t2)) ∧
+      (#t1 < #t2)) ⇒
+     (SCTAuditTransparencyCheckSuccess( L, fields ) @ #t2))"
 /*
 guarded formula characterizing all counter-examples:
 "(∀ L M fields session #t #t1.
    (AssertsNot( M, 'This loggers log currently includes these fields.', L,
                 <fields, session>
     ) @ #t) ∧
-   (SCTAuditTransparencyCheck( L, fields, session ) @ #t1)
+   (SCTAuditTransparencyCheckSession( L, fields, session ) @ #t1)
   ⇒
    ⊥) ∧
- (∃ L fields session #t1.
-   (SCTAuditTransparencyCheck( L, fields, session ) @ #t1)
+ (∃ CA fields rootCA ca_fields L1 L2 L #t1 #t2.
+   (BrowserAcceptsChain( CA, fields, rootCA, ca_fields, L1, L2 ) @ #t1) ∧
+   (SCTAuditTransparencyCheck( L, fields ) @ #t2)
   ∧
-   ¬(LContains( L, fields ) @ #t1))"
+   (((L = L1) ∨ (L = L2))) ∧
+   (#t1 < #t2) ∧
+   (¬(SCTAuditTransparencyCheckSuccess( L, fields ) @ #t2)))"
 */
 by sorry
 
@@ -4934,22 +4873,30 @@ lemma T_Audit_audit_inclusionViol_verif_nonempty:
     ((AssertsNot( M, 'This loggers log currently includes these fields.', L,
                   <fields, session>
       ) @ #t) ∧
-     (SCTAuditTransparencyCheck( L, fields, session ) @ #t1)) ⇒
-    (¬(∀ L.1 fields.1 session.1 #t1.1.
-        (SCTAuditTransparencyCheck( L.1, fields.1, session.1 ) @ #t1.1) ⇒
-        (LContains( L.1, fields.1 ) @ #t1.1)))"
+     (SCTAuditTransparencyCheckSession( L, fields, session ) @ #t1)) ⇒
+    (¬(∀ CA fields.1 rootCA ca_fields L1 L2 L.1 #t1.1 #t2.
+        ((((BrowserAcceptsChain( CA, fields.1, rootCA, ca_fields, L1, L2
+            ) @ #t1.1) ∧
+           ((L.1 = L1) ∨ (L.1 = L2))) ∧
+          (SCTAuditTransparencyCheck( L.1, fields.1 ) @ #t2)) ∧
+         (#t1.1 < #t2)) ⇒
+        (SCTAuditTransparencyCheckSuccess( L.1, fields.1 ) @ #t2)))"
 /*
 guarded formula characterizing all counter-examples:
 "∃ L M fields session #t #t1.
   (AssertsNot( M, 'This loggers log currently includes these fields.', L,
                <fields, session>
    ) @ #t) ∧
-  (SCTAuditTransparencyCheck( L, fields, session ) @ #t1)
+  (SCTAuditTransparencyCheckSession( L, fields, session ) @ #t1)
  ∧
-  ∀ L.1 fields.1 session.1 #t1.1.
-   (SCTAuditTransparencyCheck( L.1, fields.1, session.1 ) @ #t1.1)
+  ∀ CA fields.1 rootCA ca_fields L1 L2 L.1 #t1.1 #t2.
+   (BrowserAcceptsChain( CA, fields.1, rootCA, ca_fields, L1, L2
+    ) @ #t1.1) ∧
+   (SCTAuditTransparencyCheck( L.1, fields.1 ) @ #t2)
   ⇒
-   LContains( L.1, fields.1 ) @ #t1.1"
+   (((¬(L.1 = L1)) ∧ (¬(L.1 = L2))) ∨
+    (¬(#t1.1 < #t2)) ∨
+    (SCTAuditTransparencyCheckSuccess( L.1, fields.1 ) @ #t2))"
 */
 by sorry
 
@@ -4959,12 +4906,12 @@ lemma T_Audit_audit_inclusionViol_min:
     ((AssertsNot( M, 'This loggers log currently includes these fields.', L,
                   <fields, session>
       ) @ #t) ∧
-     (SCTAuditTransparencyCheck( L, fields, session ) @ #t1)) ⇒
+     (SCTAuditTransparencyCheckSession( L, fields, session ) @ #t1)) ⇒
     (¬(∃ L.1 M.1 fields.1 session.1 #t.1 #t1.1.
         ((AssertsNot( M.1, 'This loggers log currently includes these fields.',
                       L.1, <fields.1, session.1>
           ) @ #t.1) ∧
-         (SCTAuditTransparencyCheck( L.1, fields.1, session.1 ) @ #t1.1)) ∧
+         (SCTAuditTransparencyCheckSession( L.1, fields.1, session.1 ) @ #t1.1)) ∧
         ((L.1 = L) ∧ (¬(L = L.1)))))"
 /*
 guarded formula characterizing all counter-examples:
@@ -4972,13 +4919,13 @@ guarded formula characterizing all counter-examples:
   (AssertsNot( M, 'This loggers log currently includes these fields.', L,
                <fields, session>
    ) @ #t) ∧
-  (SCTAuditTransparencyCheck( L, fields, session ) @ #t1)
+  (SCTAuditTransparencyCheckSession( L, fields, session ) @ #t1)
  ∧
   ∃ L.1 M.1 fields.1 session.1 #t.1 #t1.1.
    (AssertsNot( M.1, 'This loggers log currently includes these fields.',
                 L.1, <fields.1, session.1>
     ) @ #t.1) ∧
-   (SCTAuditTransparencyCheck( L.1, fields.1, session.1 ) @ #t1.1) ∧
+   (SCTAuditTransparencyCheckSession( L.1, fields.1, session.1 ) @ #t1.1) ∧
    (L.1 = L)
   ∧
    ¬(L = L.1)"
@@ -4991,7 +4938,7 @@ lemma T_Audit_audit_inclusionViol_uniq:
     ((AssertsNot( M, 'This loggers log currently includes these fields.', L,
                   <fields, session>
       ) @ #t) ∧
-     (SCTAuditTransparencyCheck( L, fields, session ) @ #t1)) ⇒
+     (SCTAuditTransparencyCheckSession( L, fields, session ) @ #t1)) ⇒
     (∃ #i. Corrupted( L ) @ #i)"
 /*
 guarded formula characterizing all counter-examples:
@@ -4999,7 +4946,7 @@ guarded formula characterizing all counter-examples:
   (AssertsNot( M, 'This loggers log currently includes these fields.', L,
                <fields, session>
    ) @ #t) ∧
-  (SCTAuditTransparencyCheck( L, fields, session ) @ #t1)
+  (SCTAuditTransparencyCheckSession( L, fields, session ) @ #t1)
  ∧
   ∀ #i. (Corrupted( L ) @ #i) ⇒ ⊥"
 */
@@ -5019,12 +4966,12 @@ lemma T_Audit_audit_inclusionViol_single:
     ((AssertsNot( M, 'This loggers log currently includes these fields.', L,
                   <fields, session>
       ) @ #t) ∧
-     (SCTAuditTransparencyCheck( L, fields, session ) @ #t1)) ∧
+     (SCTAuditTransparencyCheckSession( L, fields, session ) @ #t1)) ∧
     (∀ L.1 M.1 fields.1 session.1 #t.1 #t1.1.
       ((AssertsNot( M.1, 'This loggers log currently includes these fields.',
                     L.1, <fields.1, session.1>
         ) @ #t.1) ∧
-       (SCTAuditTransparencyCheck( L.1, fields.1, session.1 ) @ #t1.1)) ⇒
+       (SCTAuditTransparencyCheckSession( L.1, fields.1, session.1 ) @ #t1.1)) ⇒
       (L.1 = L))"
 /*
 guarded formula characterizing all satisfying traces:
@@ -5032,13 +4979,13 @@ guarded formula characterizing all satisfying traces:
   (AssertsNot( M, 'This loggers log currently includes these fields.', L,
                <fields, session>
    ) @ #t) ∧
-  (SCTAuditTransparencyCheck( L, fields, session ) @ #t1)
+  (SCTAuditTransparencyCheckSession( L, fields, session ) @ #t1)
  ∧
   ∀ L.1 M.1 fields.1 session.1 #t.1 #t1.1.
    (AssertsNot( M.1, 'This loggers log currently includes these fields.',
                 L.1, <fields.1, session.1>
     ) @ #t.1) ∧
-   (SCTAuditTransparencyCheck( L.1, fields.1, session.1 ) @ #t1.1)
+   (SCTAuditTransparencyCheckSession( L.1, fields.1, session.1 ) @ #t1.1)
   ⇒
    L.1 = L"
 */
@@ -5202,10 +5149,11 @@ lemma A_CTAudit_1_verif_empty:
          (AssertsNot( rootCA, 'I signed this intermediate CA.', CA, ca_fields
           ) @ #t1)) ∧
         (¬(∃ #t.1. Corrupted( M ) @ #t.1))))) ⇒
-   (∀ M ca_fields fields #t0.
-     ((SCTAuditCheck( M, fields, ca_fields ) @ #t0) ∧
+   (∀ CA fields rootCA ca_fields L1 L2 M #t0 #t1.
+     (((SCTAuditCheck( M, fields, ca_fields ) @ #t0) ∧
+       (BrowserAcceptsChain( CA, fields, rootCA, ca_fields, L1, L2 ) @ #t1)) ∧
       (¬(∃ #t. Corrupted( M ) @ #t))) ⇒
-     (∃ CA #t. GroundTruth( CA, fields ) @ #t))"
+     (∃ CA.1 #t. GroundTruth( CA.1, fields ) @ #t))"
 /*
 guarded formula characterizing all counter-examples:
 "(∀ CA M ca_fields fields rootCA #t #t0 #t1.
@@ -5228,11 +5176,12 @@ guarded formula characterizing all counter-examples:
     ) @ #t1)
   ⇒
    ∃ #t.1. (Corrupted( M ) @ #t.1)) ∧
- (∃ M ca_fields fields #t0.
-   (SCTAuditCheck( M, fields, ca_fields ) @ #t0)
+ (∃ CA fields rootCA ca_fields L1 L2 M #t0 #t1.
+   (SCTAuditCheck( M, fields, ca_fields ) @ #t0) ∧
+   (BrowserAcceptsChain( CA, fields, rootCA, ca_fields, L1, L2 ) @ #t1)
   ∧
    (∀ #t. (Corrupted( M ) @ #t) ⇒ ⊥) ∧
-   (∀ CA #t. (GroundTruth( CA, fields ) @ #t) ⇒ ⊥))"
+   (∀ CA.1 #t. (GroundTruth( CA.1, fields ) @ #t) ⇒ ⊥))"
 */
 by sorry
 
@@ -5247,10 +5196,12 @@ lemma A_CTAudit_1_ca_rogue_audit_mon_honest_verif_nonempty:
       (Asserts( rootCA, 'I signed this intermediate CA.', CA, ca_fields
        ) @ #t1)) ∧
      (¬(∃ #t.1. Corrupted( M ) @ #t.1))) ⇒
-    (¬(∀ M.1 ca_fields.1 fields.1 #t0.1.
-        ((SCTAuditCheck( M.1, fields.1, ca_fields.1 ) @ #t0.1) ∧
+    (¬(∀ CA.1 fields.1 rootCA.1 ca_fields.1 L1 L2 M.1 #t0.1 #t1.1.
+        (((SCTAuditCheck( M.1, fields.1, ca_fields.1 ) @ #t0.1) ∧
+          (BrowserAcceptsChain( CA.1, fields.1, rootCA.1, ca_fields.1, L1, L2
+           ) @ #t1.1)) ∧
          (¬(∃ #t.1. Corrupted( M.1 ) @ #t.1))) ⇒
-        (∃ CA.1 #t.1. GroundTruth( CA.1, fields.1 ) @ #t.1)))"
+        (∃ CA.2 #t.1. GroundTruth( CA.2, fields.1 ) @ #t.1)))"
 /*
 guarded formula characterizing all counter-examples:
 "∃ CA M ca_fields fields rootCA #t #t0 #t1.
@@ -5263,11 +5214,13 @@ guarded formula characterizing all counter-examples:
    ) @ #t1)
  ∧
   (∀ #t.1. (Corrupted( M ) @ #t.1) ⇒ ⊥) ∧
-  (∀ M.1 ca_fields.1 fields.1 #t0.1.
-    (SCTAuditCheck( M.1, fields.1, ca_fields.1 ) @ #t0.1)
+  (∀ CA.1 fields.1 rootCA.1 ca_fields.1 L1 L2 M.1 #t0.1 #t1.1.
+    (SCTAuditCheck( M.1, fields.1, ca_fields.1 ) @ #t0.1) ∧
+    (BrowserAcceptsChain( CA.1, fields.1, rootCA.1, ca_fields.1, L1, L2
+     ) @ #t1.1)
    ⇒
     ((∃ #t.1. (Corrupted( M.1 ) @ #t.1)) ∨
-     (∃ CA.1 #t.1. (GroundTruth( CA.1, fields.1 ) @ #t.1))))"
+     (∃ CA.2 #t.1. (GroundTruth( CA.2, fields.1 ) @ #t.1))))"
 */
 by sorry
 
@@ -5282,10 +5235,12 @@ lemma A_CTAudit_1_root_ca_rogue_audit_mon_honest_verif_nonempty:
       (AssertsNot( rootCA, 'I signed this intermediate CA.', CA, ca_fields
        ) @ #t1)) ∧
      (¬(∃ #t.1. Corrupted( M ) @ #t.1))) ⇒
-    (¬(∀ M.1 ca_fields.1 fields.1 #t0.1.
-        ((SCTAuditCheck( M.1, fields.1, ca_fields.1 ) @ #t0.1) ∧
+    (¬(∀ CA.1 fields.1 rootCA.1 ca_fields.1 L1 L2 M.1 #t0.1 #t1.1.
+        (((SCTAuditCheck( M.1, fields.1, ca_fields.1 ) @ #t0.1) ∧
+          (BrowserAcceptsChain( CA.1, fields.1, rootCA.1, ca_fields.1, L1, L2
+           ) @ #t1.1)) ∧
          (¬(∃ #t.1. Corrupted( M.1 ) @ #t.1))) ⇒
-        (∃ CA.1 #t.1. GroundTruth( CA.1, fields.1 ) @ #t.1)))"
+        (∃ CA.2 #t.1. GroundTruth( CA.2, fields.1 ) @ #t.1)))"
 /*
 guarded formula characterizing all counter-examples:
 "∃ rootCA M ca_fields fields CA #t #t0 #t1.
@@ -5298,11 +5253,13 @@ guarded formula characterizing all counter-examples:
    ) @ #t1)
  ∧
   (∀ #t.1. (Corrupted( M ) @ #t.1) ⇒ ⊥) ∧
-  (∀ M.1 ca_fields.1 fields.1 #t0.1.
-    (SCTAuditCheck( M.1, fields.1, ca_fields.1 ) @ #t0.1)
+  (∀ CA.1 fields.1 rootCA.1 ca_fields.1 L1 L2 M.1 #t0.1 #t1.1.
+    (SCTAuditCheck( M.1, fields.1, ca_fields.1 ) @ #t0.1) ∧
+    (BrowserAcceptsChain( CA.1, fields.1, rootCA.1, ca_fields.1, L1, L2
+     ) @ #t1.1)
    ⇒
     ((∃ #t.1. (Corrupted( M.1 ) @ #t.1)) ∨
-     (∃ CA.1 #t.1. (GroundTruth( CA.1, fields.1 ) @ #t.1))))"
+     (∃ CA.2 #t.1. (GroundTruth( CA.2, fields.1 ) @ #t.1))))"
 */
 by sorry
 
@@ -5800,9 +5757,10 @@ lemma A_CTAudit_2_verif_empty:
           ) @ #t0)) ∧
         (AssertsNot( rootCA, 'I signed this intermediate CA.', CA, ca_fields
          ) @ #t1)))) ⇒
-   (∀ M ca_fields fields #t0.
-     (SCTAuditCheck( M, fields, ca_fields ) @ #t0) ⇒
-     (∃ CA #t. GroundTruth( CA, fields ) @ #t))"
+   (∀ CA fields rootCA ca_fields L1 L2 M #t0 #t1.
+     ((SCTAuditCheck( M, fields, ca_fields ) @ #t0) ∧
+      (BrowserAcceptsChain( CA, fields, rootCA, ca_fields, L1, L2 ) @ #t1)) ⇒
+     (∃ CA.1 #t. GroundTruth( CA.1, fields ) @ #t))"
 /*
 guarded formula characterizing all counter-examples:
 "(∀ CA M ca_fields fields rootCA #t #t0 #t1.
@@ -5825,10 +5783,11 @@ guarded formula characterizing all counter-examples:
     ) @ #t1)
   ⇒
    ⊥) ∧
- (∃ M ca_fields fields #t0.
-   (SCTAuditCheck( M, fields, ca_fields ) @ #t0)
+ (∃ CA fields rootCA ca_fields L1 L2 M #t0 #t1.
+   (SCTAuditCheck( M, fields, ca_fields ) @ #t0) ∧
+   (BrowserAcceptsChain( CA, fields, rootCA, ca_fields, L1, L2 ) @ #t1)
   ∧
-   ∀ CA #t. (GroundTruth( CA, fields ) @ #t) ⇒ ⊥)"
+   ∀ CA.1 #t. (GroundTruth( CA.1, fields ) @ #t) ⇒ ⊥)"
 */
 by sorry
 
@@ -5842,9 +5801,11 @@ lemma A_CTAudit_2_ca_rogue_audit_verif_nonempty:
        ) @ #t0)) ∧
      (Asserts( rootCA, 'I signed this intermediate CA.', CA, ca_fields
       ) @ #t1)) ⇒
-    (¬(∀ M.1 ca_fields.1 fields.1 #t0.1.
-        (SCTAuditCheck( M.1, fields.1, ca_fields.1 ) @ #t0.1) ⇒
-        (∃ CA.1 #t.1. GroundTruth( CA.1, fields.1 ) @ #t.1)))"
+    (¬(∀ CA.1 fields.1 rootCA.1 ca_fields.1 L1 L2 M.1 #t0.1 #t1.1.
+        ((SCTAuditCheck( M.1, fields.1, ca_fields.1 ) @ #t0.1) ∧
+         (BrowserAcceptsChain( CA.1, fields.1, rootCA.1, ca_fields.1, L1, L2
+          ) @ #t1.1)) ⇒
+        (∃ CA.2 #t.1. GroundTruth( CA.2, fields.1 ) @ #t.1)))"
 /*
 guarded formula characterizing all counter-examples:
 "∃ CA M ca_fields fields rootCA #t #t0 #t1.
@@ -5856,10 +5817,12 @@ guarded formula characterizing all counter-examples:
   (Asserts( rootCA, 'I signed this intermediate CA.', CA, ca_fields
    ) @ #t1)
  ∧
-  ∀ M.1 ca_fields.1 fields.1 #t0.1.
-   (SCTAuditCheck( M.1, fields.1, ca_fields.1 ) @ #t0.1)
+  ∀ CA.1 fields.1 rootCA.1 ca_fields.1 L1 L2 M.1 #t0.1 #t1.1.
+   (SCTAuditCheck( M.1, fields.1, ca_fields.1 ) @ #t0.1) ∧
+   (BrowserAcceptsChain( CA.1, fields.1, rootCA.1, ca_fields.1, L1, L2
+    ) @ #t1.1)
   ⇒
-   ∃ CA.1 #t.1. (GroundTruth( CA.1, fields.1 ) @ #t.1)"
+   ∃ CA.2 #t.1. (GroundTruth( CA.2, fields.1 ) @ #t.1)"
 */
 by sorry
 
@@ -5873,9 +5836,11 @@ lemma A_CTAudit_2_root_ca_rogue_audit_verif_nonempty:
        ) @ #t0)) ∧
      (AssertsNot( rootCA, 'I signed this intermediate CA.', CA, ca_fields
       ) @ #t1)) ⇒
-    (¬(∀ M.1 ca_fields.1 fields.1 #t0.1.
-        (SCTAuditCheck( M.1, fields.1, ca_fields.1 ) @ #t0.1) ⇒
-        (∃ CA.1 #t.1. GroundTruth( CA.1, fields.1 ) @ #t.1)))"
+    (¬(∀ CA.1 fields.1 rootCA.1 ca_fields.1 L1 L2 M.1 #t0.1 #t1.1.
+        ((SCTAuditCheck( M.1, fields.1, ca_fields.1 ) @ #t0.1) ∧
+         (BrowserAcceptsChain( CA.1, fields.1, rootCA.1, ca_fields.1, L1, L2
+          ) @ #t1.1)) ⇒
+        (∃ CA.2 #t.1. GroundTruth( CA.2, fields.1 ) @ #t.1)))"
 /*
 guarded formula characterizing all counter-examples:
 "∃ rootCA M ca_fields fields CA #t #t0 #t1.
@@ -5887,10 +5852,12 @@ guarded formula characterizing all counter-examples:
   (AssertsNot( rootCA, 'I signed this intermediate CA.', CA, ca_fields
    ) @ #t1)
  ∧
-  ∀ M.1 ca_fields.1 fields.1 #t0.1.
-   (SCTAuditCheck( M.1, fields.1, ca_fields.1 ) @ #t0.1)
+  ∀ CA.1 fields.1 rootCA.1 ca_fields.1 L1 L2 M.1 #t0.1 #t1.1.
+   (SCTAuditCheck( M.1, fields.1, ca_fields.1 ) @ #t0.1) ∧
+   (BrowserAcceptsChain( CA.1, fields.1, rootCA.1, ca_fields.1, L1, L2
+    ) @ #t1.1)
   ⇒
-   ∃ CA.1 #t.1. (GroundTruth( CA.1, fields.1 ) @ #t.1)"
+   ∃ CA.2 #t.1. (GroundTruth( CA.2, fields.1 ) @ #t.1)"
 */
 by sorry
 

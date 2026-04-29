@@ -4363,9 +4363,27 @@ guarded formula characterizing all counter-examples:
  ∧
   ∀ #i. (Corrupted( rootCA ) @ #i) ⇒ ⊥"
 */
+<<<<<<< HEAD
+simplify
+by contradiction /* from formulas */
+
+lemma A_CT_1_ca_auth_on_log_inj:
+=======
 by sorry
 
 lemma A_CT_1_ca_auth_on_log_inj:
+<<<<<<<< HEAD:ct/proofs/results/ct/proofs/--A_CT_1_ca_auth_on_log_inj--default.spthy
+  all-traces "⊤"
+/*
+guarded formula characterizing all counter-examples:
+"⊥"
+*/
+by contradiction /* from formulas */
+
+lemma A_CT_1_root_ca_auth_on_log_inj:
+========
+>>>>>>>> eecd20276527e4b69d3a558d6b9418dbd93dd7d8:ct/proofs/results/ct/proofs/--A_CT_1_ca_auth_on_log_uniq--default.spthy
+>>>>>>> eecd20276527e4b69d3a558d6b9418dbd93dd7d8
   all-traces "⊤"
 /*
 guarded formula characterizing all counter-examples:
@@ -4373,6 +4391,11 @@ guarded formula characterizing all counter-examples:
 */
 by sorry
 
+<<<<<<< HEAD
+=======
+<<<<<<<< HEAD:ct/proofs/results/ct/proofs/--A_CT_1_ca_auth_on_log_inj--default.spthy
+========
+>>>>>>> eecd20276527e4b69d3a558d6b9418dbd93dd7d8
 lemma A_CT_1_root_ca_auth_on_log_inj:
   all-traces "⊤"
 /*
@@ -4381,6 +4404,10 @@ guarded formula characterizing all counter-examples:
 */
 by sorry
 
+<<<<<<< HEAD
+=======
+>>>>>>>> eecd20276527e4b69d3a558d6b9418dbd93dd7d8:ct/proofs/results/ct/proofs/--A_CT_1_ca_auth_on_log_uniq--default.spthy
+>>>>>>> eecd20276527e4b69d3a558d6b9418dbd93dd7d8
 lemma A_CT_1_ca_auth_on_log_single:
   exists-trace
   "∃ CA M rootCA fields ca_fields #t0 #t1 #t2.

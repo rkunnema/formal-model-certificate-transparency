@@ -1,11 +1,19 @@
 {
   "task_id": "--T_CT_1_client_inclusionViol_inj--default",
   "warnings": [],
+<<<<<<< HEAD
+  "tamarin_timing": 16.09,
+  "wrapper_measures": {
+    "time": 16.274030447006226,
+    "avg_memory": 137.23207720588235,
+    "peak_memory": 151.86328125
+=======
   "tamarin_timing": 9.53,
   "wrapper_measures": {
     "time": 9.701901197433472,
     "avg_memory": 155.1796875,
     "peak_memory": 181.171875
+>>>>>>> eecd20276527e4b69d3a558d6b9418dbd93dd7d8
   },
   "output_spthy": "results/ct/proofs/--T_CT_1_client_inclusionViol_inj--default.spthy",
   "verified_lemma": {

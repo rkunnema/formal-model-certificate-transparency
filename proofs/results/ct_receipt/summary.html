@@ -79,7 +79,7 @@
     <h1>Batch Tamarin Execution Summary</h1>
 
     <div class="info">
-        <strong>Executed :</strong> 2026-04-18 14:47:11<br>
+        <strong>Executed :</strong> 2026-04-26 15:15:16<br>
         <strong>Full execution parameters :</strong> <a href="./execution_report.json">execution_report.json</a>
     </div>
 
@@ -141,11 +141,11 @@
             <tbody>
                 <tr>
                     <td>Total Executed Lemmas</td>
-                    <td>87</td>
+                    <td>78</td>
                 </tr>
                 <tr>
                     <td>Verified Lemmas</td>
-                    <td class="success">87 (100.0%)</td>
+                    <td class="success">70 (89.7%)</td>
                 </tr>
                 <tr>
                     <td>Falsified Lemmas</td>
@@ -161,7 +161,7 @@
                 </tr>
                 <tr>
                     <td>Lemmas killed by timeout</td>
-                    <td class="warning">0 (0.0%)</td>
+                    <td class="warning">8 (10.3%)</td>
                 </tr>
                 <tr>
                     <td>Lemmas killed for memory limit</td>
@@ -179,19 +179,19 @@
             <tbody>
                 <tr>
                     <td>Total runtime</td>
-                    <td>3972.6s</td>
+                    <td>5854.0s</td>
                 </tr>
                 <tr>
                     <td>Total peak memory used</td>
-                    <td>55.9GB</td>
+                    <td>100.1GB</td>
                 </tr>
                 <tr>
                     <td>Max peak memory used</td>
-                    <td>12.0GB</td>
+                    <td>4.2GB</td>
                 </tr>
                 <tr>
                     <td>Freshly executed tasks</td>
-                    <td class="darkinfo">87 (100.0%)</td>
+                    <td class="darkinfo">78 (100.0%)</td>
                 </tr>
                 <tr>
                     <td>Cache hits</td>
@@ -226,120 +226,10 @@
                     
                         <tr class="task-white">
                             
-                                <td rowspan="58">
+                                <td rowspan="49">
                                     <strong>normal</strong><br>
                                     <small style="color: #6c757d;">pregen_models/ct_receipt_pregen.spthy</small>
                                 </td>
-                            
-                            
-                                <td>san_InclusionCheck_NotFound_wo_MMD</td>
-                            
-                            <td>default (v1.10.0)</td>
-                            <td class="success">
-                                
-                                    ✅ Verified
-                                    
-                                
-                            </td>
-                            <td>184.2s</td>
-                            <td>12288.5MB</td>
-                            <td class="info">💻 No</td>
-                        </tr>
-                    
-                
-                    
-                    
-                    
-                    
-                        <tr class="task-white lemma-alt">
-                            
-                            
-                                <td>san_SCTReceiptCheck</td>
-                            
-                            <td>default (v1.10.0)</td>
-                            <td class="success">
-                                
-                                    ✅ Verified
-                                    
-                                
-                            </td>
-                            <td>61.9s</td>
-                            <td>696.9MB</td>
-                            <td class="info">💻 No</td>
-                        </tr>
-                    
-                
-                    
-                    
-                    
-                    
-                        <tr class="task-white">
-                            
-                            
-                                <td>san_monitorTrackSubject</td>
-                            
-                            <td>default (v1.10.0)</td>
-                            <td class="success">
-                                
-                                    ✅ Verified
-                                    
-                                
-                            </td>
-                            <td>35.8s</td>
-                            <td>371.5MB</td>
-                            <td class="info">💻 No</td>
-                        </tr>
-                    
-                
-                    
-                    
-                    
-                    
-                        <tr class="task-white lemma-alt">
-                            
-                            
-                                <td>san_PubKeyCertify</td>
-                            
-                            <td>default (v1.10.0)</td>
-                            <td class="success">
-                                
-                                    ✅ Verified
-                                    
-                                
-                            </td>
-                            <td>38.4s</td>
-                            <td>428.0MB</td>
-                            <td class="info">💻 No</td>
-                        </tr>
-                    
-                
-                    
-                    
-                    
-                    
-                        <tr class="task-white">
-                            
-                            
-                                <td>san_LoggerSnapshot_M</td>
-                            
-                            <td>default (v1.10.0)</td>
-                            <td class="success">
-                                
-                                    ✅ Verified
-                                    
-                                
-                            </td>
-                            <td>37.3s</td>
-                            <td>373.4MB</td>
-                            <td class="info">💻 No</td>
-                        </tr>
-                    
-                
-                    
-                    
-                    
-                    
-                        <tr class="task-white lemma-alt">
                             
                             
                                 <td>san_ChainValidator_Valid</td>
@@ -351,30 +241,8 @@
                                     
                                 
                             </td>
-                            <td>38.8s</td>
-                            <td>446.6MB</td>
-                            <td class="info">💻 No</td>
-                        </tr>
-                    
-                
-                    
-                    
-                    
-                    
-                        <tr class="task-white">
-                            
-                            
-                                <td>san_monitorVerifiesAppendOnly</td>
-                            
-                            <td>default (v1.10.0)</td>
-                            <td class="success">
-                                
-                                    ✅ Verified
-                                    
-                                
-                            </td>
-                            <td>48.8s</td>
-                            <td>449.8MB</td>
+                            <td>62.0s</td>
+                            <td>1139.4MB</td>
                             <td class="info">💻 No</td>
                         </tr>
                     
@@ -384,512 +252,6 @@
                     
                     
                         <tr class="task-white lemma-alt">
-                            
-                            
-                                <td>san_ClientInitiatesAuditing</td>
-                            
-                            <td>default (v1.10.0)</td>
-                            <td class="success">
-                                
-                                    ✅ Verified
-                                    
-                                
-                            </td>
-                            <td>29.3s</td>
-                            <td>162.6MB</td>
-                            <td class="info">💻 No</td>
-                        </tr>
-                    
-                
-                    
-                    
-                    
-                    
-                        <tr class="task-white">
-                            
-                            
-                                <td>san_monitorAudit_no_viol</td>
-                            
-                            <td>default (v1.10.0)</td>
-                            <td class="success">
-                                
-                                    ✅ Verified
-                                    
-                                
-                            </td>
-                            <td>44.9s</td>
-                            <td>490.8MB</td>
-                            <td class="info">💻 No</td>
-                        </tr>
-                    
-                
-                    
-                    
-                    
-                    
-                        <tr class="task-white lemma-alt">
-                            
-                            
-                                <td>san_Start_Log</td>
-                            
-                            <td>default (v1.10.0)</td>
-                            <td class="success">
-                                
-                                    ✅ Verified
-                                    
-                                
-                            </td>
-                            <td>35.5s</td>
-                            <td>426.0MB</td>
-                            <td class="info">💻 No</td>
-                        </tr>
-                    
-                
-                    
-                    
-                    
-                    
-                        <tr class="task-white">
-                            
-                            
-                                <td>san_ParticipantFindsInclusionViolation</td>
-                            
-                            <td>default (v1.10.0)</td>
-                            <td class="success">
-                                
-                                    ✅ Verified
-                                    
-                                
-                            </td>
-                            <td>36.2s</td>
-                            <td>378.9MB</td>
-                            <td class="info">💻 No</td>
-                        </tr>
-                    
-                
-                    
-                    
-                    
-                    
-                        <tr class="task-white lemma-alt">
-                            
-                            
-                                <td>san_ParticipantVerifiesInclusion</td>
-                            
-                            <td>default (v1.10.0)</td>
-                            <td class="success">
-                                
-                                    ✅ Verified
-                                    
-                                
-                            </td>
-                            <td>38.4s</td>
-                            <td>398.0MB</td>
-                            <td class="info">💻 No</td>
-                        </tr>
-                    
-                
-                    
-                    
-                    
-                    
-                        <tr class="task-white">
-                            
-                            
-                                <td>san_InclusionCheck_Found_wo_MMD</td>
-                            
-                            <td>default (v1.10.0)</td>
-                            <td class="success">
-                                
-                                    ✅ Verified
-                                    
-                                
-                            </td>
-                            <td>46.4s</td>
-                            <td>517.1MB</td>
-                            <td class="info">💻 No</td>
-                        </tr>
-                    
-                
-                    
-                    
-                    
-                    
-                        <tr class="task-white lemma-alt">
-                            
-                            
-                                <td>san_MonitorStoresSnapshot</td>
-                            
-                            <td>default (v1.10.0)</td>
-                            <td class="success">
-                                
-                                    ✅ Verified
-                                    
-                                
-                            </td>
-                            <td>35.3s</td>
-                            <td>368.1MB</td>
-                            <td class="info">💻 No</td>
-                        </tr>
-                    
-                
-                    
-                    
-                    
-                    
-                        <tr class="task-white">
-                            
-                            
-                                <td>san_PreCertify</td>
-                            
-                            <td>default (v1.10.0)</td>
-                            <td class="success">
-                                
-                                    ✅ Verified
-                                    
-                                
-                            </td>
-                            <td>35.4s</td>
-                            <td>371.8MB</td>
-                            <td class="info">💻 No</td>
-                        </tr>
-                    
-                
-                    
-                    
-                    
-                    
-                        <tr class="task-white lemma-alt">
-                            
-                            
-                                <td>san_ClientVerifiesAppendOnly</td>
-                            
-                            <td>default (v1.10.0)</td>
-                            <td class="success">
-                                
-                                    ✅ Verified
-                                    
-                                
-                            </td>
-                            <td>51.1s</td>
-                            <td>732.6MB</td>
-                            <td class="info">💻 No</td>
-                        </tr>
-                    
-                
-                    
-                    
-                    
-                    
-                        <tr class="task-white">
-                            
-                            
-                                <td>san_Domain_Owner_Init</td>
-                            
-                            <td>default (v1.10.0)</td>
-                            <td class="success">
-                                
-                                    ✅ Verified
-                                    
-                                
-                            </td>
-                            <td>29.2s</td>
-                            <td>160.5MB</td>
-                            <td class="info">💻 No</td>
-                        </tr>
-                    
-                
-                    
-                    
-                    
-                    
-                        <tr class="task-white lemma-alt">
-                            
-                            
-                                <td>san_monitorAudit_CA_Viol</td>
-                            
-                            <td>default (v1.10.0)</td>
-                            <td class="success">
-                                
-                                    ✅ Verified
-                                    
-                                
-                            </td>
-                            <td>39.2s</td>
-                            <td>408.7MB</td>
-                            <td class="info">💻 No</td>
-                        </tr>
-                    
-                
-                    
-                    
-                    
-                    
-                        <tr class="task-white">
-                            
-                            
-                                <td>san_StartMonitoring</td>
-                            
-                            <td>default (v1.10.0)</td>
-                            <td class="success">
-                                
-                                    ✅ Verified
-                                    
-                                
-                            </td>
-                            <td>35.1s</td>
-                            <td>361.0MB</td>
-                            <td class="info">💻 No</td>
-                        </tr>
-                    
-                
-                    
-                    
-                    
-                    
-                        <tr class="task-white lemma-alt">
-                            
-                            
-                                <td>san_domainOwnerVerifiesReceipt_1</td>
-                            
-                            <td>default (v1.10.0)</td>
-                            <td class="success">
-                                
-                                    ✅ Verified
-                                    
-                                
-                            </td>
-                            <td>45.3s</td>
-                            <td>479.2MB</td>
-                            <td class="info">💻 No</td>
-                        </tr>
-                    
-                
-                    
-                    
-                    
-                    
-                        <tr class="task-white">
-                            
-                            
-                                <td>san_MonitorCheck_NotFound</td>
-                            
-                            <td>default (v1.10.0)</td>
-                            <td class="success">
-                                
-                                    ✅ Verified
-                                    
-                                
-                            </td>
-                            <td>83.1s</td>
-                            <td>1364.8MB</td>
-                            <td class="info">💻 No</td>
-                        </tr>
-                    
-                
-                    
-                    
-                    
-                    
-                        <tr class="task-white lemma-alt">
-                            
-                            
-                                <td>san_ClientStoresSnapshot</td>
-                            
-                            <td>default (v1.10.0)</td>
-                            <td class="success">
-                                
-                                    ✅ Verified
-                                    
-                                
-                            </td>
-                            <td>36.6s</td>
-                            <td>364.6MB</td>
-                            <td class="info">💻 No</td>
-                        </tr>
-                    
-                
-                    
-                    
-                    
-                    
-                        <tr class="task-white">
-                            
-                            
-                                <td>san_ProofFetching_M</td>
-                            
-                            <td>default (v1.10.0)</td>
-                            <td class="success">
-                                
-                                    ✅ Verified
-                                    
-                                
-                            </td>
-                            <td>35.5s</td>
-                            <td>392.7MB</td>
-                            <td class="info">💻 No</td>
-                        </tr>
-                    
-                
-                    
-                    
-                    
-                    
-                        <tr class="task-white lemma-alt">
-                            
-                            
-                                <td>san_InclusionCheck_Found</td>
-                            
-                            <td>default (v1.10.0)</td>
-                            <td class="success">
-                                
-                                    ✅ Verified
-                                    
-                                
-                            </td>
-                            <td>46.8s</td>
-                            <td>505.6MB</td>
-                            <td class="info">💻 No</td>
-                        </tr>
-                    
-                
-                    
-                    
-                    
-                    
-                        <tr class="task-white">
-                            
-                            
-                                <td>san_Start_Log_malicious</td>
-                            
-                            <td>default (v1.10.0)</td>
-                            <td class="success">
-                                
-                                    ✅ Verified
-                                    
-                                
-                            </td>
-                            <td>35.8s</td>
-                            <td>371.6MB</td>
-                            <td class="info">💻 No</td>
-                        </tr>
-                    
-                
-                    
-                    
-                    
-                    
-                        <tr class="task-white lemma-alt">
-                            
-                            
-                                <td>san_SCTAuditCheck</td>
-                            
-                            <td>default (v1.10.0)</td>
-                            <td class="success">
-                                
-                                    ✅ Verified
-                                    
-                                
-                            </td>
-                            <td>44.6s</td>
-                            <td>613.6MB</td>
-                            <td class="info">💻 No</td>
-                        </tr>
-                    
-                
-                    
-                    
-                    
-                    
-                        <tr class="task-white">
-                            
-                            
-                                <td>san_ProofFetching_C</td>
-                            
-                            <td>default (v1.10.0)</td>
-                            <td class="success">
-                                
-                                    ✅ Verified
-                                    
-                                
-                            </td>
-                            <td>35.4s</td>
-                            <td>373.4MB</td>
-                            <td class="info">💻 No</td>
-                        </tr>
-                    
-                
-                    
-                    
-                    
-                    
-                        <tr class="task-white lemma-alt">
-                            
-                            
-                                <td>san_compromiseRootCA</td>
-                            
-                            <td>default (v1.10.0)</td>
-                            <td class="success">
-                                
-                                    ✅ Verified
-                                    
-                                
-                            </td>
-                            <td>35.3s</td>
-                            <td>379.5MB</td>
-                            <td class="info">💻 No</td>
-                        </tr>
-                    
-                
-                    
-                    
-                    
-                    
-                        <tr class="task-white">
-                            
-                            
-                                <td>san_Logger_Init</td>
-                            
-                            <td>default (v1.10.0)</td>
-                            <td class="success">
-                                
-                                    ✅ Verified
-                                    
-                                
-                            </td>
-                            <td>28.8s</td>
-                            <td>156.7MB</td>
-                            <td class="info">💻 No</td>
-                        </tr>
-                    
-                
-                    
-                    
-                    
-                    
-                        <tr class="task-white lemma-alt">
-                            
-                            
-                                <td>san_Intermediate_CA_Init</td>
-                            
-                            <td>default (v1.10.0)</td>
-                            <td class="success">
-                                
-                                    ✅ Verified
-                                    
-                                
-                            </td>
-                            <td>35.3s</td>
-                            <td>364.6MB</td>
-                            <td class="info">💻 No</td>
-                        </tr>
-                    
-                
-                    
-                    
-                    
-                    
-                        <tr class="task-white">
                             
                             
                                 <td>san_add_preC_to_log</td>
@@ -901,30 +263,8 @@
                                     
                                 
                             </td>
-                            <td>38.2s</td>
-                            <td>406.2MB</td>
-                            <td class="info">💻 No</td>
-                        </tr>
-                    
-                
-                    
-                    
-                    
-                    
-                        <tr class="task-white lemma-alt">
-                            
-                            
-                                <td>san_DomainOwnerContract</td>
-                            
-                            <td>default (v1.10.0)</td>
-                            <td class="success">
-                                
-                                    ✅ Verified
-                                    
-                                
-                            </td>
-                            <td>36.1s</td>
-                            <td>369.3MB</td>
+                            <td>61.3s</td>
+                            <td>1110.2MB</td>
                             <td class="info">💻 No</td>
                         </tr>
                     
@@ -934,6 +274,28 @@
                     
                     
                         <tr class="task-white">
+                            
+                            
+                                <td>san_ConsultDocumentation_Success</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>54.2s</td>
+                            <td>1096.3MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white lemma-alt">
                             
                             
                                 <td>san_forge_log_view</td>
@@ -945,118 +307,8 @@
                                     
                                 
                             </td>
-                            <td>36.2s</td>
-                            <td>380.0MB</td>
-                            <td class="info">💻 No</td>
-                        </tr>
-                    
-                
-                    
-                    
-                    
-                    
-                        <tr class="task-white lemma-alt">
-                            
-                            
-                                <td>san_ClientFindsAppendOnlyViolation</td>
-                            
-                            <td>default (v1.10.0)</td>
-                            <td class="success">
-                                
-                                    ✅ Verified
-                                    
-                                
-                            </td>
-                            <td>40.6s</td>
-                            <td>408.2MB</td>
-                            <td class="info">💻 No</td>
-                        </tr>
-                    
-                
-                    
-                    
-                    
-                    
-                        <tr class="task-white">
-                            
-                            
-                                <td>san_signReceipt</td>
-                            
-                            <td>default (v1.10.0)</td>
-                            <td class="success">
-                                
-                                    ✅ Verified
-                                    
-                                
-                            </td>
-                            <td>48.8s</td>
-                            <td>466.9MB</td>
-                            <td class="info">💻 No</td>
-                        </tr>
-                    
-                
-                    
-                    
-                    
-                    
-                        <tr class="task-white lemma-alt">
-                            
-                            
-                                <td>san_monitorFindsRogueCertificate_Sleep</td>
-                            
-                            <td>default (v1.10.0)</td>
-                            <td class="success">
-                                
-                                    ✅ Verified
-                                    
-                                
-                            </td>
-                            <td>37.8s</td>
-                            <td>400.5MB</td>
-                            <td class="info">💻 No</td>
-                        </tr>
-                    
-                
-                    
-                    
-                    
-                    
-                        <tr class="task-white">
-                            
-                            
-                                <td>san_domainOwnerBlamesMonitor</td>
-                            
-                            <td>default (v1.10.0)</td>
-                            <td class="success">
-                                
-                                    ✅ Verified
-                                    
-                                
-                            </td>
-                            <td>45.3s</td>
-                            <td>554.5MB</td>
-                            <td class="info">💻 No</td>
-                        </tr>
-                    
-                
-                    
-                    
-                    
-                    
-                        <tr class="task-white lemma-alt">
-                            
-                            
-                                <td>san_compromiseCA</td>
-                            
-                            <td>default (v1.10.0)</td>
-                            <td class="success">
-                                
-                                    ✅ Verified
-                                    
-                                
-                            </td>
-                            <td>35.0s</td>
-                            <td>368.0MB</td>
+                            <td>53.2s</td>
+                            <td>1100.3MB</td>
                             <td class="info">💻 No</td>
                         </tr>
                     
@@ -1077,8 +329,8 @@
                                     
                                 
                             </td>
-                            <td>44.2s</td>
-                            <td>506.8MB</td>
+                            <td>62.7s</td>
+                            <td>1129.6MB</td>
                             <td class="info">💻 No</td>
                         </tr>
                     
@@ -1090,7 +342,7 @@
                         <tr class="task-white lemma-alt">
                             
                             
-                                <td>san_ConsultDocumentation_Fails</td>
+                                <td>san_PreCertify</td>
                             
                             <td>default (v1.10.0)</td>
                             <td class="success">
@@ -1099,184 +351,8 @@
                                     
                                 
                             </td>
-                            <td>35.8s</td>
-                            <td>384.1MB</td>
-                            <td class="info">💻 No</td>
-                        </tr>
-                    
-                
-                    
-                    
-                    
-                    
-                        <tr class="task-white">
-                            
-                            
-                                <td>san_monitorCanFindCertificate</td>
-                            
-                            <td>default (v1.10.0)</td>
-                            <td class="success">
-                                
-                                    ✅ Verified
-                                    
-                                
-                            </td>
-                            <td>42.4s</td>
-                            <td>471.1MB</td>
-                            <td class="info">💻 No</td>
-                        </tr>
-                    
-                
-                    
-                    
-                    
-                    
-                        <tr class="task-white lemma-alt">
-                            
-                            
-                                <td>san_monitorFindsRogueCertificate</td>
-                            
-                            <td>default (v1.10.0)</td>
-                            <td class="success">
-                                
-                                    ✅ Verified
-                                    
-                                
-                            </td>
-                            <td>38.0s</td>
-                            <td>389.8MB</td>
-                            <td class="info">💻 No</td>
-                        </tr>
-                    
-                
-                    
-                    
-                    
-                    
-                        <tr class="task-white">
-                            
-                            
-                                <td>san_monitorFindsAppendOnlyViolation</td>
-                            
-                            <td>default (v1.10.0)</td>
-                            <td class="success">
-                                
-                                    ✅ Verified
-                                    
-                                
-                            </td>
-                            <td>41.2s</td>
-                            <td>417.7MB</td>
-                            <td class="info">💻 No</td>
-                        </tr>
-                    
-                
-                    
-                    
-                    
-                    
-                        <tr class="task-white lemma-alt">
-                            
-                            
-                                <td>san_compromiseMonitor</td>
-                            
-                            <td>default (v1.10.0)</td>
-                            <td class="success">
-                                
-                                    ✅ Verified
-                                    
-                                
-                            </td>
-                            <td>35.2s</td>
-                            <td>361.6MB</td>
-                            <td class="info">💻 No</td>
-                        </tr>
-                    
-                
-                    
-                    
-                    
-                    
-                        <tr class="task-white">
-                            
-                            
-                                <td>san_domainOwnerVerifiesReceipt_2</td>
-                            
-                            <td>default (v1.10.0)</td>
-                            <td class="success">
-                                
-                                    ✅ Verified
-                                    
-                                
-                            </td>
-                            <td>50.7s</td>
-                            <td>542.8MB</td>
-                            <td class="info">💻 No</td>
-                        </tr>
-                    
-                
-                    
-                    
-                    
-                    
-                        <tr class="task-white lemma-alt">
-                            
-                            
-                                <td>san_ChainValidator_Invalid</td>
-                            
-                            <td>default (v1.10.0)</td>
-                            <td class="success">
-                                
-                                    ✅ Verified
-                                    
-                                
-                            </td>
-                            <td>35.8s</td>
-                            <td>377.1MB</td>
-                            <td class="info">💻 No</td>
-                        </tr>
-                    
-                
-                    
-                    
-                    
-                    
-                        <tr class="task-white">
-                            
-                            
-                                <td>san_SCTAuditTransparencyCheck_NotFound</td>
-                            
-                            <td>default (v1.10.0)</td>
-                            <td class="success">
-                                
-                                    ✅ Verified
-                                    
-                                
-                            </td>
-                            <td>59.3s</td>
-                            <td>780.7MB</td>
-                            <td class="info">💻 No</td>
-                        </tr>
-                    
-                
-                    
-                    
-                    
-                    
-                        <tr class="task-white lemma-alt">
-                            
-                            
-                                <td>san_monitorCannotFindCertificate</td>
-                            
-                            <td>default (v1.10.0)</td>
-                            <td class="success">
-                                
-                                    ✅ Verified
-                                    
-                                
-                            </td>
-                            <td>38.3s</td>
-                            <td>365.8MB</td>
+                            <td>53.4s</td>
+                            <td>1082.5MB</td>
                             <td class="info">💻 No</td>
                         </tr>
                     
@@ -1297,8 +373,8 @@
                                     
                                 
                             </td>
-                            <td>29.7s</td>
-                            <td>162.9MB</td>
+                            <td>23.5s</td>
+                            <td>162.8MB</td>
                             <td class="info">💻 No</td>
                         </tr>
                     
@@ -1310,7 +386,7 @@
                         <tr class="task-white lemma-alt">
                             
                             
-                                <td>san_LoggerSnapshot_C</td>
+                                <td>san_ConsultDocumentation_Fails</td>
                             
                             <td>default (v1.10.0)</td>
                             <td class="success">
@@ -1319,8 +395,8 @@
                                     
                                 
                             </td>
-                            <td>33.3s</td>
-                            <td>367.7MB</td>
+                            <td>53.6s</td>
+                            <td>1137.9MB</td>
                             <td class="info">💻 No</td>
                         </tr>
                     
@@ -1332,7 +408,7 @@
                         <tr class="task-white">
                             
                             
-                                <td>san_SCTAuditTransparencyCheck_Found</td>
+                                <td>san_Start_Log</td>
                             
                             <td>default (v1.10.0)</td>
                             <td class="success">
@@ -1341,8 +417,8 @@
                                     
                                 
                             </td>
-                            <td>43.3s</td>
-                            <td>492.6MB</td>
+                            <td>52.9s</td>
+                            <td>1106.5MB</td>
                             <td class="info">💻 No</td>
                         </tr>
                     
@@ -1354,7 +430,7 @@
                         <tr class="task-white lemma-alt">
                             
                             
-                                <td>san_MonitorCheck_Found</td>
+                                <td>san_ParticipantFindsInclusionViolation</td>
                             
                             <td>default (v1.10.0)</td>
                             <td class="success">
@@ -1363,8 +439,8 @@
                                     
                                 
                             </td>
-                            <td>54.5s</td>
-                            <td>607.4MB</td>
+                            <td>53.6s</td>
+                            <td>1104.9MB</td>
                             <td class="info">💻 No</td>
                         </tr>
                     
@@ -1376,7 +452,7 @@
                         <tr class="task-white">
                             
                             
-                                <td>san_clientReceivesReceipt</td>
+                                <td>san_LoggerSnapshot_M</td>
                             
                             <td>default (v1.10.0)</td>
                             <td class="success">
@@ -1385,8 +461,8 @@
                                     
                                 
                             </td>
-                            <td>55.0s</td>
-                            <td>469.0MB</td>
+                            <td>53.3s</td>
+                            <td>1067.8MB</td>
                             <td class="info">💻 No</td>
                         </tr>
                     
@@ -1398,7 +474,7 @@
                         <tr class="task-white lemma-alt">
                             
                             
-                                <td>san_compromiseLogger</td>
+                                <td>san_monitorVerifiesAppendOnly</td>
                             
                             <td>default (v1.10.0)</td>
                             <td class="success">
@@ -1407,52 +483,8 @@
                                     
                                 
                             </td>
-                            <td>35.6s</td>
-                            <td>385.5MB</td>
-                            <td class="info">💻 No</td>
-                        </tr>
-                    
-                
-                    
-                    
-                    
-                    
-                        <tr class="task-white">
-                            
-                            
-                                <td>san_Root_CA_Init</td>
-                            
-                            <td>default (v1.10.0)</td>
-                            <td class="success">
-                                
-                                    ✅ Verified
-                                    
-                                
-                            </td>
-                            <td>28.9s</td>
-                            <td>161.2MB</td>
-                            <td class="info">💻 No</td>
-                        </tr>
-                    
-                
-                    
-                    
-                    
-                    
-                        <tr class="task-white lemma-alt">
-                            
-                            
-                                <td>san_ConsultDocumentation_Success</td>
-                            
-                            <td>default (v1.10.0)</td>
-                            <td class="success">
-                                
-                                    ✅ Verified
-                                    
-                                
-                            </td>
-                            <td>36.2s</td>
-                            <td>377.1MB</td>
+                            <td>67.1s</td>
+                            <td>1107.8MB</td>
                             <td class="info">💻 No</td>
                         </tr>
                     
@@ -1473,8 +505,8 @@
                                     
                                 
                             </td>
-                            <td>40.0s</td>
-                            <td>418.4MB</td>
+                            <td>61.2s</td>
+                            <td>1110.9MB</td>
                             <td class="info">💻 No</td>
                         </tr>
                     
@@ -1486,7 +518,7 @@
                         <tr class="task-white lemma-alt">
                             
                             
-                                <td>san_InclusionCheck_NotFound</td>
+                                <td>san_SCTReceiptCheck</td>
                             
                             <td>default (v1.10.0)</td>
                             <td class="success">
@@ -1495,8 +527,774 @@
                                     
                                 
                             </td>
-                            <td>91.9s</td>
-                            <td>1325.6MB</td>
+                            <td>141.0s</td>
+                            <td>2274.8MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white">
+                            
+                            
+                                <td>san_DomainOwnerContract</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>52.9s</td>
+                            <td>1098.0MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white lemma-alt">
+                            
+                            
+                                <td>san_monitorFindsRogueCertificate</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>56.1s</td>
+                            <td>1112.4MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white">
+                            
+                            
+                                <td>san_ClientInitiatesAuditing</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>61.1s</td>
+                            <td>1103.3MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white lemma-alt">
+                            
+                            
+                                <td>san_ParticipantVerifiesInclusion</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>55.5s</td>
+                            <td>1111.6MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white">
+                            
+                            
+                                <td>san_monitorFindsAppendOnlyViolation</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>58.7s</td>
+                            <td>1138.4MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white lemma-alt">
+                            
+                            
+                                <td>san_Root_CA_Init</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>23.5s</td>
+                            <td>158.5MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white">
+                            
+                            
+                                <td>san_StartMonitoring</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>53.0s</td>
+                            <td>1113.8MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white lemma-alt">
+                            
+                            
+                                <td>san_Intermediate_CA_Init</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>53.1s</td>
+                            <td>1145.6MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white">
+                            
+                            
+                                <td>san_Logger_Init</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>23.1s</td>
+                            <td>158.9MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white lemma-alt">
+                            
+                            
+                                <td>san_ProofFetching_C</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>53.1s</td>
+                            <td>1122.4MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white">
+                            
+                            
+                                <td>san_ClientVerifiesAppendOnly</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>69.2s</td>
+                            <td>1389.4MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white lemma-alt">
+                            
+                            
+                                <td>san_ClientStoresSnapshot</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>53.4s</td>
+                            <td>1076.9MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white">
+                            
+                            
+                                <td>san_domainOwnerBlamesMonitor</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="warning">
+                                ⏳ Timed Out
+                                
+                            </td>
+                            <td>240.4s</td>
+                            <td>2991.6MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white lemma-alt">
+                            
+                            
+                                <td>san_compromiseMonitor</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>53.3s</td>
+                            <td>1077.8MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white">
+                            
+                            
+                                <td>san_monitorCanFindCertificate</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>59.3s</td>
+                            <td>1131.9MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white lemma-alt">
+                            
+                            
+                                <td>san_MonitorStoresSnapshot</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>53.4s</td>
+                            <td>1097.8MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white">
+                            
+                            
+                                <td>san_monitorAudit_no_viol</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>64.6s</td>
+                            <td>1142.1MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white lemma-alt">
+                            
+                            
+                                <td>san_PubKeyCertify</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>56.9s</td>
+                            <td>1123.0MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white">
+                            
+                            
+                                <td>san_compromiseRootCA</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>53.0s</td>
+                            <td>1110.0MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white lemma-alt">
+                            
+                            
+                                <td>san_ClientFindsAppendOnlyViolation</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>58.8s</td>
+                            <td>1123.1MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white">
+                            
+                            
+                                <td>san_Domain_Owner_Init</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>23.4s</td>
+                            <td>162.5MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white lemma-alt">
+                            
+                            
+                                <td>san_ChainValidator_Invalid</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>53.4s</td>
+                            <td>1099.8MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white">
+                            
+                            
+                                <td>san_monitorTrackSubject</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>53.2s</td>
+                            <td>1088.3MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white lemma-alt">
+                            
+                            
+                                <td>san_clientReceivesReceipt</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>136.8s</td>
+                            <td>1844.1MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white">
+                            
+                            
+                                <td>san_Start_Log_malicious</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>53.5s</td>
+                            <td>1107.1MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white lemma-alt">
+                            
+                            
+                                <td>san_ProofFetching_M</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>53.2s</td>
+                            <td>1098.9MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white">
+                            
+                            
+                                <td>san_domainOwnerVerifiesReceipt_2</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>124.3s</td>
+                            <td>2057.3MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white lemma-alt">
+                            
+                            
+                                <td>san_compromiseCA</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>53.5s</td>
+                            <td>1109.0MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white">
+                            
+                            
+                                <td>san_signReceipt</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>73.7s</td>
+                            <td>1253.5MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white lemma-alt">
+                            
+                            
+                                <td>san_monitorAudit_CA_Viol</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>75.6s</td>
+                            <td>1112.0MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white">
+                            
+                            
+                                <td>san_LoggerSnapshot_C</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>62.9s</td>
+                            <td>1119.0MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white lemma-alt">
+                            
+                            
+                                <td>san_monitorCannotFindCertificate</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>64.5s</td>
+                            <td>1090.6MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white">
+                            
+                            
+                                <td>san_compromiseLogger</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>58.7s</td>
+                            <td>1086.3MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white lemma-alt">
+                            
+                            
+                                <td>san_domainOwnerVerifiesReceipt_1</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="warning">
+                                ⏳ Timed Out
+                                
+                            </td>
+                            <td>240.7s</td>
+                            <td>2331.1MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white">
+                            
+                            
+                                <td>san_monitorFindsRogueCertificate_Sleep</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>63.3s</td>
+                            <td>1092.6MB</td>
                             <td class="info">💻 No</td>
                         </tr>
                     
@@ -1518,7 +1316,7 @@
                                 </td>
                             
                             
-                                <td>A_Ext_uniq_helper_intm_CA</td>
+                                <td>A_uniq1_helper</td>
                             
                             <td>default (v1.10.0)</td>
                             <td class="success">
@@ -1527,8 +1325,8 @@
                                     
                                 
                             </td>
-                            <td>53.6s</td>
-                            <td>475.9MB</td>
+                            <td>90.2s</td>
+                            <td>1832.9MB</td>
                             <td class="info">💻 No</td>
                         </tr>
                     
@@ -1540,7 +1338,7 @@
                         <tr class="task-light-gray lemma-alt">
                             
                             
-                                <td>A_Ext_uniq_helper_root</td>
+                                <td>A_uniq2_helper</td>
                             
                             <td>default (v1.10.0)</td>
                             <td class="success">
@@ -1549,8 +1347,8 @@
                                     
                                 
                             </td>
-                            <td>41.6s</td>
-                            <td>372.9MB</td>
+                            <td>62.5s</td>
+                            <td>1103.3MB</td>
                             <td class="info">💻 No</td>
                         </tr>
                     
@@ -1571,8 +1369,8 @@
                                     
                                 
                             </td>
-                            <td>54.3s</td>
-                            <td>436.8MB</td>
+                            <td>83.0s</td>
+                            <td>1120.6MB</td>
                             <td class="info">💻 No</td>
                         </tr>
                     
@@ -1593,8 +1391,8 @@
                                     
                                 
                             </td>
-                            <td>52.2s</td>
-                            <td>438.6MB</td>
+                            <td>81.2s</td>
+                            <td>1144.3MB</td>
                             <td class="info">💻 No</td>
                         </tr>
                     
@@ -1615,8 +1413,8 @@
                                     
                                 
                             </td>
-                            <td>34.4s</td>
-                            <td>542.7MB</td>
+                            <td>60.0s</td>
+                            <td>1144.9MB</td>
                             <td class="info">💻 No</td>
                         </tr>
                     
@@ -1637,8 +1435,8 @@
                                     
                                 
                             </td>
-                            <td>35.6s</td>
-                            <td>461.2MB</td>
+                            <td>62.5s</td>
+                            <td>1103.9MB</td>
                             <td class="info">💻 No</td>
                         </tr>
                     
@@ -1659,8 +1457,8 @@
                                     
                                 
                             </td>
-                            <td>35.6s</td>
-                            <td>443.1MB</td>
+                            <td>62.6s</td>
+                            <td>1104.4MB</td>
                             <td class="info">💻 No</td>
                         </tr>
                     
@@ -1681,8 +1479,8 @@
                                     
                                 
                             </td>
-                            <td>35.4s</td>
-                            <td>445.7MB</td>
+                            <td>63.3s</td>
+                            <td>1093.3MB</td>
                             <td class="info">💻 No</td>
                         </tr>
                     
@@ -1703,8 +1501,8 @@
                                     
                                 
                             </td>
-                            <td>35.5s</td>
-                            <td>484.2MB</td>
+                            <td>63.9s</td>
+                            <td>1093.5MB</td>
                             <td class="info">💻 No</td>
                         </tr>
                     
@@ -1725,8 +1523,8 @@
                                     
                                 
                             </td>
-                            <td>32.4s</td>
-                            <td>395.0MB</td>
+                            <td>59.3s</td>
+                            <td>1141.9MB</td>
                             <td class="info">💻 No</td>
                         </tr>
                     
@@ -1747,8 +1545,8 @@
                                     
                                 
                             </td>
-                            <td>32.3s</td>
-                            <td>390.7MB</td>
+                            <td>60.8s</td>
+                            <td>1105.1MB</td>
                             <td class="info">💻 No</td>
                         </tr>
                     
@@ -1769,8 +1567,8 @@
                                     
                                 
                             </td>
-                            <td>32.3s</td>
-                            <td>370.7MB</td>
+                            <td>59.1s</td>
+                            <td>1108.3MB</td>
                             <td class="info">💻 No</td>
                         </tr>
                     
@@ -1791,8 +1589,8 @@
                                     
                                 
                             </td>
-                            <td>32.7s</td>
-                            <td>374.1MB</td>
+                            <td>58.1s</td>
+                            <td>1122.9MB</td>
                             <td class="info">💻 No</td>
                         </tr>
                     
@@ -1813,8 +1611,8 @@
                                     
                                 
                             </td>
-                            <td>26.9s</td>
-                            <td>157.9MB</td>
+                            <td>25.5s</td>
+                            <td>161.2MB</td>
                             <td class="info">💻 No</td>
                         </tr>
                     
@@ -1835,8 +1633,8 @@
                                     
                                 
                             </td>
-                            <td>26.9s</td>
-                            <td>161.7MB</td>
+                            <td>25.6s</td>
+                            <td>158.3MB</td>
                             <td class="info">💻 No</td>
                         </tr>
                     
@@ -1857,8 +1655,8 @@
                                     
                                 
                             </td>
-                            <td>37.3s</td>
-                            <td>445.9MB</td>
+                            <td>63.5s</td>
+                            <td>1207.4MB</td>
                             <td class="info">💻 No</td>
                         </tr>
                     
@@ -1879,8 +1677,8 @@
                                     
                                 
                             </td>
-                            <td>37.2s</td>
-                            <td>430.8MB</td>
+                            <td>63.5s</td>
+                            <td>1194.4MB</td>
                             <td class="info">💻 No</td>
                         </tr>
                     
@@ -1901,8 +1699,8 @@
                                     
                                 
                             </td>
-                            <td>27.1s</td>
-                            <td>165.2MB</td>
+                            <td>25.9s</td>
+                            <td>159.5MB</td>
                             <td class="info">💻 No</td>
                         </tr>
                     
@@ -1923,8 +1721,8 @@
                                     
                                 
                             </td>
-                            <td>26.8s</td>
-                            <td>159.5MB</td>
+                            <td>25.3s</td>
+                            <td>159.6MB</td>
                             <td class="info">💻 No</td>
                         </tr>
                     
@@ -1945,8 +1743,8 @@
                                     
                                 
                             </td>
-                            <td>32.6s</td>
-                            <td>349.0MB</td>
+                            <td>58.0s</td>
+                            <td>1090.3MB</td>
                             <td class="info">💻 No</td>
                         </tr>
                     
@@ -1967,8 +1765,8 @@
                                     
                                 
                             </td>
-                            <td>32.5s</td>
-                            <td>366.0MB</td>
+                            <td>59.4s</td>
+                            <td>1100.5MB</td>
                             <td class="info">💻 No</td>
                         </tr>
                     
@@ -1999,8 +1797,8 @@
                                     
                                 
                             </td>
-                            <td>48.9s</td>
-                            <td>521.7MB</td>
+                            <td>128.7s</td>
+                            <td>2491.6MB</td>
                             <td class="info">💻 No</td>
                         </tr>
                     
@@ -2021,8 +1819,8 @@
                                     
                                 
                             </td>
-                            <td>50.6s</td>
-                            <td>597.6MB</td>
+                            <td>132.2s</td>
+                            <td>3469.8MB</td>
                             <td class="info">💻 No</td>
                         </tr>
                     
@@ -2037,14 +1835,12 @@
                                 <td>A_Receipt_receipt_3_suff</td>
                             
                             <td>default (v1.10.0)</td>
-                            <td class="success">
-                                
-                                    ✅ Verified
-                                    
+                            <td class="warning">
+                                ⏳ Timed Out
                                 
                             </td>
-                            <td>88.9s</td>
-                            <td>898.7MB</td>
+                            <td>180.7s</td>
+                            <td>3444.5MB</td>
                             <td class="info">💻 No</td>
                         </tr>
                     
@@ -2059,14 +1855,12 @@
                                 <td>A_Receipt_receipt_4_suff</td>
                             
                             <td>default (v1.10.0)</td>
-                            <td class="success">
-                                
-                                    ✅ Verified
-                                    
+                            <td class="warning">
+                                ⏳ Timed Out
                                 
                             </td>
-                            <td>108.2s</td>
-                            <td>1818.6MB</td>
+                            <td>180.6s</td>
+                            <td>4294.6MB</td>
                             <td class="info">💻 No</td>
                         </tr>
                     
@@ -2081,14 +1875,12 @@
                                 <td>A_Receipt_receipt_1_single</td>
                             
                             <td>default (v1.10.0)</td>
-                            <td class="success">
-                                
-                                    ✅ Verified
-                                    
+                            <td class="warning">
+                                ⏳ Timed Out
                                 
                             </td>
-                            <td>62.3s</td>
-                            <td>539.3MB</td>
+                            <td>180.5s</td>
+                            <td>2142.6MB</td>
                             <td class="info">💻 No</td>
                         </tr>
                     
@@ -2103,14 +1895,12 @@
                                 <td>A_Receipt_receipt_2_single</td>
                             
                             <td>default (v1.10.0)</td>
-                            <td class="success">
-                                
-                                    ✅ Verified
-                                    
+                            <td class="warning">
+                                ⏳ Timed Out
                                 
                             </td>
-                            <td>63.6s</td>
-                            <td>646.2MB</td>
+                            <td>180.7s</td>
+                            <td>2229.3MB</td>
                             <td class="info">💻 No</td>
                         </tr>
                     
@@ -2125,14 +1915,12 @@
                                 <td>A_Receipt_receipt_3_single</td>
                             
                             <td>default (v1.10.0)</td>
-                            <td class="success">
-                                
-                                    ✅ Verified
-                                    
+                            <td class="warning">
+                                ⏳ Timed Out
                                 
                             </td>
-                            <td>147.6s</td>
-                            <td>3461.6MB</td>
+                            <td>180.6s</td>
+                            <td>3329.2MB</td>
                             <td class="info">💻 No</td>
                         </tr>
                     
@@ -2147,14 +1935,12 @@
                                 <td>A_Receipt_receipt_4_single</td>
                             
                             <td>default (v1.10.0)</td>
-                            <td class="success">
-                                
-                                    ✅ Verified
-                                    
+                            <td class="warning">
+                                ⏳ Timed Out
                                 
                             </td>
-                            <td>96.2s</td>
-                            <td>2999.4MB</td>
+                            <td>180.7s</td>
+                            <td>3753.8MB</td>
                             <td class="info">💻 No</td>
                         </tr>
                     
@@ -2164,12 +1950,77 @@
     </table>
 
     
+    <h2>🚨 Error Report</h2>
+    
 
+    
+    <div class="error-details">
+        <h3><span class="warning">⏳ TIMED OUT :</span> normal</h3>
+        <h4>On lemma : san_domainOwnerBlamesMonitor, with tamarin-prover : default (v1.10.0)</h4>
+        <p>Task timed out during execution</p>
+        <pre><code class="zsh">Process timed out</code></pre>
+    </div>
+    
+    <div class="error-details">
+        <h3><span class="warning">⏳ TIMED OUT :</span> normal</h3>
+        <h4>On lemma : san_domainOwnerVerifiesReceipt_1, with tamarin-prover : default (v1.10.0)</h4>
+        <p>Task timed out during execution</p>
+        <pre><code class="zsh">Process timed out</code></pre>
+    </div>
+    
+    <div class="error-details">
+        <h3><span class="warning">⏳ TIMED OUT :</span> manual</h3>
+        <h4>On lemma : A_Receipt_receipt_3_suff, with tamarin-prover : default (v1.10.0)</h4>
+        <p>Task timed out during execution</p>
+        <pre><code class="zsh">Process timed out</code></pre>
+    </div>
+    
+    <div class="error-details">
+        <h3><span class="warning">⏳ TIMED OUT :</span> manual</h3>
+        <h4>On lemma : A_Receipt_receipt_4_suff, with tamarin-prover : default (v1.10.0)</h4>
+        <p>Task timed out during execution</p>
+        <pre><code class="zsh">Process timed out</code></pre>
+    </div>
+    
+    <div class="error-details">
+        <h3><span class="warning">⏳ TIMED OUT :</span> manual</h3>
+        <h4>On lemma : A_Receipt_receipt_1_single, with tamarin-prover : default (v1.10.0)</h4>
+        <p>Task timed out during execution</p>
+        <pre><code class="zsh">Process timed out</code></pre>
+    </div>
+    
+    <div class="error-details">
+        <h3><span class="warning">⏳ TIMED OUT :</span> manual</h3>
+        <h4>On lemma : A_Receipt_receipt_2_single, with tamarin-prover : default (v1.10.0)</h4>
+        <p>Task timed out during execution</p>
+        <pre><code class="zsh">Process timed out</code></pre>
+    </div>
+    
+    <div class="error-details">
+        <h3><span class="warning">⏳ TIMED OUT :</span> manual</h3>
+        <h4>On lemma : A_Receipt_receipt_3_single, with tamarin-prover : default (v1.10.0)</h4>
+        <p>Task timed out during execution</p>
+        <pre><code class="zsh">Process timed out</code></pre>
+    </div>
+    
+    <div class="error-details">
+        <h3><span class="warning">⏳ TIMED OUT :</span> manual</h3>
+        <h4>On lemma : A_Receipt_receipt_4_single, with tamarin-prover : default (v1.10.0)</h4>
+        <p>Task timed out during execution</p>
+        <pre><code class="zsh">Process timed out</code></pre>
+    </div>
+    
+
+    
+    
+
+    
+    <h4>Rerun file : <a href="./all_ct_receipt-rerun.json">all_ct_receipt-rerun.json</a></h4>
     
 
     <hr>
     <footer>
-        <p><em>Summary generated by Batch Tamarin on 2026-04-18 14:47:11<br>
+        <p><em>Summary generated by Batch Tamarin on 2026-04-26 15:15:16<br>
         For more details, generate a report with the following command: <code>batch-tamarin report results/ct_receipt</code></em></p>
     </footer>
 </body>

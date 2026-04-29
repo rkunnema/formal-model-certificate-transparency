@@ -1,11 +1,19 @@
 {
   "task_id": "--A_CT_2_root_ca_rogue_honest_log_min--default",
   "warnings": [],
+<<<<<<< HEAD
+  "tamarin_timing": 22.0,
+  "wrapper_measures": {
+    "time": 22.19680094718933,
+    "avg_memory": 142.12446732954547,
+    "peak_memory": 240.08984375
+=======
   "tamarin_timing": 10.18,
   "wrapper_measures": {
     "time": 10.340798139572144,
     "avg_memory": 166.53835227272728,
     "peak_memory": 278.03125
+>>>>>>> eecd20276527e4b69d3a558d6b9418dbd93dd7d8
   },
   "output_spthy": "results/ct/proofs/--A_CT_2_root_ca_rogue_honest_log_min--default.spthy",
   "verified_lemma": {

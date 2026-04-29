@@ -95,20 +95,16 @@ rule (modulo E) PubKeyCertify[color=#c871ff]:
 
   /* has exactly the trivial AC variant */
 
-restriction Restr_ClientValidate_1:
-  "∀ x #NOW x.1. (Restr_ClientValidate_1( x, x.1 ) @ #NOW) ⇒ (¬(x = x.1))"
-  // safety formula
-
 rule (modulo E) ClientValidate[color=#f2ce03]:
    [
    !Root_CA( $rootCA, pkRootCA ),
-   In( <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0> ), In( ca_sig ),
-   In( <$CA, $id, pkID, 'pubKey', sn, $i, $j> ), In( pub_sig )
+   In( <<<$CA, $id, pkID, 'pubKey', sn, $i, $j>, pub_sig>, 
+        <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, ca_sig>
+   )
    ]
   --[
-  ClientAcceptsChain( $L1, $L2, $rootCA,
-                      <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, $CA,
-                      <$CA, $id, pkID, 'pubKey', sn, $i, $j>
+  BrowserAcceptsChain( $CA, <$CA, $id, pkID, 'pubKey', sn, $i, $j>,
+                       $rootCA, <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
   ),
   Eq( verify(pub_sig, <$CA, $id, pkID, 'pubKey', sn, $i, $j>, pkCA), true
   ),
@@ -117,7 +113,7 @@ rule (modulo E) ClientValidate[color=#f2ce03]:
       true
   ),
   CheckValidUntil( $now, $j ), CheckValidUntil( $now, $j0 ), Time( $now ),
-  San_ClientValidate( ), Restr_ClientValidate_1( $L1, $L2 )
+  San_ClientValidate( )
   ]->
    [ ]
 
@@ -125,111 +121,110 @@ rule (modulo E) ClientValidate[color=#f2ce03]:
   rule (modulo AC) ClientValidate[color=#f2ce03]:
      [
      !Root_CA( $rootCA, pkRootCA ),
-     In( <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0> ), In( ca_sig ),
-     In( <$CA, $id, pkID, 'pubKey', sn, $i, $j> ), In( pub_sig )
+     In( <<<$CA, $id, pkID, 'pubKey', sn, $i, $j>, pub_sig>, 
+          <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, ca_sig>
+     )
      ]
     --[
-    ClientAcceptsChain( $L1, $L2, $rootCA,
-                        <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, $CA,
-                        <$CA, $id, pkID, 'pubKey', sn, $i, $j>
+    BrowserAcceptsChain( $CA, <$CA, $id, pkID, 'pubKey', sn, $i, $j>,
+                         $rootCA, <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
     ),
     Eq( z, true ), Eq( z.1, true ), CheckValidUntil( $now, $j ),
-    CheckValidUntil( $now, $j0 ), Time( $now ), San_ClientValidate( ),
-    Restr_ClientValidate_1( $L1, $L2 )
+    CheckValidUntil( $now, $j0 ), Time( $now ), San_ClientValidate( )
     ]->
      [ ]
     variants (modulo AC)
-    1. $CA   = $CA.39
-       $i    = $i.42
-       $i0   = $i0.43
-       $id   = $id.44
-       $j    = $j.45
-       $j0   = $j0.46
+    1. $CA   = $CA.35
+       $i    = $i.36
+       $i0   = $i0.37
+       $id   = $id.38
+       $j    = $j.39
+       $j0   = $j0.40
        $rootCA
-             = $rootCA.48
+             = $rootCA.42
        ca_sig
-             = ca_sig.49
-       pkCA  = pkCA.50
-       pkID  = pkID.51
+             = ca_sig.43
+       pkCA  = pkCA.44
+       pkID  = pkID.45
        pkRootCA
-             = pkRootCA.52
+             = pkRootCA.46
        pub_sig
-             = pub_sig.53
-       sn    = sn.54
-       snCA  = snCA.55
-       z     = verify(pub_sig.53,
-                      <$CA.39, $id.44, pkID.51, 'pubKey', sn.54, $i.42, $j.45>, pkCA.50)
-       z.1   = verify(ca_sig.49,
-                      <$rootCA.48, $CA.39, pkCA.50, 'pubKey-CA', snCA.55, $i0.43, $j0.46>,
-                      pkRootCA.52)
+             = pub_sig.47
+       sn    = sn.48
+       snCA  = snCA.49
+       z     = verify(pub_sig.47,
+                      <$CA.35, $id.38, pkID.45, 'pubKey', sn.48, $i.36, $j.39>, pkCA.44)
+       z.1   = verify(ca_sig.43,
+                      <$rootCA.42, $CA.35, pkCA.44, 'pubKey-CA', snCA.49, $i0.37, $j0.40>,
+                      pkRootCA.46)
     
-    2. $CA   = $CA.55
-       $i    = $i.58
-       $i0   = $i0.59
-       $id   = $id.60
-       $j    = $j.61
-       $j0   = $j0.62
+    2. $CA   = $CA.49
+       $i    = $i.50
+       $i0   = $i0.51
+       $id   = $id.52
+       $j    = $j.53
+       $j0   = $j0.54
        $rootCA
-             = $rootCA.64
+             = $rootCA.56
        ca_sig
-             = ca_sig.65
-       pkCA  = pk(x.108)
-       pkID  = pkID.67
+             = ca_sig.57
+       pkCA  = pk(x.96)
+       pkID  = pkID.59
        pkRootCA
-             = pkRootCA.68
+             = pkRootCA.60
        pub_sig
-             = sign(<$CA.55, $id.60, pkID.67, 'pubKey', sn.70, $i.58, $j.61>, x.108)
-       sn    = sn.70
-       snCA  = snCA.71
+             = sign(<$CA.49, $id.52, pkID.59, 'pubKey', sn.62, $i.50, $j.53>, x.96)
+       sn    = sn.62
+       snCA  = snCA.63
        z     = true
-       z.1   = verify(ca_sig.65,
-                      <$rootCA.64, $CA.55, pk(x.108), 'pubKey-CA', snCA.71, $i0.59, $j0.62>,
-                      pkRootCA.68)
+       z.1   = verify(ca_sig.57,
+                      <$rootCA.56, $CA.49, pk(x.96), 'pubKey-CA', snCA.63, $i0.51, $j0.54>,
+                      pkRootCA.60)
     
-    3. $CA   = $CA.56
-       $i    = $i.59
-       $i0   = $i0.60
-       $id   = $id.61
-       $j    = $j.62
-       $j0   = $j0.63
+    3. $CA   = $CA.50
+       $i    = $i.51
+       $i0   = $i0.52
+       $id   = $id.53
+       $j    = $j.54
+       $j0   = $j0.55
        $rootCA
-             = $rootCA.65
+             = $rootCA.57
        ca_sig
-             = sign(<$rootCA.65, $CA.56, pkCA.67, 'pubKey-CA', snCA.72, $i0.60, $j0.63
+             = sign(<$rootCA.57, $CA.50, pkCA.59, 'pubKey-CA', snCA.64, $i0.52, $j0.55
                     >,
-                    x.110)
-       pkCA  = pkCA.67
-       pkID  = pkID.68
+                    x.98)
+       pkCA  = pkCA.59
+       pkID  = pkID.60
        pkRootCA
-             = pk(x.110)
+             = pk(x.98)
        pub_sig
-             = pub_sig.70
-       sn    = sn.71
-       snCA  = snCA.72
-       z     = verify(pub_sig.70,
-                      <$CA.56, $id.61, pkID.68, 'pubKey', sn.71, $i.59, $j.62>, pkCA.67)
+             = pub_sig.62
+       sn    = sn.63
+       snCA  = snCA.64
+       z     = verify(pub_sig.62,
+                      <$CA.50, $id.53, pkID.60, 'pubKey', sn.63, $i.51, $j.54>, pkCA.59)
        z.1   = true
     
-    4. $CA   = $CA.56
-       $i    = $i.59
-       $i0   = $i0.60
-       $id   = $id.61
-       $j    = $j.62
-       $j0   = $j0.63
+    4. $CA   = $CA.50
+       $i    = $i.51
+       $i0   = $i0.52
+       $id   = $id.53
+       $j    = $j.54
+       $j0   = $j0.55
        $rootCA
-             = $rootCA.65
+             = $rootCA.57
        ca_sig
-             = sign(<$rootCA.65, $CA.56, pk(x.108), 'pubKey-CA', snCA.72, $i0.60, 
-                     $j0.63>,
-                    x.110)
-       pkCA  = pk(x.108)
-       pkID  = pkID.68
+             = sign(<$rootCA.57, $CA.50, pk(x.96), 'pubKey-CA', snCA.64, $i0.52, 
+                     $j0.55>,
+                    x.98)
+       pkCA  = pk(x.96)
+       pkID  = pkID.60
        pkRootCA
-             = pk(x.110)
+             = pk(x.98)
        pub_sig
-             = sign(<$CA.56, $id.61, pkID.68, 'pubKey', sn.71, $i.59, $j.62>, x.108)
-       sn    = sn.71
-       snCA  = snCA.72
+             = sign(<$CA.50, $id.53, pkID.60, 'pubKey', sn.63, $i.51, $j.54>, x.96)
+       sn    = sn.63
+       snCA  = snCA.64
        z     = true
        z.1   = true
   */
@@ -318,8 +313,8 @@ rule (modulo E) ConsultDocumentation_Fails:
   UndocumentedIntermediateCA( $rootCA, $CA,
                               <$rootCA, $CA, pkCA, 'pubKey-CA', sn, $i, $j>
   ),
-  AssertsNot( $rootCA, 'I signed this intermediate CA.', $CA,
-              <$rootCA, $CA, pkCA, 'pubKey-CA', sn, $i, $j>
+  Asserts( 'CCADB', 'No root CA signed this CA.', $CA,
+           <<$rootCA, $CA, pkCA, 'pubKey-CA', sn, $i, $j>, $rootCA>
   ),
   Eq( verify(ca_sig, <$rootCA, $CA, pkCA, 'pubKey-CA', sn, $i, $j>, pkRCA),
       true
@@ -343,8 +338,8 @@ rule (modulo E) ConsultDocumentation_Fails:
     UndocumentedIntermediateCA( $rootCA, $CA,
                                 <$rootCA, $CA, pkCA, 'pubKey-CA', sn, $i, $j>
     ),
-    AssertsNot( $rootCA, 'I signed this intermediate CA.', $CA,
-                <$rootCA, $CA, pkCA, 'pubKey-CA', sn, $i, $j>
+    Asserts( 'CCADB', 'No root CA signed this CA.', $CA,
+             <<$rootCA, $CA, pkCA, 'pubKey-CA', sn, $i, $j>, $rootCA>
     ),
     Eq( z, true ),
     ExternalCheckCCADB( $rootCA,
@@ -356,31 +351,31 @@ rule (modulo E) ConsultDocumentation_Fails:
      CCADBConsulted( $rootCA, <$rootCA, $CA, pkCA, 'pubKey-CA', sn, $i, $j> )
      ]
     variants (modulo AC)
-    1. $CA   = $CA.22
-       $i    = $i.23
-       $j    = $j.24
+    1. $CA   = $CA.23
+       $i    = $i.24
+       $j    = $j.25
        $rootCA
-             = $rootCA.26
+             = $rootCA.27
        ca_sig
-             = ca_sig.27
-       pkCA  = pkCA.28
-       pkRCA = pkRCA.29
-       sn    = sn.30
-       z     = verify(ca_sig.27,
-                      <$rootCA.26, $CA.22, pkCA.28, 'pubKey-CA', sn.30, $i.23, $j.24>,
-                      pkRCA.29)
+             = ca_sig.28
+       pkCA  = pkCA.29
+       pkRCA = pkRCA.30
+       sn    = sn.31
+       z     = verify(ca_sig.28,
+                      <$rootCA.27, $CA.23, pkCA.29, 'pubKey-CA', sn.31, $i.24, $j.25>,
+                      pkRCA.30)
     
-    2. $CA   = $CA.33
-       $i    = $i.34
-       $j    = $j.35
+    2. $CA   = $CA.48
+       $i    = $i.49
+       $j    = $j.50
        $rootCA
-             = $rootCA.37
+             = $rootCA.52
        ca_sig
-             = sign(<$rootCA.37, $CA.33, pkCA.39, 'pubKey-CA', sn.41, $i.34, $j.35>,
-                    x.64)
-       pkCA  = pkCA.39
-       pkRCA = pk(x.64)
-       sn    = sn.41
+             = sign(<$rootCA.52, $CA.48, pkCA.54, 'pubKey-CA', sn.56, $i.49, $j.50>,
+                    x.94)
+       pkCA  = pkCA.54
+       pkRCA = pk(x.94)
+       sn    = sn.56
        z     = true
   */
 
@@ -394,7 +389,10 @@ rule (modulo E) external_check_true:
    [
    In( <$CA, $id, pkID, 'pubKey', sn, $i, $j> ), In( pub_sig ),
    In( <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0> ), In( ca_sig ),
-   !Root_CA( $rootCA, pkRootCA )
+   !Root_CA( $rootCA, pkRootCA ),
+   CCADBConsulted( $rootCA,
+                   <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
+   )
    ]
   --[
   Eq( verify(pub_sig, <$CA, $id, pkID, 'pubKey', sn, $i, $j>, pkCA), true
@@ -407,9 +405,8 @@ rule (modulo E) external_check_true:
                         <$CA, $id, pkID, 'pubKey', sn, $i, $j>
   ),
   BenignCert( $CA, <$CA, $id, pkID, 'pubKey', sn, $i, $j> ),
-  Asserts( 'external auditor', 'this is a correct statement', $CA,
-           <<$CA, $id, pkID, 'pubKey', sn, $i, $j>, $rootCA, $CA, pkCA, 
-            'pubKey-CA', snCA, $i0, $j0>
+  Asserts( 'external auditor', 'This CA signed a correct statement', $CA,
+           <$CA, $id, pkID, 'pubKey', sn, $i, $j>
   ),
   Time( $now ), San_external_check_true( )
   ]->
@@ -420,7 +417,10 @@ rule (modulo E) external_check_true:
      [
      In( <$CA, $id, pkID, 'pubKey', sn, $i, $j> ), In( pub_sig ),
      In( <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0> ), In( ca_sig ),
-     !Root_CA( $rootCA, pkRootCA )
+     !Root_CA( $rootCA, pkRootCA ),
+     CCADBConsulted( $rootCA,
+                     <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
+     )
      ]
     --[
     Eq( z, true ), Eq( z.1, true ),
@@ -428,9 +428,8 @@ rule (modulo E) external_check_true:
                           <$CA, $id, pkID, 'pubKey', sn, $i, $j>
     ),
     BenignCert( $CA, <$CA, $id, pkID, 'pubKey', sn, $i, $j> ),
-    Asserts( 'external auditor', 'this is a correct statement', $CA,
-             <<$CA, $id, pkID, 'pubKey', sn, $i, $j>, $rootCA, $CA, pkCA, 
-              'pubKey-CA', snCA, $i0, $j0>
+    Asserts( 'external auditor', 'This CA signed a correct statement', $CA,
+             <$CA, $id, pkID, 'pubKey', sn, $i, $j>
     ),
     Time( $now ), San_external_check_true( )
     ]->
@@ -535,7 +534,10 @@ rule (modulo E) external_check_false:
    [
    In( <$CA, $id, pkID, 'pubKey', sn, $i, $j> ), In( pub_sig ),
    In( <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0> ), In( ca_sig ),
-   !Root_CA( $rootCA, pkRootCA )
+   !Root_CA( $rootCA, pkRootCA ),
+   CCADBConsulted( $rootCA,
+                   <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
+   )
    ]
   --[
   Eq( verify(pub_sig, <$CA, $id, pkID, 'pubKey', sn, $i, $j>, pkCA), true
@@ -544,9 +546,11 @@ rule (modulo E) external_check_false:
              pkRootCA),
       true
   ),
-  AssertsNot( 'external auditor', 'this is a correct statement', $CA,
-              <<$CA, $id, pkID, 'pubKey', sn, $i, $j>, $rootCA, $CA, pkCA, 
-               'pubKey-CA', snCA, $i0, $j0>
+  Asserts( 'external auditor',
+           'That intermediary CA signed the following incorrect statement and the validation chain says the following about that CA.',
+           $CA,
+           <<$CA, $id, pkID, 'pubKey', sn, $i, $j>, $rootCA, $CA, pkCA, 
+            'pubKey-CA', snCA, $i0, $j0>
   ),
   RogueCert( $CA, <$CA, $id, pkID, 'pubKey', sn, $i, $j> ),
   ExternalAuditorCheck( <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>,
@@ -561,13 +565,18 @@ rule (modulo E) external_check_false:
      [
      In( <$CA, $id, pkID, 'pubKey', sn, $i, $j> ), In( pub_sig ),
      In( <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0> ), In( ca_sig ),
-     !Root_CA( $rootCA, pkRootCA )
+     !Root_CA( $rootCA, pkRootCA ),
+     CCADBConsulted( $rootCA,
+                     <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
+     )
      ]
     --[
     Eq( z, true ), Eq( z.1, true ),
-    AssertsNot( 'external auditor', 'this is a correct statement', $CA,
-                <<$CA, $id, pkID, 'pubKey', sn, $i, $j>, $rootCA, $CA, pkCA, 
-                 'pubKey-CA', snCA, $i0, $j0>
+    Asserts( 'external auditor',
+             'That intermediary CA signed the following incorrect statement and the validation chain says the following about that CA.',
+             $CA,
+             <<$CA, $id, pkID, 'pubKey', sn, $i, $j>, $rootCA, $CA, pkCA, 
+              'pubKey-CA', snCA, $i0, $j0>
     ),
     RogueCert( $CA, <$CA, $id, pkID, 'pubKey', sn, $i, $j> ),
     ExternalAuditorCheck( <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>,
@@ -814,26 +823,31 @@ guarded formula characterizing all satisfying traces:
 simplify
 solve( !Root_CA( $rootCA, pk(x.1) ) ▶₄ #t )
   case Root_CA_Init
-  solve( !DomainOwner( $id, pkID ) ▶₀ #t0 )
-    case Domain_Owner_Init
-    solve( !CA_s0( $CA, skCA.1, pkCA, ca_fields, ca_sig ) ▶₁ #t0 )
-      case Intermediate_CA_Init
-      solve( !KU( sign(<$CA, $id, pk(~sk), 'pubKey', ~sn, $i, $j>, x)
-             ) @ #vk.15 )
-        case PubKeyCertify
-        solve( !KU( sign(<$rootCA, $CA, pk(~skCA), 'pubKey-CA', snCA, $i0, $j0>,
-                         ~skCA.1)
-               ) @ #vk.26 )
-          case Intermediate_CA_Init
-          solve( !KU( ~sn ) @ #vk.13 )
-            case PubKeyCertify
-            solve( !KU( ~sn.1 ) @ #vk.23 )
-              case Intermediate_CA_Init
-              solve( !KU( pk(~skCA) ) @ #vk.20 )
-                case Intermediate_CA_Init_case_1
-                solve( !KU( pk(~sk) ) @ #vk.17 )
-                  case Domain_Owner_Init
-                  SOLVED // trace found
+  solve( CCADBConsulted( $rootCA,
+                         <$rootCA, $CA, pk(x), 'pubKey-CA', snCA, $i0, $j0>
+         ) ▶₅ #t )
+    case ConsultDocumentation_Success
+    solve( !DomainOwner( $id, pkID ) ▶₀ #t0 )
+      case Domain_Owner_Init
+      solve( !CA_s0( $CA, skCA.2, pkCA, ca_fields, ca_sig ) ▶₁ #t0 )
+        case Intermediate_CA_Init
+        solve( !KU( ~sn ) @ #vk.11 )
+          case PubKeyCertify
+          solve( !KU( ~sn.1 ) @ #vk.22 )
+            case Intermediate_CA_Init
+            solve( !KU( sign(<$CA, $id, pk(~sk), 'pubKey', ~sn, $i, $j>, ~skCA)
+                   ) @ #vk.16 )
+              case PubKeyCertify
+              solve( !KU( sign(<$rootCA, $CA, pk(~skCA), 'pubKey-CA', ~sn.1, $i0, $j0>,
+                               ~skCA.1)
+                     ) @ #vk.26 )
+                case Intermediate_CA_Init
+                solve( !KU( pk(~skCA) ) @ #vk.22 )
+                  case Intermediate_CA_Init_case_1
+                  solve( !KU( pk(~sk) ) @ #vk.17 )
+                    case Domain_Owner_Init
+                    SOLVED // trace found
+                  qed
                 qed
               qed
             qed
@@ -876,27 +890,27 @@ by sorry
 
 lemma CA_auth_w_compromise:
   exists-trace
-  "∃ L1 L2 rootCA ca_fields CA fields #t.
-    (ClientAcceptsChain( L1, L2, rootCA, ca_fields, CA, fields ) @ #t) ∧
+  "∃ rootCA ca_fields CA fields #t.
+    (BrowserAcceptsChain( CA, fields, rootCA, ca_fields ) @ #t) ∧
     (¬(∃ #t1. CAAsserts( CA, fields ) @ #t1))"
 /*
 guarded formula characterizing all satisfying traces:
-"∃ L1 L2 rootCA ca_fields CA fields #t.
-  (ClientAcceptsChain( L1, L2, rootCA, ca_fields, CA, fields ) @ #t)
+"∃ rootCA ca_fields CA fields #t.
+  (BrowserAcceptsChain( CA, fields, rootCA, ca_fields ) @ #t)
  ∧
   ∀ #t1. (CAAsserts( CA, fields ) @ #t1) ⇒ ⊥"
 */
 by sorry
 
 lemma authenticity:
-  all-traces
-  "∀ L1 L2 rootCA ca_fields CA fields #j.
-    (ClientAcceptsChain( L1, L2, rootCA, ca_fields, CA, fields ) @ #j) ⇒
-    (∃ #i. (GroundTruth( CA, fields ) @ #i) ∧ (#i < #j))"
+  exists-trace
+  "∃ rootCA ca_fields CA fields #j.
+    (BrowserAcceptsChain( CA, fields, rootCA, ca_fields ) @ #j) ∧
+    (¬(∃ #i. (GroundTruth( CA, fields ) @ #i) ∧ (#i < #j)))"
 /*
-guarded formula characterizing all counter-examples:
-"∃ L1 L2 rootCA ca_fields CA fields #j.
-  (ClientAcceptsChain( L1, L2, rootCA, ca_fields, CA, fields ) @ #j)
+guarded formula characterizing all satisfying traces:
+"∃ rootCA ca_fields CA fields #j.
+  (BrowserAcceptsChain( CA, fields, rootCA, ca_fields ) @ #j)
  ∧
   ∀ #i. (GroundTruth( CA, fields ) @ #i) ⇒ ¬(#i < #j)"
 */
@@ -904,15 +918,15 @@ by sorry
 
 lemma cert_auth:
   all-traces
-  "∀ L1 L2 rootCA ca_fields CA fields #t.
-    (ClientAcceptsChain( L1, L2, rootCA, ca_fields, CA, fields ) @ #t) ⇒
+  "∀ rootCA ca_fields CA fields #t.
+    (BrowserAcceptsChain( CA, fields, rootCA, ca_fields ) @ #t) ⇒
     (((∃ #t1. CAAsserts( CA, fields ) @ #t1) ∨
       (∃ #t2. (CompromiseCA( CA ) @ #t2) ∧ (#t2 < #t))) ∨
      (∃ #t2. (CompromiseRootCA( rootCA ) @ #t2) ∧ (#t2 < #t)))"
 /*
 guarded formula characterizing all counter-examples:
-"∃ L1 L2 rootCA ca_fields CA fields #t.
-  (ClientAcceptsChain( L1, L2, rootCA, ca_fields, CA, fields ) @ #t)
+"∃ rootCA ca_fields CA fields #t.
+  (BrowserAcceptsChain( CA, fields, rootCA, ca_fields ) @ #t)
  ∧
   (∀ #t1. (CAAsserts( CA, fields ) @ #t1) ⇒ ⊥) ∧
   (∀ #t2. (CompromiseCA( CA ) @ #t2) ⇒ ¬(#t2 < #t)) ∧
@@ -922,52 +936,65 @@ by sorry
 
 lemma A_PKI_Ext_CAfalseAsserts_rootBlamed_suff:
   exists-trace
-  "∃ rootCA CA fields ca_fields #t0 #t1.
-    (((AssertsNot( 'external auditor', 'this is a correct statement', CA,
-                   <fields, ca_fields>
-       ) @ #t0) ∧
-      (AssertsNot( rootCA, 'I signed this intermediate CA.', CA, ca_fields
-       ) @ #t1)) ∧
-     (∀ rootCA.1 CA.1 fields.1 ca_fields.1 #t0.1 #t1.1.
-       ((AssertsNot( 'external auditor', 'this is a correct statement', CA.1,
-                     <fields.1, ca_fields.1>
-         ) @ #t0.1) ∧
-        (AssertsNot( rootCA.1, 'I signed this intermediate CA.', CA.1,
-                     ca_fields.1
-         ) @ #t1.1)) ⇒
+  "∃ rootCA CA fields ca_fields #t0 #t1 #t2.
+    ((((Asserts( 'external auditor',
+                 'That intermediary CA signed the following incorrect statement and the validation chain says the following about that CA.',
+                 CA, <fields, ca_fields>
+        ) @ #t0) ∧
+       (Asserts( 'CCADB', 'No root CA signed this CA.', CA, <ca_fields, rootCA>
+        ) @ #t1)) ∧
+      (BrowserAcceptsChain( CA, fields, rootCA, ca_fields ) @ #t2)) ∧
+     (∀ rootCA.1 CA.1 fields.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+       (((Asserts( 'external auditor',
+                   'That intermediary CA signed the following incorrect statement and the validation chain says the following about that CA.',
+                   CA.1, <fields.1, ca_fields.1>
+          ) @ #t0.1) ∧
+         (Asserts( 'CCADB', 'No root CA signed this CA.', CA.1,
+                   <ca_fields.1, rootCA.1>
+          ) @ #t1.1)) ∧
+        (BrowserAcceptsChain( CA.1, fields.1, rootCA.1, ca_fields.1 ) @ #t2.1)) ⇒
        (rootCA.1 = rootCA))) ∧
     ((∀ a #i. (Corrupted( a ) @ #i) ⇒ (a = rootCA)) ∧
-     (¬(∃ CA.1 rootCA.1 fields.1 ca_fields.1 #t0.1 #t1.1.
-         (AssertsNot( 'external auditor', 'this is a correct statement', CA.1,
-                      <fields.1, ca_fields.1>
-          ) @ #t0.1) ∧
-         (Asserts( rootCA.1, 'I signed this intermediate CA.', CA.1, ca_fields.1
-          ) @ #t1.1))))"
+     (¬(∃ CA.1 rootCA.1 fields.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+         ((Asserts( 'external auditor',
+                    'That intermediary CA signed the following incorrect statement and the validation chain says the following about that CA.',
+                    CA.1, <fields.1, ca_fields.1>
+           ) @ #t0.1) ∧
+          (Asserts( rootCA.1, 'I signed this intermediate CA.', CA.1, ca_fields.1
+           ) @ #t1.1)) ∧
+         (BrowserAcceptsChain( CA.1, fields.1, rootCA.1, ca_fields.1
+          ) @ #t2.1))))"
 /*
 guarded formula characterizing all satisfying traces:
-"∃ rootCA CA fields ca_fields #t0 #t1.
-  (AssertsNot( 'external auditor', 'this is a correct statement', CA,
-               <fields, ca_fields>
+"∃ rootCA CA fields ca_fields #t0 #t1 #t2.
+  (Asserts( 'external auditor',
+            'That intermediary CA signed the following incorrect statement and the validation chain says the following about that CA.',
+            CA, <fields, ca_fields>
    ) @ #t0) ∧
-  (AssertsNot( rootCA, 'I signed this intermediate CA.', CA, ca_fields
-   ) @ #t1)
+  (Asserts( 'CCADB', 'No root CA signed this CA.', CA, <ca_fields, rootCA>
+   ) @ #t1) ∧
+  (BrowserAcceptsChain( CA, fields, rootCA, ca_fields ) @ #t2)
  ∧
-  (∀ rootCA.1 CA.1 fields.1 ca_fields.1 #t0.1 #t1.1.
-    (AssertsNot( 'external auditor', 'this is a correct statement', CA.1,
-                 <fields.1, ca_fields.1>
+  (∀ rootCA.1 CA.1 fields.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+    (Asserts( 'external auditor',
+              'That intermediary CA signed the following incorrect statement and the validation chain says the following about that CA.',
+              CA.1, <fields.1, ca_fields.1>
      ) @ #t0.1) ∧
-    (AssertsNot( rootCA.1, 'I signed this intermediate CA.', CA.1,
-                 ca_fields.1
-     ) @ #t1.1)
+    (Asserts( 'CCADB', 'No root CA signed this CA.', CA.1,
+              <ca_fields.1, rootCA.1>
+     ) @ #t1.1) ∧
+    (BrowserAcceptsChain( CA.1, fields.1, rootCA.1, ca_fields.1 ) @ #t2.1)
    ⇒
     rootCA.1 = rootCA) ∧
   (∀ a #i. (Corrupted( a ) @ #i) ⇒ a = rootCA) ∧
-  (∀ CA.1 rootCA.1 fields.1 ca_fields.1 #t0.1 #t1.1.
-    (AssertsNot( 'external auditor', 'this is a correct statement', CA.1,
-                 <fields.1, ca_fields.1>
+  (∀ CA.1 rootCA.1 fields.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+    (Asserts( 'external auditor',
+              'That intermediary CA signed the following incorrect statement and the validation chain says the following about that CA.',
+              CA.1, <fields.1, ca_fields.1>
      ) @ #t0.1) ∧
     (Asserts( rootCA.1, 'I signed this intermediate CA.', CA.1, ca_fields.1
-     ) @ #t1.1)
+     ) @ #t1.1) ∧
+    (BrowserAcceptsChain( CA.1, fields.1, rootCA.1, ca_fields.1 ) @ #t2.1)
    ⇒
     ⊥)"
 */
@@ -975,52 +1002,65 @@ by sorry
 
 lemma A_PKI_Ext_CAfalseAsserts_rootNotBlamed_suff:
   exists-trace
-  "∃ CA rootCA fields ca_fields #t0 #t1.
-    (((AssertsNot( 'external auditor', 'this is a correct statement', CA,
-                   <fields, ca_fields>
-       ) @ #t0) ∧
-      (Asserts( rootCA, 'I signed this intermediate CA.', CA, ca_fields
-       ) @ #t1)) ∧
-     (∀ CA.1 rootCA.1 fields.1 ca_fields.1 #t0.1 #t1.1.
-       ((AssertsNot( 'external auditor', 'this is a correct statement', CA.1,
-                     <fields.1, ca_fields.1>
-         ) @ #t0.1) ∧
-        (Asserts( rootCA.1, 'I signed this intermediate CA.', CA.1, ca_fields.1
-         ) @ #t1.1)) ⇒
+  "∃ CA rootCA fields ca_fields #t0 #t1 #t2.
+    ((((Asserts( 'external auditor',
+                 'That intermediary CA signed the following incorrect statement and the validation chain says the following about that CA.',
+                 CA, <fields, ca_fields>
+        ) @ #t0) ∧
+       (Asserts( rootCA, 'I signed this intermediate CA.', CA, ca_fields
+        ) @ #t1)) ∧
+      (BrowserAcceptsChain( CA, fields, rootCA, ca_fields ) @ #t2)) ∧
+     (∀ CA.1 rootCA.1 fields.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+       (((Asserts( 'external auditor',
+                   'That intermediary CA signed the following incorrect statement and the validation chain says the following about that CA.',
+                   CA.1, <fields.1, ca_fields.1>
+          ) @ #t0.1) ∧
+         (Asserts( rootCA.1, 'I signed this intermediate CA.', CA.1, ca_fields.1
+          ) @ #t1.1)) ∧
+        (BrowserAcceptsChain( CA.1, fields.1, rootCA.1, ca_fields.1 ) @ #t2.1)) ⇒
        (CA.1 = CA))) ∧
     ((∀ a #i. (Corrupted( a ) @ #i) ⇒ (a = CA)) ∧
-     (¬(∃ rootCA.1 CA.1 fields.1 ca_fields.1 #t0.1 #t1.1.
-         (AssertsNot( 'external auditor', 'this is a correct statement', CA.1,
-                      <fields.1, ca_fields.1>
-          ) @ #t0.1) ∧
-         (AssertsNot( rootCA.1, 'I signed this intermediate CA.', CA.1,
-                      ca_fields.1
-          ) @ #t1.1))))"
+     (¬(∃ rootCA.1 CA.1 fields.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+         ((Asserts( 'external auditor',
+                    'That intermediary CA signed the following incorrect statement and the validation chain says the following about that CA.',
+                    CA.1, <fields.1, ca_fields.1>
+           ) @ #t0.1) ∧
+          (Asserts( 'CCADB', 'No root CA signed this CA.', CA.1,
+                    <ca_fields.1, rootCA.1>
+           ) @ #t1.1)) ∧
+         (BrowserAcceptsChain( CA.1, fields.1, rootCA.1, ca_fields.1
+          ) @ #t2.1))))"
 /*
 guarded formula characterizing all satisfying traces:
-"∃ CA rootCA fields ca_fields #t0 #t1.
-  (AssertsNot( 'external auditor', 'this is a correct statement', CA,
-               <fields, ca_fields>
+"∃ CA rootCA fields ca_fields #t0 #t1 #t2.
+  (Asserts( 'external auditor',
+            'That intermediary CA signed the following incorrect statement and the validation chain says the following about that CA.',
+            CA, <fields, ca_fields>
    ) @ #t0) ∧
   (Asserts( rootCA, 'I signed this intermediate CA.', CA, ca_fields
-   ) @ #t1)
+   ) @ #t1) ∧
+  (BrowserAcceptsChain( CA, fields, rootCA, ca_fields ) @ #t2)
  ∧
-  (∀ CA.1 rootCA.1 fields.1 ca_fields.1 #t0.1 #t1.1.
-    (AssertsNot( 'external auditor', 'this is a correct statement', CA.1,
-                 <fields.1, ca_fields.1>
+  (∀ CA.1 rootCA.1 fields.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+    (Asserts( 'external auditor',
+              'That intermediary CA signed the following incorrect statement and the validation chain says the following about that CA.',
+              CA.1, <fields.1, ca_fields.1>
      ) @ #t0.1) ∧
     (Asserts( rootCA.1, 'I signed this intermediate CA.', CA.1, ca_fields.1
-     ) @ #t1.1)
+     ) @ #t1.1) ∧
+    (BrowserAcceptsChain( CA.1, fields.1, rootCA.1, ca_fields.1 ) @ #t2.1)
    ⇒
     CA.1 = CA) ∧
   (∀ a #i. (Corrupted( a ) @ #i) ⇒ a = CA) ∧
-  (∀ rootCA.1 CA.1 fields.1 ca_fields.1 #t0.1 #t1.1.
-    (AssertsNot( 'external auditor', 'this is a correct statement', CA.1,
-                 <fields.1, ca_fields.1>
+  (∀ rootCA.1 CA.1 fields.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+    (Asserts( 'external auditor',
+              'That intermediary CA signed the following incorrect statement and the validation chain says the following about that CA.',
+              CA.1, <fields.1, ca_fields.1>
      ) @ #t0.1) ∧
-    (AssertsNot( rootCA.1, 'I signed this intermediate CA.', CA.1,
-                 ca_fields.1
-     ) @ #t1.1)
+    (Asserts( 'CCADB', 'No root CA signed this CA.', CA.1,
+              <ca_fields.1, rootCA.1>
+     ) @ #t1.1) ∧
+    (BrowserAcceptsChain( CA.1, fields.1, rootCA.1, ca_fields.1 ) @ #t2.1)
    ⇒
     ⊥)"
 */
@@ -1028,174 +1068,182 @@ by sorry
 
 lemma A_PKI_Ext_verif_empty:
   all-traces
-  "(¬((∃ rootCA CA fields ca_fields #t0 #t1.
-        (AssertsNot( 'external auditor', 'this is a correct statement', CA,
-                     <fields, ca_fields>
-         ) @ #t0) ∧
-        (AssertsNot( rootCA, 'I signed this intermediate CA.', CA, ca_fields
-         ) @ #t1)) ∨
-      (∃ CA rootCA fields ca_fields #t0 #t1.
-        (AssertsNot( 'external auditor', 'this is a correct statement', CA,
-                     <fields, ca_fields>
-         ) @ #t0) ∧
-        (Asserts( rootCA, 'I signed this intermediate CA.', CA, ca_fields
-         ) @ #t1)))) ⇒
-   (∀ rootCA ca_fields fields #t0 #t1.
+  "(¬((∃ rootCA CA fields ca_fields #t0 #t1 #t2.
+        ((Asserts( 'external auditor',
+                   'That intermediary CA signed the following incorrect statement and the validation chain says the following about that CA.',
+                   CA, <fields, ca_fields>
+          ) @ #t0) ∧
+         (Asserts( 'CCADB', 'No root CA signed this CA.', CA, <ca_fields, rootCA>
+          ) @ #t1)) ∧
+        (BrowserAcceptsChain( CA, fields, rootCA, ca_fields ) @ #t2)) ∨
+      (∃ CA rootCA fields ca_fields #t0 #t1 #t2.
+        ((Asserts( 'external auditor',
+                   'That intermediary CA signed the following incorrect statement and the validation chain says the following about that CA.',
+                   CA, <fields, ca_fields>
+          ) @ #t0) ∧
+         (Asserts( rootCA, 'I signed this intermediate CA.', CA, ca_fields
+          ) @ #t1)) ∧
+        (BrowserAcceptsChain( CA, fields, rootCA, ca_fields ) @ #t2)))) ⇒
+   (∀ CA rootCA ca_fields fields #t0 #t1.
      ((ExternalAuditorCheck( ca_fields, fields ) @ #t0) ∧
-      (ExternalCheckCCADB( rootCA, ca_fields ) @ #t1)) ⇒
-     (∃ CA #t.
-       Asserts( 'external auditor', 'this is a correct statement', CA,
-                <fields, ca_fields>
-       ) @ #t))"
+      (BrowserAcceptsChain( CA, fields, rootCA, ca_fields ) @ #t1)) ⇒
+     (∃ #t. GroundTruth( CA, fields ) @ #t))"
 /*
 guarded formula characterizing all counter-examples:
-"(∀ rootCA CA fields ca_fields #t0 #t1.
-   (AssertsNot( 'external auditor', 'this is a correct statement', CA,
-                <fields, ca_fields>
+"(∀ rootCA CA fields ca_fields #t0 #t1 #t2.
+   (Asserts( 'external auditor',
+             'That intermediary CA signed the following incorrect statement and the validation chain says the following about that CA.',
+             CA, <fields, ca_fields>
     ) @ #t0) ∧
-   (AssertsNot( rootCA, 'I signed this intermediate CA.', CA, ca_fields
-    ) @ #t1)
+   (Asserts( 'CCADB', 'No root CA signed this CA.', CA, <ca_fields, rootCA>
+    ) @ #t1) ∧
+   (BrowserAcceptsChain( CA, fields, rootCA, ca_fields ) @ #t2)
   ⇒
    ⊥) ∧
- (∀ CA rootCA fields ca_fields #t0 #t1.
-   (AssertsNot( 'external auditor', 'this is a correct statement', CA,
-                <fields, ca_fields>
+ (∀ CA rootCA fields ca_fields #t0 #t1 #t2.
+   (Asserts( 'external auditor',
+             'That intermediary CA signed the following incorrect statement and the validation chain says the following about that CA.',
+             CA, <fields, ca_fields>
     ) @ #t0) ∧
    (Asserts( rootCA, 'I signed this intermediate CA.', CA, ca_fields
-    ) @ #t1)
+    ) @ #t1) ∧
+   (BrowserAcceptsChain( CA, fields, rootCA, ca_fields ) @ #t2)
   ⇒
    ⊥) ∧
- (∃ rootCA ca_fields fields #t0 #t1.
+ (∃ CA rootCA ca_fields fields #t0 #t1.
    (ExternalAuditorCheck( ca_fields, fields ) @ #t0) ∧
-   (ExternalCheckCCADB( rootCA, ca_fields ) @ #t1)
+   (BrowserAcceptsChain( CA, fields, rootCA, ca_fields ) @ #t1)
   ∧
-   ∀ CA #t.
-    (Asserts( 'external auditor', 'this is a correct statement', CA,
-              <fields, ca_fields>
-     ) @ #t)
-   ⇒
-    ⊥)"
+   ∀ #t. (GroundTruth( CA, fields ) @ #t) ⇒ ⊥)"
 */
 by sorry
 
 lemma A_PKI_Ext_CAfalseAsserts_rootBlamed_verif_nonempty:
   all-traces
-  "∀ rootCA CA fields ca_fields #t0 #t1.
-    ((AssertsNot( 'external auditor', 'this is a correct statement', CA,
-                  <fields, ca_fields>
-      ) @ #t0) ∧
-     (AssertsNot( rootCA, 'I signed this intermediate CA.', CA, ca_fields
-      ) @ #t1)) ⇒
-    (¬(∀ rootCA.1 ca_fields.1 fields.1 #t0.1 #t1.1.
+  "∀ rootCA CA fields ca_fields #t0 #t1 #t2.
+    (((Asserts( 'external auditor',
+                'That intermediary CA signed the following incorrect statement and the validation chain says the following about that CA.',
+                CA, <fields, ca_fields>
+       ) @ #t0) ∧
+      (Asserts( 'CCADB', 'No root CA signed this CA.', CA, <ca_fields, rootCA>
+       ) @ #t1)) ∧
+     (BrowserAcceptsChain( CA, fields, rootCA, ca_fields ) @ #t2)) ⇒
+    (¬(∀ CA.1 rootCA.1 ca_fields.1 fields.1 #t0.1 #t1.1.
         ((ExternalAuditorCheck( ca_fields.1, fields.1 ) @ #t0.1) ∧
-         (ExternalCheckCCADB( rootCA.1, ca_fields.1 ) @ #t1.1)) ⇒
-        (∃ CA.1 #t.
-          Asserts( 'external auditor', 'this is a correct statement', CA.1,
-                   <fields.1, ca_fields.1>
-          ) @ #t)))"
+         (BrowserAcceptsChain( CA.1, fields.1, rootCA.1, ca_fields.1 ) @ #t1.1)) ⇒
+        (∃ #t. GroundTruth( CA.1, fields.1 ) @ #t)))"
 /*
 guarded formula characterizing all counter-examples:
-"∃ rootCA CA fields ca_fields #t0 #t1.
-  (AssertsNot( 'external auditor', 'this is a correct statement', CA,
-               <fields, ca_fields>
+"∃ rootCA CA fields ca_fields #t0 #t1 #t2.
+  (Asserts( 'external auditor',
+            'That intermediary CA signed the following incorrect statement and the validation chain says the following about that CA.',
+            CA, <fields, ca_fields>
    ) @ #t0) ∧
-  (AssertsNot( rootCA, 'I signed this intermediate CA.', CA, ca_fields
-   ) @ #t1)
+  (Asserts( 'CCADB', 'No root CA signed this CA.', CA, <ca_fields, rootCA>
+   ) @ #t1) ∧
+  (BrowserAcceptsChain( CA, fields, rootCA, ca_fields ) @ #t2)
  ∧
-  ∀ rootCA.1 ca_fields.1 fields.1 #t0.1 #t1.1.
+  ∀ CA.1 rootCA.1 ca_fields.1 fields.1 #t0.1 #t1.1.
    (ExternalAuditorCheck( ca_fields.1, fields.1 ) @ #t0.1) ∧
-   (ExternalCheckCCADB( rootCA.1, ca_fields.1 ) @ #t1.1)
+   (BrowserAcceptsChain( CA.1, fields.1, rootCA.1, ca_fields.1 ) @ #t1.1)
   ⇒
-   ∃ CA.1 #t.
-    (Asserts( 'external auditor', 'this is a correct statement', CA.1,
-              <fields.1, ca_fields.1>
-     ) @ #t)"
+   ∃ #t. (GroundTruth( CA.1, fields.1 ) @ #t)"
 */
 by sorry
 
 lemma A_PKI_Ext_CAfalseAsserts_rootNotBlamed_verif_nonempty:
   all-traces
-  "∀ CA rootCA fields ca_fields #t0 #t1.
-    ((AssertsNot( 'external auditor', 'this is a correct statement', CA,
-                  <fields, ca_fields>
-      ) @ #t0) ∧
-     (Asserts( rootCA, 'I signed this intermediate CA.', CA, ca_fields
-      ) @ #t1)) ⇒
-    (¬(∀ rootCA.1 ca_fields.1 fields.1 #t0.1 #t1.1.
+  "∀ CA rootCA fields ca_fields #t0 #t1 #t2.
+    (((Asserts( 'external auditor',
+                'That intermediary CA signed the following incorrect statement and the validation chain says the following about that CA.',
+                CA, <fields, ca_fields>
+       ) @ #t0) ∧
+      (Asserts( rootCA, 'I signed this intermediate CA.', CA, ca_fields
+       ) @ #t1)) ∧
+     (BrowserAcceptsChain( CA, fields, rootCA, ca_fields ) @ #t2)) ⇒
+    (¬(∀ CA.1 rootCA.1 ca_fields.1 fields.1 #t0.1 #t1.1.
         ((ExternalAuditorCheck( ca_fields.1, fields.1 ) @ #t0.1) ∧
-         (ExternalCheckCCADB( rootCA.1, ca_fields.1 ) @ #t1.1)) ⇒
-        (∃ CA.1 #t.
-          Asserts( 'external auditor', 'this is a correct statement', CA.1,
-                   <fields.1, ca_fields.1>
-          ) @ #t)))"
+         (BrowserAcceptsChain( CA.1, fields.1, rootCA.1, ca_fields.1 ) @ #t1.1)) ⇒
+        (∃ #t. GroundTruth( CA.1, fields.1 ) @ #t)))"
 /*
 guarded formula characterizing all counter-examples:
-"∃ CA rootCA fields ca_fields #t0 #t1.
-  (AssertsNot( 'external auditor', 'this is a correct statement', CA,
-               <fields, ca_fields>
+"∃ CA rootCA fields ca_fields #t0 #t1 #t2.
+  (Asserts( 'external auditor',
+            'That intermediary CA signed the following incorrect statement and the validation chain says the following about that CA.',
+            CA, <fields, ca_fields>
    ) @ #t0) ∧
   (Asserts( rootCA, 'I signed this intermediate CA.', CA, ca_fields
-   ) @ #t1)
+   ) @ #t1) ∧
+  (BrowserAcceptsChain( CA, fields, rootCA, ca_fields ) @ #t2)
  ∧
-  ∀ rootCA.1 ca_fields.1 fields.1 #t0.1 #t1.1.
+  ∀ CA.1 rootCA.1 ca_fields.1 fields.1 #t0.1 #t1.1.
    (ExternalAuditorCheck( ca_fields.1, fields.1 ) @ #t0.1) ∧
-   (ExternalCheckCCADB( rootCA.1, ca_fields.1 ) @ #t1.1)
+   (BrowserAcceptsChain( CA.1, fields.1, rootCA.1, ca_fields.1 ) @ #t1.1)
   ⇒
-   ∃ CA.1 #t.
-    (Asserts( 'external auditor', 'this is a correct statement', CA.1,
-              <fields.1, ca_fields.1>
-     ) @ #t)"
+   ∃ #t. (GroundTruth( CA.1, fields.1 ) @ #t)"
 */
 by sorry
 
 lemma A_PKI_Ext_CAfalseAsserts_rootBlamed_min:
   all-traces
-  "∀ rootCA CA fields ca_fields #t0 #t1.
-    ((AssertsNot( 'external auditor', 'this is a correct statement', CA,
-                  <fields, ca_fields>
-      ) @ #t0) ∧
-     (AssertsNot( rootCA, 'I signed this intermediate CA.', CA, ca_fields
-      ) @ #t1)) ⇒
-    ((¬(∃ rootCA.1 CA.1 fields.1 ca_fields.1 #t0.1 #t1.1.
-         ((AssertsNot( 'external auditor', 'this is a correct statement', CA.1,
-                       <fields.1, ca_fields.1>
-           ) @ #t0.1) ∧
-          (AssertsNot( rootCA.1, 'I signed this intermediate CA.', CA.1,
-                       ca_fields.1
-           ) @ #t1.1)) ∧
+  "∀ rootCA CA fields ca_fields #t0 #t1 #t2.
+    (((Asserts( 'external auditor',
+                'That intermediary CA signed the following incorrect statement and the validation chain says the following about that CA.',
+                CA, <fields, ca_fields>
+       ) @ #t0) ∧
+      (Asserts( 'CCADB', 'No root CA signed this CA.', CA, <ca_fields, rootCA>
+       ) @ #t1)) ∧
+     (BrowserAcceptsChain( CA, fields, rootCA, ca_fields ) @ #t2)) ⇒
+    ((¬(∃ rootCA.1 CA.1 fields.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+         (((Asserts( 'external auditor',
+                     'That intermediary CA signed the following incorrect statement and the validation chain says the following about that CA.',
+                     CA.1, <fields.1, ca_fields.1>
+            ) @ #t0.1) ∧
+           (Asserts( 'CCADB', 'No root CA signed this CA.', CA.1,
+                     <ca_fields.1, rootCA.1>
+            ) @ #t1.1)) ∧
+          (BrowserAcceptsChain( CA.1, fields.1, rootCA.1, ca_fields.1 ) @ #t2.1)) ∧
          ((rootCA.1 = rootCA) ∧ (¬(rootCA = rootCA.1))))) ∧
-     (¬(∃ CA.1 rootCA.1 fields.1 ca_fields.1 #t0.1 #t1.1.
-         ((AssertsNot( 'external auditor', 'this is a correct statement', CA.1,
-                       <fields.1, ca_fields.1>
-           ) @ #t0.1) ∧
-          (Asserts( rootCA.1, 'I signed this intermediate CA.', CA.1, ca_fields.1
-           ) @ #t1.1)) ∧
+     (¬(∃ CA.1 rootCA.1 fields.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+         (((Asserts( 'external auditor',
+                     'That intermediary CA signed the following incorrect statement and the validation chain says the following about that CA.',
+                     CA.1, <fields.1, ca_fields.1>
+            ) @ #t0.1) ∧
+           (Asserts( rootCA.1, 'I signed this intermediate CA.', CA.1, ca_fields.1
+            ) @ #t1.1)) ∧
+          (BrowserAcceptsChain( CA.1, fields.1, rootCA.1, ca_fields.1 ) @ #t2.1)) ∧
          ((CA.1 = rootCA) ∧ (¬(rootCA = CA.1))))))"
 /*
 guarded formula characterizing all counter-examples:
-"∃ rootCA CA fields ca_fields #t0 #t1.
-  (AssertsNot( 'external auditor', 'this is a correct statement', CA,
-               <fields, ca_fields>
+"∃ rootCA CA fields ca_fields #t0 #t1 #t2.
+  (Asserts( 'external auditor',
+            'That intermediary CA signed the following incorrect statement and the validation chain says the following about that CA.',
+            CA, <fields, ca_fields>
    ) @ #t0) ∧
-  (AssertsNot( rootCA, 'I signed this intermediate CA.', CA, ca_fields
-   ) @ #t1)
+  (Asserts( 'CCADB', 'No root CA signed this CA.', CA, <ca_fields, rootCA>
+   ) @ #t1) ∧
+  (BrowserAcceptsChain( CA, fields, rootCA, ca_fields ) @ #t2)
  ∧
-  ((∃ rootCA.1 CA.1 fields.1 ca_fields.1 #t0.1 #t1.1.
-     (AssertsNot( 'external auditor', 'this is a correct statement', CA.1,
-                  <fields.1, ca_fields.1>
+  ((∃ rootCA.1 CA.1 fields.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+     (Asserts( 'external auditor',
+               'That intermediary CA signed the following incorrect statement and the validation chain says the following about that CA.',
+               CA.1, <fields.1, ca_fields.1>
       ) @ #t0.1) ∧
-     (AssertsNot( rootCA.1, 'I signed this intermediate CA.', CA.1,
-                  ca_fields.1
+     (Asserts( 'CCADB', 'No root CA signed this CA.', CA.1,
+               <ca_fields.1, rootCA.1>
       ) @ #t1.1) ∧
+     (BrowserAcceptsChain( CA.1, fields.1, rootCA.1, ca_fields.1 ) @ #t2.1) ∧
      (rootCA.1 = rootCA)
     ∧
      ¬(rootCA = rootCA.1)) ∨
-   (∃ CA.1 rootCA.1 fields.1 ca_fields.1 #t0.1 #t1.1.
-     (AssertsNot( 'external auditor', 'this is a correct statement', CA.1,
-                  <fields.1, ca_fields.1>
+   (∃ CA.1 rootCA.1 fields.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+     (Asserts( 'external auditor',
+               'That intermediary CA signed the following incorrect statement and the validation chain says the following about that CA.',
+               CA.1, <fields.1, ca_fields.1>
       ) @ #t0.1) ∧
      (Asserts( rootCA.1, 'I signed this intermediate CA.', CA.1, ca_fields.1
       ) @ #t1.1) ∧
+     (BrowserAcceptsChain( CA.1, fields.1, rootCA.1, ca_fields.1 ) @ #t2.1) ∧
      (CA.1 = rootCA)
     ∧
      ¬(rootCA = CA.1)))"
@@ -1204,52 +1252,64 @@ by sorry
 
 lemma A_PKI_Ext_CAfalseAsserts_rootNotBlamed_min:
   all-traces
-  "∀ CA rootCA fields ca_fields #t0 #t1.
-    ((AssertsNot( 'external auditor', 'this is a correct statement', CA,
-                  <fields, ca_fields>
-      ) @ #t0) ∧
-     (Asserts( rootCA, 'I signed this intermediate CA.', CA, ca_fields
-      ) @ #t1)) ⇒
-    ((¬(∃ rootCA.1 CA.1 fields.1 ca_fields.1 #t0.1 #t1.1.
-         ((AssertsNot( 'external auditor', 'this is a correct statement', CA.1,
-                       <fields.1, ca_fields.1>
-           ) @ #t0.1) ∧
-          (AssertsNot( rootCA.1, 'I signed this intermediate CA.', CA.1,
-                       ca_fields.1
-           ) @ #t1.1)) ∧
+  "∀ CA rootCA fields ca_fields #t0 #t1 #t2.
+    (((Asserts( 'external auditor',
+                'That intermediary CA signed the following incorrect statement and the validation chain says the following about that CA.',
+                CA, <fields, ca_fields>
+       ) @ #t0) ∧
+      (Asserts( rootCA, 'I signed this intermediate CA.', CA, ca_fields
+       ) @ #t1)) ∧
+     (BrowserAcceptsChain( CA, fields, rootCA, ca_fields ) @ #t2)) ⇒
+    ((¬(∃ rootCA.1 CA.1 fields.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+         (((Asserts( 'external auditor',
+                     'That intermediary CA signed the following incorrect statement and the validation chain says the following about that CA.',
+                     CA.1, <fields.1, ca_fields.1>
+            ) @ #t0.1) ∧
+           (Asserts( 'CCADB', 'No root CA signed this CA.', CA.1,
+                     <ca_fields.1, rootCA.1>
+            ) @ #t1.1)) ∧
+          (BrowserAcceptsChain( CA.1, fields.1, rootCA.1, ca_fields.1 ) @ #t2.1)) ∧
          ((rootCA.1 = CA) ∧ (¬(CA = rootCA.1))))) ∧
-     (¬(∃ CA.1 rootCA.1 fields.1 ca_fields.1 #t0.1 #t1.1.
-         ((AssertsNot( 'external auditor', 'this is a correct statement', CA.1,
-                       <fields.1, ca_fields.1>
-           ) @ #t0.1) ∧
-          (Asserts( rootCA.1, 'I signed this intermediate CA.', CA.1, ca_fields.1
-           ) @ #t1.1)) ∧
+     (¬(∃ CA.1 rootCA.1 fields.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+         (((Asserts( 'external auditor',
+                     'That intermediary CA signed the following incorrect statement and the validation chain says the following about that CA.',
+                     CA.1, <fields.1, ca_fields.1>
+            ) @ #t0.1) ∧
+           (Asserts( rootCA.1, 'I signed this intermediate CA.', CA.1, ca_fields.1
+            ) @ #t1.1)) ∧
+          (BrowserAcceptsChain( CA.1, fields.1, rootCA.1, ca_fields.1 ) @ #t2.1)) ∧
          ((CA.1 = CA) ∧ (¬(CA = CA.1))))))"
 /*
 guarded formula characterizing all counter-examples:
-"∃ CA rootCA fields ca_fields #t0 #t1.
-  (AssertsNot( 'external auditor', 'this is a correct statement', CA,
-               <fields, ca_fields>
+"∃ CA rootCA fields ca_fields #t0 #t1 #t2.
+  (Asserts( 'external auditor',
+            'That intermediary CA signed the following incorrect statement and the validation chain says the following about that CA.',
+            CA, <fields, ca_fields>
    ) @ #t0) ∧
   (Asserts( rootCA, 'I signed this intermediate CA.', CA, ca_fields
-   ) @ #t1)
+   ) @ #t1) ∧
+  (BrowserAcceptsChain( CA, fields, rootCA, ca_fields ) @ #t2)
  ∧
-  ((∃ rootCA.1 CA.1 fields.1 ca_fields.1 #t0.1 #t1.1.
-     (AssertsNot( 'external auditor', 'this is a correct statement', CA.1,
-                  <fields.1, ca_fields.1>
+  ((∃ rootCA.1 CA.1 fields.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+     (Asserts( 'external auditor',
+               'That intermediary CA signed the following incorrect statement and the validation chain says the following about that CA.',
+               CA.1, <fields.1, ca_fields.1>
       ) @ #t0.1) ∧
-     (AssertsNot( rootCA.1, 'I signed this intermediate CA.', CA.1,
-                  ca_fields.1
+     (Asserts( 'CCADB', 'No root CA signed this CA.', CA.1,
+               <ca_fields.1, rootCA.1>
       ) @ #t1.1) ∧
+     (BrowserAcceptsChain( CA.1, fields.1, rootCA.1, ca_fields.1 ) @ #t2.1) ∧
      (rootCA.1 = CA)
     ∧
      ¬(CA = rootCA.1)) ∨
-   (∃ CA.1 rootCA.1 fields.1 ca_fields.1 #t0.1 #t1.1.
-     (AssertsNot( 'external auditor', 'this is a correct statement', CA.1,
-                  <fields.1, ca_fields.1>
+   (∃ CA.1 rootCA.1 fields.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+     (Asserts( 'external auditor',
+               'That intermediary CA signed the following incorrect statement and the validation chain says the following about that CA.',
+               CA.1, <fields.1, ca_fields.1>
       ) @ #t0.1) ∧
      (Asserts( rootCA.1, 'I signed this intermediate CA.', CA.1, ca_fields.1
       ) @ #t1.1) ∧
+     (BrowserAcceptsChain( CA.1, fields.1, rootCA.1, ca_fields.1 ) @ #t2.1) ∧
      (CA.1 = CA)
     ∧
      ¬(CA = CA.1)))"
@@ -1258,21 +1318,25 @@ by sorry
 
 lemma A_PKI_Ext_CAfalseAsserts_rootBlamed_uniq:
   all-traces
-  "∀ rootCA CA fields ca_fields #t0 #t1.
-    ((AssertsNot( 'external auditor', 'this is a correct statement', CA,
-                  <fields, ca_fields>
-      ) @ #t0) ∧
-     (AssertsNot( rootCA, 'I signed this intermediate CA.', CA, ca_fields
-      ) @ #t1)) ⇒
+  "∀ rootCA CA fields ca_fields #t0 #t1 #t2.
+    (((Asserts( 'external auditor',
+                'That intermediary CA signed the following incorrect statement and the validation chain says the following about that CA.',
+                CA, <fields, ca_fields>
+       ) @ #t0) ∧
+      (Asserts( 'CCADB', 'No root CA signed this CA.', CA, <ca_fields, rootCA>
+       ) @ #t1)) ∧
+     (BrowserAcceptsChain( CA, fields, rootCA, ca_fields ) @ #t2)) ⇒
     (∃ #i. Corrupted( rootCA ) @ #i)"
 /*
 guarded formula characterizing all counter-examples:
-"∃ rootCA CA fields ca_fields #t0 #t1.
-  (AssertsNot( 'external auditor', 'this is a correct statement', CA,
-               <fields, ca_fields>
+"∃ rootCA CA fields ca_fields #t0 #t1 #t2.
+  (Asserts( 'external auditor',
+            'That intermediary CA signed the following incorrect statement and the validation chain says the following about that CA.',
+            CA, <fields, ca_fields>
    ) @ #t0) ∧
-  (AssertsNot( rootCA, 'I signed this intermediate CA.', CA, ca_fields
-   ) @ #t1)
+  (Asserts( 'CCADB', 'No root CA signed this CA.', CA, <ca_fields, rootCA>
+   ) @ #t1) ∧
+  (BrowserAcceptsChain( CA, fields, rootCA, ca_fields ) @ #t2)
  ∧
   ∀ #i. (Corrupted( rootCA ) @ #i) ⇒ ⊥"
 */
@@ -1280,21 +1344,25 @@ by sorry
 
 lemma A_PKI_Ext_CAfalseAsserts_rootNotBlamed_uniq:
   all-traces
-  "∀ CA rootCA fields ca_fields #t0 #t1.
-    ((AssertsNot( 'external auditor', 'this is a correct statement', CA,
-                  <fields, ca_fields>
-      ) @ #t0) ∧
-     (Asserts( rootCA, 'I signed this intermediate CA.', CA, ca_fields
-      ) @ #t1)) ⇒
+  "∀ CA rootCA fields ca_fields #t0 #t1 #t2.
+    (((Asserts( 'external auditor',
+                'That intermediary CA signed the following incorrect statement and the validation chain says the following about that CA.',
+                CA, <fields, ca_fields>
+       ) @ #t0) ∧
+      (Asserts( rootCA, 'I signed this intermediate CA.', CA, ca_fields
+       ) @ #t1)) ∧
+     (BrowserAcceptsChain( CA, fields, rootCA, ca_fields ) @ #t2)) ⇒
     (∃ #i. Corrupted( CA ) @ #i)"
 /*
 guarded formula characterizing all counter-examples:
-"∃ CA rootCA fields ca_fields #t0 #t1.
-  (AssertsNot( 'external auditor', 'this is a correct statement', CA,
-               <fields, ca_fields>
+"∃ CA rootCA fields ca_fields #t0 #t1 #t2.
+  (Asserts( 'external auditor',
+            'That intermediary CA signed the following incorrect statement and the validation chain says the following about that CA.',
+            CA, <fields, ca_fields>
    ) @ #t0) ∧
   (Asserts( rootCA, 'I signed this intermediate CA.', CA, ca_fields
-   ) @ #t1)
+   ) @ #t1) ∧
+  (BrowserAcceptsChain( CA, fields, rootCA, ca_fields ) @ #t2)
  ∧
   ∀ #i. (Corrupted( CA ) @ #i) ⇒ ⊥"
 */
@@ -1318,50 +1386,62 @@ by sorry
 
 lemma A_PKI_Ext_CAfalseAsserts_rootBlamed_single:
   exists-trace
-  "∃ rootCA CA fields ca_fields #t0 #t1.
-    (((AssertsNot( 'external auditor', 'this is a correct statement', CA,
-                   <fields, ca_fields>
-       ) @ #t0) ∧
-      (AssertsNot( rootCA, 'I signed this intermediate CA.', CA, ca_fields
-       ) @ #t1)) ∧
-     (∀ rootCA.1 CA.1 fields.1 ca_fields.1 #t0.1 #t1.1.
-       ((AssertsNot( 'external auditor', 'this is a correct statement', CA.1,
-                     <fields.1, ca_fields.1>
-         ) @ #t0.1) ∧
-        (AssertsNot( rootCA.1, 'I signed this intermediate CA.', CA.1,
-                     ca_fields.1
-         ) @ #t1.1)) ⇒
+  "∃ rootCA CA fields ca_fields #t0 #t1 #t2.
+    ((((Asserts( 'external auditor',
+                 'That intermediary CA signed the following incorrect statement and the validation chain says the following about that CA.',
+                 CA, <fields, ca_fields>
+        ) @ #t0) ∧
+       (Asserts( 'CCADB', 'No root CA signed this CA.', CA, <ca_fields, rootCA>
+        ) @ #t1)) ∧
+      (BrowserAcceptsChain( CA, fields, rootCA, ca_fields ) @ #t2)) ∧
+     (∀ rootCA.1 CA.1 fields.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+       (((Asserts( 'external auditor',
+                   'That intermediary CA signed the following incorrect statement and the validation chain says the following about that CA.',
+                   CA.1, <fields.1, ca_fields.1>
+          ) @ #t0.1) ∧
+         (Asserts( 'CCADB', 'No root CA signed this CA.', CA.1,
+                   <ca_fields.1, rootCA.1>
+          ) @ #t1.1)) ∧
+        (BrowserAcceptsChain( CA.1, fields.1, rootCA.1, ca_fields.1 ) @ #t2.1)) ⇒
        (rootCA.1 = rootCA))) ∧
-    (¬(∃ CA.1 rootCA.1 fields.1 ca_fields.1 #t0.1 #t1.1.
-        (AssertsNot( 'external auditor', 'this is a correct statement', CA.1,
-                     <fields.1, ca_fields.1>
-         ) @ #t0.1) ∧
-        (Asserts( rootCA.1, 'I signed this intermediate CA.', CA.1, ca_fields.1
-         ) @ #t1.1)))"
+    (¬(∃ CA.1 rootCA.1 fields.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+        ((Asserts( 'external auditor',
+                   'That intermediary CA signed the following incorrect statement and the validation chain says the following about that CA.',
+                   CA.1, <fields.1, ca_fields.1>
+          ) @ #t0.1) ∧
+         (Asserts( rootCA.1, 'I signed this intermediate CA.', CA.1, ca_fields.1
+          ) @ #t1.1)) ∧
+        (BrowserAcceptsChain( CA.1, fields.1, rootCA.1, ca_fields.1 ) @ #t2.1)))"
 /*
 guarded formula characterizing all satisfying traces:
-"∃ rootCA CA fields ca_fields #t0 #t1.
-  (AssertsNot( 'external auditor', 'this is a correct statement', CA,
-               <fields, ca_fields>
+"∃ rootCA CA fields ca_fields #t0 #t1 #t2.
+  (Asserts( 'external auditor',
+            'That intermediary CA signed the following incorrect statement and the validation chain says the following about that CA.',
+            CA, <fields, ca_fields>
    ) @ #t0) ∧
-  (AssertsNot( rootCA, 'I signed this intermediate CA.', CA, ca_fields
-   ) @ #t1)
+  (Asserts( 'CCADB', 'No root CA signed this CA.', CA, <ca_fields, rootCA>
+   ) @ #t1) ∧
+  (BrowserAcceptsChain( CA, fields, rootCA, ca_fields ) @ #t2)
  ∧
-  (∀ rootCA.1 CA.1 fields.1 ca_fields.1 #t0.1 #t1.1.
-    (AssertsNot( 'external auditor', 'this is a correct statement', CA.1,
-                 <fields.1, ca_fields.1>
+  (∀ rootCA.1 CA.1 fields.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+    (Asserts( 'external auditor',
+              'That intermediary CA signed the following incorrect statement and the validation chain says the following about that CA.',
+              CA.1, <fields.1, ca_fields.1>
      ) @ #t0.1) ∧
-    (AssertsNot( rootCA.1, 'I signed this intermediate CA.', CA.1,
-                 ca_fields.1
-     ) @ #t1.1)
+    (Asserts( 'CCADB', 'No root CA signed this CA.', CA.1,
+              <ca_fields.1, rootCA.1>
+     ) @ #t1.1) ∧
+    (BrowserAcceptsChain( CA.1, fields.1, rootCA.1, ca_fields.1 ) @ #t2.1)
    ⇒
     rootCA.1 = rootCA) ∧
-  (∀ CA.1 rootCA.1 fields.1 ca_fields.1 #t0.1 #t1.1.
-    (AssertsNot( 'external auditor', 'this is a correct statement', CA.1,
-                 <fields.1, ca_fields.1>
+  (∀ CA.1 rootCA.1 fields.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+    (Asserts( 'external auditor',
+              'That intermediary CA signed the following incorrect statement and the validation chain says the following about that CA.',
+              CA.1, <fields.1, ca_fields.1>
      ) @ #t0.1) ∧
     (Asserts( rootCA.1, 'I signed this intermediate CA.', CA.1, ca_fields.1
-     ) @ #t1.1)
+     ) @ #t1.1) ∧
+    (BrowserAcceptsChain( CA.1, fields.1, rootCA.1, ca_fields.1 ) @ #t2.1)
    ⇒
     ⊥)"
 */
@@ -1369,50 +1449,62 @@ by sorry
 
 lemma A_PKI_Ext_CAfalseAsserts_rootNotBlamed_single:
   exists-trace
-  "∃ CA rootCA fields ca_fields #t0 #t1.
-    (((AssertsNot( 'external auditor', 'this is a correct statement', CA,
-                   <fields, ca_fields>
-       ) @ #t0) ∧
-      (Asserts( rootCA, 'I signed this intermediate CA.', CA, ca_fields
-       ) @ #t1)) ∧
-     (∀ CA.1 rootCA.1 fields.1 ca_fields.1 #t0.1 #t1.1.
-       ((AssertsNot( 'external auditor', 'this is a correct statement', CA.1,
-                     <fields.1, ca_fields.1>
-         ) @ #t0.1) ∧
-        (Asserts( rootCA.1, 'I signed this intermediate CA.', CA.1, ca_fields.1
-         ) @ #t1.1)) ⇒
+  "∃ CA rootCA fields ca_fields #t0 #t1 #t2.
+    ((((Asserts( 'external auditor',
+                 'That intermediary CA signed the following incorrect statement and the validation chain says the following about that CA.',
+                 CA, <fields, ca_fields>
+        ) @ #t0) ∧
+       (Asserts( rootCA, 'I signed this intermediate CA.', CA, ca_fields
+        ) @ #t1)) ∧
+      (BrowserAcceptsChain( CA, fields, rootCA, ca_fields ) @ #t2)) ∧
+     (∀ CA.1 rootCA.1 fields.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+       (((Asserts( 'external auditor',
+                   'That intermediary CA signed the following incorrect statement and the validation chain says the following about that CA.',
+                   CA.1, <fields.1, ca_fields.1>
+          ) @ #t0.1) ∧
+         (Asserts( rootCA.1, 'I signed this intermediate CA.', CA.1, ca_fields.1
+          ) @ #t1.1)) ∧
+        (BrowserAcceptsChain( CA.1, fields.1, rootCA.1, ca_fields.1 ) @ #t2.1)) ⇒
        (CA.1 = CA))) ∧
-    (¬(∃ rootCA.1 CA.1 fields.1 ca_fields.1 #t0.1 #t1.1.
-        (AssertsNot( 'external auditor', 'this is a correct statement', CA.1,
-                     <fields.1, ca_fields.1>
-         ) @ #t0.1) ∧
-        (AssertsNot( rootCA.1, 'I signed this intermediate CA.', CA.1,
-                     ca_fields.1
-         ) @ #t1.1)))"
+    (¬(∃ rootCA.1 CA.1 fields.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+        ((Asserts( 'external auditor',
+                   'That intermediary CA signed the following incorrect statement and the validation chain says the following about that CA.',
+                   CA.1, <fields.1, ca_fields.1>
+          ) @ #t0.1) ∧
+         (Asserts( 'CCADB', 'No root CA signed this CA.', CA.1,
+                   <ca_fields.1, rootCA.1>
+          ) @ #t1.1)) ∧
+        (BrowserAcceptsChain( CA.1, fields.1, rootCA.1, ca_fields.1 ) @ #t2.1)))"
 /*
 guarded formula characterizing all satisfying traces:
-"∃ CA rootCA fields ca_fields #t0 #t1.
-  (AssertsNot( 'external auditor', 'this is a correct statement', CA,
-               <fields, ca_fields>
+"∃ CA rootCA fields ca_fields #t0 #t1 #t2.
+  (Asserts( 'external auditor',
+            'That intermediary CA signed the following incorrect statement and the validation chain says the following about that CA.',
+            CA, <fields, ca_fields>
    ) @ #t0) ∧
   (Asserts( rootCA, 'I signed this intermediate CA.', CA, ca_fields
-   ) @ #t1)
+   ) @ #t1) ∧
+  (BrowserAcceptsChain( CA, fields, rootCA, ca_fields ) @ #t2)
  ∧
-  (∀ CA.1 rootCA.1 fields.1 ca_fields.1 #t0.1 #t1.1.
-    (AssertsNot( 'external auditor', 'this is a correct statement', CA.1,
-                 <fields.1, ca_fields.1>
+  (∀ CA.1 rootCA.1 fields.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+    (Asserts( 'external auditor',
+              'That intermediary CA signed the following incorrect statement and the validation chain says the following about that CA.',
+              CA.1, <fields.1, ca_fields.1>
      ) @ #t0.1) ∧
     (Asserts( rootCA.1, 'I signed this intermediate CA.', CA.1, ca_fields.1
-     ) @ #t1.1)
+     ) @ #t1.1) ∧
+    (BrowserAcceptsChain( CA.1, fields.1, rootCA.1, ca_fields.1 ) @ #t2.1)
    ⇒
     CA.1 = CA) ∧
-  (∀ rootCA.1 CA.1 fields.1 ca_fields.1 #t0.1 #t1.1.
-    (AssertsNot( 'external auditor', 'this is a correct statement', CA.1,
-                 <fields.1, ca_fields.1>
+  (∀ rootCA.1 CA.1 fields.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+    (Asserts( 'external auditor',
+              'That intermediary CA signed the following incorrect statement and the validation chain says the following about that CA.',
+              CA.1, <fields.1, ca_fields.1>
      ) @ #t0.1) ∧
-    (AssertsNot( rootCA.1, 'I signed this intermediate CA.', CA.1,
-                 ca_fields.1
-     ) @ #t1.1)
+    (Asserts( 'CCADB', 'No root CA signed this CA.', CA.1,
+              <ca_fields.1, rootCA.1>
+     ) @ #t1.1) ∧
+    (BrowserAcceptsChain( CA.1, fields.1, rootCA.1, ca_fields.1 ) @ #t2.1)
    ⇒
     ⊥)"
 */

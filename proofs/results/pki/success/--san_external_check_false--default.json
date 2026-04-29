@@ -1,16 +1,16 @@
 {
   "task_id": "--san_external_check_false--default",
   "warnings": [],
-  "tamarin_timing": 1.57,
+  "tamarin_timing": 2.01,
   "wrapper_measures": {
-    "time": 1.7669329643249512,
-    "avg_memory": 60.216796875,
-    "peak_memory": 120.42578125
+    "time": 2.2270724773406982,
+    "avg_memory": 90.47786458333333,
+    "peak_memory": 144.3203125
   },
   "output_spthy": "results/pki/proofs/--san_external_check_false--default.spthy",
   "verified_lemma": {
     "san_external_check_false": {
-      "steps": 8,
+      "steps": 9,
       "analysis_type": "exists-trace"
     }
   },
