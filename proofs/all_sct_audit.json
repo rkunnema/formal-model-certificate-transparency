@@ -22,7 +22,8 @@
 				"timeout": 600
 			},
       "lemmas": [
-        {"name": "san_*"}
+        {"name": "san_*"},
+        {"name": "authenticity"}
       ]
     },
     "acc_authenticity": {

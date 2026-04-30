@@ -7,7 +7,7 @@
 </style>
 <pre class="hl-code">
 /*
- * Protocol: Certficate Transparency with additions for SCT Auditing, STH Gossiping
+ * Protocol: Certificate Transparency
  * Modeler:  anonymized
  * Date:     July 2025
  * Sources:  RFC6962, RFC 9162, &#34;Opt-in SCT Auditing&#34;, Emily Stark and Chris Thompson, and partly rooted on &#34;Provable Security for PKI Schemes&#34; by Wrótniak et al.
@@ -102,7 +102,7 @@ Intermediate CAs created by this rule are defined as legitimate and they are doc
         Time($now),
         San_Domain_Owner_Init()
     ]-&gt;
-    [ !DomainOwner($idServer, pubK), /* The DomainOwner fact serves as a proof of identity: If this fact is later used for issuing a certificate, we say that it is honestly issued (i.e., on behalf of the domain owner). see honest rules for issuing a pre-certificate for instace. */ 
+    [ !DomainOwner($idServer, pubK), /* The DomainOwner fact serves as a proof of identity: If this fact is later used for issuing a certificate, we say that it is honestly issued (i.e., on behalf of the domain owner). see honest rules for issuing a pre-certificate for instance. In practice this would be an id, or a webserver that solves a challenge (e.g. Let&#39;s Encrypt certification process) */
     Out(pubK) /* Public key is announced on the network */ ]
 
 
@@ -279,7 +279,7 @@ predicate: NoChainVisible(Logger, fields, log_id, #time, sth_time) &lt;=&gt;
     in
     [ !LoggerDict($M, $L), !TrackSubject($M, su), In(pub_fields), In(cert_sig), In(ca_fields), In(ca_sig), !TLS_L_to_M($L, $M, $snapshot, sth, session, $time), !Root_CA($rootCA, pkRootCA) ]
     --[ 
-        Eq(verify(cert_sig, pub_fields, pkCA), true()),
+        Eq(verify(cert_sig, pub_fields, pkCA), true()), // we only react to correctly signed certificates, wrongly signed certificates do not serve as actionable evidence for accountability
         Eq(verify(ca_sig, ca_fields, pkRootCA), true()),
         MonitorObservesEntry($M, $L, fields, &lt;ca_fields, ca_sig&gt;, sth, session), /* see restriction */
         RogueCert($CA, fields), /* see restriction */
@@ -298,11 +298,11 @@ predicate: NoChainVisible(Logger, fields, log_id, #time, sth_time) &lt;=&gt;
     in
     [ !LoggerDict($M, $L), !TrackSubject($M, $subj), In(pub_fields), In(cert_sig), In(ca_fields), In(ca_sig), !TLS_L_to_M($L, $M, $snapshot, sth, session, $time), !Root_CA($rootCA, pkRootCA) ]
     --[
-        Eq(verify(cert_sig, pub_fields, pkCA), true()),
+        Eq(verify(cert_sig, pub_fields, pkCA), true()), // we only react to correctly signed certificates, wrongly signed certificates do not serve as actionable evidence for accountability
         Eq(verify(ca_sig, ca_fields, pkRootCA), true()),
         MonitorObservesEntry($M, $L, fields, &lt;ca_fields, ca_sig&gt;, sth, session), /* see restriction */
         BenignCert($iss, fields), /* cert is found benign, see restriction */
-        AssertsNot($M, &#39;Blame this CA.&#39;, $CA, &lt;fields, ca_fields&gt;),
+        Asserts($M, &#39;Do not blame this CA.&#39;, $CA, &lt;fields, ca_fields&gt;),
 
         Time($now),
         San_monitorCanFindCertificate()
@@ -318,7 +318,7 @@ predicate: NoChainVisible(Logger, fields, log_id, #time, sth_time) &lt;=&gt;
     [ !LoggerDict($M, $L), !TrackSubject($M, su), In(fields), In(cert_sig), In(ca_fields), In(ca_sig), !TLS_L_to_M($L, $M, $snapshot, sth, session, $time), !Root_CA($rootCA, pkRootCA) ]
     --[ 
         NothingObserved($M, $L, fields, sth, session), /* see restriction */
-        AssertsNot($M, &#39;Blame this CA.&#39;, $CA, &lt;fields, ca_fields&gt;),
+        Asserts($M, &#39;Do not blame this CA.&#39;, $CA, &lt;fields, ca_fields&gt;),
 
         Time($now),
         San_monitorCannotFindCertificate()
@@ -333,15 +333,15 @@ predicate: NoChainVisible(Logger, fields, log_id, #time, sth_time) &lt;=&gt;
     in
     [ !LoggerDict($M, $L), !St_bad_Monitor($M), !TrackSubject($M, su), In(pub_fields), In(cert_sig), In(ca_fields), In(ca_sig), !TLS_L_to_M($L, $M, $snapshot, sth, session, $time), !Root_CA($rootCA, pkRootCA) ]
     --[
-        Eq(verify(cert_sig, pub_fields, pkCA), true()),
-        Eq(verify(ca_sig, ca_fields, pkRootCA), true()), /* only if it is a correctly signed and rogue cert, sleeping is considered a violation (+ we cannot check for other cases) */
+        Eq(verify(cert_sig, pub_fields, pkCA), true()), // we only react to correctly signed certificates, wrongly signed certificates do not serve as actionable evidence for accountability
+        Eq(verify(ca_sig, ca_fields, pkRootCA), true()),
         MonitorObservesEntry($M, $L, fields, &lt;ca_fields, ca_sig&gt;, sth, session), /* see restriction */
         RogueCert($CA, fields), /* see restriction */
 
         Time($now),
         San_monitorFindsRogueCertificate_Sleep()
     ]-&gt;
-    [ /* New: */ MonitorFoundCert($M, $L, fields, $CA, ca_fields, $time, session) /* but does not react: there is no assert in this rule, so the A_CT lemma needs to rule out monitor misbehavior (but we already know that it does not hold for other reasons) */ ]
+    [ MonitorFoundCert($M, $L, fields, $CA, ca_fields, $time, session) /* MonitorFoundCert but did not react: there is no assert in this rule, so the A_CT lemma needs to rule out at least monitor misbehavior which we will later see */ ]
 
 /* ----- Logger rules ----- */
 
@@ -409,7 +409,7 @@ pre-certificate is added to log along with the chain (signer of the precert, and
         !Log($L, $log_id)
     ]
     --[
-        Eq(verify(preC_sig, preC_fields, pkCA), true()),
+        Eq(verify(preC_sig, preC_fields, pkCA), true()), /* honest additions have to be properly signed */
         Eq(verify(ca_sig, ca_fields, pkRootCA), true()),
         LoggerComputesAddLogFields($L, $log_id, fields, $now),
         LoggerComputesAddLog($L, $log_id, fields, &lt;ca_fields, ca_sig&gt;, chain, $now),
@@ -436,6 +436,7 @@ pre-certificate is added to log along with the chain (signer of the precert, and
       /* Incoming certificate that is added */ 
       !Corrupted_Logger($L, skL, pk(skL)) ]
     --[
+        /* observe that we can have arbitrary forged additions, there is no requirement for proper signing */
         LoggerComputesAddLogFields($L, $log_id, fields, $now),
         LoggerComputesAddLog($L, $log_id, fields, &lt;ca_fields, ca_sig&gt;, &lt;&lt;preC_fields, preC_sig&gt;, &lt;ca_fields, ca_sig&gt;&gt;, $now),
         
@@ -496,7 +497,7 @@ This rule is invoked by the CA again. It takes the issued pre-certificate and ge
     --[ Eq(verify(sct1_sig, sct1_fields, pkL1), true()), 
         Eq(verify(sct2_sig, sct2_fields, pkL2), true()), 
         Eq(verify(sig_preC, preC_fields, pkCA), true()), 
-        _restrict( not ($L1 = $L2) ), /* the 2 SCTs were from distinct loggers */
+        _restrict( not ($L1 = $L2) ), /* the 2 SCTs were from distinct loggers, as common in most browser policies */
         Certified($CA, $L1, sct1, $L2, sct2), 
         CAAsserts($CA, fields),
         CheckValidUntil($now, $j),
@@ -516,8 +517,7 @@ This rule is invoked by the CA again. It takes the issued pre-certificate and ge
         Time($now),
         San_ClientInitiatesAuditing()
     ]-&gt;
-    [ !TLS_to_M($M, &lt;&lt;pub_fields, pub_sig&gt;, &lt;ca_fields, ca_sig&gt;&gt;, sct), Client_Receipt_Val($M, chain) ]
-// TODO T: Client_Receipt_Val does not occur anywhere, can be deleted
+    [ !TLS_to_M($M, &lt;&lt;pub_fields, pub_sig&gt;, &lt;ca_fields, ca_sig&gt;&gt;, sct) ]
 
 /*
 A client receives a certificate and now validates it. This includes:
@@ -549,6 +549,8 @@ verifying always includes validity checks of the timepoints in the certificate, 
         !Logger($L2, pkL2)
     ]
     --[ BrowserAcceptsChain($CA, fields, $rootCA, ca_fields, $L1, $L2),
+        BrowserAcceptsChainTimes($CA, fields, $rootCA, ca_fields, $L1, $sct1),
+        BrowserAcceptsChainTimes($CA, fields, $rootCA, ca_fields, $L2, $sct2), // BrowserAcceptsChain with SCT timestamps (for experimental transparency lemmas)
         Eq(verify(pub_sig, pub_fields, pkCA), true()), 
         Eq(verify(sct1_sig, sct1_fields, pkL1), true()), 
         Eq(verify(sct2_sig, sct2_fields, pkL2), true()),
@@ -560,8 +562,7 @@ verifying always includes validity checks of the timepoints in the certificate, 
         Time($now),
         San_ClientValidate(),
     ]-&gt;
-    [ !Check(pkL1, fields, &lt;ca_fields, ca_sig&gt;), !Check(pkL2, fields, &lt;ca_fields, ca_sig&gt;) /* each SCT and statement is stored to later run client-side auditing checks, e.g. inclusion proofs */, !BAccept_State($CA, fields, ca_fields, $L1, $sct1, $L2, $sct2), !BAccept_SCT($L1, fields, ca_fields, $sct1), !BAccept_SCT($L2, fields, ca_fields, $sct2)
-    ]
+    [ !BAccept_State($CA, fields, ca_fields, $L1, $sct1, $L2, $sct2) ]
 
 /* ---------- Interaction with the log to verify its properties ---------- */
 
@@ -697,9 +698,10 @@ predicate: EntryVisible(Logger, fields, ca_cert, chain, log_id, #time, sth_time)
 
 /* Monitor requests a current snapshot of the log */
 <span class="keyword">rule</span> <a name="rule:ProofFetching_M"></a><span class="rule.identifier">ProofFetching_M</span> [color= #10bcc5]<a name="lem::"></a><span class="lemma.identifier">:</span>
-    [ Fr(~session), !Monitor($M), /* Identity who fetches */ !Logger($L, pkL) ] 
+    [ Fr(~session), !Monitor($M), /* Monitor that initiates the proof fetching */ !Logger($L, pkL) ] 
     --[ 
         FetchLogSnapshot($M, $L, ~session),
+        FetchLogSnapshotTime($M, $L, ~session, $now),
         
         Time($now),
         San_ProofFetching_M()
@@ -708,10 +710,11 @@ predicate: EntryVisible(Logger, fields, ca_cert, chain, log_id, #time, sth_time)
 
 /* A client requests a current view of the log */
 <span class="keyword">rule</span> <a name="rule:ProofFetching_C"></a><span class="rule.identifier">ProofFetching_C</span> [color= #10bcc5]<a name="lem::"></a><span class="lemma.identifier">:</span>
-    [ Fr(~session), In($C), /* could be fetched by anyone */ !Logger($L, pkL) ] 
+    [ Fr(~session), In($C), /* anyone that initiates a proof fetching */ !Logger($L, pkL) ] 
     --[ 
         FetchLogSnapshot($C, $L, ~session),
-        
+        FetchLogSnapshotTime($C, $L, ~session, $now),
+
         Time($now),
         San_ProofFetching_C()
     ]-&gt;
@@ -722,6 +725,7 @@ predicate: EntryVisible(Logger, fields, ca_cert, chain, log_id, #time, sth_time)
     [ Fr(~session), In($P), /* could be fetched by anyone */ !Logger($L, pkL) ] 
     --[ 
         FetchLogSnapshot($P, $L, ~session),
+        FetchLogSnapshotTime($C, $L, ~session, $now),
         
         Time($now),
         San_ProofFetching_P()
@@ -731,7 +735,7 @@ predicate: EntryVisible(Logger, fields, ca_cert, chain, log_id, #time, sth_time)
 /*
 Logger issues a new snapshot of its maintained log. 
 This exact snapshot is relatively abstract, as the log operations are too. We assume that this generates an honest STH which is verifiable, depending on the context it also represents all entries that a monitor can explore then. 
-It is crucial for the outcome of these later checks when a certain snapshot has been created. If it was early in an execution, there might not be any entries yet contained. When going through the lemmas later, you will observe that a party can partly control this by restricting when to request to snapshot.
+It is crucial for the outcome of these later checks *when* a certain snapshot has been created. If it was early in an execution, there might not be any entries yet contained. A party that requests proof can partly control this by delaying the initial request (where $time comes from).
 */
 <span class="keyword">rule</span> <a name="rule:LoggerSnapshot_M"></a><span class="rule.identifier">LoggerSnapshot_M</span> [color= #22d6d6]<a name="lem::"></a><span class="lemma.identifier">:</span>
     [ !Logger_s($L, skL, pk(skL)), Fr(~sth) /* abstract representation of the STH */, TLS_M_to_L($M, $L, session, $time) ]
@@ -780,7 +784,7 @@ It is crucial for the outcome of these later checks when a certain snapshot has 
     in
     [ !TLS_L_to_P($L, $P, $snapshot, sth, session, $time), !Logger($L, pkL),In(fields), In(ca_cert) /* entry to check for */ ]
     --[
-        AssertsNot($P, &#39;This loggers log currently includes these fields.&#39;, $L, &lt;fields, session&gt;),
+        Asserts($P, &#39;This loggers log currently does not include these fields.&#39;, $L, &lt;fields, session&gt;),
         InclusionProofFails($P, $L, fields, ca_cert, sth, session), /* entry is not contained in the snapshot, see restriction */
         
         Time($now),
@@ -866,11 +870,12 @@ It is crucial for the outcome of these later checks when a certain snapshot has 
     [ CCADBConsulted($rootCA, ca_fields) ]
 
 /* Responsible root CA is not able to present an identity proof of the intermediate CA (-&gt; it is forged) */
-/* We obviously rely on the soundness of this documentation check. It is an interesting bit to consider how real-world documentations look like, feel free to consult the CCADB yourself for this. TLDR: they are legal documents with auditor firms involved. We do not go beyond this and consider everything around forging such documents out of scope of this work. */
+/* We obviously rely on the soundness of this documentation check. It is an interesting bit to consider how real-world documentation look like, feel free to consult the CCADB yourself for this. The contain legal documents with auditor firms involved. We do not go beyond this and consider everything around forging such documents out of scope of this work. */
 <span class="keyword">restriction</span> externalCA_no_proof:
     &#34;All rootCA CA ca_fields #t1.
         UndocumentedIntermediateCA(rootCA, CA, ca_fields)@t1
             ==&gt; not (Ex #t0. DocumentedCA(rootCA, CA, ca_fields)@t0 &amp; #t0 &lt; #t1)&#34;
+
 
 
 // ==========================================
@@ -879,6 +884,15 @@ It is crucial for the outcome of these later checks when a certain snapshot has 
 
 /* CTCheck with CCADB check included */
 
+// We assume that the affected client, and a monitor (that knows the ground truth) together with knowledge from the CCADB contribute evidence in this check. While this requires some collaboration to run, we will find that in order to verify an accountability lemma with this test, we need honest assumptions for the monitor AND logger which is in total unrealistic.
+/*
+CTCheck(). Contributed evidence:
+- Client: Has previously accepted the certificate (here we only use that to delay the check after MMD)
+    - this seems at first like we require a level of collaboration between client and monitor (unclear how CT allows this), but we will see that for CT we will need much more assumptions as well (honesty assumptions for monitor and logger)
+    - but monitors should regularly check the logs so they should find it after some time and the client knowledge is not used to blame a party
+- Monitor: Result of scanning the log for the certificate (found or not found)
+- CCADB: Result of consulting the database for the legitimacy of the CA
+*/
 <span class="keyword">rule</span> <a name="rule:MonitorCheck_Found_CCADB"></a><span class="rule.identifier">MonitorCheck_Found_CCADB</span><a name="lem::"></a><span class="lemma.identifier">:</span>
     [ !BAccept_State($CA, fields, ca_fields, $L1, $sct1, $L2, $sct2),
       MonitorFoundCert($M, $L, fields, $CA, ca_fields, $time_of_proof_fetch, session), CCADBConsulted($rootCA, ca_fields) ]
@@ -905,13 +919,16 @@ It is crucial for the outcome of these later checks when a certain snapshot has 
 
 /*  */
 
+/*
+CTTransparencyCheck(). Contributed evidence:
+- Client: Has previously accepted the certificate (hidden here but explicit in lemma)
+- Participant: Inclusion Proof done
+*/
 <span class="keyword">rule</span> <a name="rule:TransparencyCheck_Success"></a><span class="rule.identifier">TransparencyCheck_Success</span><a name="lem::"></a><span class="lemma.identifier">:</span>
-    let
-        ca_fields = &lt;$rootCA, $CA, pkCA, &#39;pubKey-CA&#39;, snCA, $i0, $j0&gt;
-    in
-    [ !BAccept_SCT($L, fields, ca_fields, $sct), InclusionVerified($P,$L, fields, $proof, session, ca_fields) ]
+    [ InclusionVerified($P, $L, fields, $proof_time, session, ca_fields) ]
     --[
         CTTransparencyCheckSession($L, fields, session),
+        CTTransparencyCheckTime($L, fields, session, $proof_time),
         CTTransparencyCheck($L, fields),
         CTTransparencyCheckSuccess($L, fields),
 
@@ -920,14 +937,11 @@ It is crucial for the outcome of these later checks when a certain snapshot has 
     [  ]
 
 <span class="keyword">rule</span> <a name="rule:TransparencyCheck_Failed"></a><span class="rule.identifier">TransparencyCheck_Failed</span><a name="lem::"></a><span class="lemma.identifier">:</span>
-    let
-        ca_fields = &lt;$rootCA, $CA, pkCA, &#39;pubKey-CA&#39;, snCA, $i0, $j0&gt;
-    in
-    [ !BAccept_SCT($L, fields, ca_fields, $sct), InclusionFalsified($P,$L, fields, $proof, session, ca_fields) ]
+    [ InclusionFalsified($P, $L, fields, $proof_time, session, ca_fields) ]
     --[
         CTTransparencyCheckSession($L, fields, session),
+        CTTransparencyCheckTime($L, fields, session, $proof_time),
         CTTransparencyCheck($L, fields),
-        MMD_passed($sct, $proof),
 
         San_TransparencyCheck_Failed()
     ]-&gt;
@@ -938,36 +952,6 @@ It is crucial for the outcome of these later checks when a certain snapshot has 
         MMD_passed(before, after)@t2 &amp; Time(before)@t0 &amp; Time(after)@t1
         ==&gt; 
         (#t0 &lt; #t1 &amp; #t1 &lt; #t2 &amp; not(before = after))&#34;
-
-// Transparency check without MMD (for counterexample)
-
-<span class="keyword">rule</span> <a name="rule:TransparencyCheck_wo_MMD_success"></a><span class="rule.identifier">TransparencyCheck_wo_MMD_success</span><a name="lem::"></a><span class="lemma.identifier">:</span>
-    let
-        ca_fields = &lt;$rootCA, $CA, pkCA, &#39;pubKey-CA&#39;, snCA, $i0, $j0&gt;
-        cert_fields = &lt;$CA, $subj, ke, &#39;pre-cert&#39;, sn, $i, $j&gt;
-        chain = &lt;&lt;cert_fields, cert_sig&gt;, &lt;ca_fields, ca_sig&gt;&gt;
-    in
-    [ !BAccept_SCT($L, fields, ca_fields, $sct), InclusionVerified($P,$L, fields, $proof, session, ca_fields) ]
-    --[
-        CTTransparencyCheck_wo_MMD($L, fields),
-        CTTransparencyCheckSuccess_wo_MMD($L, fields),
-        San_TransparencyCheck_wo_MMD_success()
-    ]-&gt;
-    [  ]
-
-<span class="keyword">rule</span> <a name="rule:TransparencyCheck_wo_MMD_failed"></a><span class="rule.identifier">TransparencyCheck_wo_MMD_failed</span><a name="lem::"></a><span class="lemma.identifier">:</span>
-    let
-        ca_fields = &lt;$rootCA, $CA, pkCA, &#39;pubKey-CA&#39;, snCA, $i0, $j0&gt;
-        cert_fields = &lt;$CA, $subj, ke, &#39;pre-cert&#39;, sn, $i, $j&gt;
-        chain = &lt;&lt;cert_fields, cert_sig&gt;, &lt;ca_fields, ca_sig&gt;&gt;
-    in
-    [ !BAccept_SCT($L, fields, ca_fields, $sct), InclusionFalsified($P,$L, fields, $proof, session, ca_fields) ]
-    --[
-        CTTransparencyCheck_wo_MMD($L, fields),
-
-        San_TransparencyCheck_wo_MMD_failed()
-    ]-&gt;
-    [  ]
 
 // ==========================================
 
@@ -1019,7 +1003,7 @@ It is crucial for the outcome of these later checks when a certain snapshot has 
                                 &amp; #t2 &lt; #t3 ==&gt; tp = t )&#34;
 
 
-/* whenever a party checks the validity period of a certificate, that time must not happened before the check, i.e. the time did not pass yet */
+/* whenever a party checks the validity period of a certificate, that time must not happen before the check, i.e. the time did not pass yet */
 <span class="keyword">restriction</span> certStillValid:
     &#34;All currTime valid_till #t1.
         Time(currTime)@t1 &amp; CheckValidUntil(currTime, valid_till)@t1
@@ -1305,7 +1289,7 @@ It is crucial for the outcome of these later checks when a certain snapshot has 
  exists-trace 
 &#34;Ex #t. 
 	San_ParticipantFindsInclusionViolation()@t
-	&amp; not (Ex #t. Compromise()@t) // violation is possible if MMD is not respected
+	&amp; not (Ex #t. Compromise()@t) // violation is still possible if MMD is not respected
 &#34;
 
 <span class="keyword">lemma</span> <span class="punctuation">san_ParticipantVerifiesInclusion</span><a name="lem::"></a><span class="lemma.identifier">:</span>
@@ -1355,20 +1339,6 @@ It is crucial for the outcome of these later checks when a certain snapshot has 
 &#34;Ex #t.
     San_TransparencyCheck_Failed()@t
     &amp; (All #t. Compromise()@t ==&gt; (Ex L. CompromiseLogger(L)@t)) // only logger corruptions allowed
-&#34;
-
-<span class="keyword">lemma</span> <span class="punctuation">san_TransparencyCheck_wo_MMD_success</span><a name="lem::"></a><span class="lemma.identifier">:</span>
- exists-trace
-&#34;Ex #t.
-    San_TransparencyCheck_wo_MMD_success()@t
-    &amp; not (Ex #t. Compromise()@t)
-&#34;
-
-<span class="keyword">lemma</span> <span class="punctuation">san_TransparencyCheck_wo_MMD_failed</span><a name="lem::"></a><span class="lemma.identifier">:</span>
- exists-trace
-&#34;Ex #t.
-    San_TransparencyCheck_wo_MMD_failed()@t
-    &amp; not (Ex #t. Compromise()@t)
 &#34;
 
 <span class="keyword">lemma</span> <span class="punctuation">san_compromiseCA</span><a name="lem::"></a><span class="lemma.identifier">:</span>
@@ -1440,7 +1410,7 @@ It is crucial for the outcome of these later checks when a certain snapshot has 
             &amp;   LoggerComputesAddLogFields(l2, lid2, fields, time2)@lt2
             &amp; #lt1 &lt; #t
             &amp; #lt2 &lt; #t 
-                /* then both loggers have added and entry to their log */ 
+                /* then both loggers have added an entry to their log */ 
             ) 
             | (Ex #c1. CompromiseLogger(l1)@c1)
             | (Ex #c2. CompromiseLogger(l2)@c2)
@@ -1452,10 +1422,8 @@ It is crucial for the outcome of these later checks when a certain snapshot has 
         TRANSPARENCY
    --------------------- */
 
-/*
-if we instead assume the MMD (ProofRunsAfterMMD) is respected, transparency can still fail if the considered logger is corrupt.
-*/
-<span class="keyword">lemma</span> <span class="punctuation">transparency_w_MMD</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+// falsified (logger can hide the entry or MMD not yet passed)
+<span class="keyword">lemma</span> <span class="punctuation">transparency</span><a name="lem::"></a><span class="lemma.identifier">:</span>
     &#34;
     All CA fields rootCA ca_fields L1 L2 L #t1 #t2.
         BrowserAcceptsChain(CA, fields, rootCA, ca_fields, L1, L2)@t1
@@ -1466,42 +1434,35 @@ if we instead assume the MMD (ProofRunsAfterMMD) is respected, transparency can 
             CTTransparencyCheckSuccess(L, fields)@t2
     &#34;
 
+/*
+In the following transparency lemmas, we weaken the property to illustrate which assumptions are at least necessary in CT.
+*/
 
-<span class="keyword">lemma</span> <span class="punctuation">transparency_w_MMD_honest_log_helper</span> [reuse]<a name="lem::"></a><span class="lemma.identifier">:</span>
+// falsified
+<span class="keyword">lemma</span> <span class="punctuation">transparency_wo_MMD_honest_log</span><a name="lem::"></a><span class="lemma.identifier">:</span>
     &#34;
-    All L fields #t1.
-        CTTransparencyCheck(L, fields)@t1
+    All P CA fields rootCA ca_fields L sct_time proof_timestamp session #t1 #t2 #t3.
+        BrowserAcceptsChainTimes(CA, fields, rootCA, ca_fields, L, sct_time)@t1
+        &amp; FetchLogSnapshotTime(P, L, session, proof_timestamp)@t2 // someone starts the inclusion proof process after the client accepted the cert
+        &amp; CTTransparencyCheckTime(L, fields, session, proof_timestamp)@t3
+        &amp; #t1 &lt; #t2 &amp; #t2 &lt; #t3
         &amp; not (Ex #t. CompromiseLogger(L)@t)
             ==&gt;
-            CTTransparencyCheckSuccess(L, fields)@t1
+            CTTransparencyCheckSuccess(L, fields)@t3
     &#34;
-/*
-...but if we assume the logger is honest (not corrupt) and the MMD is respected, transparency holds.
-*/
+
+// verified (but assuming that the logger is honest for transparency is an unsatisfying result)
 <span class="keyword">lemma</span> <span class="punctuation">transparency_w_MMD_honest_log</span><a name="lem::"></a><span class="lemma.identifier">:</span>
     &#34;
-    All CA fields rootCA ca_fields L1 L2 L #t1 #t2.
-        BrowserAcceptsChain(CA, fields, rootCA, ca_fields, L1, L2)@t1
-        &amp; ((L = L1) | (L = L2))
-        &amp; CTTransparencyCheck(L, fields)@t2
-        &amp; #t1 &lt; #t2
-        &amp; not (Ex #t. CompromiseLogger(L)@t)
+    All P CA fields rootCA ca_fields L sct_time proof_timestamp session #t1 #t2 #t3.
+        BrowserAcceptsChainTimes(CA, fields, rootCA, ca_fields, L, sct_time)@t1
+        &amp; FetchLogSnapshotTime(P, L, session, proof_timestamp)@t2 // someone starts the inclusion proof process after the client accepted the cert
+        &amp; CTTransparencyCheckTime(L, fields, session, proof_timestamp)@t3
+        &amp; #t1 &lt; #t2 &amp; #t2 &lt; #t3
+        &amp; not (sct_time = proof_timestamp) // to ensure that the MMD has passed
+        &amp; not (Ex #t. CompromiseLogger(L)@t) // assuming honest logger for transparency
             ==&gt;
-            CTTransparencyCheckSuccess(L, fields)@t2
-    &#34;
-
-
-
-/* Counterexample: without MMD, transparency can fail even if the logger is honest */
-<span class="keyword">lemma</span> <span class="punctuation">transparency_wo_MMD</span><a name="lem::"></a><span class="lemma.identifier">:</span>
-    &#34;
-    All CA fields rootCA ca_fields L1 L2 L #t1 #t2.
-        BrowserAcceptsChain(CA, fields, rootCA, ca_fields, L1, L2)@t1
-        &amp; ((L = L1) | (L = L2))
-        &amp; CTTransparencyCheck_wo_MMD(L, fields)@t2
-        &amp; #t1 &lt; #t2
-            ==&gt;
-            CTTransparencyCheckSuccess_wo_MMD(L, fields)@t2
+            CTTransparencyCheckSuccess(L, fields)@t3
     &#34;
 
 /* ------------------------
@@ -1513,10 +1474,11 @@ if we instead assume the MMD (ProofRunsAfterMMD) is respected, transparency can 
 
 test client_inclusionViol:
     &#34;Ex M fields session #t #t1.
-        AssertsNot(M, &#39;This loggers log currently includes these fields.&#39;, L, &lt;fields, session&gt;)@t // L blamed
+        Asserts(M, &#39;This loggers log currently does not include these fields.&#39;, L, &lt;fields, session&gt;)@t // L blamed
         &amp; CTTransparencyCheckSession(L, fields, session)@t1
     &#34;
 
+/* result: falsified. Running the CTTransparencyCheck after BrowserAcceptsChain does not guarantee accountable transparency. There are two counterexamples possible: Either the logger is corrupt and hides the entry (good, we can blame then) or the entry is not yet found due to the MMD (bad, hardly fixable). We can fix this by adding knowledge about the MMD to the transparency check but this is strong (see sct_audit.spthy for an alternative that achieves accountable transparency using this client knowledge in a specified way as part of auditing) */
 lemma T_CT_1:
     client_inclusionViol accounts for
     &#34;All CA fields rootCA ca_fields L1 L2 L #t1 #t2.
@@ -1536,14 +1498,13 @@ lemma T_CT_1:
 
 /* A_CT: */
 
-
 test ca_auth_on_log:
-    &#34;Ex M rootCA fields ca_fields #t0 #t1 #t2.
-        CTCheck(M, fields, CA, ca_fields)@t0
-        &amp; Asserts(M, &#39;Blame this CA.&#39;, CA, &lt;fields, ca_fields&gt;)@t1
-            /* fields contradicts known ground truth of monitor */
-        &amp; Asserts(rootCA, &#39;I signed this intermediate CA.&#39;, CA, &lt;ca_fields&gt;)@t2
-    &#34;
+&#34;Ex M rootCA fields ca_fields #t0 #t1 #t2.
+    CTCheck(M, fields, CA, ca_fields)@t0
+    &amp; Asserts(M, &#39;Blame this CA.&#39;, CA, &lt;fields, 
+      ca_fields&gt;)@t1 // fields contradict ground truth 
+    &amp; Asserts(rootCA, &#39;I signed this intermediate CA.&#39;, 
+              CA, &lt;ca_fields&gt;)@t2 &#34;
 
 test root_ca_auth_on_log:
 &#34;Ex M CA fields ca_fields #t0 #t1 #t2.
@@ -1559,6 +1520,35 @@ lemma A_CT_1:
     &#34;All CA fields rootCA ca_fields L1 L2 M #t0 #t1. 
         CTCheck(M, fields, CA, ca_fields)@t0
         &amp; BrowserAcceptsChain(CA, fields, rootCA, ca_fields, L1, L2)@t1
+            ==&gt; (Ex #t. GroundTruth(CA, fields)@t)
+    &#34;
+
+test ca_rogue_honest_mon: // CA free
+    &#34;Ex M rootCA fields ca_fields #t0 #t1 #t2.
+        CTCheck(M, fields, CA, ca_fields)@t0
+        &amp; Asserts(M, &#39;Blame this CA.&#39;, CA, &lt;fields, ca_fields&gt;)@t1
+            /* fields contradicts known ground truth of monitor */
+        &amp; Asserts(rootCA, &#39;I signed this intermediate CA.&#39;, CA, &lt;ca_fields&gt;)@t2
+        &amp; not (Ex #t. CompromiseMonitor(M)@t)
+    &#34;
+
+test root_ca_rogue_honest_mon: // rootCA free
+    &#34;Ex M CA fields ca_fields #t0 #t1 #t2.
+        CTCheck(M, fields, CA, ca_fields)@t0
+        &amp; Asserts(M, &#39;Blame this CA.&#39;, CA, &lt;fields, ca_fields&gt;)@t1
+            /* fields contradicts known ground truth of monitor */
+        &amp; Asserts(&#39;CCADB&#39;, &#39;No root CA signed this CA.&#39;, CA, &lt;ca_fields, rootCA&gt;)@t2
+        &amp; not (Ex #t. CompromiseMonitor(M)@t)
+    &#34;
+
+/* Scenario 2: Monitor runs authenticity check on log entries (as in A_CT_1), but this time the monitor is assumed to be honest. */
+// find counterexample in ***
+lemma A_CT_2:
+    ca_rogue_honest_mon, root_ca_rogue_honest_mon accounts for
+    &#34;All CA fields rootCA ca_fields L1 L2 M #t0 #t1. 
+        CTCheck(M, fields, CA, ca_fields)@t0
+        &amp; BrowserAcceptsChain(CA, fields, rootCA, ca_fields, L1, L2)@t1
+        &amp; not (Ex #t. CompromiseMonitor(M)@t)
             ==&gt; (Ex #t. GroundTruth(CA, fields)@t)
     &#34;
 
@@ -1583,8 +1573,8 @@ test root_ca_rogue_honest_log: // rootCA free
     &#34;
 
 /* Accountable authenticity under honest logger (transparency) and honest monitor holds */
-/* Scenario 2: Monitor runs authenticity check on log entries (as Scenario 3), but this time the log is assumed to be honest. Given additionally MMD, the following holds: */
-lemma A_CT_2:
+/* Scenario 3: Monitor runs authenticity check on log entries (as in A_CT_1 and A_CT_3), but this time the log and monitor are assumed to be honest. Given additionally MMD (in the CTCheck) this lemma holds. */
+lemma A_CT_3:
     ca_rogue_honest_log, root_ca_rogue_honest_log accounts for
     &#34;All CA fields rootCA ca_fields L1 L2 M #t0 #t1. 
         CTCheck(M, fields, CA, ca_fields)@t0

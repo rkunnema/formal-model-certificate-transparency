@@ -1,11 +1,11 @@
 {
   "task_id": "--san_monitorCannotFindCertificate--default",
   "warnings": [],
-  "tamarin_timing": 64.26,
+  "tamarin_timing": 59.35,
   "wrapper_measures": {
-    "time": 64.54760432243347,
-    "avg_memory": 526.1727905273438,
-    "peak_memory": 1090.5546875
+    "time": 59.65255355834961,
+    "avg_memory": 508.50112552966095,
+    "peak_memory": 1108.78125
   },
   "output_spthy": "results/ct_receipt/proofs/--san_monitorCannotFindCertificate--default.spthy",
   "verified_lemma": {
@@ -64,6 +64,7 @@
     "san_domainOwnerVerifiesReceipt_1",
     "san_domainOwnerVerifiesReceipt_2",
     "san_SCTReceiptCheck",
+    "authenticity",
     "A_uniq1_helper",
     "A_uniq2_helper",
     "A_Receipt_inj3_helper",

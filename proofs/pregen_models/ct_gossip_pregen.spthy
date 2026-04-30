@@ -1,5 +1,5 @@
 /*
- * Protocol: Certficate Transparency with additions for STH Gossiping
+ * Protocol: Certificate Transparency with additions for STH Gossiping
  * Modeler:  anonymized
  * Date:     July 2025
  * Sources:  RFC6962, RFC 9162, "Opt-in SCT Auditing", Emily Stark and Chris Thompson, and partly rooted on "Provable Security for PKI Schemes" by Wrótniak et al.
@@ -84,7 +84,7 @@ rule Intermediate_CA_Init [color= #c871ff]:
         Out(<$CA, pk(~skCA)>), /* publicly announce the public key and certificate on the network */
         !CA_s0($CA, ~skCA, pk(~skCA), fields, self_sig), !CA_Documentation($rootCA, $CA, fields, self_sig) ]
 
-/* The domain owner represents the party on the web, running a server with some domain / Common Name (CN) with a key pair that needs certification by some CA. It is equivalent to a HTTPS server that needs a certificate in order to hand it out to visiting clients; performing a key exchange subsequently. */
+/* The domain owner represents the party on the web, running a server with some DNS name / Common Name (CN) with a key pair that needs certification by some CA. It is treated like a web server that needs a certificate in order to hand it out to visiting clients; performing a key exchange subsequently. */
 rule Domain_Owner_Init [color= #c6c6c6]:
     let
         pubK = pk(~sk)
@@ -94,7 +94,7 @@ rule Domain_Owner_Init [color= #c6c6c6]:
         Time($now),
         San_Domain_Owner_Init()
     ]->
-    [ !DomainOwner($idServer, pubK), /* The DomainOwner fact serves as a proof of identity: If this fact is later used for issuing a certificate, we say that it is honestly issued (i.e., on behalf of the domain owner). see honest rules for issuing a pre-certificate for instace. */ 
+    [ !DomainOwner($idServer, pubK), /* The DomainOwner fact serves as a proof of identity: If this fact is later used for issuing a certificate, we say that it is honestly issued (i.e., on behalf of the domain owner). see honest rules for issuing a pre-certificate for instance. */ 
     Out(pubK) /* Public key is announced on the network */ ]
 
 
@@ -295,7 +295,7 @@ rule monitorCanFindCertificate [color= #f3d664]:
         Eq(verify(ca_sig, ca_fields, pkRootCA), true()),
         MonitorObservesEntry($M, $L, fields, <ca_fields, ca_sig>, sth, session), /* see restriction */
         BenignCert($iss, fields), /* cert is found benign, see restriction */
-        AssertsNot($M, 'Blame this CA.', $CA, <fields, ca_fields>),
+        Asserts($M, 'Do not blame this CA.', $CA, <fields, ca_fields>),
         MonitorScanLog(),
 
         Time($now),
@@ -312,7 +312,7 @@ rule monitorCannotFindCertificate [color= #f3d664]:
     [ !LoggerDict($M, $L), !TrackSubject($M, su), In(fields), In(cert_sig), In(ca_fields), In(ca_sig), !TLS_L_to_M($L, $M, $snapshot, sth, session, $time), !Root_CA($rootCA, pkRootCA) ]
     --[ 
         NothingObserved($M, $L, fields, sth, session), /* see restriction */
-        AssertsNot($M, 'Blame this CA.', $CA, <fields, ca_fields>),
+        Asserts($M, 'Do not blame this CA.', $CA, <fields, ca_fields>),
         MonitorScanLog(),
 
         Time($now),
@@ -337,7 +337,7 @@ rule monitorFindsRogueCertificate_Sleep [color= #af2828]:
         Time($now),
         San_monitorFindsRogueCertificate_Sleep()
     ]->
-    [ /* New: */ MonitorFoundCert($M, $L, fields, $CA, ca_fields, $time, session) /* but does not react: there is no assert in this rule, so the A_CT lemma needs to rule out monitor misbehavior (but we already know that it does not hold for other reasons) */, MonitorInspected($M, $L, fields, $CA, ca_fields, $time, session) ]
+    [ MonitorFoundCert($M, $L, fields, $CA, ca_fields, $time, session) /* but does not react: there is no assert in this rule, so the A_CT lemma needs to rule out monitor misbehavior (but we already know that it does not hold for other reasons) */, MonitorInspected($M, $L, fields, $CA, ca_fields, $time, session) ]
 
 /* ----- Logger rules ----- */
 
@@ -620,7 +620,7 @@ restriction AppendOnlyFails:
                 & LoggerPresentsView(L, id, log_id1, time, sth2, session2)@t2 
                 /* The Logger presents the view for log_id1 */
                 & SnapshotStored(id, L, session2, sth2)@t3 
-                /* this view is received stored by id */
+                /* this view is received and stored by id */
                 & FetchLogSnapshot(id, L, session)@t4
                 /* a second view is fetched by id (later) */
                 & LoggerPresentsView(L, id, log_id2, time2, sth, session)@t5
@@ -759,7 +759,7 @@ rule ParticipantFindsInclusionViolation [color= #e65208]:
     in
     [ !TLS_L_to_P($L, $P, $snapshot, sth, session, $time), !Logger($L, pkL),In(fields), In(ca_cert), /* entry to check for */ !Monitor($M) ]
     --[
-        AssertsNot($P, 'This loggers log currently includes these fields.', $L, <fields, session>),
+        Asserts($P, 'This loggers log currently does not include these fields.', $L, <fields, session>),
         InclusionProofFails($P, $L, fields, ca_cert, sth, session), /* entry is not contained in the snapshot, see restriction */
         
         Time($now),
@@ -810,19 +810,20 @@ restriction inclusionProofWorks:
 Instead of monitors receiving SCTs, they now receive the snapshots in the form of STH's issued by loggers.
 They will be used in the same way as CT (for authenticity checks) and we investigate resulting changes here. 
 We will for authenticity later, in fact, reuse the same rules as for CT again.
-Note that we cannot assume the same outcome of proofs for the shared snapshots, as this would be too strong: Loggers can still (malciously) refuse to open their own STHs that they handed out earlier and did proofs on. 
+Note that we cannot assume the same outcome of proofs for the shared snapshots, as this would be too strong: Loggers can still (maliciously) refuse to open their own STHs that they handed out earlier and did proofs on. 
 Assuming that the proofs have the same results would mean that the gossip also contains the proof itself, including the certificate.
 
 We limit ourselves to gossip between the client and monitor.
 */
 
 rule clientGossipsToMonitor:
-    [ !TLS_L_to_P($L, $P, $snapshot, sth, session, $time) ]
+    [ !TLS_L_to_P($L, $C, $snapshot, sth, session, $time), InclusionVerified($C, $L, fields, $gossiped_proof_time, gossiped_session, chain), /* client on their own verified that L contains fields */
+    !BAccept_SCT($L, fields, ca_fields) /* gossip produced after the client ran into a certificate it checked for */ ]
     --[ 
         Time($now), 
         San_clientGossipsToMonitor() 
     ]-> 
-    [ !TLS_C_to_M($P, $M, $snapshot, sth, session) ]
+    [ !TLS_C_to_M($C, $M, $snapshot, sth, session), ClientGossiped($C, $M, $L, session, $time, fields, chain) ]
 
     /* --- Gossip AppendOnly Checks --- */
     /* In addition to using gossiped snapshots to explore new entries with the help of another fetched snapshot, a different question immediately arises for the monitor: do these snapshots contradict each other? For this, the monitor can use append-only proofs between these two snapshots. The following rules here formalize this and are similar to the append-only proof that we have used in CT with the limitation to just these two snapshots and not restricting anymore that the older snapshot has been stored before. */
@@ -837,7 +838,7 @@ rule monitorFindsAppendOnlyViolation_Gossiped [color= #501755]:
         Time($now),
         San_monitorFindsAppendOnlyViolation_Gossiped(),
     ]->
-    [ Gossiped($M, gossiped_session, session) ]
+    [ AppendOnlyChecked($M, gossiped_session, session) ]
 
 /* The gossiped append only proofs assume that both proofs are fixed since we only want to formulate that between gossiped_view -> view there have been no rogue deletions */
 restriction appendOnlyFails_Gossiped:
@@ -861,14 +862,14 @@ rule monitorVerifiesAppendOnly_Gossiped [color= #501755]:
     [ !LoggerDict($M, $L), !TLS_C_to_M($C, $M, $gos_snapshot, gossiped_sth, gossiped_session), !TLS_L_to_M($L, $M, $snapshot, sth, session, $time) ]
     --[
         AppendOnlyVerified_Gossiped($M, $L, sth, session, gossiped_sth, gossiped_session), /* see restriction */
-        AssertsNot($M, 'The log has violated the append-only property between these two snapshots.', $L, <gossiped_session, session>),
+        Asserts($M, 'The log has not violated the append-only property between these two snapshots.', $L, <gossiped_session, session>),
         MonitorReceivesGossip($M, $L, gossiped_session, session),
         MonitorReceivesGossip_Verified($M, $L, gossiped_session, session),
         
         Time($now),
         San_monitorVerifiesAppendOnly_Gossiped()
     ]->
-    [ Gossiped($M, gossiped_session, session) ]
+    [ AppendOnlyChecked($M, gossiped_session, session) ]
 
 restriction appendOnlyWorks_Gossiped:
        "(All id1 M L sth session time1 t log_id log_id2 fields ca_cert chain gossiped_sth gossiped_session time2 #t0 #t1 #t4 #t5.
@@ -927,7 +928,7 @@ rule ConsultDocumentation_Fails:
     [ In(ca_fields), In(ca_sig), !Root_CA($rootCA, pkRCA) ]
     --[
         UndocumentedIntermediateCA($rootCA, $CA, ca_fields), // see restriction externalCA_no_proof below
-        AssertsNot($rootCA, 'I signed this intermediate CA.', $CA, <ca_fields>),
+        Asserts('CCADB', 'No root CA signed this CA.', $CA, <ca_fields, $rootCA>),
         Eq(verify(ca_sig, ca_fields, pkRCA), true()), // signed by root CA
         ExternalCheckCCADB($rootCA, ca_fields),
         
@@ -937,7 +938,7 @@ rule ConsultDocumentation_Fails:
     [ CCADBConsulted($rootCA, ca_fields) ]
 
 /* Responsible root CA is not able to present an identity proof of the intermediate CA (-> it is forged) */
-/* We obviously rely on the soundness of this documentation check. It is an interesting bit to consider how real-world documentations look like, feel free to consult the CCADB yourself for this. TLDR: they are legal documents with auditor firms involved. We do not go beyond this and consider everything around forging such documents out of scope of this work. */
+/* We obviously rely on the soundness of this documentation check. It is an interesting bit to consider how real-world documentation look like, feel free to consult the CCADB yourself for this. They contain legal documents with auditor firms involved. We do not go beyond this and consider everything around forging such documents out of scope of this work. */
 restriction externalCA_no_proof:
     "All rootCA CA ca_fields #t1.
         UndocumentedIntermediateCA(rootCA, CA, ca_fields)@t1
@@ -947,45 +948,55 @@ restriction externalCA_no_proof:
 
 /*** Predicate Rules ***/
 
-rule GossipTransparencyCheck_Success: // similar to CTCheck we have a found and not found variant
+/*
+STHGossipTransparencyCheck(). Contributed evidence:
+- Client: The client gossiped an STH to the monitor (from gossiped_session) and is assumed to have verified inclusion for the certificate it encountered (see ClientGossipsToMonitor rule)
+- Monitor: The monitor checks append only between both and does an own inclusion proof
+*/
+rule GossipTransparencyCheck_Success:
     [ 
-    InclusionVerified($C, $L, fields, $gossiped_proof_time, gossiped_session, chain), /* client on their own verified that L contains fields */
-    !BAccept_SCT($L, fields, ca_fields),
-    Gossiped($M, gossiped_session, session), /* then gossiped this proof to the monitor (proof, session) but without fields. Monitor checks for append only (may or may not hold), if it does not monitor emitted an assert blaming the logger */
-    MonitorFoundCert($M, $L, fields, $CA, ca_fields, $time_of_proof_fetch, session)
+    ClientGossiped($C, $M, $L, gossiped_session, $gossiped_proof_time, fields, chain),
+    AppendOnlyChecked($M, gossiped_session, session), /* then gossiped this proof to the monitor (proof, session) but without fields. Monitor checks for append only (may or may not hold), if it does not monitor emitted an assert blaming the logger */
+    MonitorFoundCert($M, $L, fields, $CA, ca_fields, $time_of_proof_fetch, session) // TODO: replace with inclusion proof? i guess so <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 ]
     --[
-        CTGossipTransparencyCheck($M, $L, fields, $CA, ca_fields, session, gossiped_session),
+        STHGossipTransparencyCheck($M, $L, fields, $CA, ca_fields, session, gossiped_session),
         CTGossipTransparencyCheckSuccess($M, $L, fields, $CA, ca_fields, session, gossiped_session),
 
         San_GossipTransparencyCheck_Success(),
     ]->
     [ ]
 
-rule GossipTransparencyCheck_Failed: // similar to CTCheck we have a found and not found variant
+rule GossipTransparencyCheck_Failed:
     let
         ca_fields = <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
         fields = <$CA, $subj, ke, 'pubKey', sn, $i, $j>
         chain = <<cert_fields, cert_sig>, <ca_fields, ca_sig>>
     in
     [ 
-    InclusionVerified($C, $L, fields, $gossiped_proof_time, gossiped_session, chain), /* client on their own verified that L contains fields */
-    !BAccept_SCT($L, fields, ca_fields),
-    Gossiped($M, gossiped_session, session), /* then gossiped this proof to the monitor (proof, session) but without fields. Monitor checks for append only (may or may not hold), if it does not monitor emitted an assert blaming the logger */
+    ClientGossiped($C, $M, $L, gossiped_session, $gossiped_proof_time, fields, chain),
+    AppendOnlyChecked($M, gossiped_session, session), /* then gossiped this proof to the monitor (proof, session) but without fields. Monitor checks for append only (may or may not hold), if it does not monitor emitted an assert blaming the logger */
     MonitorCouldNotFindCert($M, fields, $L, $CA, ca_fields, $time_of_proof_fetch, session),
     !Root_CA($rootCA, pkRootCA)
 ]
     --[
-        Eq(verify(cert_sig, fields, pkCA), true()),
-        Eq(verify(ca_sig, ca_fields, pkRootCA), true()), /* We only consider valid chains (if the monitor finds the cert this already implies that the chain is valid) */
+        Eq(verify(cert_sig, cert_fields, pkCA), true()),
+        Eq(verify(ca_sig, ca_fields, pkRootCA), true()), /* We only consider valid chains found by the client (if the monitor finds the cert this already implies that the chain is valid) */
         ProofFetchAfterGossip($gossiped_proof_time, $time_of_proof_fetch),
-        CTGossipTransparencyCheck($M, $L, fields, $CA, ca_fields, session, gossiped_session),
+        STHGossipTransparencyCheck($M, $L, fields, $CA, ca_fields, session, gossiped_session),
         CTGossipTransparencyCheck_NotFound($M, $L, fields, $CA, ca_fields, session, gossiped_session),
 
         San_GossipTransparencyCheck_Failed()
     ]->
     [ ]
 
+/*
+STHGossipCheck(). Contributed evidence:
+- Client: The client gossiped an STH to the monitor (from gossiped_session) and is assumed to have verified inclusion for the certificate it encountered (see ClientGossipsToMonitor rule)
+- Monitor: The monitor checks append only between both and does an own inclusion proof
+- CCADB Result of consulting the database for the legitimacy of the CA
+- Note that the root CA keys are assumed to be known by everyone
+*/
 rule GossipingCheck:
     let
         ca_fields = <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
@@ -993,18 +1004,17 @@ rule GossipingCheck:
         chain = <<cert_fields, cert_sig>, <ca_fields, ca_sig>>
     in
     [ 
-    InclusionVerified($C, $L, fields, $gossiped_proof_time, gossiped_session, chain), /* client on their own verified that L contains fields */
-    !BAccept_SCT($L1, fields, ca_fields),
-    Gossiped($M, gossiped_session, session), /* then gossiped this proof to the monitor (proof, session) but without fields. Monitor checks for append only (may or may not hold), if it does not monitor emitted an assert blaming the logger */
+    ClientGossiped($C, $M, $L, gossiped_session, $gossiped_proof_time, fields, chain),
+    AppendOnlyChecked($M, gossiped_session, session), /* then gossiped this proof to the monitor (proof, session) but without fields. Monitor checks for append only (may or may not hold), if it does not monitor emitted an assert blaming the logger */
     MonitorInspected($M, $L, fields, $CA, ca_fields, $time_of_proof_fetch, session),
     CCADBConsulted($rootCA, ca_fields),
     !Root_CA($rootCA, pkRootCA)
 ]
     --[
-        Eq(verify(cert_sig, fields, pkCA), true()),
+        Eq(verify(cert_sig, cert_fields, pkCA), true()),
         Eq(verify(ca_sig, ca_fields, pkRootCA), true()), /* We only consider valid chains (if the monitor finds the cert this already implies that the chain is valid) */
         ProofFetchAfterGossip($proof, $time_of_proof_fetch),
-        CTGossipCheck($M, $L, fields, $CA, ca_fields, session, gossiped_session),
+        STHGossipCheck($M, $L, fields, $CA, ca_fields, session, gossiped_session),
 
         San_GossipingCheck_Found(),
     ]->
@@ -1063,7 +1073,7 @@ restriction time_monotonicity:
                                 & #t2 < #t3 ==> tp = t )"
 
 
-/* whenever a party checks the validity period of a certificate, that time must not happened before the check, i.e. the time did not pass yet */
+/* whenever a party checks the validity period of a certificate, that time must not happen before the check, i.e. the time did not pass yet */
 restriction certStillValid:
     "All currTime valid_till #t1.
         Time(currTime)@t1 & CheckValidUntil(currTime, valid_till)@t1
@@ -1431,20 +1441,73 @@ lemma san_compromiseMonitor:
   exists-trace "∃ #t. San_compromiseMonitor( ) @ #t"
 
 
+lemma authenticity:
+  exists-trace
+  "∃ L1 L2 rootCA ca_fields CA fields #j.
+         (BrowserAcceptsChain( CA, fields, rootCA, ca_fields, L1, L2
+          ) @ #j) ∧
+         (¬(∃ #i. (GroundTruth( CA, fields ) @ #i) ∧ (#i < #j)))"
+
+
 lemma transparency_Gossip:
   all-traces
   "∀ M L L1 L2 CA rootCA fields ca_fields session
           gossiped_session #t0 #t1.
          ((((BrowserAcceptsChain( CA, fields, rootCA, ca_fields, L1, L2
              ) @ #t0) ∧
-            (CTGossipTransparencyCheck( M, L, fields, CA, ca_fields, session,
-                                        gossiped_session
+            (STHGossipTransparencyCheck( M, L, fields, CA, ca_fields, session,
+                                         gossiped_session
              ) @ #t1)) ∧
            ((L1 = L) ∨ (L2 = L))) ∧
           (#t0 < #t1)) ⇒
          (CTGossipTransparencyCheckSuccess( M, L, fields, CA, ca_fields,
                                             session, gossiped_session
-          ) @ #t0)"
+          ) @ #t1)"
+
+
+lemma T_Gossip_verif_empty_helper1 [reuse]:
+  all-traces
+  "∀ M L fields CA ca_fields gossiped_session session #t.
+         ((STHGossipTransparencyCheck( M, L, fields, CA, ca_fields, session,
+                                       gossiped_session
+           ) @ #t) ∧
+          (¬(∃ #t.1.
+              Asserts( M,
+                       'The log has violated the append-only property between these two snapshots.',
+                       L, <gossiped_session, session>
+              ) @ #t.1))) ⇒
+         (CTGossipTransparencyCheckSuccess( M, L, fields, CA, ca_fields,
+                                            session, gossiped_session
+          ) @ #t)"
+
+
+lemma T_Gossip_verif_empty_helper2 [reuse,
+                                    hide_lemma=T_Gossip_verif_empty_helper1]:
+  all-traces
+  "∀ M L fields CA ca_fields gossiped_session session #t.
+         (CTGossipTransparencyCheck_NotFound( M, L, fields, CA, ca_fields,
+                                              session, gossiped_session
+          ) @ #t) ⇒
+         (∃ #t.1.
+           Asserts( M,
+                    'The log has violated the append-only property between these two snapshots.',
+                    L, <gossiped_session, session>
+           ) @ #t.1)"
+
+
+lemma T_Gossip_verif_empty_helper3 [reuse,
+                                    hide_lemma=T_Gossip_verif_empty_helper1,
+                                    hide_lemma=T_Gossip_verif_empty_helper2]:
+  all-traces
+  "∀ M L fields CA ca_fields gossiped_session session #t1.
+         (STHGossipTransparencyCheck( M, L, fields, CA, ca_fields, session,
+                                      gossiped_session
+          ) @ #t1) ⇒
+         (∃ rootCA L1 L2 #t0.
+           ((BrowserAcceptsChain( CA, fields, rootCA, ca_fields, L1, L2
+             ) @ #t0) ∧
+            ((L1 = L) ∨ (L2 = L))) ∧
+           (#t0 < #t1))"
 
 
 lemma T_Gossip_uniq_helper [reuse]:
@@ -1472,8 +1535,8 @@ lemma A_uniq1_helper [reuse]:
 lemma A_uniq2_helper [reuse]:
   all-traces
   "∀ rootCA CA ca_fields #t.
-         (AssertsNot( rootCA, 'I signed this intermediate CA.', CA,
-                      ca_fields
+         (Asserts( 'CCADB', 'No root CA signed this CA.',
+                   CA, <ca_fields, rootCA>
           ) @ #t) ⇒
          (∃ #t.1. Corrupted( rootCA ) @ #t.1)"
 
@@ -1481,8 +1544,8 @@ lemma A_uniq2_helper [reuse]:
 lemma A_Gossip_helper [reuse]:
   all-traces
   "∀ M L fields CA ca_fields session gossiped_session #t.
-         (((CTGossipCheck( M, L, fields, CA, ca_fields, session,
-                           gossiped_session
+         (((STHGossipCheck( M, L, fields, CA, ca_fields, session,
+                            gossiped_session
             ) @ #t) ∧
            (¬(∃ #t.1. CompromiseMonitor( M ) @ #t.1))) ∧
           (¬(∃ #t.1. CompromiseLogger( L ) @ #t.1))) ⇒
@@ -1540,14 +1603,14 @@ lemma T_Gossip_verif_empty [heuristic=o "acc_oracle"]:
            #t0 #t1.
           ((((BrowserAcceptsChain( CA, fields, rootCA, ca_fields, L1, L2
               ) @ #t0) ∧
-             (CTGossipTransparencyCheck( M, L, fields, CA, ca_fields, session,
-                                         gossiped_session
+             (STHGossipTransparencyCheck( M, L, fields, CA, ca_fields, session,
+                                          gossiped_session
               ) @ #t1)) ∧
             ((L1 = L) ∨ (L2 = L))) ∧
            (#t0 < #t1)) ⇒
           (CTGossipTransparencyCheckSuccess( M, L, fields, CA, ca_fields,
                                              session, gossiped_session
-           ) @ #t0))"
+           ) @ #t1))"
 
 
 lemma T_Gossip_gossip_appendOnly_viol_verif_nonempty [heuristic=o "acc_oracle"]:
@@ -1565,14 +1628,14 @@ lemma T_Gossip_gossip_appendOnly_viol_verif_nonempty [heuristic=o "acc_oracle"]:
              ((((BrowserAcceptsChain( CA.1, fields.1, rootCA, ca_fields.1, L1,
                                       L2
                  ) @ #t0) ∧
-                (CTGossipTransparencyCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
-                                            session.1, gossiped_session.1
+                (STHGossipTransparencyCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
+                                             session.1, gossiped_session.1
                  ) @ #t1.1)) ∧
                ((L1 = L.1) ∨ (L2 = L.1))) ∧
               (#t0 < #t1.1)) ⇒
              (CTGossipTransparencyCheckSuccess( M.1, L.1, fields.1, CA.1,
                                                 ca_fields.1, session.1, gossiped_session.1
-              ) @ #t0)))"
+              ) @ #t1.1)))"
 
 
 lemma T_Gossip_gossip_appendOnly_viol_min [heuristic=o "acc_oracle"]:
@@ -1636,40 +1699,421 @@ lemma T_Gossip_gossip_appendOnly_viol_single [heuristic=o "acc_oracle"]:
            (L.1 = L))"
 
 
-lemma A_Gossip_1_rootCA_rogue_gossip_suff [heuristic=o "acc_oracle",
+lemma A_Gossip_0_rootCA_rogue_gossip_suff [heuristic=o "acc_oracle",
                                            hide_lemma=T_Gossip_verif_empty_helper1,
                                            hide_lemma=T_Gossip_verif_empty_helper2]:
   exists-trace
   "∃ rootCA M L fields CA ca_fields session gossiped_session #t
           #t1 #t2.
-         (((((CTGossipCheck( M, L, fields, CA, ca_fields, session,
+         ((((STHGossipCheck( M, L, fields, CA, ca_fields, session,
                              gossiped_session
-              ) @ #t) ∧
-             (Asserts( M, 'Blame this CA.', CA,
-                       <fields, ca_fields>
-              ) @ #t1)) ∧
-            (AssertsNot( rootCA, 'I signed this intermediate CA.', CA,
-                         ca_fields
-             ) @ #t2)) ∧
-           (¬(∃ #t.1. CompromiseMonitor( M ) @ #t.1))) ∧
+             ) @ #t) ∧
+            (Asserts( M, 'Blame this CA.', CA,
+                      <fields, ca_fields>
+             ) @ #t1)) ∧
+           (Asserts( 'CCADB', 'No root CA signed this CA.',
+                     CA, <ca_fields, rootCA>
+            ) @ #t2)) ∧
           (∀ rootCA.1 M.1 L.1 fields.1 CA.1 ca_fields.1 session.1
              gossiped_session.1 #t.1 #t1.1 #t2.1.
-            ((((CTGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
+            (((STHGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
                                session.1, gossiped_session.1
+               ) @ #t.1) ∧
+              (Asserts( M.1, 'Blame this CA.', CA.1,
+                        <fields.1, ca_fields.1>
+               ) @ #t1.1)) ∧
+             (Asserts( 'CCADB', 'No root CA signed this CA.',
+                       CA.1, <ca_fields.1, rootCA.1>
+              ) @ #t2.1)) ⇒
+            (rootCA.1 = rootCA))) ∧
+         ((∀ a #i. (Corrupted( a ) @ #i) ⇒ (a = rootCA)) ∧
+          (¬(∃ CA.1 M.1 L.1 fields.1 rootCA.1 ca_fields.1 session.1
+               gossiped_session.1 #t.1 #t1.1 #t2.1.
+              ((STHGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1, session.1,
+                                gossiped_session.1
                 ) @ #t.1) ∧
                (Asserts( M.1, 'Blame this CA.', CA.1,
                          <fields.1, ca_fields.1>
                 ) @ #t1.1)) ∧
-              (AssertsNot( rootCA.1, 'I signed this intermediate CA.',
-                           CA.1, ca_fields.1
+              (Asserts( rootCA.1, 'I signed this intermediate CA.', CA.1,
+                        ca_fields.1
+               ) @ #t2.1))))"
+
+
+lemma A_Gossip_0_rootCA_benign_gossip_suff [heuristic=o "acc_oracle",
+                                            hide_lemma=T_Gossip_verif_empty_helper1,
+                                            hide_lemma=T_Gossip_verif_empty_helper2]:
+  exists-trace
+  "∃ CA M L fields rootCA ca_fields session gossiped_session #t
+          #t1 #t2.
+         ((((STHGossipCheck( M, L, fields, CA, ca_fields, session,
+                             gossiped_session
+             ) @ #t) ∧
+            (Asserts( M, 'Blame this CA.', CA,
+                      <fields, ca_fields>
+             ) @ #t1)) ∧
+           (Asserts( rootCA, 'I signed this intermediate CA.', CA,
+                     ca_fields
+            ) @ #t2)) ∧
+          (∀ CA.1 M.1 L.1 fields.1 rootCA.1 ca_fields.1 session.1
+             gossiped_session.1 #t.1 #t1.1 #t2.1.
+            (((STHGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
+                               session.1, gossiped_session.1
+               ) @ #t.1) ∧
+              (Asserts( M.1, 'Blame this CA.', CA.1,
+                        <fields.1, ca_fields.1>
+               ) @ #t1.1)) ∧
+             (Asserts( rootCA.1, 'I signed this intermediate CA.', CA.1,
+                       ca_fields.1
+              ) @ #t2.1)) ⇒
+            (CA.1 = CA))) ∧
+         ((∀ a #i. (Corrupted( a ) @ #i) ⇒ (a = CA)) ∧
+          (¬(∃ rootCA.1 M.1 L.1 fields.1 CA.1 ca_fields.1 session.1
+               gossiped_session.1 #t.1 #t1.1 #t2.1.
+              ((STHGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1, session.1,
+                                gossiped_session.1
+                ) @ #t.1) ∧
+               (Asserts( M.1, 'Blame this CA.', CA.1,
+                         <fields.1, ca_fields.1>
+                ) @ #t1.1)) ∧
+              (Asserts( 'CCADB', 'No root CA signed this CA.',
+                        CA.1, <ca_fields.1, rootCA.1>
+               ) @ #t2.1))))"
+
+
+lemma A_Gossip_0_verif_empty [heuristic=o "acc_oracle",
+                              hide_lemma=T_Gossip_verif_empty_helper1,
+                              hide_lemma=T_Gossip_verif_empty_helper2]:
+  all-traces
+  "(¬((∃ rootCA M L fields CA ca_fields session gossiped_session
+              #t #t1 #t2.
+             ((STHGossipCheck( M, L, fields, CA, ca_fields, session,
+                               gossiped_session
+               ) @ #t) ∧
+              (Asserts( M, 'Blame this CA.', CA,
+                        <fields, ca_fields>
+               ) @ #t1)) ∧
+             (Asserts( 'CCADB', 'No root CA signed this CA.',
+                       CA, <ca_fields, rootCA>
+              ) @ #t2)) ∨
+           (∃ CA M L fields rootCA ca_fields session gossiped_session #t #t1
+              #t2.
+             ((STHGossipCheck( M, L, fields, CA, ca_fields, session,
+                               gossiped_session
+               ) @ #t) ∧
+              (Asserts( M, 'Blame this CA.', CA,
+                        <fields, ca_fields>
+               ) @ #t1)) ∧
+             (Asserts( rootCA, 'I signed this intermediate CA.', CA,
+                       ca_fields
+              ) @ #t2)))) ⇒
+        (∀ M L L1 L2 fields CA rootCA ca_fields session gossiped_session
+           #t0 #t1.
+          (((STHGossipCheck( M, L, fields, CA, ca_fields, session,
+                             gossiped_session
+             ) @ #t0) ∧
+            (BrowserAcceptsChain( CA, fields, rootCA, ca_fields, L1, L2
+             ) @ #t1)) ∧
+           ((L1 = L) ∨ (L2 = L))) ⇒
+          (∃ #t. GroundTruth( CA, fields ) @ #t))"
+
+
+lemma A_Gossip_0_rootCA_rogue_gossip_verif_nonempty [heuristic=o "acc_oracle",
+                                                     hide_lemma=T_Gossip_verif_empty_helper1,
+                                                     hide_lemma=T_Gossip_verif_empty_helper2]:
+  all-traces
+  "∀ rootCA M L fields CA ca_fields session gossiped_session #t
+          #t1 #t2.
+         (((STHGossipCheck( M, L, fields, CA, ca_fields, session,
+                            gossiped_session
+            ) @ #t) ∧
+           (Asserts( M, 'Blame this CA.', CA,
+                     <fields, ca_fields>
+            ) @ #t1)) ∧
+          (Asserts( 'CCADB', 'No root CA signed this CA.',
+                    CA, <ca_fields, rootCA>
+           ) @ #t2)) ⇒
+         (¬(∀ M.1 L.1 L1 L2 fields.1 CA.1 rootCA.1 ca_fields.1 session.1
+              gossiped_session.1 #t0 #t1.1.
+             (((STHGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
+                                session.1, gossiped_session.1
+                ) @ #t0) ∧
+               (BrowserAcceptsChain( CA.1, fields.1, rootCA.1, ca_fields.1, L1, L2
+                ) @ #t1.1)) ∧
+              ((L1 = L.1) ∨ (L2 = L.1))) ⇒
+             (∃ #t.1. GroundTruth( CA.1, fields.1 ) @ #t.1)))"
+
+
+lemma A_Gossip_0_rootCA_benign_gossip_verif_nonempty [heuristic=o "acc_oracle",
+                                                      hide_lemma=T_Gossip_verif_empty_helper1,
+                                                      hide_lemma=T_Gossip_verif_empty_helper2]:
+  all-traces
+  "∀ CA M L fields rootCA ca_fields session gossiped_session #t
+          #t1 #t2.
+         (((STHGossipCheck( M, L, fields, CA, ca_fields, session,
+                            gossiped_session
+            ) @ #t) ∧
+           (Asserts( M, 'Blame this CA.', CA,
+                     <fields, ca_fields>
+            ) @ #t1)) ∧
+          (Asserts( rootCA, 'I signed this intermediate CA.', CA,
+                    ca_fields
+           ) @ #t2)) ⇒
+         (¬(∀ M.1 L.1 L1 L2 fields.1 CA.1 rootCA.1 ca_fields.1 session.1
+              gossiped_session.1 #t0 #t1.1.
+             (((STHGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
+                                session.1, gossiped_session.1
+                ) @ #t0) ∧
+               (BrowserAcceptsChain( CA.1, fields.1, rootCA.1, ca_fields.1, L1, L2
+                ) @ #t1.1)) ∧
+              ((L1 = L.1) ∨ (L2 = L.1))) ⇒
+             (∃ #t.1. GroundTruth( CA.1, fields.1 ) @ #t.1)))"
+
+
+lemma A_Gossip_0_rootCA_rogue_gossip_min [heuristic=o "acc_oracle",
+                                          hide_lemma=T_Gossip_verif_empty_helper1,
+                                          hide_lemma=T_Gossip_verif_empty_helper2]:
+  all-traces
+  "∀ rootCA M L fields CA ca_fields session gossiped_session #t
+          #t1 #t2.
+         (((STHGossipCheck( M, L, fields, CA, ca_fields, session,
+                            gossiped_session
+            ) @ #t) ∧
+           (Asserts( M, 'Blame this CA.', CA,
+                     <fields, ca_fields>
+            ) @ #t1)) ∧
+          (Asserts( 'CCADB', 'No root CA signed this CA.',
+                    CA, <ca_fields, rootCA>
+           ) @ #t2)) ⇒
+         ((¬(∃ rootCA.1 M.1 L.1 fields.1 CA.1 ca_fields.1 session.1
+               gossiped_session.1 #t.1 #t1.1 #t2.1.
+              (((STHGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
+                                 session.1, gossiped_session.1
+                 ) @ #t.1) ∧
+                (Asserts( M.1, 'Blame this CA.', CA.1,
+                          <fields.1, ca_fields.1>
+                 ) @ #t1.1)) ∧
+               (Asserts( 'CCADB', 'No root CA signed this CA.',
+                         CA.1, <ca_fields.1, rootCA.1>
+                ) @ #t2.1)) ∧
+              ((rootCA.1 = rootCA) ∧ (¬(rootCA = rootCA.1))))) ∧
+          (¬(∃ CA.1 M.1 L.1 fields.1 rootCA.1 ca_fields.1 session.1
+               gossiped_session.1 #t.1 #t1.1 #t2.1.
+              (((STHGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
+                                 session.1, gossiped_session.1
+                 ) @ #t.1) ∧
+                (Asserts( M.1, 'Blame this CA.', CA.1,
+                          <fields.1, ca_fields.1>
+                 ) @ #t1.1)) ∧
+               (Asserts( rootCA.1, 'I signed this intermediate CA.', CA.1,
+                         ca_fields.1
+                ) @ #t2.1)) ∧
+              ((CA.1 = rootCA) ∧ (¬(rootCA = CA.1))))))"
+
+
+lemma A_Gossip_0_rootCA_benign_gossip_min [heuristic=o "acc_oracle",
+                                           hide_lemma=T_Gossip_verif_empty_helper1,
+                                           hide_lemma=T_Gossip_verif_empty_helper2]:
+  all-traces
+  "∀ CA M L fields rootCA ca_fields session gossiped_session #t
+          #t1 #t2.
+         (((STHGossipCheck( M, L, fields, CA, ca_fields, session,
+                            gossiped_session
+            ) @ #t) ∧
+           (Asserts( M, 'Blame this CA.', CA,
+                     <fields, ca_fields>
+            ) @ #t1)) ∧
+          (Asserts( rootCA, 'I signed this intermediate CA.', CA,
+                    ca_fields
+           ) @ #t2)) ⇒
+         ((¬(∃ rootCA.1 M.1 L.1 fields.1 CA.1 ca_fields.1 session.1
+               gossiped_session.1 #t.1 #t1.1 #t2.1.
+              (((STHGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
+                                 session.1, gossiped_session.1
+                 ) @ #t.1) ∧
+                (Asserts( M.1, 'Blame this CA.', CA.1,
+                          <fields.1, ca_fields.1>
+                 ) @ #t1.1)) ∧
+               (Asserts( 'CCADB', 'No root CA signed this CA.',
+                         CA.1, <ca_fields.1, rootCA.1>
+                ) @ #t2.1)) ∧
+              ((rootCA.1 = CA) ∧ (¬(CA = rootCA.1))))) ∧
+          (¬(∃ CA.1 M.1 L.1 fields.1 rootCA.1 ca_fields.1 session.1
+               gossiped_session.1 #t.1 #t1.1 #t2.1.
+              (((STHGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
+                                 session.1, gossiped_session.1
+                 ) @ #t.1) ∧
+                (Asserts( M.1, 'Blame this CA.', CA.1,
+                          <fields.1, ca_fields.1>
+                 ) @ #t1.1)) ∧
+               (Asserts( rootCA.1, 'I signed this intermediate CA.', CA.1,
+                         ca_fields.1
+                ) @ #t2.1)) ∧
+              ((CA.1 = CA) ∧ (¬(CA = CA.1))))))"
+
+
+lemma A_Gossip_0_rootCA_rogue_gossip_uniq [heuristic=o "acc_oracle",
+                                           hide_lemma=T_Gossip_verif_empty_helper1,
+                                           hide_lemma=T_Gossip_verif_empty_helper2]:
+  all-traces
+  "∀ rootCA M L fields CA ca_fields session gossiped_session #t
+          #t1 #t2.
+         (((STHGossipCheck( M, L, fields, CA, ca_fields, session,
+                            gossiped_session
+            ) @ #t) ∧
+           (Asserts( M, 'Blame this CA.', CA,
+                     <fields, ca_fields>
+            ) @ #t1)) ∧
+          (Asserts( 'CCADB', 'No root CA signed this CA.',
+                    CA, <ca_fields, rootCA>
+           ) @ #t2)) ⇒
+         (∃ #i. Corrupted( rootCA ) @ #i)"
+
+
+lemma A_Gossip_0_rootCA_benign_gossip_uniq [heuristic=o "acc_oracle",
+                                            hide_lemma=T_Gossip_verif_empty_helper1,
+                                            hide_lemma=T_Gossip_verif_empty_helper2]:
+  all-traces
+  "∀ CA M L fields rootCA ca_fields session gossiped_session #t
+          #t1 #t2.
+         (((STHGossipCheck( M, L, fields, CA, ca_fields, session,
+                            gossiped_session
+            ) @ #t) ∧
+           (Asserts( M, 'Blame this CA.', CA,
+                     <fields, ca_fields>
+            ) @ #t1)) ∧
+          (Asserts( rootCA, 'I signed this intermediate CA.', CA,
+                    ca_fields
+           ) @ #t2)) ⇒
+         (∃ #i. Corrupted( CA ) @ #i)"
+
+
+lemma A_Gossip_0_rootCA_rogue_gossip_inj [heuristic=o "acc_oracle",
+                                          hide_lemma=T_Gossip_verif_empty_helper1,
+                                          hide_lemma=T_Gossip_verif_empty_helper2]:
+  all-traces "⊤"
+
+
+lemma A_Gossip_0_rootCA_benign_gossip_inj [heuristic=o "acc_oracle",
+                                           hide_lemma=T_Gossip_verif_empty_helper1,
+                                           hide_lemma=T_Gossip_verif_empty_helper2]:
+  all-traces "⊤"
+
+
+lemma A_Gossip_0_rootCA_rogue_gossip_single [heuristic=o "acc_oracle",
+                                             hide_lemma=T_Gossip_verif_empty_helper1,
+                                             hide_lemma=T_Gossip_verif_empty_helper2]:
+  exists-trace
+  "∃ rootCA M L fields CA ca_fields session gossiped_session #t
+          #t1 #t2.
+         ((((STHGossipCheck( M, L, fields, CA, ca_fields, session,
+                             gossiped_session
+             ) @ #t) ∧
+            (Asserts( M, 'Blame this CA.', CA,
+                      <fields, ca_fields>
+             ) @ #t1)) ∧
+           (Asserts( 'CCADB', 'No root CA signed this CA.',
+                     CA, <ca_fields, rootCA>
+            ) @ #t2)) ∧
+          (∀ rootCA.1 M.1 L.1 fields.1 CA.1 ca_fields.1 session.1
+             gossiped_session.1 #t.1 #t1.1 #t2.1.
+            (((STHGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
+                               session.1, gossiped_session.1
+               ) @ #t.1) ∧
+              (Asserts( M.1, 'Blame this CA.', CA.1,
+                        <fields.1, ca_fields.1>
+               ) @ #t1.1)) ∧
+             (Asserts( 'CCADB', 'No root CA signed this CA.',
+                       CA.1, <ca_fields.1, rootCA.1>
+              ) @ #t2.1)) ⇒
+            (rootCA.1 = rootCA))) ∧
+         (¬(∃ CA.1 M.1 L.1 fields.1 rootCA.1 ca_fields.1 session.1
+              gossiped_session.1 #t.1 #t1.1 #t2.1.
+             ((STHGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1, session.1,
+                               gossiped_session.1
+               ) @ #t.1) ∧
+              (Asserts( M.1, 'Blame this CA.', CA.1,
+                        <fields.1, ca_fields.1>
+               ) @ #t1.1)) ∧
+             (Asserts( rootCA.1, 'I signed this intermediate CA.', CA.1,
+                       ca_fields.1
+              ) @ #t2.1)))"
+
+
+lemma A_Gossip_0_rootCA_benign_gossip_single [heuristic=o "acc_oracle",
+                                              hide_lemma=T_Gossip_verif_empty_helper1,
+                                              hide_lemma=T_Gossip_verif_empty_helper2]:
+  exists-trace
+  "∃ CA M L fields rootCA ca_fields session gossiped_session #t
+          #t1 #t2.
+         ((((STHGossipCheck( M, L, fields, CA, ca_fields, session,
+                             gossiped_session
+             ) @ #t) ∧
+            (Asserts( M, 'Blame this CA.', CA,
+                      <fields, ca_fields>
+             ) @ #t1)) ∧
+           (Asserts( rootCA, 'I signed this intermediate CA.', CA,
+                     ca_fields
+            ) @ #t2)) ∧
+          (∀ CA.1 M.1 L.1 fields.1 rootCA.1 ca_fields.1 session.1
+             gossiped_session.1 #t.1 #t1.1 #t2.1.
+            (((STHGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
+                               session.1, gossiped_session.1
+               ) @ #t.1) ∧
+              (Asserts( M.1, 'Blame this CA.', CA.1,
+                        <fields.1, ca_fields.1>
+               ) @ #t1.1)) ∧
+             (Asserts( rootCA.1, 'I signed this intermediate CA.', CA.1,
+                       ca_fields.1
+              ) @ #t2.1)) ⇒
+            (CA.1 = CA))) ∧
+         (¬(∃ rootCA.1 M.1 L.1 fields.1 CA.1 ca_fields.1 session.1
+              gossiped_session.1 #t.1 #t1.1 #t2.1.
+             ((STHGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1, session.1,
+                               gossiped_session.1
+               ) @ #t.1) ∧
+              (Asserts( M.1, 'Blame this CA.', CA.1,
+                        <fields.1, ca_fields.1>
+               ) @ #t1.1)) ∧
+             (Asserts( 'CCADB', 'No root CA signed this CA.',
+                       CA.1, <ca_fields.1, rootCA.1>
+              ) @ #t2.1)))"
+
+
+lemma A_Gossip_1_rootCA_rogue_gossip_mon_honest_suff [heuristic=o "acc_oracle",
+                                                      hide_lemma=T_Gossip_verif_empty_helper1,
+                                                      hide_lemma=T_Gossip_verif_empty_helper2]:
+  exists-trace
+  "∃ rootCA M L fields CA ca_fields session gossiped_session #t
+          #t1 #t2.
+         (((((STHGossipCheck( M, L, fields, CA, ca_fields, session,
+                              gossiped_session
+              ) @ #t) ∧
+             (Asserts( M, 'Blame this CA.', CA,
+                       <fields, ca_fields>
+              ) @ #t1)) ∧
+            (Asserts( 'CCADB', 'No root CA signed this CA.',
+                      CA, <ca_fields, rootCA>
+             ) @ #t2)) ∧
+           (¬(∃ #t.1. CompromiseMonitor( M ) @ #t.1))) ∧
+          (∀ rootCA.1 M.1 L.1 fields.1 CA.1 ca_fields.1 session.1
+             gossiped_session.1 #t.1 #t1.1 #t2.1.
+            ((((STHGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
+                                session.1, gossiped_session.1
+                ) @ #t.1) ∧
+               (Asserts( M.1, 'Blame this CA.', CA.1,
+                         <fields.1, ca_fields.1>
+                ) @ #t1.1)) ∧
+              (Asserts( 'CCADB', 'No root CA signed this CA.',
+                        CA.1, <ca_fields.1, rootCA.1>
                ) @ #t2.1)) ∧
              (¬(∃ #t.2. CompromiseMonitor( M.1 ) @ #t.2))) ⇒
             (rootCA.1 = rootCA))) ∧
          ((∀ a #i. (Corrupted( a ) @ #i) ⇒ (a = rootCA)) ∧
           (¬(∃ CA.1 M.1 L.1 fields.1 rootCA.1 ca_fields.1 session.1
                gossiped_session.1 #t.1 #t1.1 #t2.1.
-              (((CTGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1, session.1,
-                                gossiped_session.1
+              (((STHGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
+                                 session.1, gossiped_session.1
                  ) @ #t.1) ∧
                 (Asserts( M.1, 'Blame this CA.', CA.1,
                           <fields.1, ca_fields.1>
@@ -1680,14 +2124,14 @@ lemma A_Gossip_1_rootCA_rogue_gossip_suff [heuristic=o "acc_oracle",
               (¬(∃ #t.2. CompromiseMonitor( M.1 ) @ #t.2)))))"
 
 
-lemma A_Gossip_1_rootCA_benign_gossip_suff [heuristic=o "acc_oracle",
-                                            hide_lemma=T_Gossip_verif_empty_helper1,
-                                            hide_lemma=T_Gossip_verif_empty_helper2]:
+lemma A_Gossip_1_rootCA_benign_gossip_mon_honest_suff [heuristic=o "acc_oracle",
+                                                       hide_lemma=T_Gossip_verif_empty_helper1,
+                                                       hide_lemma=T_Gossip_verif_empty_helper2]:
   exists-trace
   "∃ CA M L fields rootCA ca_fields session gossiped_session #t
           #t1 #t2.
-         (((((CTGossipCheck( M, L, fields, CA, ca_fields, session,
-                             gossiped_session
+         (((((STHGossipCheck( M, L, fields, CA, ca_fields, session,
+                              gossiped_session
               ) @ #t) ∧
              (Asserts( M, 'Blame this CA.', CA,
                        <fields, ca_fields>
@@ -1698,8 +2142,8 @@ lemma A_Gossip_1_rootCA_benign_gossip_suff [heuristic=o "acc_oracle",
            (¬(∃ #t.1. CompromiseMonitor( M ) @ #t.1))) ∧
           (∀ CA.1 M.1 L.1 fields.1 rootCA.1 ca_fields.1 session.1
              gossiped_session.1 #t.1 #t1.1 #t2.1.
-            ((((CTGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
-                               session.1, gossiped_session.1
+            ((((STHGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
+                                session.1, gossiped_session.1
                 ) @ #t.1) ∧
                (Asserts( M.1, 'Blame this CA.', CA.1,
                          <fields.1, ca_fields.1>
@@ -1712,14 +2156,14 @@ lemma A_Gossip_1_rootCA_benign_gossip_suff [heuristic=o "acc_oracle",
          ((∀ a #i. (Corrupted( a ) @ #i) ⇒ (a = CA)) ∧
           (¬(∃ rootCA.1 M.1 L.1 fields.1 CA.1 ca_fields.1 session.1
                gossiped_session.1 #t.1 #t1.1 #t2.1.
-              (((CTGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1, session.1,
-                                gossiped_session.1
+              (((STHGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
+                                 session.1, gossiped_session.1
                  ) @ #t.1) ∧
                 (Asserts( M.1, 'Blame this CA.', CA.1,
                           <fields.1, ca_fields.1>
                  ) @ #t1.1)) ∧
-               (AssertsNot( rootCA.1, 'I signed this intermediate CA.',
-                            CA.1, ca_fields.1
+               (Asserts( 'CCADB', 'No root CA signed this CA.',
+                         CA.1, <ca_fields.1, rootCA.1>
                 ) @ #t2.1)) ∧
               (¬(∃ #t.2. CompromiseMonitor( M.1 ) @ #t.2)))))"
 
@@ -1730,20 +2174,20 @@ lemma A_Gossip_1_verif_empty [heuristic=o "acc_oracle",
   all-traces
   "(¬((∃ rootCA M L fields CA ca_fields session gossiped_session
               #t #t1 #t2.
-             (((CTGossipCheck( M, L, fields, CA, ca_fields, session,
-                               gossiped_session
+             (((STHGossipCheck( M, L, fields, CA, ca_fields, session,
+                                gossiped_session
                 ) @ #t) ∧
                (Asserts( M, 'Blame this CA.', CA,
                          <fields, ca_fields>
                 ) @ #t1)) ∧
-              (AssertsNot( rootCA, 'I signed this intermediate CA.', CA,
-                           ca_fields
+              (Asserts( 'CCADB', 'No root CA signed this CA.',
+                        CA, <ca_fields, rootCA>
                ) @ #t2)) ∧
              (¬(∃ #t.1. CompromiseMonitor( M ) @ #t.1))) ∨
            (∃ CA M L fields rootCA ca_fields session gossiped_session #t #t1
               #t2.
-             (((CTGossipCheck( M, L, fields, CA, ca_fields, session,
-                               gossiped_session
+             (((STHGossipCheck( M, L, fields, CA, ca_fields, session,
+                                gossiped_session
                 ) @ #t) ∧
                (Asserts( M, 'Blame this CA.', CA,
                          <fields, ca_fields>
@@ -1754,8 +2198,8 @@ lemma A_Gossip_1_verif_empty [heuristic=o "acc_oracle",
              (¬(∃ #t.1. CompromiseMonitor( M ) @ #t.1))))) ⇒
         (∀ M L L1 L2 fields CA rootCA ca_fields session gossiped_session
            #t0 #t1.
-          ((((CTGossipCheck( M, L, fields, CA, ca_fields, session,
-                             gossiped_session
+          ((((STHGossipCheck( M, L, fields, CA, ca_fields, session,
+                              gossiped_session
               ) @ #t0) ∧
              (BrowserAcceptsChain( CA, fields, rootCA, ca_fields, L1, L2
               ) @ #t1)) ∧
@@ -1764,26 +2208,26 @@ lemma A_Gossip_1_verif_empty [heuristic=o "acc_oracle",
           (∃ #t. GroundTruth( CA, fields ) @ #t))"
 
 
-lemma A_Gossip_1_rootCA_rogue_gossip_verif_nonempty [heuristic=o "acc_oracle",
-                                                     hide_lemma=T_Gossip_verif_empty_helper1,
-                                                     hide_lemma=T_Gossip_verif_empty_helper2]:
+lemma A_Gossip_1_rootCA_rogue_gossip_mon_honest_verif_nonempty [heuristic=o "acc_oracle",
+                                                                hide_lemma=T_Gossip_verif_empty_helper1,
+                                                                hide_lemma=T_Gossip_verif_empty_helper2]:
   all-traces
   "∀ rootCA M L fields CA ca_fields session gossiped_session #t
           #t1 #t2.
-         ((((CTGossipCheck( M, L, fields, CA, ca_fields, session,
-                            gossiped_session
+         ((((STHGossipCheck( M, L, fields, CA, ca_fields, session,
+                             gossiped_session
              ) @ #t) ∧
             (Asserts( M, 'Blame this CA.', CA,
                       <fields, ca_fields>
              ) @ #t1)) ∧
-           (AssertsNot( rootCA, 'I signed this intermediate CA.', CA,
-                        ca_fields
+           (Asserts( 'CCADB', 'No root CA signed this CA.',
+                     CA, <ca_fields, rootCA>
             ) @ #t2)) ∧
           (¬(∃ #t.1. CompromiseMonitor( M ) @ #t.1))) ⇒
          (¬(∀ M.1 L.1 L1 L2 fields.1 CA.1 rootCA.1 ca_fields.1 session.1
               gossiped_session.1 #t0 #t1.1.
-             ((((CTGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
-                                session.1, gossiped_session.1
+             ((((STHGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
+                                 session.1, gossiped_session.1
                  ) @ #t0) ∧
                 (BrowserAcceptsChain( CA.1, fields.1, rootCA.1, ca_fields.1, L1, L2
                  ) @ #t1.1)) ∧
@@ -1792,14 +2236,14 @@ lemma A_Gossip_1_rootCA_rogue_gossip_verif_nonempty [heuristic=o "acc_oracle",
              (∃ #t.1. GroundTruth( CA.1, fields.1 ) @ #t.1)))"
 
 
-lemma A_Gossip_1_rootCA_benign_gossip_verif_nonempty [heuristic=o "acc_oracle",
-                                                      hide_lemma=T_Gossip_verif_empty_helper1,
-                                                      hide_lemma=T_Gossip_verif_empty_helper2]:
+lemma A_Gossip_1_rootCA_benign_gossip_mon_honest_verif_nonempty [heuristic=o "acc_oracle",
+                                                                 hide_lemma=T_Gossip_verif_empty_helper1,
+                                                                 hide_lemma=T_Gossip_verif_empty_helper2]:
   all-traces
   "∀ CA M L fields rootCA ca_fields session gossiped_session #t
           #t1 #t2.
-         ((((CTGossipCheck( M, L, fields, CA, ca_fields, session,
-                            gossiped_session
+         ((((STHGossipCheck( M, L, fields, CA, ca_fields, session,
+                             gossiped_session
              ) @ #t) ∧
             (Asserts( M, 'Blame this CA.', CA,
                       <fields, ca_fields>
@@ -1810,8 +2254,8 @@ lemma A_Gossip_1_rootCA_benign_gossip_verif_nonempty [heuristic=o "acc_oracle",
           (¬(∃ #t.1. CompromiseMonitor( M ) @ #t.1))) ⇒
          (¬(∀ M.1 L.1 L1 L2 fields.1 CA.1 rootCA.1 ca_fields.1 session.1
               gossiped_session.1 #t0 #t1.1.
-             ((((CTGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
-                                session.1, gossiped_session.1
+             ((((STHGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
+                                 session.1, gossiped_session.1
                  ) @ #t0) ∧
                 (BrowserAcceptsChain( CA.1, fields.1, rootCA.1, ca_fields.1, L1, L2
                  ) @ #t1.1)) ∧
@@ -1820,39 +2264,39 @@ lemma A_Gossip_1_rootCA_benign_gossip_verif_nonempty [heuristic=o "acc_oracle",
              (∃ #t.1. GroundTruth( CA.1, fields.1 ) @ #t.1)))"
 
 
-lemma A_Gossip_1_rootCA_rogue_gossip_min [heuristic=o "acc_oracle",
-                                          hide_lemma=T_Gossip_verif_empty_helper1,
-                                          hide_lemma=T_Gossip_verif_empty_helper2]:
+lemma A_Gossip_1_rootCA_rogue_gossip_mon_honest_min [heuristic=o "acc_oracle",
+                                                     hide_lemma=T_Gossip_verif_empty_helper1,
+                                                     hide_lemma=T_Gossip_verif_empty_helper2]:
   all-traces
   "∀ rootCA M L fields CA ca_fields session gossiped_session #t
           #t1 #t2.
-         ((((CTGossipCheck( M, L, fields, CA, ca_fields, session,
-                            gossiped_session
+         ((((STHGossipCheck( M, L, fields, CA, ca_fields, session,
+                             gossiped_session
              ) @ #t) ∧
             (Asserts( M, 'Blame this CA.', CA,
                       <fields, ca_fields>
              ) @ #t1)) ∧
-           (AssertsNot( rootCA, 'I signed this intermediate CA.', CA,
-                        ca_fields
+           (Asserts( 'CCADB', 'No root CA signed this CA.',
+                     CA, <ca_fields, rootCA>
             ) @ #t2)) ∧
           (¬(∃ #t.1. CompromiseMonitor( M ) @ #t.1))) ⇒
          ((¬(∃ rootCA.1 M.1 L.1 fields.1 CA.1 ca_fields.1 session.1
                gossiped_session.1 #t.1 #t1.1 #t2.1.
-              ((((CTGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
-                                 session.1, gossiped_session.1
+              ((((STHGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
+                                  session.1, gossiped_session.1
                   ) @ #t.1) ∧
                  (Asserts( M.1, 'Blame this CA.', CA.1,
                            <fields.1, ca_fields.1>
                   ) @ #t1.1)) ∧
-                (AssertsNot( rootCA.1, 'I signed this intermediate CA.',
-                             CA.1, ca_fields.1
+                (Asserts( 'CCADB', 'No root CA signed this CA.',
+                          CA.1, <ca_fields.1, rootCA.1>
                  ) @ #t2.1)) ∧
                (¬(∃ #t.2. CompromiseMonitor( M.1 ) @ #t.2))) ∧
               ((rootCA.1 = rootCA) ∧ (¬(rootCA = rootCA.1))))) ∧
           (¬(∃ CA.1 M.1 L.1 fields.1 rootCA.1 ca_fields.1 session.1
                gossiped_session.1 #t.1 #t1.1 #t2.1.
-              ((((CTGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
-                                 session.1, gossiped_session.1
+              ((((STHGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
+                                  session.1, gossiped_session.1
                   ) @ #t.1) ∧
                  (Asserts( M.1, 'Blame this CA.', CA.1,
                            <fields.1, ca_fields.1>
@@ -1864,14 +2308,14 @@ lemma A_Gossip_1_rootCA_rogue_gossip_min [heuristic=o "acc_oracle",
               ((CA.1 = rootCA) ∧ (¬(rootCA = CA.1))))))"
 
 
-lemma A_Gossip_1_rootCA_benign_gossip_min [heuristic=o "acc_oracle",
-                                           hide_lemma=T_Gossip_verif_empty_helper1,
-                                           hide_lemma=T_Gossip_verif_empty_helper2]:
+lemma A_Gossip_1_rootCA_benign_gossip_mon_honest_min [heuristic=o "acc_oracle",
+                                                      hide_lemma=T_Gossip_verif_empty_helper1,
+                                                      hide_lemma=T_Gossip_verif_empty_helper2]:
   all-traces
   "∀ CA M L fields rootCA ca_fields session gossiped_session #t
           #t1 #t2.
-         ((((CTGossipCheck( M, L, fields, CA, ca_fields, session,
-                            gossiped_session
+         ((((STHGossipCheck( M, L, fields, CA, ca_fields, session,
+                             gossiped_session
              ) @ #t) ∧
             (Asserts( M, 'Blame this CA.', CA,
                       <fields, ca_fields>
@@ -1882,21 +2326,21 @@ lemma A_Gossip_1_rootCA_benign_gossip_min [heuristic=o "acc_oracle",
           (¬(∃ #t.1. CompromiseMonitor( M ) @ #t.1))) ⇒
          ((¬(∃ rootCA.1 M.1 L.1 fields.1 CA.1 ca_fields.1 session.1
                gossiped_session.1 #t.1 #t1.1 #t2.1.
-              ((((CTGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
-                                 session.1, gossiped_session.1
+              ((((STHGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
+                                  session.1, gossiped_session.1
                   ) @ #t.1) ∧
                  (Asserts( M.1, 'Blame this CA.', CA.1,
                            <fields.1, ca_fields.1>
                   ) @ #t1.1)) ∧
-                (AssertsNot( rootCA.1, 'I signed this intermediate CA.',
-                             CA.1, ca_fields.1
+                (Asserts( 'CCADB', 'No root CA signed this CA.',
+                          CA.1, <ca_fields.1, rootCA.1>
                  ) @ #t2.1)) ∧
                (¬(∃ #t.2. CompromiseMonitor( M.1 ) @ #t.2))) ∧
               ((rootCA.1 = CA) ∧ (¬(CA = rootCA.1))))) ∧
           (¬(∃ CA.1 M.1 L.1 fields.1 rootCA.1 ca_fields.1 session.1
                gossiped_session.1 #t.1 #t1.1 #t2.1.
-              ((((CTGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
-                                 session.1, gossiped_session.1
+              ((((STHGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
+                                  session.1, gossiped_session.1
                   ) @ #t.1) ∧
                  (Asserts( M.1, 'Blame this CA.', CA.1,
                            <fields.1, ca_fields.1>
@@ -1908,33 +2352,33 @@ lemma A_Gossip_1_rootCA_benign_gossip_min [heuristic=o "acc_oracle",
               ((CA.1 = CA) ∧ (¬(CA = CA.1))))))"
 
 
-lemma A_Gossip_1_rootCA_rogue_gossip_uniq [heuristic=o "acc_oracle",
-                                           hide_lemma=T_Gossip_verif_empty_helper1,
-                                           hide_lemma=T_Gossip_verif_empty_helper2]:
+lemma A_Gossip_1_rootCA_rogue_gossip_mon_honest_uniq [heuristic=o "acc_oracle",
+                                                      hide_lemma=T_Gossip_verif_empty_helper1,
+                                                      hide_lemma=T_Gossip_verif_empty_helper2]:
   all-traces
   "∀ rootCA M L fields CA ca_fields session gossiped_session #t
           #t1 #t2.
-         ((((CTGossipCheck( M, L, fields, CA, ca_fields, session,
-                            gossiped_session
+         ((((STHGossipCheck( M, L, fields, CA, ca_fields, session,
+                             gossiped_session
              ) @ #t) ∧
             (Asserts( M, 'Blame this CA.', CA,
                       <fields, ca_fields>
              ) @ #t1)) ∧
-           (AssertsNot( rootCA, 'I signed this intermediate CA.', CA,
-                        ca_fields
+           (Asserts( 'CCADB', 'No root CA signed this CA.',
+                     CA, <ca_fields, rootCA>
             ) @ #t2)) ∧
           (¬(∃ #t.1. CompromiseMonitor( M ) @ #t.1))) ⇒
          (∃ #i. Corrupted( rootCA ) @ #i)"
 
 
-lemma A_Gossip_1_rootCA_benign_gossip_uniq [heuristic=o "acc_oracle",
-                                            hide_lemma=T_Gossip_verif_empty_helper1,
-                                            hide_lemma=T_Gossip_verif_empty_helper2]:
+lemma A_Gossip_1_rootCA_benign_gossip_mon_honest_uniq [heuristic=o "acc_oracle",
+                                                       hide_lemma=T_Gossip_verif_empty_helper1,
+                                                       hide_lemma=T_Gossip_verif_empty_helper2]:
   all-traces
   "∀ CA M L fields rootCA ca_fields session gossiped_session #t
           #t1 #t2.
-         ((((CTGossipCheck( M, L, fields, CA, ca_fields, session,
-                            gossiped_session
+         ((((STHGossipCheck( M, L, fields, CA, ca_fields, session,
+                             gossiped_session
              ) @ #t) ∧
             (Asserts( M, 'Blame this CA.', CA,
                       <fields, ca_fields>
@@ -1946,51 +2390,51 @@ lemma A_Gossip_1_rootCA_benign_gossip_uniq [heuristic=o "acc_oracle",
          (∃ #i. Corrupted( CA ) @ #i)"
 
 
-lemma A_Gossip_1_rootCA_rogue_gossip_inj [heuristic=o "acc_oracle",
-                                          hide_lemma=T_Gossip_verif_empty_helper1,
-                                          hide_lemma=T_Gossip_verif_empty_helper2]:
+lemma A_Gossip_1_rootCA_rogue_gossip_mon_honest_inj [heuristic=o "acc_oracle",
+                                                     hide_lemma=T_Gossip_verif_empty_helper1,
+                                                     hide_lemma=T_Gossip_verif_empty_helper2]:
   all-traces "⊤"
 
 
-lemma A_Gossip_1_rootCA_benign_gossip_inj [heuristic=o "acc_oracle",
-                                           hide_lemma=T_Gossip_verif_empty_helper1,
-                                           hide_lemma=T_Gossip_verif_empty_helper2]:
+lemma A_Gossip_1_rootCA_benign_gossip_mon_honest_inj [heuristic=o "acc_oracle",
+                                                      hide_lemma=T_Gossip_verif_empty_helper1,
+                                                      hide_lemma=T_Gossip_verif_empty_helper2]:
   all-traces "⊤"
 
 
-lemma A_Gossip_1_rootCA_rogue_gossip_single [heuristic=o "acc_oracle",
-                                             hide_lemma=T_Gossip_verif_empty_helper1,
-                                             hide_lemma=T_Gossip_verif_empty_helper2]:
+lemma A_Gossip_1_rootCA_rogue_gossip_mon_honest_single [heuristic=o "acc_oracle",
+                                                        hide_lemma=T_Gossip_verif_empty_helper1,
+                                                        hide_lemma=T_Gossip_verif_empty_helper2]:
   exists-trace
   "∃ rootCA M L fields CA ca_fields session gossiped_session #t
           #t1 #t2.
-         (((((CTGossipCheck( M, L, fields, CA, ca_fields, session,
-                             gossiped_session
+         (((((STHGossipCheck( M, L, fields, CA, ca_fields, session,
+                              gossiped_session
               ) @ #t) ∧
              (Asserts( M, 'Blame this CA.', CA,
                        <fields, ca_fields>
               ) @ #t1)) ∧
-            (AssertsNot( rootCA, 'I signed this intermediate CA.', CA,
-                         ca_fields
+            (Asserts( 'CCADB', 'No root CA signed this CA.',
+                      CA, <ca_fields, rootCA>
              ) @ #t2)) ∧
            (¬(∃ #t.1. CompromiseMonitor( M ) @ #t.1))) ∧
           (∀ rootCA.1 M.1 L.1 fields.1 CA.1 ca_fields.1 session.1
              gossiped_session.1 #t.1 #t1.1 #t2.1.
-            ((((CTGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
-                               session.1, gossiped_session.1
+            ((((STHGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
+                                session.1, gossiped_session.1
                 ) @ #t.1) ∧
                (Asserts( M.1, 'Blame this CA.', CA.1,
                          <fields.1, ca_fields.1>
                 ) @ #t1.1)) ∧
-              (AssertsNot( rootCA.1, 'I signed this intermediate CA.',
-                           CA.1, ca_fields.1
+              (Asserts( 'CCADB', 'No root CA signed this CA.',
+                        CA.1, <ca_fields.1, rootCA.1>
                ) @ #t2.1)) ∧
              (¬(∃ #t.2. CompromiseMonitor( M.1 ) @ #t.2))) ⇒
             (rootCA.1 = rootCA))) ∧
          (¬(∃ CA.1 M.1 L.1 fields.1 rootCA.1 ca_fields.1 session.1
               gossiped_session.1 #t.1 #t1.1 #t2.1.
-             (((CTGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1, session.1,
-                               gossiped_session.1
+             (((STHGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
+                                session.1, gossiped_session.1
                 ) @ #t.1) ∧
                (Asserts( M.1, 'Blame this CA.', CA.1,
                          <fields.1, ca_fields.1>
@@ -2001,14 +2445,14 @@ lemma A_Gossip_1_rootCA_rogue_gossip_single [heuristic=o "acc_oracle",
              (¬(∃ #t.2. CompromiseMonitor( M.1 ) @ #t.2))))"
 
 
-lemma A_Gossip_1_rootCA_benign_gossip_single [heuristic=o "acc_oracle",
-                                              hide_lemma=T_Gossip_verif_empty_helper1,
-                                              hide_lemma=T_Gossip_verif_empty_helper2]:
+lemma A_Gossip_1_rootCA_benign_gossip_mon_honest_single [heuristic=o "acc_oracle",
+                                                         hide_lemma=T_Gossip_verif_empty_helper1,
+                                                         hide_lemma=T_Gossip_verif_empty_helper2]:
   exists-trace
   "∃ CA M L fields rootCA ca_fields session gossiped_session #t
           #t1 #t2.
-         (((((CTGossipCheck( M, L, fields, CA, ca_fields, session,
-                             gossiped_session
+         (((((STHGossipCheck( M, L, fields, CA, ca_fields, session,
+                              gossiped_session
               ) @ #t) ∧
              (Asserts( M, 'Blame this CA.', CA,
                        <fields, ca_fields>
@@ -2019,8 +2463,8 @@ lemma A_Gossip_1_rootCA_benign_gossip_single [heuristic=o "acc_oracle",
            (¬(∃ #t.1. CompromiseMonitor( M ) @ #t.1))) ∧
           (∀ CA.1 M.1 L.1 fields.1 rootCA.1 ca_fields.1 session.1
              gossiped_session.1 #t.1 #t1.1 #t2.1.
-            ((((CTGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
-                               session.1, gossiped_session.1
+            ((((STHGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
+                                session.1, gossiped_session.1
                 ) @ #t.1) ∧
                (Asserts( M.1, 'Blame this CA.', CA.1,
                          <fields.1, ca_fields.1>
@@ -2032,14 +2476,14 @@ lemma A_Gossip_1_rootCA_benign_gossip_single [heuristic=o "acc_oracle",
             (CA.1 = CA))) ∧
          (¬(∃ rootCA.1 M.1 L.1 fields.1 CA.1 ca_fields.1 session.1
               gossiped_session.1 #t.1 #t1.1 #t2.1.
-             (((CTGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1, session.1,
-                               gossiped_session.1
+             (((STHGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
+                                session.1, gossiped_session.1
                 ) @ #t.1) ∧
                (Asserts( M.1, 'Blame this CA.', CA.1,
                          <fields.1, ca_fields.1>
                 ) @ #t1.1)) ∧
-              (AssertsNot( rootCA.1, 'I signed this intermediate CA.',
-                           CA.1, ca_fields.1
+              (Asserts( 'CCADB', 'No root CA signed this CA.',
+                        CA.1, <ca_fields.1, rootCA.1>
                ) @ #t2.1)) ∧
              (¬(∃ #t.2. CompromiseMonitor( M.1 ) @ #t.2))))"
 
@@ -2050,27 +2494,27 @@ lemma A_Gossip_2_rootCA_rogue_gossip_log_honest_suff [heuristic=o "acc_oracle",
   exists-trace
   "∃ rootCA M L fields CA ca_fields session gossiped_session #t
           #t1 #t2.
-         ((((((CTGossipCheck( M, L, fields, CA, ca_fields, session,
-                              gossiped_session
+         ((((((STHGossipCheck( M, L, fields, CA, ca_fields, session,
+                               gossiped_session
                ) @ #t) ∧
               (Asserts( M, 'Blame this CA.', CA,
                         <fields, ca_fields>
                ) @ #t1)) ∧
-             (AssertsNot( rootCA, 'I signed this intermediate CA.', CA,
-                          ca_fields
+             (Asserts( 'CCADB', 'No root CA signed this CA.',
+                       CA, <ca_fields, rootCA>
               ) @ #t2)) ∧
             (¬(∃ #t.1. CompromiseLogger( L ) @ #t.1))) ∧
            (¬(∃ #t.1. CompromiseMonitor( M ) @ #t.1))) ∧
           (∀ rootCA.1 M.1 L.1 fields.1 CA.1 ca_fields.1 session.1
              gossiped_session.1 #t.1 #t1.1 #t2.1.
-            (((((CTGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
-                                session.1, gossiped_session.1
+            (((((STHGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
+                                 session.1, gossiped_session.1
                  ) @ #t.1) ∧
                 (Asserts( M.1, 'Blame this CA.', CA.1,
                           <fields.1, ca_fields.1>
                  ) @ #t1.1)) ∧
-               (AssertsNot( rootCA.1, 'I signed this intermediate CA.',
-                            CA.1, ca_fields.1
+               (Asserts( 'CCADB', 'No root CA signed this CA.',
+                         CA.1, <ca_fields.1, rootCA.1>
                 ) @ #t2.1)) ∧
               (¬(∃ #t.2. CompromiseLogger( L.1 ) @ #t.2))) ∧
              (¬(∃ #t.2. CompromiseMonitor( M.1 ) @ #t.2))) ⇒
@@ -2078,8 +2522,8 @@ lemma A_Gossip_2_rootCA_rogue_gossip_log_honest_suff [heuristic=o "acc_oracle",
          ((∀ a #i. (Corrupted( a ) @ #i) ⇒ (a = rootCA)) ∧
           (¬(∃ CA.1 M.1 L.1 fields.1 rootCA.1 ca_fields.1 session.1
                gossiped_session.1 #t.1 #t1.1 #t2.1.
-              ((((CTGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
-                                 session.1, gossiped_session.1
+              ((((STHGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
+                                  session.1, gossiped_session.1
                   ) @ #t.1) ∧
                  (Asserts( M.1, 'Blame this CA.', CA.1,
                            <fields.1, ca_fields.1>
@@ -2097,8 +2541,8 @@ lemma A_Gossip_2_rootCA_benign_gossip_log_honest_suff [heuristic=o "acc_oracle",
   exists-trace
   "∃ CA M L fields rootCA ca_fields session gossiped_session #t
           #t1 #t2.
-         ((((((CTGossipCheck( M, L, fields, CA, ca_fields, session,
-                              gossiped_session
+         ((((((STHGossipCheck( M, L, fields, CA, ca_fields, session,
+                               gossiped_session
                ) @ #t) ∧
               (Asserts( M, 'Blame this CA.', CA,
                         <fields, ca_fields>
@@ -2110,8 +2554,8 @@ lemma A_Gossip_2_rootCA_benign_gossip_log_honest_suff [heuristic=o "acc_oracle",
            (¬(∃ #t.1. CompromiseMonitor( M ) @ #t.1))) ∧
           (∀ CA.1 M.1 L.1 fields.1 rootCA.1 ca_fields.1 session.1
              gossiped_session.1 #t.1 #t1.1 #t2.1.
-            (((((CTGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
-                                session.1, gossiped_session.1
+            (((((STHGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
+                                 session.1, gossiped_session.1
                  ) @ #t.1) ∧
                 (Asserts( M.1, 'Blame this CA.', CA.1,
                           <fields.1, ca_fields.1>
@@ -2125,14 +2569,14 @@ lemma A_Gossip_2_rootCA_benign_gossip_log_honest_suff [heuristic=o "acc_oracle",
          ((∀ a #i. (Corrupted( a ) @ #i) ⇒ (a = CA)) ∧
           (¬(∃ rootCA.1 M.1 L.1 fields.1 CA.1 ca_fields.1 session.1
                gossiped_session.1 #t.1 #t1.1 #t2.1.
-              ((((CTGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
-                                 session.1, gossiped_session.1
+              ((((STHGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
+                                  session.1, gossiped_session.1
                   ) @ #t.1) ∧
                  (Asserts( M.1, 'Blame this CA.', CA.1,
                            <fields.1, ca_fields.1>
                   ) @ #t1.1)) ∧
-                (AssertsNot( rootCA.1, 'I signed this intermediate CA.',
-                             CA.1, ca_fields.1
+                (Asserts( 'CCADB', 'No root CA signed this CA.',
+                          CA.1, <ca_fields.1, rootCA.1>
                  ) @ #t2.1)) ∧
                (¬(∃ #t.2. CompromiseLogger( L.1 ) @ #t.2))) ∧
               (¬(∃ #t.2. CompromiseMonitor( M.1 ) @ #t.2)))))"
@@ -2144,21 +2588,21 @@ lemma A_Gossip_2_verif_empty [heuristic=o "acc_oracle",
   all-traces
   "(¬((∃ rootCA M L fields CA ca_fields session gossiped_session
               #t #t1 #t2.
-             ((((CTGossipCheck( M, L, fields, CA, ca_fields, session,
-                                gossiped_session
+             ((((STHGossipCheck( M, L, fields, CA, ca_fields, session,
+                                 gossiped_session
                  ) @ #t) ∧
                 (Asserts( M, 'Blame this CA.', CA,
                           <fields, ca_fields>
                  ) @ #t1)) ∧
-               (AssertsNot( rootCA, 'I signed this intermediate CA.', CA,
-                            ca_fields
+               (Asserts( 'CCADB', 'No root CA signed this CA.',
+                         CA, <ca_fields, rootCA>
                 ) @ #t2)) ∧
               (¬(∃ #t.1. CompromiseLogger( L ) @ #t.1))) ∧
              (¬(∃ #t.1. CompromiseMonitor( M ) @ #t.1))) ∨
            (∃ CA M L fields rootCA ca_fields session gossiped_session #t #t1
               #t2.
-             ((((CTGossipCheck( M, L, fields, CA, ca_fields, session,
-                                gossiped_session
+             ((((STHGossipCheck( M, L, fields, CA, ca_fields, session,
+                                 gossiped_session
                  ) @ #t) ∧
                 (Asserts( M, 'Blame this CA.', CA,
                           <fields, ca_fields>
@@ -2170,8 +2614,8 @@ lemma A_Gossip_2_verif_empty [heuristic=o "acc_oracle",
              (¬(∃ #t.1. CompromiseMonitor( M ) @ #t.1))))) ⇒
         (∀ M L L1 L2 fields CA ca_fields session gossiped_session rootCA
            #t0 #t1.
-          (((((CTGossipCheck( M, L, fields, CA, ca_fields, session,
-                              gossiped_session
+          (((((STHGossipCheck( M, L, fields, CA, ca_fields, session,
+                               gossiped_session
                ) @ #t0) ∧
               (BrowserAcceptsChain( CA, fields, rootCA, ca_fields, L1, L2
                ) @ #t1)) ∧
@@ -2187,21 +2631,21 @@ lemma A_Gossip_2_rootCA_rogue_gossip_log_honest_verif_nonempty [heuristic=o "acc
   all-traces
   "∀ rootCA M L fields CA ca_fields session gossiped_session #t
           #t1 #t2.
-         (((((CTGossipCheck( M, L, fields, CA, ca_fields, session,
-                             gossiped_session
+         (((((STHGossipCheck( M, L, fields, CA, ca_fields, session,
+                              gossiped_session
               ) @ #t) ∧
              (Asserts( M, 'Blame this CA.', CA,
                        <fields, ca_fields>
               ) @ #t1)) ∧
-            (AssertsNot( rootCA, 'I signed this intermediate CA.', CA,
-                         ca_fields
+            (Asserts( 'CCADB', 'No root CA signed this CA.',
+                      CA, <ca_fields, rootCA>
              ) @ #t2)) ∧
            (¬(∃ #t.1. CompromiseLogger( L ) @ #t.1))) ∧
           (¬(∃ #t.1. CompromiseMonitor( M ) @ #t.1))) ⇒
          (¬(∀ M.1 L.1 L1 L2 fields.1 CA.1 ca_fields.1 session.1
               gossiped_session.1 rootCA.1 #t0 #t1.1.
-             (((((CTGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
-                                 session.1, gossiped_session.1
+             (((((STHGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
+                                  session.1, gossiped_session.1
                   ) @ #t0) ∧
                  (BrowserAcceptsChain( CA.1, fields.1, rootCA.1, ca_fields.1, L1, L2
                   ) @ #t1.1)) ∧
@@ -2217,8 +2661,8 @@ lemma A_Gossip_2_rootCA_benign_gossip_log_honest_verif_nonempty [heuristic=o "ac
   all-traces
   "∀ CA M L fields rootCA ca_fields session gossiped_session #t
           #t1 #t2.
-         (((((CTGossipCheck( M, L, fields, CA, ca_fields, session,
-                             gossiped_session
+         (((((STHGossipCheck( M, L, fields, CA, ca_fields, session,
+                              gossiped_session
               ) @ #t) ∧
              (Asserts( M, 'Blame this CA.', CA,
                        <fields, ca_fields>
@@ -2230,8 +2674,8 @@ lemma A_Gossip_2_rootCA_benign_gossip_log_honest_verif_nonempty [heuristic=o "ac
           (¬(∃ #t.1. CompromiseMonitor( M ) @ #t.1))) ⇒
          (¬(∀ M.1 L.1 L1 L2 fields.1 CA.1 ca_fields.1 session.1
               gossiped_session.1 rootCA.1 #t0 #t1.1.
-             (((((CTGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
-                                 session.1, gossiped_session.1
+             (((((STHGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
+                                  session.1, gossiped_session.1
                   ) @ #t0) ∧
                  (BrowserAcceptsChain( CA.1, fields.1, rootCA.1, ca_fields.1, L1, L2
                   ) @ #t1.1)) ∧
@@ -2247,35 +2691,35 @@ lemma A_Gossip_2_rootCA_rogue_gossip_log_honest_min [heuristic=o "acc_oracle",
   all-traces
   "∀ rootCA M L fields CA ca_fields session gossiped_session #t
           #t1 #t2.
-         (((((CTGossipCheck( M, L, fields, CA, ca_fields, session,
-                             gossiped_session
+         (((((STHGossipCheck( M, L, fields, CA, ca_fields, session,
+                              gossiped_session
               ) @ #t) ∧
              (Asserts( M, 'Blame this CA.', CA,
                        <fields, ca_fields>
               ) @ #t1)) ∧
-            (AssertsNot( rootCA, 'I signed this intermediate CA.', CA,
-                         ca_fields
+            (Asserts( 'CCADB', 'No root CA signed this CA.',
+                      CA, <ca_fields, rootCA>
              ) @ #t2)) ∧
            (¬(∃ #t.1. CompromiseLogger( L ) @ #t.1))) ∧
           (¬(∃ #t.1. CompromiseMonitor( M ) @ #t.1))) ⇒
          ((¬(∃ rootCA.1 M.1 L.1 fields.1 CA.1 ca_fields.1 session.1
                gossiped_session.1 #t.1 #t1.1 #t2.1.
-              (((((CTGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
-                                  session.1, gossiped_session.1
+              (((((STHGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
+                                   session.1, gossiped_session.1
                    ) @ #t.1) ∧
                   (Asserts( M.1, 'Blame this CA.', CA.1,
                             <fields.1, ca_fields.1>
                    ) @ #t1.1)) ∧
-                 (AssertsNot( rootCA.1, 'I signed this intermediate CA.',
-                              CA.1, ca_fields.1
+                 (Asserts( 'CCADB', 'No root CA signed this CA.',
+                           CA.1, <ca_fields.1, rootCA.1>
                   ) @ #t2.1)) ∧
                 (¬(∃ #t.2. CompromiseLogger( L.1 ) @ #t.2))) ∧
                (¬(∃ #t.2. CompromiseMonitor( M.1 ) @ #t.2))) ∧
               ((rootCA.1 = rootCA) ∧ (¬(rootCA = rootCA.1))))) ∧
           (¬(∃ CA.1 M.1 L.1 fields.1 rootCA.1 ca_fields.1 session.1
                gossiped_session.1 #t.1 #t1.1 #t2.1.
-              (((((CTGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
-                                  session.1, gossiped_session.1
+              (((((STHGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
+                                   session.1, gossiped_session.1
                    ) @ #t.1) ∧
                   (Asserts( M.1, 'Blame this CA.', CA.1,
                             <fields.1, ca_fields.1>
@@ -2294,8 +2738,8 @@ lemma A_Gossip_2_rootCA_benign_gossip_log_honest_min [heuristic=o "acc_oracle",
   all-traces
   "∀ CA M L fields rootCA ca_fields session gossiped_session #t
           #t1 #t2.
-         (((((CTGossipCheck( M, L, fields, CA, ca_fields, session,
-                             gossiped_session
+         (((((STHGossipCheck( M, L, fields, CA, ca_fields, session,
+                              gossiped_session
               ) @ #t) ∧
              (Asserts( M, 'Blame this CA.', CA,
                        <fields, ca_fields>
@@ -2307,22 +2751,22 @@ lemma A_Gossip_2_rootCA_benign_gossip_log_honest_min [heuristic=o "acc_oracle",
           (¬(∃ #t.1. CompromiseMonitor( M ) @ #t.1))) ⇒
          ((¬(∃ rootCA.1 M.1 L.1 fields.1 CA.1 ca_fields.1 session.1
                gossiped_session.1 #t.1 #t1.1 #t2.1.
-              (((((CTGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
-                                  session.1, gossiped_session.1
+              (((((STHGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
+                                   session.1, gossiped_session.1
                    ) @ #t.1) ∧
                   (Asserts( M.1, 'Blame this CA.', CA.1,
                             <fields.1, ca_fields.1>
                    ) @ #t1.1)) ∧
-                 (AssertsNot( rootCA.1, 'I signed this intermediate CA.',
-                              CA.1, ca_fields.1
+                 (Asserts( 'CCADB', 'No root CA signed this CA.',
+                           CA.1, <ca_fields.1, rootCA.1>
                   ) @ #t2.1)) ∧
                 (¬(∃ #t.2. CompromiseLogger( L.1 ) @ #t.2))) ∧
                (¬(∃ #t.2. CompromiseMonitor( M.1 ) @ #t.2))) ∧
               ((rootCA.1 = CA) ∧ (¬(CA = rootCA.1))))) ∧
           (¬(∃ CA.1 M.1 L.1 fields.1 rootCA.1 ca_fields.1 session.1
                gossiped_session.1 #t.1 #t1.1 #t2.1.
-              (((((CTGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
-                                  session.1, gossiped_session.1
+              (((((STHGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
+                                   session.1, gossiped_session.1
                    ) @ #t.1) ∧
                   (Asserts( M.1, 'Blame this CA.', CA.1,
                             <fields.1, ca_fields.1>
@@ -2341,14 +2785,14 @@ lemma A_Gossip_2_rootCA_rogue_gossip_log_honest_uniq [heuristic=o "acc_oracle",
   all-traces
   "∀ rootCA M L fields CA ca_fields session gossiped_session #t
           #t1 #t2.
-         (((((CTGossipCheck( M, L, fields, CA, ca_fields, session,
-                             gossiped_session
+         (((((STHGossipCheck( M, L, fields, CA, ca_fields, session,
+                              gossiped_session
               ) @ #t) ∧
              (Asserts( M, 'Blame this CA.', CA,
                        <fields, ca_fields>
               ) @ #t1)) ∧
-            (AssertsNot( rootCA, 'I signed this intermediate CA.', CA,
-                         ca_fields
+            (Asserts( 'CCADB', 'No root CA signed this CA.',
+                      CA, <ca_fields, rootCA>
              ) @ #t2)) ∧
            (¬(∃ #t.1. CompromiseLogger( L ) @ #t.1))) ∧
           (¬(∃ #t.1. CompromiseMonitor( M ) @ #t.1))) ⇒
@@ -2361,8 +2805,8 @@ lemma A_Gossip_2_rootCA_benign_gossip_log_honest_uniq [heuristic=o "acc_oracle",
   all-traces
   "∀ CA M L fields rootCA ca_fields session gossiped_session #t
           #t1 #t2.
-         (((((CTGossipCheck( M, L, fields, CA, ca_fields, session,
-                             gossiped_session
+         (((((STHGossipCheck( M, L, fields, CA, ca_fields, session,
+                              gossiped_session
               ) @ #t) ∧
              (Asserts( M, 'Blame this CA.', CA,
                        <fields, ca_fields>
@@ -2393,35 +2837,35 @@ lemma A_Gossip_2_rootCA_rogue_gossip_log_honest_single [heuristic=o "acc_oracle"
   exists-trace
   "∃ rootCA M L fields CA ca_fields session gossiped_session #t
           #t1 #t2.
-         ((((((CTGossipCheck( M, L, fields, CA, ca_fields, session,
-                              gossiped_session
+         ((((((STHGossipCheck( M, L, fields, CA, ca_fields, session,
+                               gossiped_session
                ) @ #t) ∧
               (Asserts( M, 'Blame this CA.', CA,
                         <fields, ca_fields>
                ) @ #t1)) ∧
-             (AssertsNot( rootCA, 'I signed this intermediate CA.', CA,
-                          ca_fields
+             (Asserts( 'CCADB', 'No root CA signed this CA.',
+                       CA, <ca_fields, rootCA>
               ) @ #t2)) ∧
             (¬(∃ #t.1. CompromiseLogger( L ) @ #t.1))) ∧
            (¬(∃ #t.1. CompromiseMonitor( M ) @ #t.1))) ∧
           (∀ rootCA.1 M.1 L.1 fields.1 CA.1 ca_fields.1 session.1
              gossiped_session.1 #t.1 #t1.1 #t2.1.
-            (((((CTGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
-                                session.1, gossiped_session.1
+            (((((STHGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
+                                 session.1, gossiped_session.1
                  ) @ #t.1) ∧
                 (Asserts( M.1, 'Blame this CA.', CA.1,
                           <fields.1, ca_fields.1>
                  ) @ #t1.1)) ∧
-               (AssertsNot( rootCA.1, 'I signed this intermediate CA.',
-                            CA.1, ca_fields.1
+               (Asserts( 'CCADB', 'No root CA signed this CA.',
+                         CA.1, <ca_fields.1, rootCA.1>
                 ) @ #t2.1)) ∧
               (¬(∃ #t.2. CompromiseLogger( L.1 ) @ #t.2))) ∧
              (¬(∃ #t.2. CompromiseMonitor( M.1 ) @ #t.2))) ⇒
             (rootCA.1 = rootCA))) ∧
          (¬(∃ CA.1 M.1 L.1 fields.1 rootCA.1 ca_fields.1 session.1
               gossiped_session.1 #t.1 #t1.1 #t2.1.
-             ((((CTGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
-                                session.1, gossiped_session.1
+             ((((STHGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
+                                 session.1, gossiped_session.1
                  ) @ #t.1) ∧
                 (Asserts( M.1, 'Blame this CA.', CA.1,
                           <fields.1, ca_fields.1>
@@ -2439,8 +2883,8 @@ lemma A_Gossip_2_rootCA_benign_gossip_log_honest_single [heuristic=o "acc_oracle
   exists-trace
   "∃ CA M L fields rootCA ca_fields session gossiped_session #t
           #t1 #t2.
-         ((((((CTGossipCheck( M, L, fields, CA, ca_fields, session,
-                              gossiped_session
+         ((((((STHGossipCheck( M, L, fields, CA, ca_fields, session,
+                               gossiped_session
                ) @ #t) ∧
               (Asserts( M, 'Blame this CA.', CA,
                         <fields, ca_fields>
@@ -2452,8 +2896,8 @@ lemma A_Gossip_2_rootCA_benign_gossip_log_honest_single [heuristic=o "acc_oracle
            (¬(∃ #t.1. CompromiseMonitor( M ) @ #t.1))) ∧
           (∀ CA.1 M.1 L.1 fields.1 rootCA.1 ca_fields.1 session.1
              gossiped_session.1 #t.1 #t1.1 #t2.1.
-            (((((CTGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
-                                session.1, gossiped_session.1
+            (((((STHGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
+                                 session.1, gossiped_session.1
                  ) @ #t.1) ∧
                 (Asserts( M.1, 'Blame this CA.', CA.1,
                           <fields.1, ca_fields.1>
@@ -2466,14 +2910,14 @@ lemma A_Gossip_2_rootCA_benign_gossip_log_honest_single [heuristic=o "acc_oracle
             (CA.1 = CA))) ∧
          (¬(∃ rootCA.1 M.1 L.1 fields.1 CA.1 ca_fields.1 session.1
               gossiped_session.1 #t.1 #t1.1 #t2.1.
-             ((((CTGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
-                                session.1, gossiped_session.1
+             ((((STHGossipCheck( M.1, L.1, fields.1, CA.1, ca_fields.1,
+                                 session.1, gossiped_session.1
                  ) @ #t.1) ∧
                 (Asserts( M.1, 'Blame this CA.', CA.1,
                           <fields.1, ca_fields.1>
                  ) @ #t1.1)) ∧
-               (AssertsNot( rootCA.1, 'I signed this intermediate CA.',
-                            CA.1, ca_fields.1
+               (Asserts( 'CCADB', 'No root CA signed this CA.',
+                         CA.1, <ca_fields.1, rootCA.1>
                 ) @ #t2.1)) ∧
               (¬(∃ #t.2. CompromiseLogger( L.1 ) @ #t.2))) ∧
              (¬(∃ #t.2. CompromiseMonitor( M.1 ) @ #t.2))))"
@@ -2512,14 +2956,14 @@ restriction monitorFindsRogueCertificate_once:
 
 restriction CTGossipCheck_once:
     "All M L fields CA ca_fields session gossiped_session #t1 #t2. 
-    CTGossipCheck(M, L, fields, CA, ca_fields, session, gossiped_session)@t1 
-    & CTGossipCheck(M, L, fields, CA, ca_fields, session, gossiped_session)@t2 
+    STHGossipCheck(M, L, fields, CA, ca_fields, session, gossiped_session)@t1 
+    & STHGossipCheck(M, L, fields, CA, ca_fields, session, gossiped_session)@t2 
     ==> (#t1 = #t2)"
 
 restriction CTGossipTransparencyCheck_once:
     "All M L fields CA ca_fields session gossiped_session #t1 #t2. 
-    CTGossipTransparencyCheck(M, L, fields, CA, ca_fields, session, gossiped_session)@t1 
-    & CTGossipTransparencyCheck(M, L, fields, CA, ca_fields, session, gossiped_session)@t2 
+    STHGossipTransparencyCheck(M, L, fields, CA, ca_fields, session, gossiped_session)@t1 
+    & STHGossipTransparencyCheck(M, L, fields, CA, ca_fields, session, gossiped_session)@t2 
     ==> (#t1 = #t2)"
 
 restriction appendOnlyCheck_Gossip_once:

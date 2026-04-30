@@ -22,7 +22,8 @@
 				"timeout": 300
 			},
       "lemmas": [
-        {"name": "san_*"}
+        {"name": "san_*"},
+        {"name": "authenticity"}
       ]
     },
     "transparency": {
@@ -50,14 +51,22 @@
 				"timeout": 300
 			},
       "lemmas": [
-        {"name": "A_Gossip_1_rootCA_rogue_gossip_verif_nonempty"},
-        {"name": "A_Gossip_1_rootCA_benign_gossip_verif_nonempty"},
-        {"name": "A_Gossip_1_rootCA_rogue_gossip_min"},
-        {"name": "A_Gossip_1_rootCA_benign_gossip_min"},
-        {"name": "A_Gossip_1_rootCA_rogue_gossip_uniq"},
-        {"name": "A_Gossip_1_rootCA_benign_gossip_uniq"},
-        {"name": "A_Gossip_1_rootCA_rogue_gossip_inj"},
-        {"name": "A_Gossip_1_rootCA_benign_gossip_inj"},
+        {"name": "A_Gossip_0_rootCA_rogue_gossip_verif_nonempty"},
+        {"name": "A_Gossip_0_rootCA_benign_gossip_verif_nonempty"},
+        {"name": "A_Gossip_0_rootCA_rogue_gossip_min"},
+        {"name": "A_Gossip_0_rootCA_benign_gossip_min"},
+        {"name": "A_Gossip_0_rootCA_rogue_gossip_uniq"},
+        {"name": "A_Gossip_0_rootCA_benign_gossip_uniq"},
+        {"name": "A_Gossip_0_rootCA_rogue_gossip_inj"},
+        {"name": "A_Gossip_0_rootCA_benign_gossip_inj"},
+        {"name": "A_Gossip_1_rootCA_rogue_gossip_mon_honest_verif_nonempty"},
+        {"name": "A_Gossip_1_rootCA_benign_gossip_mon_honest_verif_nonempty"},
+        {"name": "A_Gossip_1_rootCA_rogue_gossip_mon_honest_min"},
+        {"name": "A_Gossip_1_rootCA_benign_gossip_mon_honest_min"},
+        {"name": "A_Gossip_1_rootCA_rogue_gossip_mon_honest_uniq"},
+        {"name": "A_Gossip_1_rootCA_benign_gossip_mon_honest_uniq"},
+        {"name": "A_Gossip_1_rootCA_rogue_gossip_mon_honest_inj"},
+        {"name": "A_Gossip_1_rootCA_benign_gossip_mon_honest_inj"},
         {"name": "A_Gossip_2_verif_empty"},
         {"name": "A_Gossip_2_rootCA_rogue_gossip_log_honest_verif_nonempty"},
         {"name": "A_Gossip_2_rootCA_benign_gossip_log_honest_verif_nonempty"},
@@ -100,7 +109,8 @@
       "lemmas": [
         {"name": "T_Gossip_uniq_helper"},
         {"name": "T_Gossip_verif_empty_helper1"},
-        {"name": "T_Gossip_verif_empty_helper2"},       
+        {"name": "T_Gossip_verif_empty_helper2"},   
+        {"name": "T_Gossip_verif_empty_helper3"},       
         {"name": "A_Gossip_helper"},
         {"name": "A_uniq1_helper"},
         {"name": "A_uniq2_helper"},
@@ -120,15 +130,20 @@
       "lemmas": [
         {"name": "T_Gossip_gossip_appendOnly_viol_suff"},
         {"name": "T_Gossip_gossip_appendOnly_viol_single"},
-        {"name": "A_Gossip_1_rootCA_rogue_gossip_suff"},
-        {"name": "A_Gossip_1_rootCA_benign_gossip_suff"},
-        {"name": "A_Gossip_1_rootCA_rogue_gossip_single"},
-        {"name": "A_Gossip_1_rootCA_benign_gossip_single"},
+        {"name": "A_Gossip_0_rootCA_rogue_gossip_suff"},
+        {"name": "A_Gossip_0_rootCA_benign_gossip_suff"},
+        {"name": "A_Gossip_0_rootCA_rogue_gossip_single"},
+        {"name": "A_Gossip_0_rootCA_benign_gossip_single"},
+        {"name": "A_Gossip_0_verif_empty"},
+        {"name": "A_Gossip_1_rootCA_rogue_gossip_mon_honest_suff"},
+        {"name": "A_Gossip_1_rootCA_benign_gossip_mon_honest_suff"},
+        {"name": "A_Gossip_1_rootCA_rogue_gossip_mon_honest_single"},
+        {"name": "A_Gossip_1_rootCA_benign_gossip_mon_honest_single"},
+        {"name": "A_Gossip_1_verif_empty"},
         {"name": "A_Gossip_2_rootCA_rogue_gossip_log_honest_suff"},
         {"name": "A_Gossip_2_rootCA_benign_gossip_log_honest_suff"},
         {"name": "A_Gossip_2_rootCA_rogue_gossip_log_honest_single"},
         {"name": "A_Gossip_2_rootCA_benign_gossip_log_honest_single"},
-        {"name": "A_Gossip_1_verif_empty"},
         {"name": "suff_san_GossipTransparencyCheck_Success"},
         {"name": "suff_san_GossipTransparencyCheck_Failed"},
         {"name": "suff_san_GossipingCheck_Found"}

@@ -1,11 +1,11 @@
 {
   "task_id": "--san_Start_Log_malicious--default",
   "warnings": [],
-  "tamarin_timing": 53.21,
+  "tamarin_timing": 57.63,
   "wrapper_measures": {
-    "time": 53.50904154777527,
-    "avg_memory": 518.9617482311321,
-    "peak_memory": 1107.0859375
+    "time": 57.97980308532715,
+    "avg_memory": 515.4246363146551,
+    "peak_memory": 1101.47265625
   },
   "output_spthy": "results/ct_receipt/proofs/--san_Start_Log_malicious--default.spthy",
   "verified_lemma": {
@@ -64,6 +64,7 @@
     "san_domainOwnerVerifiesReceipt_1",
     "san_domainOwnerVerifiesReceipt_2",
     "san_SCTReceiptCheck",
+    "authenticity",
     "A_uniq1_helper",
     "A_uniq2_helper",
     "A_Receipt_inj3_helper",

@@ -1,5 +1,5 @@
 /*
- * Protocol: Certficate Transparency with additions for SCT Auditing, STH Gossiping
+ * Protocol: Certficate Transparency SCT Auditing
  * Modeler:  anonymized
  * Date:     July 2025
  * Sources:  RFC6962, RFC 9162, "Opt-in SCT Auditing", Emily Stark and Chris Thompson, and partly rooted on "Provable Security for PKI Schemes" by Wrótniak et al.
@@ -7,7 +7,7 @@
  * Notes:    consult README for instructions on evaluating this model
  */
 
-theory ct_audit
+theory sct_audit
 begin
 
 functions:
@@ -275,7 +275,7 @@ rule monitorFindsRogueCertificate [color= #f3d664]:
         Eq(verify(ca_sig, ca_fields, pkRootCA), true()),
         MonitorObservesEntry($M, $L, fields, <ca_fields, ca_sig>, sth, session), /* see restriction */
         RogueCert($CA, fields), /* see restriction */
-        Asserts($M, '.', $CA, <fields, ca_fields>),
+        Asserts($M, 'Blame this CA.', $CA, <fields, ca_fields>),
 
         Time($now),
         San_monitorFindsRogueCertificate()
@@ -294,7 +294,7 @@ rule monitorCanFindCertificate [color= #f3d664]:
         Eq(verify(ca_sig, ca_fields, pkRootCA), true()),
         MonitorObservesEntry($M, $L, fields, <ca_fields, ca_sig>, sth, session), /* see restriction */
         BenignCert($iss, fields), /* cert is found benign, see restriction */
-        AssertsNot($M, '.', $CA, <fields, ca_fields>),
+        Asserts($M, 'Do not blame this CA.', $CA, <fields, ca_fields>),
 
         Time($now),
         San_monitorCanFindCertificate()
@@ -310,7 +310,7 @@ rule monitorCannotFindCertificate [color= #f3d664]:
     [ !LoggerDict($M, $L), !TrackSubject($M, su), In(fields), In(cert_sig), In(ca_fields), In(ca_sig), !TLS_L_to_M($L, $M, $snapshot, sth, session, $time), !Root_CA($rootCA, pkRootCA) ]
     --[ 
         NothingObserved($M, $L, fields, sth, session), /* see restriction */
-        AssertsNot($M, '.', $CA, <fields, ca_fields>),
+        Asserts($M, 'Do not blame this CA.', $CA, <fields, ca_fields>),
 
         Time($now),
         San_monitorCannotFindCertificate()
@@ -389,7 +389,7 @@ rule monitorAudit_no_viol:
         Eq(verify(ca_sig, ca_fields, pkRootCA), true()),
         _restrict((sct_to_audit = sct1) | (sct_to_audit = sct2)), /* only one sct at a time is considered */
         BenignCert($CA, fields), /* see restriction */
-        AssertsNot($M, 'This CA has the following fields and it failed the SCT audit for the following fields.', $CA, <fields, ca_fields>),
+        Asserts($M, 'This CA has the following fields and it passed the SCT audit for the following fields.', $CA, <fields, ca_fields>),
 
         Time($now),
         San_monitorAudit_no_viol(),
@@ -857,7 +857,7 @@ rule ParticipantFindsInclusionViolation [color= #e65208]:
     in
     [ !TLS_L_to_P($L, $P, $snapshot, sth, session, $time), !Logger($L, pkL),In(fields), In(ca_cert) /* entry to check for */ ]
     --[
-        AssertsNot($P, 'This loggers log currently includes these fields.', $L, <fields, session>),
+        Asserts($P, 'This loggers log currently does not include these fields.', $L, <fields, session>),
         InclusionProofFails($P, $L, fields, ca_cert, sth, session), /* entry is not contained in the snapshot, see restriction */
         
         Time($now),
@@ -929,7 +929,7 @@ rule ConsultDocumentation_Fails:
     [ In(ca_fields), In(ca_sig), !Root_CA($rootCA, pkRCA) ]
     --[
         UndocumentedIntermediateCA($rootCA, $CA, ca_fields), // see restriction externalCA_no_proof below
-        AssertsNot($rootCA, 'I signed this intermediate CA.', $CA, <ca_fields>),
+        Asserts('CCADB', 'No root CA signed this CA.', $CA, <ca_fields,$rootCA>),
         Eq(verify(ca_sig, ca_fields, pkRCA), true()), // signed by root CA
         ExternalCheckCCADB($rootCA, ca_fields),
         
@@ -939,7 +939,7 @@ rule ConsultDocumentation_Fails:
     [ CCADBConsulted($rootCA, ca_fields) ]
 
 /* Responsible root CA is not able to present an identity proof of the intermediate CA (-> it is forged) */
-/* We obviously rely on the soundness of this documentation check. It is an interesting bit to consider how real-world documentations look like, feel free to consult the CCADB yourself for this. TLDR: they are legal documents with auditor firms involved. We do not go beyond this and consider everything around forging such documents out of scope of this work. */
+/* We obviously rely on the soundness of this documentation check. It is an interesting bit to consider how real-world documentation look like, feel free to consult the CCADB yourself for this. The contain legal documents with auditor firms involved. We do not go beyond this and consider everything around forging such documents out of scope of this work. */
 restriction externalCA_no_proof:
     "All rootCA CA ca_fields #t1.
         UndocumentedIntermediateCA(rootCA, CA, ca_fields)@t1
@@ -949,34 +949,6 @@ restriction externalCA_no_proof:
 
 /*** Predicate Rules ***/
 
-/* CTCheck with CCADB check included */
-
-rule MonitorCheck_Found_CCADB:
-    [ !BAccept_State($CA, fields, $L1, $sct1, $L2, $sct2),
-      MonitorFoundCert($M, $L, fields, $CA, ca_fields, $time_of_proof_fetch, session), CCADBConsulted($rootCA, ca_fields) ]
-    --[ 
-        CTCheck($M, fields, $CA, ca_fields),
-        _restrict(($L1 = $L) | ($L2 = $L)),
-        
-        San_MonitorCheck_Found()
-    ]->
-    [  ]
-
-rule MonitorCheck_NotFound_CCADB:
-    [ !BAccept_State($CA, fields, $L1, $sct1, $L2, $sct2),
-      MonitorCouldNotFindCert($M, fields, $L1, $CA, ca_fields, $proof1, session1), MonitorCouldNotFindCert($M, fields, $L2, $CA, ca_fields, $proof2, session2),
-      CCADBConsulted($rootCA, ca_fields) ]
-    --[ 
-        CTCheck($M, fields, $CA, ca_fields),
-        MMD_passed($sct1, $proof1), // $sct < $time_of_proof_fetch => MMD passed for both
-        MMD_passed($sct2, $proof2),
-
-        San_MonitorCheck_NotFound()
-    ]->
-    [  ]
-
-/*  */
-
 restriction mmd_passed: // "before < after"
     "All before after #t2 #t1 #t0. 
         MMD_passed(before, after)@t2 & Time(before)@t0 & Time(after)@t1
@@ -985,14 +957,16 @@ restriction mmd_passed: // "before < after"
 
 // SCT Auditing Checks
 
+/*
+SCTAuditTransparencyCheck(). Contributed evidence.
+- Monitor (designated auditor), (and client): received a certificate chain with incorporated SCTs from a client
+- Participant: Inclusion proof (respecting MMD) after 
+*/
 rule SCTAuditTransparencyCheck_Success:
     let
         ca_fields = <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
     in
-    [ MAudit_SCT($M, $L, fields, ca_fields, $sct),
-      // some party checked for inclusion (typically a browser that accepted
-      // a certificate, but can be run by auditor itself)
-      InclusionVerified($P, $L, fields, $proof, session) ]
+    [ MAudit_SCT($M, $L, fields, ca_fields, $sct), InclusionVerified($P, $L, fields, $proof, session) ]
     --[
         SCTAuditTransparencyCheck($L, fields),
         SCTAuditTransparencyCheckSuccess($L, fields),
@@ -1016,6 +990,10 @@ rule SCTAuditTransparencyCheck_Failed:
     ]->
     [  ]
 
+/* SCTAuditCheck(). Contributed evidence:
+- Monitor (designated auditor), (and client): received a certificate chain with incorporated SCTs from a client
+- CCADB Result of consulting the database for the legitimacy of the CA
+*/
 rule SCTAuditCheck:
     [ MAudit_SCT($M, $L, fields, ca_fields, $sct),
       CCADBConsulted($rootCA, ca_fields) ]
@@ -1076,7 +1054,7 @@ restriction time_monotonicity:
                                 & #t2 < #t3 ==> tp = t )"
 
 
-/* whenever a party checks the validity period of a certificate, that time must not happened before the check, i.e. the time did not pass yet */
+/* whenever a party checks the validity period of a certificate, that time must not happen before the check, i.e. the time did not pass yet */
 restriction certStillValid:
     "All currTime valid_till #t1.
         Time(currTime)@t1 & CheckValidUntil(currTime, valid_till)@t1
@@ -1408,20 +1386,6 @@ lemma san_ConsultDocumentation_Fails:
 	& (All #t. Compromise()@t ==> (Ex rootCA. CompromiseRootCA(rootCA)@t))
 "
 
-lemma san_MonitorCheck_Found:
- exists-trace 
-"Ex #t. 
-	San_MonitorCheck_Found()@t
-	& not (Ex #t. Compromise()@t)
-"
-
-lemma san_MonitorCheck_NotFound:
- exists-trace 
-"Ex #t. 
-	San_MonitorCheck_NotFound()@t
-	& (All #t. Compromise()@t ==> (Ex L. CompromiseLogger(L)@t)) // only logger corruptions allowed
-"
-
 lemma san_SCTAuditTransparencyCheck_Success:
  exists-trace 
 "Ex #t. 
@@ -1466,13 +1430,24 @@ lemma san_compromiseMonitor:
 	San_compromiseMonitor()@t
 "
 
+/* Authenticity */
+
+// counterexample to authenticity
+lemma authenticity:
+    exists-trace
+    "Ex L1 L2 rootCA ca_fields CA fields #j.
+        BrowserAcceptsChain(CA, fields, rootCA, ca_fields, L1, L2)@j 
+        & not (Ex #i. GroundTruth(CA, fields)@i & #i < #j)"
+
+
 /* ---------------------
         TRANSPARENCY
    --------------------- */
 
 /* 
-Log transparency can still fail although the monitor does not need the log anymore. 
+The auditing mechanism alone does not enhance transparency but we will see below that the audited material can be used to enhance accountable transparency
 */
+/* falsified */
 lemma transparency_SCT_Auditing:
     "All CA fields rootCA ca_fields L1 L2 L #t1 #t2.
         BrowserAcceptsChain(CA, fields, rootCA, ca_fields, L1, L2)@t1
@@ -1493,13 +1468,13 @@ lemma transparency_SCT_Auditing:
 In this variant, the monitor performs an audit where it got the SCT externally (e.g., from a client). Then, it fetches a log view and runs the usual inclusion check. If the monitor cannot find the certificate, the logger is blamed.
 */
 test audit_inclusionViol:
-    "Ex M fields session #t #t1.
-        AssertsNot(M, 'This loggers log currently includes these fields.', L, <fields, session>)@t
-        & SCTAuditTransparencyCheckSession(L, fields, session)@t1
-    "
+"Ex M fields session #t #t1.
+  Asserts(M,'This loggers log currently does not include these fields.',L,<fields,session>)@t
+& SCTAuditTransparencyCheckSession(L,fields,session)@t1"
+
 /* 
 Result: autoprovable
-If a monitor runs the same check as in T_CT_3 but now after it received a certificate to audit from a client, then the monitor can correctly blame the logger if the inclusion proof fails again. This is similar to T_CT_2 where the monitor relied on knowledge from the client, but with auditing there is a defined and existing way to share this knowledge.
+The monitor knows about the certificate thanks to the audited certificate. If after the given timestamp the certificate is still not included, that allows easy blaming as done as part of the SCTAuditTransparencyCheck.
 */
 lemma T_Audit:
     audit_inclusionViol accounts for
@@ -1529,7 +1504,7 @@ lemma A_uniq1_helper [reuse]:
 
 lemma A_uniq2_helper [reuse]:
     "All rootCA CA ca_fields #t.
-    AssertsNot(rootCA, 'I signed this intermediate CA.', CA, <ca_fields>)@t
+    Asserts('CCADB', 'No root CA signed this CA.', CA, <ca_fields,rootCA>)@t
     ==> (Ex #t. Corrupted(rootCA)@t)"
 
 
@@ -1547,10 +1522,10 @@ test root_ca_rogue_audit_mon_honest:
     "Ex M ca_fields fields CA #t #t0 #t1. 
         SCTAuditCheck(M, fields, ca_fields)@t
         & Asserts(M, 'This CA has the following fields and it failed the SCT audit for the following fields.', CA, <fields, ca_fields>)@t0
-        & AssertsNot(rootCA, 'I signed this intermediate CA.', CA, <ca_fields>)@t1 /* rootCA free */
+        & Asserts('CCADB', 'No root CA signed this CA.', CA, <ca_fields,rootCA>)@t1 /* rootCA free */
         & not (Ex #t. Corrupted(M)@t)"
 /*
-CTAudit Scenario 1: Monitor receives a certificate via auditing (shared by some client) and checks authenticity on it. Then further distinguishes between the cases where the CA is documented or not (wrt the root CA) and blames accordingly.
+CTAudit Scenario 1: Monitor receives a certificate via auditing (shared by some client) and checks authenticity on it. Then further distinguishes between the cases where the CA is documented or not (wrt the root CA) and blames accordingly (as before).
 */
 lemma A_CTAudit_1:
     ca_rogue_audit_mon_honest, root_ca_rogue_audit_mon_honest accounts for
@@ -1564,20 +1539,22 @@ lemma A_CTAudit_1:
 
 
 test ca_rogue_audit:
-    "Ex M ca_fields fields rootCA #t #t0 #t1.
-        SCTAuditCheck(M, fields, ca_fields)@t
-        & Asserts(M, 'This CA has the following fields and it failed the SCT audit for the following fields.', CA, <fields, ca_fields>)@t0
-        & Asserts(rootCA, 'I signed this intermediate CA.', CA, <ca_fields>)@t1
-    "
+ "Ex M ca_fields fields rootCA #t #t0 #t1.
+  SCTAuditCheck(M, fields, ca_fields)@t
+  & Asserts(M, 'This CA has the following fields and it failed the SCT audit for the following fields.', CA, <fields, ca_fields>)@t0
+  & Asserts(rootCA, 'I signed this intermediate CA.', CA, <ca_fields>)@t1
+ "
 
 test root_ca_rogue_audit:
-    "Ex M ca_fields fields CA #t #t0 #t1. 
-        SCTAuditCheck(M, fields, ca_fields)@t
-        & Asserts(M, 'This CA has the following fields and it failed the SCT audit for the following fields.', CA, <fields, ca_fields>)@t0
-        & AssertsNot(rootCA, 'I signed this intermediate CA.', CA, <ca_fields>)@t1 /* rootCA free */
-    "
+ "Ex M ca_fields fields CA #t #t0 #t1. 
+  SCTAuditCheck(M, fields, ca_fields)@t
+  & Asserts(M, 'This CA has the following fields and it failed the SCT audit for the following fields.', CA, <fields, ca_fields>)@t0
+  & Asserts('CCADB', 'No root CA signed this CA.', CA, <ca_fields,rootCA>)@t1
+ "
 
-// This version allows the monitor to sleep. It is a counterexample to the previous one.
+/* CTAudit Scenario 2: 
+
+This version allows the monitor to sleep. It is a counterexample to the previous one. */
 lemma A_CTAudit_2:
     ca_rogue_audit, root_ca_rogue_audit accounts for
     "All CA fields rootCA ca_fields L1 L2 M #t0 #t1. 

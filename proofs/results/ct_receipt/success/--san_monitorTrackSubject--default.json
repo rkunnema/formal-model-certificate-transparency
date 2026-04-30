@@ -1,11 +1,11 @@
 {
   "task_id": "--san_monitorTrackSubject--default",
   "warnings": [],
-  "tamarin_timing": 52.87,
+  "tamarin_timing": 55.43,
   "wrapper_measures": {
-    "time": 53.165910720825195,
-    "avg_memory": 520.6012676886793,
-    "peak_memory": 1088.32421875
+    "time": 55.687408208847046,
+    "avg_memory": 506.32296316964283,
+    "peak_memory": 1132.62109375
   },
   "output_spthy": "results/ct_receipt/proofs/--san_monitorTrackSubject--default.spthy",
   "verified_lemma": {
@@ -64,6 +64,7 @@
     "san_domainOwnerVerifiesReceipt_1",
     "san_domainOwnerVerifiesReceipt_2",
     "san_SCTReceiptCheck",
+    "authenticity",
     "A_uniq1_helper",
     "A_uniq2_helper",
     "A_Receipt_inj3_helper",

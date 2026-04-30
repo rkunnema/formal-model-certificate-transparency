@@ -1,24 +1,16 @@
 {
   "task_id": "--T_CT_1_client_inclusionViol_single--default",
   "warnings": [],
-<<<<<<< HEAD
-  "tamarin_timing": 26.99,
+  "tamarin_timing": 13.75,
   "wrapper_measures": {
-    "time": 27.205097913742065,
-    "avg_memory": 202.30946180555554,
-    "peak_memory": 399.5859375
-=======
-  "tamarin_timing": 14.55,
-  "wrapper_measures": {
-    "time": 14.717617273330688,
-    "avg_memory": 224.63333333333335,
-    "peak_memory": 430.109375
->>>>>>> eecd20276527e4b69d3a558d6b9418dbd93dd7d8
+    "time": 13.958471775054932,
+    "avg_memory": 142.01283482142856,
+    "peak_memory": 249.60546875
   },
   "output_spthy": "results/ct/proofs/--T_CT_1_client_inclusionViol_single--default.spthy",
   "verified_lemma": {
     "T_CT_1_client_inclusionViol_single": {
-      "steps": 25,
+      "steps": 11,
       "analysis_type": "exists-trace"
     }
   },
@@ -63,23 +55,19 @@
     "san_MonitorCheck_NotFound",
     "san_TransparencyCheck_Success",
     "san_TransparencyCheck_Failed",
-    "san_TransparencyCheck_wo_MMD_success",
-    "san_TransparencyCheck_wo_MMD_failed",
     "san_compromiseCA",
     "san_compromiseRootCA",
     "san_compromiseLogger",
     "san_compromiseMonitor",
-    "CA_auth_w_compromise",
     "authenticity",
     "authenticity_honest",
     "cert_sct_auth",
     "sct_auth",
-    "transparency_w_MMD",
-    "transparency_w_MMD_honest_log_helper",
+    "transparency",
+    "transparency_wo_MMD_honest_log",
     "transparency_w_MMD_honest_log",
-    "transparency_wo_MMD",
-    "A_CT_2_uniq_helper_intm_CA",
-    "A_CT_2_uniq_helper_root",
+    "A_uniq1_helper",
+    "A_uniq2_helper",
     "T_CT_1_client_inclusionViol_suff",
     "T_CT_1_verif_empty",
     "T_CT_1_client_inclusionViol_verif_nonempty",
@@ -99,18 +87,31 @@
     "A_CT_1_root_ca_auth_on_log_inj",
     "A_CT_1_ca_auth_on_log_single",
     "A_CT_1_root_ca_auth_on_log_single",
-    "A_CT_2_ca_rogue_honest_log_suff",
-    "A_CT_2_root_ca_rogue_honest_log_suff",
+    "A_CT_2_ca_rogue_honest_mon_suff",
+    "A_CT_2_root_ca_rogue_honest_mon_suff",
     "A_CT_2_verif_empty",
-    "A_CT_2_ca_rogue_honest_log_verif_nonempty",
-    "A_CT_2_root_ca_rogue_honest_log_verif_nonempty",
-    "A_CT_2_ca_rogue_honest_log_min",
-    "A_CT_2_root_ca_rogue_honest_log_min",
-    "A_CT_2_ca_rogue_honest_log_uniq",
-    "A_CT_2_root_ca_rogue_honest_log_uniq",
-    "A_CT_2_ca_rogue_honest_log_inj",
-    "A_CT_2_root_ca_rogue_honest_log_inj",
-    "A_CT_2_ca_rogue_honest_log_single",
-    "A_CT_2_root_ca_rogue_honest_log_single"
+    "A_CT_2_ca_rogue_honest_mon_verif_nonempty",
+    "A_CT_2_root_ca_rogue_honest_mon_verif_nonempty",
+    "A_CT_2_ca_rogue_honest_mon_min",
+    "A_CT_2_root_ca_rogue_honest_mon_min",
+    "A_CT_2_ca_rogue_honest_mon_uniq",
+    "A_CT_2_root_ca_rogue_honest_mon_uniq",
+    "A_CT_2_ca_rogue_honest_mon_inj",
+    "A_CT_2_root_ca_rogue_honest_mon_inj",
+    "A_CT_2_ca_rogue_honest_mon_single",
+    "A_CT_2_root_ca_rogue_honest_mon_single",
+    "A_CT_3_ca_rogue_honest_log_suff",
+    "A_CT_3_root_ca_rogue_honest_log_suff",
+    "A_CT_3_verif_empty",
+    "A_CT_3_ca_rogue_honest_log_verif_nonempty",
+    "A_CT_3_root_ca_rogue_honest_log_verif_nonempty",
+    "A_CT_3_ca_rogue_honest_log_min",
+    "A_CT_3_root_ca_rogue_honest_log_min",
+    "A_CT_3_ca_rogue_honest_log_uniq",
+    "A_CT_3_root_ca_rogue_honest_log_uniq",
+    "A_CT_3_ca_rogue_honest_log_inj",
+    "A_CT_3_root_ca_rogue_honest_log_inj",
+    "A_CT_3_ca_rogue_honest_log_single",
+    "A_CT_3_root_ca_rogue_honest_log_single"
   ]
 }

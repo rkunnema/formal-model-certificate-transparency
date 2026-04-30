@@ -7,7 +7,7 @@
 </style>
 <pre class="hl-code">
 /*
- * Protocol: Certficate Transparency with SCT auditing, instrumented with receipts
+ * Protocol: Certificate Transparency with SCT auditing, instrumented with receipts
  * Modeler:  anonymized
  * Date:     July 2025
  * Sources:  RFC6962, RFC 9162, &#34;Opt-in SCT Auditing&#34;, Emily Stark and Chris Thompson, and partly rooted on &#34;Provable Security for PKI Schemes&#34; by Wrótniak et al.
@@ -102,7 +102,7 @@ Intermediate CAs created by this rule are defined as legitimate and they are doc
         Time($now),
         San_Domain_Owner_Init()
     ]-&gt;
-    [ !DomainOwner($idServer, pubK), /* The DomainOwner fact serves as a proof of identity: If this fact is later used for issuing a certificate, we say that it is honestly issued (i.e., on behalf of the domain owner). see honest rules for issuing a pre-certificate for instace. */ 
+    [ !DomainOwner($idServer, pubK), /* The DomainOwner fact serves as a proof of identity: If this fact is later used for issuing a certificate, we say that it is honestly issued (i.e., on behalf of the domain owner). see honest rules for issuing a pre-certificate for instance. */ 
     Out(pubK) /* Public key is announced on the network */ ]
 
 
@@ -302,7 +302,7 @@ predicate: NoChainVisible(Logger, fields, log_id, #time, sth_time) &lt;=&gt;
         Eq(verify(ca_sig, ca_fields, pkRootCA), true()),
         MonitorObservesEntry($M, $L, fields, &lt;ca_fields, ca_sig&gt;, sth, session), /* see restriction */
         BenignCert($iss, fields), /* cert is found benign, see restriction */
-        AssertsNot($M, &#39;Blame this CA.&#39;, $CA, &lt;fields, ca_fields&gt;),
+        Asserts($M, &#39;Do not blame this CA.&#39;, $CA, &lt;fields, ca_fields&gt;),
 
         Time($now),
         San_monitorCanFindCertificate()
@@ -318,7 +318,7 @@ predicate: NoChainVisible(Logger, fields, log_id, #time, sth_time) &lt;=&gt;
     [ !LoggerDict($M, $L), !TrackSubject($M, su), In(fields), In(cert_sig), In(ca_fields), In(ca_sig), !TLS_L_to_M($L, $M, $snapshot, sth, session, $time), !Root_CA($rootCA, pkRootCA) ]
     --[ 
         NothingObserved($M, $L, fields, sth, session), /* see restriction */
-        AssertsNot($M, &#39;Blame this CA.&#39;, $CA, &lt;fields, ca_fields&gt;),
+        Asserts($M, &#39;Do not blame this CA.&#39;, $CA, &lt;fields, ca_fields&gt;),
 
         Time($now),
         San_monitorCannotFindCertificate()
@@ -397,7 +397,7 @@ The SCT is then used together with the certificate to determine whether the cert
         Eq(verify(ca_sig, ca_fields, pkRootCA), true()),
         _restrict((sct_to_audit = sct1) | (sct_to_audit = sct2)), /* only one sct at a time is considered */
         BenignCert($CA, fields), /* see restriction */
-        AssertsNot($M, &#39;This CA has the following fields and it failed the SCT audit for the following fields.&#39;, $CA, &lt;fields, ca_fields&gt;),
+        Asserts($M, &#39;This CA has the following fields and it passed the SCT audit for the following fields.&#39;, $CA, &lt;fields, ca_fields&gt;),
 
         Time($now),
         San_monitorAudit_no_viol(),
@@ -864,7 +864,7 @@ It is crucial for the outcome of these later checks when a certain snapshot has 
     in
     [ !TLS_L_to_P($L, $P, $snapshot, sth, session, $time), !Logger($L, pkL),In(fields), In(ca_cert), /* entry to check for */ !Monitor($M) ]
     --[
-        AssertsNot($P, &#39;This loggers log currently includes these fields.&#39;, $L, &lt;fields, session&gt;),
+        Asserts($P, &#39;This loggers log currently does not include these fields.&#39;, $L, &lt;fields, session&gt;),
         InclusionProofFails($P, $L, fields, ca_cert, sth, session), /* entry is not contained in the snapshot, see restriction */
         
         Time($now),
@@ -938,7 +938,7 @@ It is crucial for the outcome of these later checks when a certain snapshot has 
     [ In(ca_fields), In(ca_sig), !Root_CA($rootCA, pkRCA) ]
     --[
         UndocumentedIntermediateCA($rootCA, $CA, ca_fields), // see restriction externalCA_no_proof below
-        AssertsNot($rootCA, &#39;I signed this intermediate CA.&#39;, $CA, &lt;ca_fields&gt;),
+        Asserts(&#39;CCADB&#39;, &#39;No root CA signed this CA.&#39;, $CA, &lt;ca_fields,$rootCA&gt;),
         Eq(verify(ca_sig, ca_fields, pkRCA), true()), // signed by root CA
         ExternalCheckCCADB($rootCA, ca_fields),
         
@@ -948,7 +948,7 @@ It is crucial for the outcome of these later checks when a certain snapshot has 
     [ CCADBConsulted($rootCA, ca_fields) ]
 
 /* Responsible root CA is not able to present an identity proof of the intermediate CA (-&gt; it is forged) */
-/* We obviously rely on the soundness of this documentation check. It is an interesting bit to consider how real-world documentations look like, feel free to consult the CCADB yourself for this. TLDR: they are legal documents with auditor firms involved. We do not go beyond this and consider everything around forging such documents out of scope of this work. */
+/* We obviously rely on the soundness of this documentation check. It is an interesting bit to consider how real-world documentation look like, feel free to consult the CCADB yourself for this. They contain legal documents with auditor firms involved. We do not go beyond this and consider everything around forging such documents out of scope of this work. */
 <span class="keyword">restriction</span> externalCA_no_proof:
     &#34;All rootCA CA ca_fields #t1.
         UndocumentedIntermediateCA(rootCA, CA, ca_fields)@t1
@@ -1021,7 +1021,7 @@ Variant 2: The audited certificate is benign. In this case the monitor did not n
         Eq(verify(ca_sig, ca_fields, pkRootCA), true()), 
         DO_MonitorBlame($M, $CA, ca_fields, fields),
         Asserts($id, &#39;This monitor did not react&#39;, $M, &lt;fields&gt;),
-        AssertsNot($id, &#39;this is a correct statement&#39;, $CA, &lt;fields, ca_fields&gt;), // PKI style assertions for authenticity of the claim
+        Asserts($id, &#39;That intermediary CA signed the following incorrect statement and the validation chain says the following about that CA.&#39;, $CA, &lt;fields, ca_fields&gt;), // external validator style assertions for authenticity of the claim
         DomainOwnerChecksReceipt($M, ca_fields, fields),
         RogueCert($CA, fields),
         
@@ -1045,8 +1045,8 @@ Variant 2: The audited certificate is benign. In this case the monitor did not n
         Eq(verify(pub_sig, pub_fields, pkCA), true()),
         Eq(verify(ca_sig, ca_fields, pkRootCA), true()),
         DO_MonitorBenign($M, ca_fields, pub_fields),
-        AssertsNot($id, &#39;This monitor did not react&#39;, $M, &lt;fields&gt;),
-        AssertsNot($id, &#39;this is a correct statement&#39;, $CA, &lt;fields, ca_fields&gt;), // PKI style assertions for authenticity of the claim
+        Asserts($id, &#39;This monitor did react&#39;, $M, &lt;fields&gt;),
+        Asserts($id, &#39;That intermediary CA signed the following incorrect statement and the validation chain says the following about that CA.&#39;, $CA, &lt;fields, ca_fields&gt;), // external validator style assertions for authenticity of the claim
         DomainOwnerChecksReceipt($M, ca_fields, fields),
         Monitor_Reacted($M, fields),
         RogueCert($CA, fields),
@@ -1071,8 +1071,8 @@ Variant 2: The audited certificate is benign. In this case the monitor did not n
         Eq(verify(ca_sig, ca_fields, pkRootCA), true()),
         DO_MonitorBenign($M, ca_fields, pub_fields),
         DomainOwnerChecksReceipt($M, ca_fields, fields),
-        AssertsNot($id, &#39;This monitor did not react&#39;, $M, &lt;fields&gt;),
-        Asserts($id, &#39;this is a correct statement&#39;, $CA, &lt;fields, ca_fields&gt;), // PKI style assertions for authenticity of the claim
+        Asserts($id, &#39;This monitor did react&#39;, $M, &lt;fields&gt;),
+        Asserts($id, &#39;this is a correct statement&#39;, $CA, &lt;fields, ca_fields&gt;), // external validator style assertions for authenticity of the claim
         BenignCert($CA, fields),
 
         Time($now),
@@ -1087,6 +1087,13 @@ Variant 2: The audited certificate is benign. In this case the monitor did not n
 <span class="keyword">restriction</span> monitor_reacted:
     &#34;All M fields #t. Monitor_Reacted(M, fields)@t ==&gt; (Ex CA ca_fields #t0. Asserts(M, &#39;This CA has the following fields and it failed the SCT audit for the following fields.&#39;, CA, &lt;fields, ca_fields&gt;)@t0 &amp; #t0 &lt; #t)&#34;
 
+
+/*
+SCTReceiptCheck(). Contributed evidence
+- Monitor (designated auditor), (and client): received a certificate chain with incorporated SCTs from a client
+- CCADB Result of consulting the database for the legitimacy of the CA
+- Client, (and domain owner): Shared Receipt with the domain owner, domain owner acted upon the receipt
+*/
 <span class="keyword">rule</span> <a name="rule:SCTReceiptCheck"></a><span class="rule.identifier">SCTReceiptCheck</span><a name="lem::"></a><span class="lemma.identifier">:</span>
     [ MAudit_SCT($M, $L, fields, ca_fields, $sct),
       CCADBConsulted($rootCA, ca_fields),
@@ -1146,7 +1153,7 @@ Variant 2: The audited certificate is benign. In this case the monitor did not n
                                 &amp; #t2 &lt; #t3 ==&gt; tp = t )&#34;
 
 
-/* whenever a party checks the validity period of a certificate, that time must not happened before the check, i.e. the time did not pass yet */
+/* whenever a party checks the validity period of a certificate, that time must not happen before the check, i.e. the time did not pass yet */
 <span class="keyword">restriction</span> certStillValid:
     &#34;All currTime valid_till #t1.
         Time(currTime)@t1 &amp; CheckValidUntil(currTime, valid_till)@t1
@@ -1556,11 +1563,23 @@ Variant 2: The audited certificate is benign. In this case the monitor did not n
     &amp; not (Ex #t. Compromise()@t)
 &#34;
 
+/* Authenticity */
+
+// counterexample to authenticity
+<span class="keyword">lemma</span> <span class="punctuation">authenticity</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+    exists-trace
+    &#34;Ex L1 L2 rootCA ca_fields CA fields #j.
+        BrowserAcceptsChain(CA, fields, rootCA, ca_fields, L1, L2)@j 
+        &amp; not (Ex #i. GroundTruth(CA, fields)@i &amp; #i &lt; #j)&#34;
+
+
+// Note that we do not have a dedicated transparency lemma: the same results from SCTAudit apply since we just extended audit by receipts here
+
 /***** Accountable Authenticity *****/
 
 <span class="keyword">lemma</span> <span class="punctuation">A_uniq1_helper</span> [reuse]<a name="lem::"></a><span class="lemma.identifier">:</span>
     &#34;All CA id rootCA fields ca_fields #t1 #t2.
-        AssertsNot( id, &#39;this is a correct statement&#39;, CA, &lt;fields, ca_fields&gt;)@t1 
+        Asserts(id, &#39;That intermediary CA signed the following incorrect statement and the validation chain says the following about that CA.&#39;, CA, &lt;fields, ca_fields&gt;)@t1 
         &amp; Asserts( rootCA, &#39;I signed this intermediate CA.&#39;, CA, ca_fields)@t2
         ==&gt;
         (Ex #i. Corrupted( CA ) @ #i)
@@ -1568,7 +1587,7 @@ Variant 2: The audited certificate is benign. In this case the monitor did not n
 
 <span class="keyword">lemma</span> <span class="punctuation">A_uniq2_helper</span> [reuse]<a name="lem::"></a><span class="lemma.identifier">:</span>
     &#34;All rootCA CA ca_fields #t.
-    AssertsNot(rootCA, &#39;I signed this intermediate CA.&#39;, CA, &lt;ca_fields&gt;)@t
+    Asserts(&#39;CCADB&#39;, &#39;No root CA signed this CA.&#39;, CA, &lt;ca_fields, rootCA&gt;)@t
     ==&gt; (Ex #t. Corrupted(rootCA)@t)&#34;
 
 
@@ -1577,59 +1596,64 @@ Variant 2: The audited certificate is benign. In this case the monitor did not n
 test receipt_1:
     &#34;Ex M id fields rootCA ca_fields #t #t1 #t2 #t3.
     SCTReceiptCheck(M, fields)@t
-    &amp; AssertsNot(id, &#39;this is a correct statement&#39;, CA, &lt;fields, ca_fields&gt;)@t1 // CA blamed
-    &amp; AssertsNot(id, &#39;This monitor did not react&#39;, M, &lt;fields&gt;)@t2 // monitor not blamed
+    &amp; Asserts(id, &#39;That intermediary CA signed the following incorrect statement and the validation chain says the following about that CA.&#39;, CA, &lt;fields, ca_fields&gt;)@t1 // CA blamed
+    &amp; Asserts(id, &#39;This monitor did react&#39;, M, &lt;fields&gt;)@t2 // monitor not blamed
     &amp; Asserts(rootCA, &#39;I signed this intermediate CA.&#39;, CA, &lt;ca_fields&gt;)@t3 // CA is liable
     &#34;
 
 test receipt_2:
     &#34;Ex M id fields CA ca_fields #t #t1 #t2 #t3.
     SCTReceiptCheck(M, fields)@t
-    &amp; AssertsNot(id, &#39;this is a correct statement&#39;, CA, &lt;fields, ca_fields&gt;)@t1 // CA blamed
-    &amp; AssertsNot(id, &#39;This monitor did not react&#39;, M, &lt;fields&gt;)@t2 // monitor not blamed
-    &amp; AssertsNot(rootCA, &#39;I signed this intermediate CA.&#39;, CA, &lt;ca_fields&gt;)@t3 // rootCA is liable
+    &amp; Asserts(id, &#39;That intermediary CA signed the following incorrect statement and the validation chain says the following about that CA.&#39;, CA, &lt;fields, ca_fields&gt;)@t1 // CA blamed
+    &amp; Asserts(id, &#39;This monitor did react&#39;, M, &lt;fields&gt;)@t2 // monitor not blamed
+    &amp; Asserts(&#39;CCADB&#39;, &#39;No root CA signed this CA.&#39;, CA, &lt;ca_fields, rootCA&gt;)@t3 // rootCA is liable
     &#34;
 
 test receipt_3:
     &#34;Ex id fields rootCA ca_fields #t #t1 #t2 #t3.
     SCTReceiptCheck(M, fields)@t
-    &amp; AssertsNot(id, &#39;this is a correct statement&#39;, CA, &lt;fields, ca_fields&gt;)@t1 // CA blamed
+    &amp; Asserts(id, &#39;That intermediary CA signed the following incorrect statement and the validation chain says the following about that CA.&#39;, CA, &lt;fields, ca_fields&gt;)@t1 // CA blamed
     &amp; Asserts(id, &#39;This monitor did not react&#39;, M, &lt;fields&gt;)@t2 // monitor blamed
     &amp; Asserts(rootCA, &#39;I signed this intermediate CA.&#39;, CA, &lt;ca_fields&gt;)@t3 // CA is liable
     //&amp; not [receipt_1, receipt_2]
     &amp; not (Ex M id fields CA rootCA ca_fields #t #t1 #t2 #t3.
     SCTReceiptCheck(M, fields)@t
-    &amp; AssertsNot(id, &#39;this is a correct statement&#39;, CA, &lt;fields, ca_fields&gt;)@t1
-    &amp; AssertsNot(id, &#39;This monitor did not react&#39;, M, &lt;fields&gt;)@t2
+    &amp; Asserts(id, &#39;That intermediary CA signed the following incorrect statement and the validation chain says the following about that CA.&#39;, CA, &lt;fields, ca_fields&gt;)@t1
+    &amp; Asserts(id, &#39;This monitor did react&#39;, M, &lt;fields&gt;)@t2
     &amp; Asserts(rootCA, &#39;I signed this intermediate CA.&#39;, CA, &lt;ca_fields&gt;)@t3
     )
     &amp; not (Ex M id fields rootCA CA ca_fields #t #t1 #t2 #t3.
     SCTReceiptCheck(M, fields)@t
-    &amp; AssertsNot(id, &#39;this is a correct statement&#39;, CA, &lt;fields, ca_fields&gt;)@t1
-    &amp; AssertsNot(id, &#39;This monitor did not react&#39;, M, &lt;fields&gt;)@t2
-    &amp; AssertsNot(rootCA, &#39;I signed this intermediate CA.&#39;, CA, &lt;ca_fields&gt;)@t3)
+    &amp; Asserts(id, &#39;That intermediary CA signed the following incorrect statement and the validation chain says the following about that CA.&#39;, CA, &lt;fields, ca_fields&gt;)@t1
+    &amp; Asserts(id, &#39;This monitor did react&#39;, M, &lt;fields&gt;)@t2
+    &amp; Asserts(&#39;CCADB&#39;, &#39;No root CA signed this CA.&#39;, CA, &lt;ca_fields, rootCA&gt;)@t3)
     &#34;
 
 test receipt_4:
     &#34;Ex id fields CA ca_fields #t #t1 #t2 #t3.
     SCTReceiptCheck(M, fields)@t
-    &amp; AssertsNot(id, &#39;this is a correct statement&#39;, CA, &lt;fields, ca_fields&gt;)@t1 // CA blamed
+    &amp; Asserts(id, &#39;That intermediary CA signed the following incorrect statement and the validation chain says the following about that CA.&#39;, CA, &lt;fields, ca_fields&gt;)@t1 // CA blamed
     &amp; Asserts(id, &#39;This monitor did not react&#39;, M, &lt;fields&gt;)@t2 // monitor blamed
-    &amp; AssertsNot(rootCA, &#39;I signed this intermediate CA.&#39;, CA, &lt;ca_fields&gt;)@t3 // rootCA is liable
+    &amp; Asserts(&#39;CCADB&#39;, &#39;No root CA signed this CA.&#39;, CA, &lt;ca_fields, rootCA&gt;)@t3 // rootCA is liable
     //&amp; not [receipt_1, receipt_2]
     &amp; not (Ex M id fields CA rootCA ca_fields #t #t1 #t2 #t3.
     SCTReceiptCheck(M, fields)@t
-    &amp; AssertsNot(id, &#39;this is a correct statement&#39;, CA, &lt;fields, ca_fields&gt;)@t1
-    &amp; AssertsNot(id, &#39;This monitor did not react&#39;, M, &lt;fields&gt;)@t2
+    &amp; Asserts(id, &#39;That intermediary CA signed the following incorrect statement and the validation chain says the following about that CA.&#39;, CA, &lt;fields, ca_fields&gt;)@t1
+    &amp; Asserts(id, &#39;This monitor did react&#39;, M, &lt;fields&gt;)@t2
     &amp; Asserts(rootCA, &#39;I signed this intermediate CA.&#39;, CA, &lt;ca_fields&gt;)@t3
     )
     &amp; not (Ex M id fields rootCA CA ca_fields #t #t1 #t2 #t3.
     SCTReceiptCheck(M, fields)@t
-    &amp; AssertsNot(id, &#39;this is a correct statement&#39;, CA, &lt;fields, ca_fields&gt;)@t1
-    &amp; AssertsNot(id, &#39;This monitor did not react&#39;, M, &lt;fields&gt;)@t2
-    &amp; AssertsNot(rootCA, &#39;I signed this intermediate CA.&#39;, CA, &lt;ca_fields&gt;)@t3)
+    &amp; Asserts(id, &#39;That intermediary CA signed the following incorrect statement and the validation chain says the following about that CA.&#39;, CA, &lt;fields, ca_fields&gt;)@t1
+    &amp; Asserts(id, &#39;This monitor did react&#39;, M, &lt;fields&gt;)@t2
+    &amp; Asserts(&#39;CCADB&#39;, &#39;No root CA signed this CA.&#39;, CA, &lt;ca_fields, rootCA&gt;)@t3)
     &#34;
 
+/* There is some overlap between these tests, the model does not exclude the possiblity that multiple results hold at once. So we needed to finetune the test conditions more. */
+
+/*
+The SCTReceiptCheck successfully establishes accountability and only assumes the client and domain owner to collaborate honestly. 
+*/
 lemma A_Receipt:
     receipt_1, receipt_2, receipt_3, receipt_4
     accounts for
@@ -1641,7 +1665,7 @@ lemma A_Receipt:
 
 <span class="keyword">lemma</span> <span class="punctuation">A_Receipt_inj3_helper</span> [reuse]<a name="lem::"></a><span class="lemma.identifier">:</span>
   &#34;All CA M id fields rootCA ca_fields #t1 #t2 #t3.
-    AssertsNot( id, &#39;this is a correct statement&#39;, CA, &lt;fields, ca_fields&gt;)@t1 
+    Asserts( id, &#39;That intermediary CA signed the following incorrect statement and the validation chain says the following about that CA.&#39;, CA, &lt;fields, ca_fields&gt;)@t1 
     &amp; Asserts( id, &#39;This monitor did not react&#39;, M, fields)@t2
     &amp; Asserts( rootCA, &#39;I signed this intermediate CA.&#39;, CA, ca_fields)@t3
         ==&gt;
@@ -1649,9 +1673,9 @@ lemma A_Receipt:
 
 <span class="keyword">lemma</span> <span class="punctuation">A_Receipt_inj4_helper</span> [reuse]<a name="lem::"></a><span class="lemma.identifier">:</span>
   &#34;All CA M id fields rootCA ca_fields #t1 #t2 #t3.
-    AssertsNot( id, &#39;this is a correct statement&#39;, CA, &lt;fields, ca_fields&gt;)@t1 
+    Asserts( id, &#39;That intermediary CA signed the following incorrect statement and the validation chain says the following about that CA.&#39;, CA, &lt;fields, ca_fields&gt;)@t1 
     &amp; Asserts( id, &#39;This monitor did not react&#39;, M, fields)@t2
-    &amp; AssertsNot( rootCA, &#39;I signed this intermediate CA.&#39;, CA, ca_fields)@t3
+    &amp; Asserts( &#39;CCADB&#39;, &#39;No root CA signed this CA.&#39;, CA, &lt;ca_fields, rootCA&gt;)@t3
         ==&gt;
         ((not(rootCA = M)) &amp; (not(M = rootCA)))&#34;
 

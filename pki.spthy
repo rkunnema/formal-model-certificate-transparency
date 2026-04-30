@@ -1,5 +1,5 @@
 /*
- * Protocol: Certficate Transparency with additions for SCT Auditing, STH Gossiping
+ * Protocol: Web PKI (CT without logs and monitors)
  * Modeler:  anonymized
  * Date:     July 2025
  * Sources:  RFC6962, RFC 9162, "Opt-in SCT Auditing", Emily Stark and Chris Thompson, and partly rooted on "Provable Security for PKI Schemes" by Wrótniak et al.
@@ -20,18 +20,12 @@ functions:
     
     + Normal certificate 
     <Issuer, Subject, Key, Type, serial number, issued timestamp, valid until timestamp>
-    + SCTs
-    <Logger Identity, 'SCT', timestamp, signature>
-    + Public Key certificate with embedded SCTs
-    <Issuer, Subject, Key, Type, serial number, issued timestamp, valid until timestamp, sct1, sct2>
 
     Different types are: 
     1. 'pre-cert'
-    2. 'SCT': Signed Certificate Timestamp
-    3. 'pubKey': Public Key Certificate (finished certificate after issued as PreCert)
-        3.1 'pubKey-CA': Public Key Certificate of a CA
-    4. 'selfCert': Certificate is self signed, usually root of trust
-        4.1 'selfCert-log': Logger's self-signed certificate
+    2. 'pubKey': Public Key Certificate (finished certificate after issued as PreCert)
+        2.1 'pubKey-CA': Public Key Certificate of a CA
+    3. 'selfCert': Certificate is self signed, usually root of trust
 
     */
 
@@ -84,7 +78,7 @@ rule Intermediate_CA_Init [color= #c871ff]:
         Out(<$CA, pk(~skCA)>), /* publicly announce the public key and certificate on the network */
         !CA_s0($CA, ~skCA, pk(~skCA), fields, self_sig), !CA_Documentation($rootCA, $CA, fields, self_sig) ]
 
-/* The domain owner represents the party on the web, running a server with some domain / Common Name (CN) with a key pair that needs certification by some CA. It is equivalent to a HTTPS server that needs a certificate in order to hand it out to visiting clients; performing a key exchange subsequently. */
+/* The domain owner represents the party on the web, running a server with some DNS name / Common Name (CN) with a key pair that needs certification by some CA. It is treated like a web server that needs a certificate in order to hand it out to visiting clients; performing a key exchange subsequently. */
 rule Domain_Owner_Init [color= #c6c6c6]:
     let
         pubK = pk(~sk)
@@ -94,7 +88,7 @@ rule Domain_Owner_Init [color= #c6c6c6]:
         Time($now),
         San_Domain_Owner_Init()
     ]->
-    [ !DomainOwner($idServer, pubK), /* The DomainOwner fact serves as a proof of identity: If this fact is later used for issuing a certificate, we say that it is honestly issued (i.e., on behalf of the domain owner). see honest rules for issuing a pre-certificate for instace. */ 
+    [ !DomainOwner($idServer, pubK), /* The DomainOwner fact serves as a proof of identity: If this fact is later used for issuing a certificate, we say that it is honestly issued (i.e., on behalf of the domain owner). see honest rules for issuing a pre-certificate for instace. In practice this would be an id, or a webserver that solves a challenge (e.g. Let's Encrypt certification process) */ 
     Out(pubK) /* Public key is announced on the network */ ]
 
 restriction rogueCert:
@@ -107,7 +101,7 @@ restriction benignCert:
 
 /* 
 Invoked by a domain owner (DO): DO wants to have a certificate for its public key signed by CA, 
-CA "checks" identity and then creates a pre certificate to hand out to loggers tmt, sth, session
+CA "checks" (e.g. domain ownership challenge as in Let's Encrypt) identity and then creates a pre certificate to hand out to loggers tmt, sth, session
 The DomainOwner fact serves as a proof of identity, so we assume that invoking this always happens on DO's behalf. 
 Rogue certificates are not issued using this fact but instead by the network attacker using the CA's key (requires CA corruption).
 */
@@ -120,34 +114,33 @@ rule PubKeyCertify [color= #c871ff]:
     [ !DomainOwner($id, pkID), /* public key to sign. Using this rule includes an "identity check" which is simplified: There is a DomainOwner fact with this public key. */
      !CA_s0($CA, skCA, pkCA, ca_fields, ca_sig), Fr(~sn) ]
     --[ 
-        GroundTruth($CA, <$CA, $id, pkID, 'pubKey', ~sn, $now, $j>), /* used for ground truth comparisons, when a CA issues a pre certificate although that is not yet accepted by end-users, they already need to assert that they performed all necessary checks. */
+        GroundTruth($CA, <$CA, $id, pkID, 'pubKey', ~sn, $now, $j>), /* used for ground truth comparisons. When a CA issues a pre certificate although that is not yet accepted by end-users, they already need to assert that they performed all necessary checks. */
         CAAsserts($CA, fields),
-        
         Time($now),
         San_PubKeyCertify()
     ]->
     [ Out(fields), Out(fields_sig), Certificate_Store($CA, cert), Out(ca_fields), Out(ca_sig) ]
 
+//NOTE: rule is inlined, please keep "check" comments and linebreaks
 rule ClientValidate [color= #f2ce03]:
-    let
-        ca_fields = <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
-        fields = <$CA, $id, pkID, 'pubKey', sn, $i, $j>
-
-        chain = <<fields, pub_sig>, <ca_fields, ca_sig>>
-    in
-    [   !Root_CA($rootCA, pkRootCA),
-        In(chain), /* incoming certificate (intermediate CA + pubKey certificate) */
-    ]
-    --[ BrowserAcceptsChain($CA, fields, $rootCA, ca_fields),
-        Eq(verify(pub_sig, fields, pkCA), true()),
-        Eq(verify(ca_sig, ca_fields, pkRootCA), true()),
-        CheckValidUntil($now, $j),
-        CheckValidUntil($now, $j0),
-
-        Time($now),
-        San_ClientValidate(),
-    ]->
-    [ ]
+let
+    ca_fields = <$rootCA,$CA,pkCA,'pubKey-CA',
+                 snCA,$i0,$j0>
+    fields = <$CA,$id,pkID,'pubKey',sn,$i,$j>
+    chain = <<fields,pub_sig>,<ca_fields,ca_sig>>
+in
+[   In(chain), // incoming certificate 
+    !Root_CA($rootCA,pkRootCA), // check (1)
+] --[ // check (2)+(3)
+    Eq(verify(pub_sig,fields,pkCA),true()),
+    Eq(verify(ca_sig,ca_fields,pkRootCA),true()),
+    // check (4)
+    CheckValidUntil($now,$j),
+    CheckValidUntil($now,$j0),
+    Time($now),
+    // emittted event 
+    BrowserAcceptsChain($CA,fields,$rootCA,ca_fields),
+]-> [ ]
 
 /* ------- External CA Legitimacy Test ------- */
 
@@ -188,7 +181,7 @@ rule ConsultDocumentation_Fails:
     [ CCADBConsulted($rootCA, ca_fields) ]
 
 /* Responsible root CA is not able to present an identity proof of the intermediate CA (-> it is forged) */
-/* We obviously rely on the soundness of this documentation check. It is an interesting bit to consider how real-world documentations look like, feel free to consult the CCADB yourself for this. TLDR: they are legal documents with auditor firms involved. We do not go beyond this and consider everything around forging such documents out of scope of this work. */
+/* We obviously rely on the soundness of this documentation check. It is an interesting bit to consider how real-world documentations look like, feel free to consult the CCADB yourself for this. The contain legal documents with auditor firms involved. We do not go beyond this and consider everything around forging such documents out of scope of this work. */
 restriction externalCA_no_proof:
     "All rootCA CA ca_fields #t1.
         UndocumentedIntermediateCA(rootCA, CA, ca_fields)@t1
@@ -196,6 +189,12 @@ restriction externalCA_no_proof:
 
 /* ------ External Validator (PKI) */
 
+
+/*
+ExternalAuditorCheck(). Contributed evidence
+- CCADB: to determine whether a CA certificate is documented or not
+- Network: a fully signed certificate (we discuss that this is a strong assumption since it does not address where the certificate is found which is a lot more relevant in practice and ultimatively led to the development of CT logs)
+*/
 rule external_check_true:
     let
         fields = <$CA, $id, pkID, 'pubKey', sn, $i, $j>
@@ -296,6 +295,10 @@ rule compromiseRootCA [color= #d40808 ]:
 
 /* BEGIN LEMMAS */
 
+/*
+Sanity lemmas: These lemmas are not security properties but rather sanity checks that the model is correctly set up. They check that the main events of the protocol can actually happen without any compromise. Exception are rules that are only triggered by a compromise, for which we allow the compromise event to happen.
+*/
+
 lemma san_Root_CA_Init:
  exists-trace 
 "Ex #t. 
@@ -326,8 +329,8 @@ lemma san_PubKeyCertify:
 
 lemma san_ClientValidate:
  exists-trace 
-"Ex #t. 
-	San_ClientValidate()@t
+"Ex #t ca fields rootCA ca_fields. 
+        BrowserAcceptsChain(ca,fields,rootCA,ca_fields)@t
 	& not (Ex #t. Compromise()@t)
 "
 
@@ -427,14 +430,16 @@ test CAfalseAsserts_rootNotBlamed:
 
 /* Scenario: Accountable authenticity under PKI with external auth check. Result: autoproven */
 lemma A_PKI_Ext:
-  CAfalseAsserts_rootBlamed, CAfalseAsserts_rootNotBlamed accounts for 
-    "All CA rootCA ca_fields fields #t0 #t1.
-        ExternalAuditorCheck(ca_fields, fields)@t0
-        // if the certificate's statement is checked externally...
-        & BrowserAcceptsChain(CA, fields, rootCA, ca_fields)@t1
-        ==>
-          (Ex #t. GroundTruth(CA, fields)@t)"
-            // ...the certificate's statement is correct
+ CAfalseAsserts_rootBlamed, CAfalseAsserts_rootNotBlamed 
+ accounts for 
+ "All CA rootCA ca_fields fields #t0 #t1.
+ ExternalAuditorCheck(ca_fields, fields)@t0
+ /*  if the certificate's statement is checked 
+ externally... */
+ & BrowserAcceptsChain(CA, fields, rootCA, ca_fields)@t1
+ ==>
+     (Ex #t. GroundTruth(CA, fields)@t)"
+     // ...the certificate's statement is correct
 
 /* END LEMMAS */
 

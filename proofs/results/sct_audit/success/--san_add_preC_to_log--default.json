@@ -1,11 +1,11 @@
 {
   "task_id": "--san_add_preC_to_log--default",
   "warnings": [],
-  "tamarin_timing": 24.04,
+  "tamarin_timing": 24.26,
   "wrapper_measures": {
-    "time": 24.226978302001953,
-    "avg_memory": 176.38492838541666,
-    "peak_memory": 383.76953125
+    "time": 24.497666597366333,
+    "avg_memory": 182.72375,
+    "peak_memory": 399.984375
   },
   "output_spthy": "results/sct_audit/proofs/--san_add_preC_to_log--default.spthy",
   "verified_lemma": {
@@ -53,8 +53,6 @@
     "san_ParticipantVerifiesInclusion",
     "san_ConsultDocumentation_Success",
     "san_ConsultDocumentation_Fails",
-    "san_MonitorCheck_Found",
-    "san_MonitorCheck_NotFound",
     "san_SCTAuditTransparencyCheck_Success",
     "san_SCTAuditTransparencyCheck_Failed",
     "san_SCTAuditCheck",
@@ -62,6 +60,7 @@
     "san_compromiseRootCA",
     "san_compromiseLogger",
     "san_compromiseMonitor",
+    "authenticity",
     "transparency_SCT_Auditing",
     "A_uniq1_helper",
     "A_uniq2_helper",

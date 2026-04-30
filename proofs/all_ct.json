@@ -24,7 +24,6 @@
       "lemmas": [
         {"name": "san_*"},
         {"name": "authenticity"},
-        {"name": "CA_auth_w_compromise"},
         {"name": "authenticity_honest"},
         {"name": "cert_sct_auth"},
         {"name": "sct_auth"}
@@ -41,7 +40,8 @@
 				"timeout": 300
 			},
       "lemmas": [
-        {"name": "transparency_w_MMD_honest_log_helper"},
+        {"name": "transparency"},
+        {"name": "transparency_wo_MMD_honest_log"},
         {"name": "transparency_w_MMD_honest_log"}
       ]
     },
@@ -68,18 +68,30 @@
         {"name": "A_CT_1_root_ca_auth_on_log_inj"},
         {"name": "A_uniq1_helper"},
         {"name": "A_uniq2_helper"},
-        {"name": "A_CT_2_ca_rogue_honest_log_suff"},
+        {"name": "A_CT_2_ca_rogue_honest_mon_suff"},
         {"name": "A_CT_2_verif_empty"},
-        {"name": "A_CT_2_ca_rogue_honest_log_verif_nonempty"},
-        {"name": "A_CT_2_root_ca_rogue_honest_log_verif_nonempty"},
-        {"name": "A_CT_2_ca_rogue_honest_log_min"},
-        {"name": "A_CT_2_root_ca_rogue_honest_log_min"},
-        {"name": "A_CT_2_ca_rogue_honest_log_uniq"},
-        {"name": "A_CT_2_root_ca_rogue_honest_log_uniq"},
-        {"name": "A_CT_2_ca_rogue_honest_log_inj"},
-        {"name": "A_CT_2_root_ca_rogue_honest_log_inj"},
-        {"name": "A_CT_2_ca_rogue_honest_log_single"},
-        {"name": "A_CT_2_root_ca_rogue_honest_log_single"}
+        {"name": "A_CT_2_ca_rogue_honest_mon_verif_nonempty"},
+        {"name": "A_CT_2_root_ca_rogue_honest_mon_verif_nonempty"},
+        {"name": "A_CT_2_ca_rogue_honest_mon_min"},
+        {"name": "A_CT_2_root_ca_rogue_honest_mon_min"},
+        {"name": "A_CT_2_ca_rogue_honest_mon_uniq"},
+        {"name": "A_CT_2_root_ca_rogue_honest_mon_uniq"},
+        {"name": "A_CT_2_ca_rogue_honest_mon_inj"},
+        {"name": "A_CT_2_root_ca_rogue_honest_mon_inj"},
+        {"name": "A_CT_2_ca_rogue_honest_mon_single"},
+        {"name": "A_CT_2_root_ca_rogue_honest_mon_single"},
+        {"name": "A_CT_3_ca_rogue_honest_log_suff"},
+        {"name": "A_CT_3_verif_empty"},
+        {"name": "A_CT_3_ca_rogue_honest_log_verif_nonempty"},
+        {"name": "A_CT_3_root_ca_rogue_honest_log_verif_nonempty"},
+        {"name": "A_CT_3_ca_rogue_honest_log_min"},
+        {"name": "A_CT_3_root_ca_rogue_honest_log_min"},
+        {"name": "A_CT_3_ca_rogue_honest_log_uniq"},
+        {"name": "A_CT_3_root_ca_rogue_honest_log_uniq"},
+        {"name": "A_CT_3_ca_rogue_honest_log_inj"},
+        {"name": "A_CT_3_root_ca_rogue_honest_log_inj"},
+        {"name": "A_CT_3_ca_rogue_honest_log_single"},
+        {"name": "A_CT_3_root_ca_rogue_honest_log_single"}
       ]
     },
     "acc_transparency": {
@@ -129,9 +141,8 @@
 			},
       "lemmas": [
         {"name": "A_CT_1_root_ca_auth_on_log_suff"},
-        {"name": "A_CT_2_root_ca_rogue_honest_log_suff"},
-        {"name": "transparency_wo_MMD"},
-        {"name": "transparency_w_MMD"}
+        {"name": "A_CT_2_root_ca_rogue_honest_mon_suff"},
+        {"name": "A_CT_3_root_ca_rogue_honest_log_suff"}
       ]
     }
   }

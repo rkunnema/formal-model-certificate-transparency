@@ -7,7 +7,7 @@
 </style>
 <pre class="hl-code">
 /*
- * Protocol: Certficate Transparency with additions for STH Gossiping
+ * Protocol: Certificate Transparency with additions for STH Gossiping
  * Modeler:  anonymized
  * Date:     July 2025
  * Sources:  RFC6962, RFC 9162, &#34;Opt-in SCT Auditing&#34;, Emily Stark and Chris Thompson, and partly rooted on &#34;Provable Security for PKI Schemes&#34; by Wrótniak et al.
@@ -92,7 +92,7 @@ Intermediate CAs created by this rule are defined as legitimate and they are doc
         Out(&lt;$CA, pk(~skCA)&gt;), /* publicly announce the public key and certificate on the network */
         !CA_s0($CA, ~skCA, pk(~skCA), fields, self_sig), !CA_Documentation($rootCA, $CA, fields, self_sig) ]
 
-/* The domain owner represents the party on the web, running a server with some domain / Common Name (CN) with a key pair that needs certification by some CA. It is equivalent to a HTTPS server that needs a certificate in order to hand it out to visiting clients; performing a key exchange subsequently. */
+/* The domain owner represents the party on the web, running a server with some DNS name / Common Name (CN) with a key pair that needs certification by some CA. It is treated like a web server that needs a certificate in order to hand it out to visiting clients; performing a key exchange subsequently. */
 <span class="keyword">rule</span> <a name="rule:Domain_Owner_Init"></a><span class="rule.identifier">Domain_Owner_Init</span> [color= #c6c6c6]<a name="lem::"></a><span class="lemma.identifier">:</span>
     let
         pubK = pk(~sk)
@@ -102,7 +102,7 @@ Intermediate CAs created by this rule are defined as legitimate and they are doc
         Time($now),
         San_Domain_Owner_Init()
     ]-&gt;
-    [ !DomainOwner($idServer, pubK), /* The DomainOwner fact serves as a proof of identity: If this fact is later used for issuing a certificate, we say that it is honestly issued (i.e., on behalf of the domain owner). see honest rules for issuing a pre-certificate for instace. */ 
+    [ !DomainOwner($idServer, pubK), /* The DomainOwner fact serves as a proof of identity: If this fact is later used for issuing a certificate, we say that it is honestly issued (i.e., on behalf of the domain owner). see honest rules for issuing a pre-certificate for instance. */ 
     Out(pubK) /* Public key is announced on the network */ ]
 
 
@@ -303,7 +303,7 @@ predicate: NoChainVisible(Logger, fields, log_id, #time, sth_time) &lt;=&gt;
         Eq(verify(ca_sig, ca_fields, pkRootCA), true()),
         MonitorObservesEntry($M, $L, fields, &lt;ca_fields, ca_sig&gt;, sth, session), /* see restriction */
         BenignCert($iss, fields), /* cert is found benign, see restriction */
-        AssertsNot($M, &#39;Blame this CA.&#39;, $CA, &lt;fields, ca_fields&gt;),
+        Asserts($M, &#39;Do not blame this CA.&#39;, $CA, &lt;fields, ca_fields&gt;),
         MonitorScanLog(),
 
         Time($now),
@@ -320,7 +320,7 @@ predicate: NoChainVisible(Logger, fields, log_id, #time, sth_time) &lt;=&gt;
     [ !LoggerDict($M, $L), !TrackSubject($M, su), In(fields), In(cert_sig), In(ca_fields), In(ca_sig), !TLS_L_to_M($L, $M, $snapshot, sth, session, $time), !Root_CA($rootCA, pkRootCA) ]
     --[ 
         NothingObserved($M, $L, fields, sth, session), /* see restriction */
-        AssertsNot($M, &#39;Blame this CA.&#39;, $CA, &lt;fields, ca_fields&gt;),
+        Asserts($M, &#39;Do not blame this CA.&#39;, $CA, &lt;fields, ca_fields&gt;),
         MonitorScanLog(),
 
         Time($now),
@@ -345,7 +345,7 @@ predicate: NoChainVisible(Logger, fields, log_id, #time, sth_time) &lt;=&gt;
         Time($now),
         San_monitorFindsRogueCertificate_Sleep()
     ]-&gt;
-    [ /* New: */ MonitorFoundCert($M, $L, fields, $CA, ca_fields, $time, session) /* but does not react: there is no assert in this rule, so the A_CT lemma needs to rule out monitor misbehavior (but we already know that it does not hold for other reasons) */, MonitorInspected($M, $L, fields, $CA, ca_fields, $time, session) ]
+    [ MonitorFoundCert($M, $L, fields, $CA, ca_fields, $time, session) /* but does not react: there is no assert in this rule, so the A_CT lemma needs to rule out monitor misbehavior (but we already know that it does not hold for other reasons) */, MonitorInspected($M, $L, fields, $CA, ca_fields, $time, session) ]
 
 /* ----- Logger rules ----- */
 
@@ -628,7 +628,7 @@ predicate: EntryVisible(Logger, fields, ca_cert, chain, log_id, #time, sth_time)
                 &amp; LoggerPresentsView(L, id, log_id1, time, sth2, session2)@t2 
                 /* The Logger presents the view for log_id1 */
                 &amp; SnapshotStored(id, L, session2, sth2)@t3 
-                /* this view is received stored by id */
+                /* this view is received and stored by id */
                 &amp; FetchLogSnapshot(id, L, session)@t4
                 /* a second view is fetched by id (later) */
                 &amp; LoggerPresentsView(L, id, log_id2, time2, sth, session)@t5
@@ -767,7 +767,7 @@ It is crucial for the outcome of these later checks when a certain snapshot has 
     in
     [ !TLS_L_to_P($L, $P, $snapshot, sth, session, $time), !Logger($L, pkL),In(fields), In(ca_cert), /* entry to check for */ !Monitor($M) ]
     --[
-        AssertsNot($P, &#39;This loggers log currently includes these fields.&#39;, $L, &lt;fields, session&gt;),
+        Asserts($P, &#39;This loggers log currently does not include these fields.&#39;, $L, &lt;fields, session&gt;),
         InclusionProofFails($P, $L, fields, ca_cert, sth, session), /* entry is not contained in the snapshot, see restriction */
         
         Time($now),
@@ -818,19 +818,20 @@ It is crucial for the outcome of these later checks when a certain snapshot has 
 Instead of monitors receiving SCTs, they now receive the snapshots in the form of STH&#39;s issued by loggers.
 They will be used in the same way as CT (for authenticity checks) and we investigate resulting changes here. 
 We will for authenticity later, in fact, reuse the same rules as for CT again.
-Note that we cannot assume the same outcome of proofs for the shared snapshots, as this would be too strong: Loggers can still (malciously) refuse to open their own STHs that they handed out earlier and did proofs on. 
+Note that we cannot assume the same outcome of proofs for the shared snapshots, as this would be too strong: Loggers can still (maliciously) refuse to open their own STHs that they handed out earlier and did proofs on. 
 Assuming that the proofs have the same results would mean that the gossip also contains the proof itself, including the certificate.
 
 We limit ourselves to gossip between the client and monitor.
 */
 
 <span class="keyword">rule</span> <a name="rule:clientGossipsToMonitor"></a><span class="rule.identifier">clientGossipsToMonitor</span><a name="lem::"></a><span class="lemma.identifier">:</span>
-    [ !TLS_L_to_P($L, $P, $snapshot, sth, session, $time) ]
+    [ !TLS_L_to_P($L, $C, $snapshot, sth, session, $time), InclusionVerified($C, $L, fields, $gossiped_proof_time, gossiped_session, chain), /* client on their own verified that L contains fields */
+    !BAccept_SCT($L, fields, ca_fields) /* gossip produced after the client ran into a certificate it checked for */ ]
     --[ 
         Time($now), 
         San_clientGossipsToMonitor() 
     ]-&gt; 
-    [ !TLS_C_to_M($P, $M, $snapshot, sth, session) ]
+    [ !TLS_C_to_M($C, $M, $snapshot, sth, session), ClientGossiped($C, $M, $L, session, $time, fields, chain) ]
 
     /* --- Gossip AppendOnly Checks --- */
     /* In addition to using gossiped snapshots to explore new entries with the help of another fetched snapshot, a different question immediately arises for the monitor: do these snapshots contradict each other? For this, the monitor can use append-only proofs between these two snapshots. The following rules here formalize this and are similar to the append-only proof that we have used in CT with the limitation to just these two snapshots and not restricting anymore that the older snapshot has been stored before. */
@@ -845,7 +846,7 @@ We limit ourselves to gossip between the client and monitor.
         Time($now),
         San_monitorFindsAppendOnlyViolation_Gossiped(),
     ]-&gt;
-    [ Gossiped($M, gossiped_session, session) ]
+    [ AppendOnlyChecked($M, gossiped_session, session) ]
 
 /* The gossiped append only proofs assume that both proofs are fixed since we only want to formulate that between gossiped_view -&gt; view there have been no rogue deletions */
 restriction appendOnlyFails_Gossiped:
@@ -869,14 +870,14 @@ rule monitorVerifiesAppendOnly_Gossiped [color= #501755]:
     [ !LoggerDict($M, $L), !TLS_C_to_M($C, $M, $gos_snapshot, gossiped_sth, gossiped_session), !TLS_L_to_M($L, $M, $snapshot, sth, session, $time) ]
     --[
         AppendOnlyVerified_Gossiped($M, $L, sth, session, gossiped_sth, gossiped_session), /* see restriction */
-        AssertsNot($M, &#39;The log has violated the append-only property between these two snapshots.&#39;, $L, &lt;gossiped_session, session&gt;),
+        Asserts($M, &#39;The log has not violated the append-only property between these two snapshots.&#39;, $L, &lt;gossiped_session, session&gt;),
         MonitorReceivesGossip($M, $L, gossiped_session, session),
         MonitorReceivesGossip_Verified($M, $L, gossiped_session, session),
         
         Time($now),
         San_monitorVerifiesAppendOnly_Gossiped()
     ]-&gt;
-    [ Gossiped($M, gossiped_session, session) ]
+    [ AppendOnlyChecked($M, gossiped_session, session) ]
 
 <span class="keyword">restriction</span> appendOnlyWorks_Gossiped:
        &#34;(All id1 M L sth session time1 t log_id log_id2 fields ca_cert chain gossiped_sth gossiped_session time2 #t0 #t1 #t4 #t5.
@@ -935,7 +936,7 @@ rule monitorVerifiesAppendOnly_Gossiped [color= #501755]:
     [ In(ca_fields), In(ca_sig), !Root_CA($rootCA, pkRCA) ]
     --[
         UndocumentedIntermediateCA($rootCA, $CA, ca_fields), // see restriction externalCA_no_proof below
-        AssertsNot($rootCA, &#39;I signed this intermediate CA.&#39;, $CA, &lt;ca_fields&gt;),
+        Asserts(&#39;CCADB&#39;, &#39;No root CA signed this CA.&#39;, $CA, &lt;ca_fields, $rootCA&gt;),
         Eq(verify(ca_sig, ca_fields, pkRCA), true()), // signed by root CA
         ExternalCheckCCADB($rootCA, ca_fields),
         
@@ -945,7 +946,7 @@ rule monitorVerifiesAppendOnly_Gossiped [color= #501755]:
     [ CCADBConsulted($rootCA, ca_fields) ]
 
 /* Responsible root CA is not able to present an identity proof of the intermediate CA (-&gt; it is forged) */
-/* We obviously rely on the soundness of this documentation check. It is an interesting bit to consider how real-world documentations look like, feel free to consult the CCADB yourself for this. TLDR: they are legal documents with auditor firms involved. We do not go beyond this and consider everything around forging such documents out of scope of this work. */
+/* We obviously rely on the soundness of this documentation check. It is an interesting bit to consider how real-world documentation look like, feel free to consult the CCADB yourself for this. They contain legal documents with auditor firms involved. We do not go beyond this and consider everything around forging such documents out of scope of this work. */
 <span class="keyword">restriction</span> externalCA_no_proof:
     &#34;All rootCA CA ca_fields #t1.
         UndocumentedIntermediateCA(rootCA, CA, ca_fields)@t1
@@ -955,31 +956,34 @@ rule monitorVerifiesAppendOnly_Gossiped [color= #501755]:
 
 /*** Predicate Rules ***/
 
-<span class="keyword">rule</span> <a name="rule:GossipTransparencyCheck_Success"></a><span class="rule.identifier">GossipTransparencyCheck_Success</span><a name="lem::"></a><span class="lemma.identifier">:</span> // similar to CTCheck we have a found and not found variant
+/*
+STHGossipTransparencyCheck(). Contributed evidence:
+- Client: The client gossiped an STH to the monitor (from gossiped_session) and is assumed to have verified inclusion for the certificate it encountered (see ClientGossipsToMonitor rule)
+- Monitor: The monitor checks append only between both and does an own inclusion proof
+*/
+<span class="keyword">rule</span> <a name="rule:GossipTransparencyCheck_Success"></a><span class="rule.identifier">GossipTransparencyCheck_Success</span><a name="lem::"></a><span class="lemma.identifier">:</span>
     [ 
-    InclusionVerified($C, $L, fields, $gossiped_proof_time, gossiped_session, chain), /* client on their own verified that L contains fields */
-    !BAccept_SCT($L, fields, ca_fields),
-    Gossiped($M, gossiped_session, session), /* then gossiped this proof to the monitor (proof, session) but without fields. Monitor checks for append only (may or may not hold), if it does not monitor emitted an assert blaming the logger */
-    MonitorFoundCert($M, $L, fields, $CA, ca_fields, $time_of_proof_fetch, session)
+    ClientGossiped($C, $M, $L, gossiped_session, $gossiped_proof_time, fields, chain),
+    AppendOnlyChecked($M, gossiped_session, session), /* then gossiped this proof to the monitor (proof, session) but without fields. Monitor checks for append only (may or may not hold), if it does not monitor emitted an assert blaming the logger */
+    MonitorFoundCert($M, $L, fields, $CA, ca_fields, $time_of_proof_fetch, session) // TODO: replace with inclusion proof? i guess so &lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;
 ]
     --[
-        CTGossipTransparencyCheck($M, $L, fields, $CA, ca_fields, session, gossiped_session),
+        STHGossipTransparencyCheck($M, $L, fields, $CA, ca_fields, session, gossiped_session),
         CTGossipTransparencyCheckSuccess($M, $L, fields, $CA, ca_fields, session, gossiped_session),
 
         San_GossipTransparencyCheck_Success(),
     ]-&gt;
     [ ]
 
-rule GossipTransparencyCheck_Failed: // similar to CTCheck we have a found and not found variant
+rule GossipTransparencyCheck_Failed:
     let
         ca_fields = &lt;$rootCA, $CA, pkCA, &#39;pubKey-CA&#39;, snCA, $i0, $j0&gt;
         fields = &lt;$CA, $subj, ke, &#39;pubKey&#39;, sn, $i, $j&gt;
         chain = &lt;&lt;cert_fields, cert_sig&gt;, &lt;ca_fields, ca_sig&gt;&gt;
     in
     [ 
-    InclusionVerified($C, $L, fields, $gossiped_proof_time, gossiped_session, chain), /* client on their own verified that L contains fields */
-    !BAccept_SCT($L, fields, ca_fields),
-    Gossiped($M, gossiped_session, session), /* then gossiped this proof to the monitor (proof, session) but without fields. Monitor checks for append only (may or may not hold), if it does not monitor emitted an assert blaming the logger */
+    ClientGossiped($C, $M, $L, gossiped_session, $gossiped_proof_time, fields, chain),
+    AppendOnlyChecked($M, gossiped_session, session), /* then gossiped this proof to the monitor (proof, session) but without fields. Monitor checks for append only (may or may not hold), if it does not monitor emitted an assert blaming the logger */
     MonitorCouldNotFindCert($M, fields, $L, $CA, ca_fields, $time_of_proof_fetch, session),
     !Root_CA($rootCA, pkRootCA)
 ]
@@ -987,13 +991,20 @@ rule GossipTransparencyCheck_Failed: // similar to CTCheck we have a found and n
         Eq(verify(cert_sig, cert_fields, pkCA), true()),
         Eq(verify(ca_sig, ca_fields, pkRootCA), true()), /* We only consider valid chains found by the client (if the monitor finds the cert this already implies that the chain is valid) */
         ProofFetchAfterGossip($gossiped_proof_time, $time_of_proof_fetch),
-        CTGossipTransparencyCheck($M, $L, fields, $CA, ca_fields, session, gossiped_session),
+        STHGossipTransparencyCheck($M, $L, fields, $CA, ca_fields, session, gossiped_session),
         CTGossipTransparencyCheck_NotFound($M, $L, fields, $CA, ca_fields, session, gossiped_session),
 
         San_GossipTransparencyCheck_Failed()
     ]-&gt;
     [ ]
 
+/*
+STHGossipCheck(). Contributed evidence:
+- Client: The client gossiped an STH to the monitor (from gossiped_session) and is assumed to have verified inclusion for the certificate it encountered (see ClientGossipsToMonitor rule)
+- Monitor: The monitor checks append only between both and does an own inclusion proof
+- CCADB Result of consulting the database for the legitimacy of the CA
+- Note that the root CA keys are assumed to be known by everyone
+*/
 rule GossipingCheck:
     let
         ca_fields = &lt;$rootCA, $CA, pkCA, &#39;pubKey-CA&#39;, snCA, $i0, $j0&gt;
@@ -1001,9 +1012,8 @@ rule GossipingCheck:
         chain = &lt;&lt;cert_fields, cert_sig&gt;, &lt;ca_fields, ca_sig&gt;&gt;
     in
     [ 
-    InclusionVerified($C, $L, fields, $gossiped_proof_time, gossiped_session, chain), /* client on their own verified that L contains fields */
-    !BAccept_SCT($L1, fields, ca_fields),
-    Gossiped($M, gossiped_session, session), /* then gossiped this proof to the monitor (proof, session) but without fields. Monitor checks for append only (may or may not hold), if it does not monitor emitted an assert blaming the logger */
+    ClientGossiped($C, $M, $L, gossiped_session, $gossiped_proof_time, fields, chain),
+    AppendOnlyChecked($M, gossiped_session, session), /* then gossiped this proof to the monitor (proof, session) but without fields. Monitor checks for append only (may or may not hold), if it does not monitor emitted an assert blaming the logger */
     MonitorInspected($M, $L, fields, $CA, ca_fields, $time_of_proof_fetch, session),
     CCADBConsulted($rootCA, ca_fields),
     !Root_CA($rootCA, pkRootCA)
@@ -1012,7 +1022,7 @@ rule GossipingCheck:
         Eq(verify(cert_sig, cert_fields, pkCA), true()),
         Eq(verify(ca_sig, ca_fields, pkRootCA), true()), /* We only consider valid chains (if the monitor finds the cert this already implies that the chain is valid) */
         ProofFetchAfterGossip($proof, $time_of_proof_fetch),
-        CTGossipCheck($M, $L, fields, $CA, ca_fields, session, gossiped_session),
+        STHGossipCheck($M, $L, fields, $CA, ca_fields, session, gossiped_session),
 
         San_GossipingCheck_Found(),
     ]-&gt;
@@ -1071,7 +1081,7 @@ restriction time_monotonicity:
                                 &amp; #t2 &lt; #t3 ==&gt; tp = t )&#34;
 
 
-/* whenever a party checks the validity period of a certificate, that time must not happened before the check, i.e. the time did not pass yet */
+/* whenever a party checks the validity period of a certificate, that time must not happen before the check, i.e. the time did not pass yet */
 restriction certStillValid:
     &#34;All currTime valid_till #t1.
         Time(currTime)@t1 &amp; CheckValidUntil(currTime, valid_till)@t1
@@ -1439,14 +1449,25 @@ lemma san_compromiseMonitor:
 	San_compromiseMonitor()@t
 &#34;
 
+/* Authenticity */
+
+// counterexample to authenticity
+lemma authenticity:
+    exists-trace
+    &#34;Ex L1 L2 rootCA ca_fields CA fields #j.
+        BrowserAcceptsChain(CA, fields, rootCA, ca_fields, L1, L2)@j 
+        &amp; not (Ex #i. GroundTruth(CA, fields)@i &amp; #i &lt; #j)&#34;
+
+
 /* ---------------------
         TRANSPARENCY
    --------------------- */
 
-lemma transparency_Gossip: // does not hold: logger equivocates between gossiped and non-gossiped view // works in autoprove ~8mins
+/* falsified. Gossiping alone does not guarantee that the monitor who was gossiped to will see an entry. But it will be detectable which we will explore in T_Gossip. */
+lemma transparency_Gossip:
     &#34;All M L L1 L2 CA rootCA fields ca_fields session gossiped_session #t0 #t1.
         BrowserAcceptsChain(CA, fields, rootCA, ca_fields, L1, L2)@t0
-        &amp; CTGossipTransparencyCheck(M, L, fields, CA, ca_fields, session, gossiped_session)@t1
+        &amp; STHGossipTransparencyCheck(M, L, fields, CA, ca_fields, session, gossiped_session)@t1
         &amp; ((L1 = L) | (L2 = L))
         &amp; #t0 &lt; #t1
         ==&gt;
@@ -1465,11 +1486,14 @@ test gossip_appendOnly_viol:
         &amp; Asserts(M, &#39;The log has violated the append-only property between these two snapshots.&#39;, L, &lt;gossiped_session, session&gt;)@t1
     &#34;
 
+/*
+The monitor that was gossiped to can use the append only check to hold the logger accountable for the entry that the client accepted earlier.
+*/
 lemma T_Gossip [heuristic=o &#34;acc_oracle&#34;]:
     gossip_appendOnly_viol accounts for
     &#34;All M L L1 L2 CA rootCA fields ca_fields session gossiped_session #t0 #t1.
         BrowserAcceptsChain(CA, fields, rootCA, ca_fields, L1, L2)@t0
-        &amp; CTGossipTransparencyCheck(M, L, fields, CA, ca_fields, session, gossiped_session)@t1
+        &amp; STHGossipTransparencyCheck(M, L, fields, CA, ca_fields, session, gossiped_session)@t1
         &amp; ((L1 = L) | (L2 = L))
         &amp; #t0 &lt; #t1
         ==&gt;
@@ -1478,7 +1502,7 @@ lemma T_Gossip [heuristic=o &#34;acc_oracle&#34;]:
 
 <span class="keyword">lemma</span> <span class="punctuation">T_Gossip_verif_empty_helper1</span> [reuse]<a name="lem::"></a><span class="lemma.identifier">:</span>
     &#34;All M L fields CA ca_fields gossiped_session session #t.
-    CTGossipTransparencyCheck(M, L, fields, CA, ca_fields, session, gossiped_session)@t
+    STHGossipTransparencyCheck(M, L, fields, CA, ca_fields, session, gossiped_session)@t
     &amp; not (Ex #t. Asserts(M, &#39;The log has violated the append-only property between these two snapshots.&#39;, L, &lt;gossiped_session, session&gt;)@t)
     ==&gt; CTGossipTransparencyCheckSuccess(M, L, fields, CA, ca_fields, session, gossiped_session)@t
     &#34;
@@ -1491,7 +1515,7 @@ lemma T_Gossip [heuristic=o &#34;acc_oracle&#34;]:
 
 <span class="keyword">lemma</span> <span class="punctuation">T_Gossip_verif_empty_helper3</span> [reuse, hide_lemma=T_Gossip_verif_empty_helper1, hide_lemma=T_Gossip_verif_empty_helper2]<a name="lem::"></a><span class="lemma.identifier">:</span>
     &#34;All M L fields CA ca_fields gossiped_session session #t1.
-    CTGossipTransparencyCheck(M, L, fields, CA, ca_fields, session, gossiped_session)@t1
+    STHGossipTransparencyCheck(M, L, fields, CA, ca_fields, session, gossiped_session)@t1
     ==&gt; (Ex rootCA L1 L2 #t0. BrowserAcceptsChain(CA, fields, rootCA, ca_fields, L1, L2)@t0 &amp; ((L1 = L) | (L2 = L)) &amp; #t0 &lt; #t1)
     &#34;
 
@@ -1517,33 +1541,65 @@ lemma T_Gossip [heuristic=o &#34;acc_oracle&#34;]:
 
 <span class="keyword">lemma</span> <span class="punctuation">A_uniq2_helper</span> [reuse]<a name="lem::"></a><span class="lemma.identifier">:</span>
     &#34;All rootCA CA ca_fields #t.
-    AssertsNot(rootCA, &#39;I signed this intermediate CA.&#39;, CA, &lt;ca_fields&gt;)@t
+    Asserts(&#39;CCADB&#39;, &#39;No root CA signed this CA.&#39;, CA, &lt;ca_fields, rootCA&gt;)@t
     ==&gt; (Ex #t. Corrupted(rootCA)@t)&#34;
 
 /***** Accountable Authenticity (CT + Gossiping) *****/
 
+
 test rootCA_rogue_gossip:
     &#34;Ex M L fields CA ca_fields session gossiped_session #t #t1 #t2.
-    CTGossipCheck(M, L, fields, CA, ca_fields, session, gossiped_session)@t
+    STHGossipCheck(M, L, fields, CA, ca_fields, session, gossiped_session)@t
     &amp; Asserts(M, &#39;Blame this CA.&#39;, CA, &lt;fields, ca_fields&gt;)@t1
-            /* fields contradicts known ground truth of monitor */
-    &amp; AssertsNot(rootCA, &#39;I signed this intermediate CA.&#39;, CA, &lt;ca_fields&gt;)@t2
-    &amp; not (Ex #t. CompromiseMonitor(M)@t)
+            /* fields contradict known ground truth of monitor */
+    &amp; Asserts(&#39;CCADB&#39;, &#39;No root CA signed this CA.&#39;, CA, &lt;ca_fields, rootCA&gt;)@t2
     &#34;
 
 test rootCA_benign_gossip:
     &#34;Ex M L fields rootCA ca_fields session gossiped_session #t #t1 #t2.
-    CTGossipCheck(M, L, fields, CA, ca_fields, session, gossiped_session)@t
+    STHGossipCheck(M, L, fields, CA, ca_fields, session, gossiped_session)@t
     &amp; Asserts(M, &#39;Blame this CA.&#39;, CA, &lt;fields, ca_fields&gt;)@t1
-            /* fields contradicts known ground truth of monitor */
+            /* fields contradict known ground truth of monitor */
+    &amp; Asserts(rootCA, &#39;I signed this intermediate CA.&#39;, CA, &lt;ca_fields&gt;)@t2
+    &#34;
+
+/*
+Falsified. Gossiping without trust assumptions is not sufficient to achieve accountable authenticity. 
+*/
+<span class="keyword">lemma</span> <span class="punctuation">A_Gossip_0</span> [heuristic=o &#34;acc_oracle&#34;, hide_lemma=T_Gossip_verif_empty_helper1, hide_lemma=T_Gossip_verif_empty_helper2]<a name="lem::"></a><span class="lemma.identifier">:</span>
+    rootCA_rogue_gossip, rootCA_benign_gossip accounts for
+    &#34;All M L L1 L2 fields CA rootCA ca_fields session gossiped_session #t0 #t1.
+        STHGossipCheck(M, L, fields, CA, ca_fields, session, gossiped_session)@t0
+        &amp; BrowserAcceptsChain(CA, fields, rootCA, ca_fields, L1, L2)@t1
+        &amp; ((L1 = L) | (L2 = L))
+            ==&gt; (Ex #t. GroundTruth(CA, fields)@t)
+    &#34;
+
+test rootCA_rogue_gossip_mon_honest:
+    &#34;Ex M L fields CA ca_fields session gossiped_session #t #t1 #t2.
+    STHGossipCheck(M, L, fields, CA, ca_fields, session, gossiped_session)@t
+    &amp; Asserts(M, &#39;Blame this CA.&#39;, CA, &lt;fields, ca_fields&gt;)@t1
+            /* fields contradict known ground truth of monitor */
+    &amp; Asserts(&#39;CCADB&#39;, &#39;No root CA signed this CA.&#39;, CA, &lt;ca_fields, rootCA&gt;)@t2
+    &amp; not (Ex #t. CompromiseMonitor(M)@t)
+    &#34;
+
+test rootCA_benign_gossip_mon_honest:
+    &#34;Ex M L fields rootCA ca_fields session gossiped_session #t #t1 #t2.
+    STHGossipCheck(M, L, fields, CA, ca_fields, session, gossiped_session)@t
+    &amp; Asserts(M, &#39;Blame this CA.&#39;, CA, &lt;fields, ca_fields&gt;)@t1
+            /* fields contradict known ground truth of monitor */
     &amp; Asserts(rootCA, &#39;I signed this intermediate CA.&#39;, CA, &lt;ca_fields&gt;)@t2
     &amp; not (Ex #t. CompromiseMonitor(M)@t)
     &#34;
 
+/*
+Falsified. Gossiping with only the monitor being trusted is not sufficient to achieve accountable authenticity.
+*/
 <span class="keyword">lemma</span> <span class="punctuation">A_Gossip_1</span> [heuristic=o &#34;acc_oracle&#34;, hide_lemma=T_Gossip_verif_empty_helper1, hide_lemma=T_Gossip_verif_empty_helper2]<a name="lem::"></a><span class="lemma.identifier">:</span>
-    rootCA_rogue_gossip, rootCA_benign_gossip accounts for
+    rootCA_rogue_gossip_mon_honest, rootCA_benign_gossip_mon_honest accounts for
     &#34;All M L L1 L2 fields CA rootCA ca_fields session gossiped_session #t0 #t1.
-        CTGossipCheck(M, L, fields, CA, ca_fields, session, gossiped_session)@t0
+        STHGossipCheck(M, L, fields, CA, ca_fields, session, gossiped_session)@t0
         &amp; BrowserAcceptsChain(CA, fields, rootCA, ca_fields, L1, L2)@t1
         &amp; ((L1 = L) | (L2 = L))
         &amp; not (Ex #t. CompromiseMonitor(M)@t)
@@ -1552,7 +1608,7 @@ test rootCA_benign_gossip:
 
 <span class="keyword">lemma</span> <span class="punctuation">A_Gossip_helper</span> [reuse]<a name="lem::"></a><span class="lemma.identifier">:</span>
     &#34;All M L fields CA ca_fields session gossiped_session #t.
-    CTGossipCheck(M, L, fields, CA, ca_fields, session, gossiped_session)@t
+    STHGossipCheck(M, L, fields, CA, ca_fields, session, gossiped_session)@t
     &amp; not (Ex #t. CompromiseMonitor(M)@t)
     &amp; not (Ex #t. CompromiseLogger(L)@t)
     ==&gt; (Ex ca_sig sth #t0. MonitorObservesEntry(M, L, fields, &lt;ca_fields, ca_sig&gt;, sth, session)@t0 &amp; #t0 &lt; #t)
@@ -1563,31 +1619,31 @@ test rootCA_benign_gossip:
            Asserts( M, &#39;Blame this CA.&#39;, CA, &lt;fields, ca_fields&gt;)@t1 ⇒
          (¬(∃ CA #t0. GroundTruth(CA, fields)@t0 &amp; #t0 &lt; #t1))&#34;
 
-
 test rootCA_rogue_gossip_log_honest:
     &#34;Ex M L fields CA ca_fields session gossiped_session #t #t1 #t2.
-    CTGossipCheck(M, L, fields, CA, ca_fields, session, gossiped_session)@t
+    STHGossipCheck(M, L, fields, CA, ca_fields, session, gossiped_session)@t
     &amp; Asserts(M, &#39;Blame this CA.&#39;, CA, &lt;fields, ca_fields&gt;)@t1
-            /* fields contradicts known ground truth of monitor */
-    &amp; AssertsNot(rootCA, &#39;I signed this intermediate CA.&#39;, CA, &lt;ca_fields&gt;)@t2
+            /* fields contradict known ground truth of monitor */
+    &amp; Asserts(&#39;CCADB&#39;, &#39;No root CA signed this CA.&#39;, CA, &lt;ca_fields, rootCA&gt;)@t2
     &amp; not (Ex #t. CompromiseLogger(L)@t)
     &amp; not (Ex #t. CompromiseMonitor(M)@t)
     &#34;
 
 test rootCA_benign_gossip_log_honest:
     &#34;Ex M L fields rootCA ca_fields session gossiped_session #t #t1 #t2.
-    CTGossipCheck(M, L, fields, CA, ca_fields, session, gossiped_session)@t
+    STHGossipCheck(M, L, fields, CA, ca_fields, session, gossiped_session)@t
     &amp; Asserts(M, &#39;Blame this CA.&#39;, CA, &lt;fields, ca_fields&gt;)@t1
-            /* fields contradicts known ground truth of monitor */
+            /* fields contradict known ground truth of monitor */
     &amp; Asserts(rootCA, &#39;I signed this intermediate CA.&#39;, CA, &lt;ca_fields&gt;)@t2
     &amp; not (Ex #t. CompromiseLogger(L)@t)
     &amp; not (Ex #t. CompromiseMonitor(M)@t)
     &#34;
 
+/* Gossiping with honest monitor and honest logger is finally sufficient to achieve accountable authenticity */
 <span class="keyword">lemma</span> <span class="punctuation">A_Gossip_2</span> [heuristic=o &#34;acc_oracle&#34;, hide_lemma=T_Gossip_verif_empty_helper1, hide_lemma=T_Gossip_verif_empty_helper2]<a name="lem::"></a><span class="lemma.identifier">:</span>
     rootCA_rogue_gossip_log_honest, rootCA_benign_gossip_log_honest accounts for
     &#34;All M L L1 L2 fields CA ca_fields session gossiped_session rootCA #t0 #t1.
-        CTGossipCheck(M, L, fields, CA, ca_fields, session, gossiped_session)@t0
+        STHGossipCheck(M, L, fields, CA, ca_fields, session, gossiped_session)@t0
         &amp; BrowserAcceptsChain(CA, fields, rootCA, ca_fields, L1, L2)@t1
         &amp; ((L1 = L) | (L2 = L))
         &amp; not (Ex #t. CompromiseLogger(L)@t)
@@ -1627,14 +1683,14 @@ test rootCA_benign_gossip_log_honest:
 
 <span class="keyword">restriction</span> CTGossipCheck_once:
     &#34;All M L fields CA ca_fields session gossiped_session #t1 #t2. 
-    CTGossipCheck(M, L, fields, CA, ca_fields, session, gossiped_session)@t1 
-    &amp; CTGossipCheck(M, L, fields, CA, ca_fields, session, gossiped_session)@t2 
+    STHGossipCheck(M, L, fields, CA, ca_fields, session, gossiped_session)@t1 
+    &amp; STHGossipCheck(M, L, fields, CA, ca_fields, session, gossiped_session)@t2 
     ==&gt; (#t1 = #t2)&#34;
 
 <span class="keyword">restriction</span> CTGossipTransparencyCheck_once:
     &#34;All M L fields CA ca_fields session gossiped_session #t1 #t2. 
-    CTGossipTransparencyCheck(M, L, fields, CA, ca_fields, session, gossiped_session)@t1 
-    &amp; CTGossipTransparencyCheck(M, L, fields, CA, ca_fields, session, gossiped_session)@t2 
+    STHGossipTransparencyCheck(M, L, fields, CA, ca_fields, session, gossiped_session)@t1 
+    &amp; STHGossipTransparencyCheck(M, L, fields, CA, ca_fields, session, gossiped_session)@t2 
     ==&gt; (#t1 = #t2)&#34;
 
 <span class="keyword">restriction</span> appendOnlyCheck_Gossip_once:

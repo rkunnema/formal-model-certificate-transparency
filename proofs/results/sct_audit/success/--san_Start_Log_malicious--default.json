@@ -1,11 +1,11 @@
 {
   "task_id": "--san_Start_Log_malicious--default",
   "warnings": [],
-  "tamarin_timing": 22.29,
+  "tamarin_timing": 22.85,
   "wrapper_measures": {
-    "time": 22.49063467979431,
-    "avg_memory": 166.45108695652175,
-    "peak_memory": 351.2890625
+    "time": 23.07945203781128,
+    "avg_memory": 158.3780570652174,
+    "peak_memory": 351.7265625
   },
   "output_spthy": "results/sct_audit/proofs/--san_Start_Log_malicious--default.spthy",
   "verified_lemma": {
@@ -53,8 +53,6 @@
     "san_ParticipantVerifiesInclusion",
     "san_ConsultDocumentation_Success",
     "san_ConsultDocumentation_Fails",
-    "san_MonitorCheck_Found",
-    "san_MonitorCheck_NotFound",
     "san_SCTAuditTransparencyCheck_Success",
     "san_SCTAuditTransparencyCheck_Failed",
     "san_SCTAuditCheck",
@@ -62,6 +60,7 @@
     "san_compromiseRootCA",
     "san_compromiseLogger",
     "san_compromiseMonitor",
+    "authenticity",
     "transparency_SCT_Auditing",
     "A_uniq1_helper",
     "A_uniq2_helper",

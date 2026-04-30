@@ -1,16 +1,16 @@
 {
   "task_id": "SUFFICIENCY_PROOF--A_Receipt_receipt_2_suff--default",
   "warnings": [],
-  "tamarin_timing": 131.82,
+  "tamarin_timing": 103.01,
   "wrapper_measures": {
-    "time": 132.23011112213135,
-    "avg_memory": 1555.606363311069,
-    "peak_memory": 3469.83984375
+    "time": 103.31491994857788,
+    "avg_memory": 784.1629626820392,
+    "peak_memory": 1409.59375
   },
   "output_spthy": "results/ct_receipt/proofs/SUFFICIENCY_PROOF--A_Receipt_receipt_2_suff--default.spthy",
   "verified_lemma": {
     "A_Receipt_receipt_2_suff": {
-      "steps": 55,
+      "steps": 47,
       "analysis_type": "exists-trace"
     }
   },
@@ -65,6 +65,7 @@
     "san_domainOwnerVerifiesReceipt_1",
     "san_domainOwnerVerifiesReceipt_2",
     "san_SCTReceiptCheck",
+    "authenticity",
     "A_uniq1_helper",
     "A_uniq2_helper",
     "A_Receipt_inj3_helper",

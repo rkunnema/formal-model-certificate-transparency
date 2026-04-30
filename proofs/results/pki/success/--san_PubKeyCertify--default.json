@@ -1,11 +1,11 @@
 {
   "task_id": "--san_PubKeyCertify--default",
   "warnings": [],
-  "tamarin_timing": 1.78,
+  "tamarin_timing": 1.48,
   "wrapper_measures": {
-    "time": 1.997997522354126,
-    "avg_memory": 64.466796875,
-    "peak_memory": 128.92578125
+    "time": 1.6456372737884521,
+    "avg_memory": 62.0390625,
+    "peak_memory": 124.0703125
   },
   "output_spthy": "results/pki/proofs/--san_PubKeyCertify--default.spthy",
   "verified_lemma": {

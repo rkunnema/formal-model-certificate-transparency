@@ -1,11 +1,11 @@
 {
   "task_id": "--san_add_preC_to_log--default",
   "warnings": [],
-  "tamarin_timing": 60.97,
+  "tamarin_timing": 55.02,
   "wrapper_measures": {
-    "time": 61.272340059280396,
-    "avg_memory": 534.9921875000001,
-    "peak_memory": 1110.2265625
+    "time": 55.28059411048889,
+    "avg_memory": 547.3803977272727,
+    "peak_memory": 1103.859375
   },
   "output_spthy": "results/ct_receipt/proofs/--san_add_preC_to_log--default.spthy",
   "verified_lemma": {
@@ -64,6 +64,7 @@
     "san_domainOwnerVerifiesReceipt_1",
     "san_domainOwnerVerifiesReceipt_2",
     "san_SCTReceiptCheck",
+    "authenticity",
     "A_uniq1_helper",
     "A_uniq2_helper",
     "A_Receipt_inj3_helper",

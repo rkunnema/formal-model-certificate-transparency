@@ -97,15 +97,12 @@ rule (modulo E) PubKeyCertify[color=#c871ff]:
 
 rule (modulo E) ClientValidate[color=#f2ce03]:
    [
-   !Root_CA( $rootCA, pkRootCA ),
    In( <<<$CA, $id, pkID, 'pubKey', sn, $i, $j>, pub_sig>, 
         <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, ca_sig>
-   )
+   ),
+   !Root_CA( $rootCA, pkRootCA )
    ]
   --[
-  BrowserAcceptsChain( $CA, <$CA, $id, pkID, 'pubKey', sn, $i, $j>,
-                       $rootCA, <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
-  ),
   Eq( verify(pub_sig, <$CA, $id, pkID, 'pubKey', sn, $i, $j>, pkCA), true
   ),
   Eq( verify(ca_sig, <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>,
@@ -113,24 +110,26 @@ rule (modulo E) ClientValidate[color=#f2ce03]:
       true
   ),
   CheckValidUntil( $now, $j ), CheckValidUntil( $now, $j0 ), Time( $now ),
-  San_ClientValidate( )
+  BrowserAcceptsChain( $CA, <$CA, $id, pkID, 'pubKey', sn, $i, $j>,
+                       $rootCA, <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
+  )
   ]->
    [ ]
 
   /*
   rule (modulo AC) ClientValidate[color=#f2ce03]:
      [
-     !Root_CA( $rootCA, pkRootCA ),
      In( <<<$CA, $id, pkID, 'pubKey', sn, $i, $j>, pub_sig>, 
           <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, ca_sig>
-     )
+     ),
+     !Root_CA( $rootCA, pkRootCA )
      ]
     --[
+    Eq( z, true ), Eq( z.1, true ), CheckValidUntil( $now, $j ),
+    CheckValidUntil( $now, $j0 ), Time( $now ),
     BrowserAcceptsChain( $CA, <$CA, $id, pkID, 'pubKey', sn, $i, $j>,
                          $rootCA, <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
-    ),
-    Eq( z, true ), Eq( z.1, true ), CheckValidUntil( $now, $j ),
-    CheckValidUntil( $now, $j0 ), Time( $now ), San_ClientValidate( )
+    )
     ]->
      [ ]
     variants (modulo AC)
@@ -774,10 +773,15 @@ by sorry
 
 lemma san_ClientValidate:
   exists-trace
-  "∃ #t. (San_ClientValidate( ) @ #t) ∧ (¬(∃ #t.1. Compromise( ) @ #t.1))"
+  "∃ #t ca fields rootCA ca_fields.
+    (BrowserAcceptsChain( ca, fields, rootCA, ca_fields ) @ #t) ∧
+    (¬(∃ #t.1. Compromise( ) @ #t.1))"
 /*
 guarded formula characterizing all satisfying traces:
-"∃ #t. (San_ClientValidate( ) @ #t) ∧ ∀ #t.1. (Compromise( ) @ #t.1) ⇒ ⊥"
+"∃ #t ca fields rootCA ca_fields.
+  (BrowserAcceptsChain( ca, fields, rootCA, ca_fields ) @ #t)
+ ∧
+  ∀ #t.1. (Compromise( ) @ #t.1) ⇒ ⊥"
 */
 by sorry
 
@@ -1147,7 +1151,7 @@ guarded formula characterizing all counter-examples:
    ∃ #t. (GroundTruth( CA.1, fields.1 ) @ #t)"
 */
 simplify
-solve( !Root_CA( $rootCA, pk(x) ) ▶₀ #t2 )
+solve( !Root_CA( $rootCA, pk(x.1) ) ▶₁ #t2 )
   case Root_CA_Init
   solve( Asserts( 'external auditor',
                   'That intermediary CA signed the following incorrect statement and the validation chain says the following about that CA.',

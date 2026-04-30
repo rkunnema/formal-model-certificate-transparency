@@ -1,11 +1,11 @@
 {
   "task_id": "--T_Audit_audit_inclusionViol_inj--default",
   "warnings": [],
-  "tamarin_timing": 18.42,
+  "tamarin_timing": 17.83,
   "wrapper_measures": {
-    "time": 18.623422145843506,
-    "avg_memory": 137.57648026315792,
-    "peak_memory": 149.18359375
+    "time": 18.05245804786682,
+    "avg_memory": 134.3198784722222,
+    "peak_memory": 147.78515625
   },
   "output_spthy": "results/sct_audit/proofs/--T_Audit_audit_inclusionViol_inj--default.spthy",
   "verified_lemma": {
@@ -54,8 +54,6 @@
     "san_ParticipantVerifiesInclusion",
     "san_ConsultDocumentation_Success",
     "san_ConsultDocumentation_Fails",
-    "san_MonitorCheck_Found",
-    "san_MonitorCheck_NotFound",
     "san_SCTAuditTransparencyCheck_Success",
     "san_SCTAuditTransparencyCheck_Failed",
     "san_SCTAuditCheck",
@@ -63,6 +61,7 @@
     "san_compromiseRootCA",
     "san_compromiseLogger",
     "san_compromiseMonitor",
+    "authenticity",
     "transparency_SCT_Auditing",
     "A_uniq1_helper",
     "A_uniq2_helper",

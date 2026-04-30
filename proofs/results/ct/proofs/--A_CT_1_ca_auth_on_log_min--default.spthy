@@ -656,9 +656,9 @@ rule (modulo E) monitorCanFindCertificate[color=#f3d664]:
                         <<$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, ca_sig>, sth, session
   ),
   BenignCert( $iss, <$CA, $subj, ke, 'pubKey', sn, $i, $j> ),
-  AssertsNot( $M, 'Blame this CA.', $CA,
-              <<$CA, $subj, ke, 'pubKey', sn, $i, $j>, $rootCA, $CA, pkCA, 
-               'pubKey-CA', snCA, $i0, $j0>
+  Asserts( $M, 'Do not blame this CA.', $CA,
+           <<$CA, $subj, ke, 'pubKey', sn, $i, $j>, $rootCA, $CA, pkCA, 
+            'pubKey-CA', snCA, $i0, $j0>
   ),
   Time( $now ), San_monitorCanFindCertificate( )
   ]->
@@ -683,9 +683,9 @@ rule (modulo E) monitorCanFindCertificate[color=#f3d664]:
                           <<$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, ca_sig>, sth, session
     ),
     BenignCert( $iss, <$CA, $subj, ke, 'pubKey', sn, $i, $j> ),
-    AssertsNot( $M, 'Blame this CA.', $CA,
-                <<$CA, $subj, ke, 'pubKey', sn, $i, $j>, $rootCA, $CA, pkCA, 
-                 'pubKey-CA', snCA, $i0, $j0>
+    Asserts( $M, 'Do not blame this CA.', $CA,
+             <<$CA, $subj, ke, 'pubKey', sn, $i, $j>, $rootCA, $CA, pkCA, 
+              'pubKey-CA', snCA, $i0, $j0>
     ),
     Time( $now ), San_monitorCanFindCertificate( )
     ]->
@@ -819,9 +819,9 @@ rule (modulo E) monitorCannotFindCertificate[color=#f3d664]:
   NothingObserved( $M, $L, <$CA, $subj, ke, 'pubKey', sn, $i, $j>, sth,
                    session
   ),
-  AssertsNot( $M, 'Blame this CA.', $CA,
-              <<$CA, $subj, ke, 'pubKey', sn, $i, $j>, $rootCA, $CA, pkCA, 
-               'pubKey-CA', snCA, $i0, $j0>
+  Asserts( $M, 'Do not blame this CA.', $CA,
+           <<$CA, $subj, ke, 'pubKey', sn, $i, $j>, $rootCA, $CA, pkCA, 
+            'pubKey-CA', snCA, $i0, $j0>
   ),
   Time( $now ), San_monitorCannotFindCertificate( )
   ]->
@@ -1557,10 +1557,7 @@ rule (modulo E) ClientInitiatesAuditing:
    In( ca_fields ), In( ca_sig ), In( pub_fields ), In( pub_sig ), In( sct )
    ]
   --[ Time( $now ), San_ClientInitiatesAuditing( ) ]->
-   [
-   !TLS_to_M( $M, <<pub_fields, pub_sig>, ca_fields, ca_sig>, sct ),
-   Client_Receipt_Val( $M, <<pub_fields, pub_sig>, ca_fields, ca_sig> )
-   ]
+   [ !TLS_to_M( $M, <<pub_fields, pub_sig>, ca_fields, ca_sig>, sct ) ]
 
   /* has exactly the trivial AC variant */
 
@@ -1580,6 +1577,12 @@ rule (modulo E) ClientValidate[color=#f2ce03]:
   --[
   BrowserAcceptsChain( $CA, <$CA, $id, pkID, 'pubKey', sn, $i, $j>,
                        $rootCA, <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, $L1, $L2
+  ),
+  BrowserAcceptsChainTimes( $CA, <$CA, $id, pkID, 'pubKey', sn, $i, $j>,
+                            $rootCA, <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, $L1, $sct1
+  ),
+  BrowserAcceptsChainTimes( $CA, <$CA, $id, pkID, 'pubKey', sn, $i, $j>,
+                            $rootCA, <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, $L2, $sct2
   ),
   Eq( verify(pub_sig,
              <$CA, $id, pkID, 'pubKey', sn, $i, $j, <$L1, 'SCT', $sct1, sct1_sig>, 
@@ -1603,20 +1606,8 @@ rule (modulo E) ClientValidate[color=#f2ce03]:
   San_ClientValidate( ), Restr_ClientValidate_1( $L1, $L2 )
   ]->
    [
-   !Check( pkL1, <$CA, $id, pkID, 'pubKey', sn, $i, $j>,
-           <<$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, ca_sig>
-   ),
-   !Check( pkL2, <$CA, $id, pkID, 'pubKey', sn, $i, $j>,
-           <<$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, ca_sig>
-   ),
    !BAccept_State( $CA, <$CA, $id, pkID, 'pubKey', sn, $i, $j>,
                    <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, $L1, $sct1, $L2, $sct2
-   ),
-   !BAccept_SCT( $L1, <$CA, $id, pkID, 'pubKey', sn, $i, $j>,
-                 <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, $sct1
-   ),
-   !BAccept_SCT( $L2, <$CA, $id, pkID, 'pubKey', sn, $i, $j>,
-                 <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, $sct2
    )
    ]
 
@@ -1634,25 +1625,19 @@ rule (modulo E) ClientValidate[color=#f2ce03]:
     BrowserAcceptsChain( $CA, <$CA, $id, pkID, 'pubKey', sn, $i, $j>,
                          $rootCA, <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, $L1, $L2
     ),
+    BrowserAcceptsChainTimes( $CA, <$CA, $id, pkID, 'pubKey', sn, $i, $j>,
+                              $rootCA, <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, $L1, $sct1
+    ),
+    BrowserAcceptsChainTimes( $CA, <$CA, $id, pkID, 'pubKey', sn, $i, $j>,
+                              $rootCA, <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, $L2, $sct2
+    ),
     Eq( z, true ), Eq( z.1, true ), Eq( z.2, true ), Eq( z.3, true ),
     CheckValidUntil( $now, $j ), CheckValidUntil( $now, $j0 ), Time( $now ),
     San_ClientValidate( ), Restr_ClientValidate_1( $L1, $L2 )
     ]->
      [
-     !Check( pkL1, <$CA, $id, pkID, 'pubKey', sn, $i, $j>,
-             <<$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, ca_sig>
-     ),
-     !Check( pkL2, <$CA, $id, pkID, 'pubKey', sn, $i, $j>,
-             <<$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, ca_sig>
-     ),
      !BAccept_State( $CA, <$CA, $id, pkID, 'pubKey', sn, $i, $j>,
                      <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, $L1, $sct1, $L2, $sct2
-     ),
-     !BAccept_SCT( $L1, <$CA, $id, pkID, 'pubKey', sn, $i, $j>,
-                   <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, $sct1
-     ),
-     !BAccept_SCT( $L2, <$CA, $id, pkID, 'pubKey', sn, $i, $j>,
-                   <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, $sct2
      )
      ]
     variants (modulo AC)
@@ -2558,7 +2543,8 @@ restriction appendOnlyWorks:
 rule (modulo E) ProofFetching_M[color=#10bcc5]:
    [ Fr( ~session ), !Monitor( $M ), !Logger( $L, pkL ) ]
   --[
-  FetchLogSnapshot( $M, $L, ~session ), Time( $now ),
+  FetchLogSnapshot( $M, $L, ~session ),
+  FetchLogSnapshotTime( $M, $L, ~session, $now ), Time( $now ),
   San_ProofFetching_M( )
   ]->
    [ TLS_M_to_L( $M, $L, ~session, $now ) ]
@@ -2568,7 +2554,8 @@ rule (modulo E) ProofFetching_M[color=#10bcc5]:
 rule (modulo E) ProofFetching_C[color=#10bcc5]:
    [ Fr( ~session ), In( $C ), !Logger( $L, pkL ) ]
   --[
-  FetchLogSnapshot( $C, $L, ~session ), Time( $now ),
+  FetchLogSnapshot( $C, $L, ~session ),
+  FetchLogSnapshotTime( $C, $L, ~session, $now ), Time( $now ),
   San_ProofFetching_C( )
   ]->
    [ TLS_C_to_L( $C, $L, ~session ) ]
@@ -2578,7 +2565,8 @@ rule (modulo E) ProofFetching_C[color=#10bcc5]:
 rule (modulo E) ProofFetching_P[color=#10bcc5]:
    [ Fr( ~session ), In( $P ), !Logger( $L, pkL ) ]
   --[
-  FetchLogSnapshot( $P, $L, ~session ), Time( $now ),
+  FetchLogSnapshot( $P, $L, ~session ),
+  FetchLogSnapshotTime( $C, $L, ~session, $now ), Time( $now ),
   San_ProofFetching_P( )
   ]->
    [ TLS_P_to_L( $P, $L, ~session, $now ) ]
@@ -2635,11 +2623,11 @@ rule (modulo E) ParticipantFindsInclusionViolation[color=#e65208]:
    [
    !TLS_L_to_P( $L, $P, $snapshot, sth, session, $time ),
    !Logger( $L, pkL ), In( <$CA, $id, pkID, 'pubKey', sn, $i, $j> ),
-   In( <ca_fields, ca_sig> ), !Monitor( $M )
+   In( <ca_fields, ca_sig> )
    ]
   --[
-  AssertsNot( $P, 'This loggers log currently includes these fields.', $L,
-              <<$CA, $id, pkID, 'pubKey', sn, $i, $j>, session>
+  Asserts( $P, 'This loggers log currently does not include these fields.',
+           $L, <<$CA, $id, pkID, 'pubKey', sn, $i, $j>, session>
   ),
   InclusionProofFails( $P, $L, <$CA, $id, pkID, 'pubKey', sn, $i, $j>,
                        <ca_fields, ca_sig>, sth, session
@@ -2904,18 +2892,12 @@ rule (modulo E) MonitorCheck_NotFound_CCADB:
   /* has exactly the trivial AC variant */
 
 rule (modulo E) TransparencyCheck_Success:
-   [
-   !BAccept_SCT( $L, fields,
-                 <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, $sct
-   ),
-   InclusionVerified( $P, $L, fields, $proof, session,
-                      <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
-   )
-   ]
+   [ InclusionVerified( $P, $L, fields, $proof_time, session, ca_fields ) ]
   --[
   CTTransparencyCheckSession( $L, fields, session ),
+  CTTransparencyCheckTime( $L, fields, session, $proof_time ),
   CTTransparencyCheck( $L, fields ),
-  CTTransparencyCheckSuccess( $L, fields ), MMD_passed( $sct, $proof ),
+  CTTransparencyCheckSuccess( $L, fields ),
   San_TransparencyCheck_Success( )
   ]->
    [ ]
@@ -2923,18 +2905,11 @@ rule (modulo E) TransparencyCheck_Success:
   /* has exactly the trivial AC variant */
 
 rule (modulo E) TransparencyCheck_Failed:
-   [
-   !BAccept_SCT( $L, fields,
-                 <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, $sct
-   ),
-   InclusionFalsified( $P, $L, fields, $proof, session,
-                       <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
-   )
-   ]
+   [ InclusionFalsified( $P, $L, fields, $proof_time, session, ca_fields ) ]
   --[
   CTTransparencyCheckSession( $L, fields, session ),
-  CTTransparencyCheck( $L, fields ), MMD_passed( $sct, $proof ),
-  San_TransparencyCheck_Failed( )
+  CTTransparencyCheckTime( $L, fields, session, $proof_time ),
+  CTTransparencyCheck( $L, fields ), San_TransparencyCheck_Failed( )
   ]->
    [ ]
 
@@ -2946,41 +2921,6 @@ restriction mmd_passed:
      (Time( after ) @ #t1)) ⇒
     (((#t0 < #t1) ∧ (#t1 < #t2)) ∧ (¬(before = after)))"
   // safety formula
-
-rule (modulo E) TransparencyCheck_wo_MMD_success:
-   [
-   !BAccept_SCT( $L, fields,
-                 <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, $sct
-   ),
-   InclusionVerified( $P, $L, fields, $proof, session,
-                      <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
-   )
-   ]
-  --[
-  CTTransparencyCheck_wo_MMD( $L, fields ),
-  CTTransparencyCheckSuccess_wo_MMD( $L, fields ),
-  San_TransparencyCheck_wo_MMD_success( )
-  ]->
-   [ ]
-
-  /* has exactly the trivial AC variant */
-
-rule (modulo E) TransparencyCheck_wo_MMD_failed:
-   [
-   !BAccept_SCT( $L, fields,
-                 <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, $sct
-   ),
-   InclusionFalsified( $P, $L, fields, $proof, session,
-                       <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
-   )
-   ]
-  --[
-  CTTransparencyCheck_wo_MMD( $L, fields ),
-  San_TransparencyCheck_wo_MMD_failed( )
-  ]->
-   [ ]
-
-  /* has exactly the trivial AC variant */
 
 restriction rootCA_CA_distinct:
   "∀ rootCA CA #t1 #t2.
@@ -3565,34 +3505,6 @@ guarded formula characterizing all satisfying traces:
 */
 by sorry
 
-lemma san_TransparencyCheck_wo_MMD_success:
-  exists-trace
-  "∃ #t.
-    (San_TransparencyCheck_wo_MMD_success( ) @ #t) ∧
-    (¬(∃ #t.1. Compromise( ) @ #t.1))"
-/*
-guarded formula characterizing all satisfying traces:
-"∃ #t.
-  (San_TransparencyCheck_wo_MMD_success( ) @ #t)
- ∧
-  ∀ #t.1. (Compromise( ) @ #t.1) ⇒ ⊥"
-*/
-by sorry
-
-lemma san_TransparencyCheck_wo_MMD_failed:
-  exists-trace
-  "∃ #t.
-    (San_TransparencyCheck_wo_MMD_failed( ) @ #t) ∧
-    (¬(∃ #t.1. Compromise( ) @ #t.1))"
-/*
-guarded formula characterizing all satisfying traces:
-"∃ #t.
-  (San_TransparencyCheck_wo_MMD_failed( ) @ #t)
- ∧
-  ∀ #t.1. (Compromise( ) @ #t.1) ⇒ ⊥"
-*/
-by sorry
-
 lemma san_compromiseCA:
   exists-trace "∃ #t. San_compromiseCA( ) @ #t"
 /*
@@ -3622,20 +3534,6 @@ lemma san_compromiseMonitor:
 /*
 guarded formula characterizing all satisfying traces:
 "∃ #t. (San_compromiseMonitor( ) @ #t)"
-*/
-by sorry
-
-lemma CA_auth_w_compromise:
-  exists-trace
-  "∃ L1 L2 rootCA ca_fields CA fields #t.
-    (BrowserAcceptsChain( CA, fields, rootCA, ca_fields, L1, L2 ) @ #t) ∧
-    (¬(∃ #t1. CAAsserts( CA, fields ) @ #t1))"
-/*
-guarded formula characterizing all satisfying traces:
-"∃ L1 L2 rootCA ca_fields CA fields #t.
-  (BrowserAcceptsChain( CA, fields, rootCA, ca_fields, L1, L2 ) @ #t)
- ∧
-  ∀ #t1. (CAAsserts( CA, fields ) @ #t1) ⇒ ⊥"
 */
 by sorry
 
@@ -3718,7 +3616,7 @@ guarded formula characterizing all counter-examples:
 */
 by sorry
 
-lemma transparency_w_MMD:
+lemma transparency:
   all-traces
   "∀ CA fields rootCA ca_fields L1 L2 L #t1 #t2.
     ((((BrowserAcceptsChain( CA, fields, rootCA, ca_fields, L1, L2 ) @ #t1) ∧
@@ -3738,66 +3636,67 @@ guarded formula characterizing all counter-examples:
 */
 by sorry
 
-lemma transparency_w_MMD_honest_log_helper [reuse]:
+lemma transparency_wo_MMD_honest_log:
   all-traces
-  "∀ L fields #t1.
-    ((CTTransparencyCheck( L, fields ) @ #t1) ∧
+  "∀ P CA fields rootCA ca_fields L sct_time proof_timestamp session #t1
+     #t2 #t3.
+    ((((((BrowserAcceptsChainTimes( CA, fields, rootCA, ca_fields, L,
+                                    sct_time
+          ) @ #t1) ∧
+         (FetchLogSnapshotTime( P, L, session, proof_timestamp ) @ #t2)) ∧
+        (CTTransparencyCheckTime( L, fields, session, proof_timestamp ) @ #t3)) ∧
+       (#t1 < #t2)) ∧
+      (#t2 < #t3)) ∧
      (¬(∃ #t. CompromiseLogger( L ) @ #t))) ⇒
-    (CTTransparencyCheckSuccess( L, fields ) @ #t1)"
+    (CTTransparencyCheckSuccess( L, fields ) @ #t3)"
 /*
 guarded formula characterizing all counter-examples:
-"∃ L fields #t1.
-  (CTTransparencyCheck( L, fields ) @ #t1)
+"∃ P CA fields rootCA ca_fields L sct_time proof_timestamp session #t1
+   #t2 #t3.
+  (BrowserAcceptsChainTimes( CA, fields, rootCA, ca_fields, L, sct_time
+   ) @ #t1) ∧
+  (FetchLogSnapshotTime( P, L, session, proof_timestamp ) @ #t2) ∧
+  (CTTransparencyCheckTime( L, fields, session, proof_timestamp ) @ #t3)
  ∧
+  (#t1 < #t2) ∧
+  (#t2 < #t3) ∧
   (∀ #t. (CompromiseLogger( L ) @ #t) ⇒ ⊥) ∧
-  (¬(CTTransparencyCheckSuccess( L, fields ) @ #t1))"
+  (¬(CTTransparencyCheckSuccess( L, fields ) @ #t3))"
 */
 by sorry
 
 lemma transparency_w_MMD_honest_log:
   all-traces
-  "∀ CA fields rootCA ca_fields L1 L2 L #t1 #t2.
-    (((((BrowserAcceptsChain( CA, fields, rootCA, ca_fields, L1, L2
-         ) @ #t1) ∧
-        ((L = L1) ∨ (L = L2))) ∧
-       (CTTransparencyCheck( L, fields ) @ #t2)) ∧
-      (#t1 < #t2)) ∧
+  "∀ P CA fields rootCA ca_fields L sct_time proof_timestamp session #t1
+     #t2 #t3.
+    (((((((BrowserAcceptsChainTimes( CA, fields, rootCA, ca_fields, L,
+                                     sct_time
+           ) @ #t1) ∧
+          (FetchLogSnapshotTime( P, L, session, proof_timestamp ) @ #t2)) ∧
+         (CTTransparencyCheckTime( L, fields, session, proof_timestamp ) @ #t3)) ∧
+        (#t1 < #t2)) ∧
+       (#t2 < #t3)) ∧
+      (¬(sct_time = proof_timestamp))) ∧
      (¬(∃ #t. CompromiseLogger( L ) @ #t))) ⇒
-    (CTTransparencyCheckSuccess( L, fields ) @ #t2)"
+    (CTTransparencyCheckSuccess( L, fields ) @ #t3)"
 /*
 guarded formula characterizing all counter-examples:
-"∃ CA fields rootCA ca_fields L1 L2 L #t1 #t2.
-  (BrowserAcceptsChain( CA, fields, rootCA, ca_fields, L1, L2 ) @ #t1) ∧
-  (CTTransparencyCheck( L, fields ) @ #t2)
+"∃ P CA fields rootCA ca_fields L sct_time proof_timestamp session #t1
+   #t2 #t3.
+  (BrowserAcceptsChainTimes( CA, fields, rootCA, ca_fields, L, sct_time
+   ) @ #t1) ∧
+  (FetchLogSnapshotTime( P, L, session, proof_timestamp ) @ #t2) ∧
+  (CTTransparencyCheckTime( L, fields, session, proof_timestamp ) @ #t3)
  ∧
-  (((L = L1) ∨ (L = L2))) ∧
   (#t1 < #t2) ∧
+  (#t2 < #t3) ∧
+  (¬(sct_time = proof_timestamp)) ∧
   (∀ #t. (CompromiseLogger( L ) @ #t) ⇒ ⊥) ∧
-  (¬(CTTransparencyCheckSuccess( L, fields ) @ #t2))"
+  (¬(CTTransparencyCheckSuccess( L, fields ) @ #t3))"
 */
 by sorry
 
-lemma transparency_wo_MMD:
-  all-traces
-  "∀ CA fields rootCA ca_fields L1 L2 L #t1 #t2.
-    ((((BrowserAcceptsChain( CA, fields, rootCA, ca_fields, L1, L2 ) @ #t1) ∧
-       ((L = L1) ∨ (L = L2))) ∧
-      (CTTransparencyCheck_wo_MMD( L, fields ) @ #t2)) ∧
-     (#t1 < #t2)) ⇒
-    (CTTransparencyCheckSuccess_wo_MMD( L, fields ) @ #t2)"
-/*
-guarded formula characterizing all counter-examples:
-"∃ CA fields rootCA ca_fields L1 L2 L #t1 #t2.
-  (BrowserAcceptsChain( CA, fields, rootCA, ca_fields, L1, L2 ) @ #t1) ∧
-  (CTTransparencyCheck_wo_MMD( L, fields ) @ #t2)
- ∧
-  (((L = L1) ∨ (L = L2))) ∧
-  (#t1 < #t2) ∧
-  (¬(CTTransparencyCheckSuccess_wo_MMD( L, fields ) @ #t2))"
-*/
-by sorry
-
-lemma A_CT_2_uniq_helper_intm_CA [reuse]:
+lemma A_uniq1_helper [reuse]:
   all-traces
   "∀ CA M rootCA fields ca_fields #t1 #t2.
     ((Asserts( M, 'Blame this CA.', CA, <fields, ca_fields> ) @ #t1) ∧
@@ -3815,7 +3714,7 @@ guarded formula characterizing all counter-examples:
 */
 by sorry
 
-lemma A_CT_2_uniq_helper_root [reuse]:
+lemma A_uniq2_helper [reuse]:
   all-traces
   "∀ rootCA CA ca_fields #t.
     (Asserts( 'CCADB', 'No root CA signed this CA.', CA, <ca_fields, rootCA>
@@ -3834,13 +3733,15 @@ by sorry
 lemma T_CT_1_client_inclusionViol_suff:
   exists-trace
   "∃ L M fields session #t #t1.
-    (((AssertsNot( M, 'This loggers log currently includes these fields.', L,
-                   <fields, session>
+    (((Asserts( M,
+                'This loggers log currently does not include these fields.', L,
+                <fields, session>
        ) @ #t) ∧
       (CTTransparencyCheckSession( L, fields, session ) @ #t1)) ∧
      (∀ L.1 M.1 fields.1 session.1 #t.1 #t1.1.
-       ((AssertsNot( M.1, 'This loggers log currently includes these fields.',
-                     L.1, <fields.1, session.1>
+       ((Asserts( M.1,
+                  'This loggers log currently does not include these fields.', L.1,
+                  <fields.1, session.1>
          ) @ #t.1) ∧
         (CTTransparencyCheckSession( L.1, fields.1, session.1 ) @ #t1.1)) ⇒
        (L.1 = L))) ∧
@@ -3848,14 +3749,15 @@ lemma T_CT_1_client_inclusionViol_suff:
 /*
 guarded formula characterizing all satisfying traces:
 "∃ L M fields session #t #t1.
-  (AssertsNot( M, 'This loggers log currently includes these fields.', L,
-               <fields, session>
+  (Asserts( M, 'This loggers log currently does not include these fields.',
+            L, <fields, session>
    ) @ #t) ∧
   (CTTransparencyCheckSession( L, fields, session ) @ #t1)
  ∧
   (∀ L.1 M.1 fields.1 session.1 #t.1 #t1.1.
-    (AssertsNot( M.1, 'This loggers log currently includes these fields.',
-                 L.1, <fields.1, session.1>
+    (Asserts( M.1,
+              'This loggers log currently does not include these fields.', L.1,
+              <fields.1, session.1>
      ) @ #t.1) ∧
     (CTTransparencyCheckSession( L.1, fields.1, session.1 ) @ #t1.1)
    ⇒
@@ -3867,8 +3769,8 @@ by sorry
 lemma T_CT_1_verif_empty:
   all-traces
   "(¬(∃ L M fields session #t #t1.
-       (AssertsNot( M, 'This loggers log currently includes these fields.', L,
-                    <fields, session>
+       (Asserts( M, 'This loggers log currently does not include these fields.',
+                 L, <fields, session>
         ) @ #t) ∧
        (CTTransparencyCheckSession( L, fields, session ) @ #t1))) ⇒
    (∀ CA fields rootCA ca_fields L1 L2 L #t1 #t2.
@@ -3880,8 +3782,8 @@ lemma T_CT_1_verif_empty:
 /*
 guarded formula characterizing all counter-examples:
 "(∀ L M fields session #t #t1.
-   (AssertsNot( M, 'This loggers log currently includes these fields.', L,
-                <fields, session>
+   (Asserts( M, 'This loggers log currently does not include these fields.',
+             L, <fields, session>
     ) @ #t) ∧
    (CTTransparencyCheckSession( L, fields, session ) @ #t1)
   ⇒
@@ -3899,8 +3801,9 @@ by sorry
 lemma T_CT_1_client_inclusionViol_verif_nonempty:
   all-traces
   "∀ L M fields session #t #t1.
-    ((AssertsNot( M, 'This loggers log currently includes these fields.', L,
-                  <fields, session>
+    ((Asserts( M,
+               'This loggers log currently does not include these fields.', L,
+               <fields, session>
       ) @ #t) ∧
      (CTTransparencyCheckSession( L, fields, session ) @ #t1)) ⇒
     (¬(∀ CA fields.1 rootCA ca_fields L1 L2 L.1 #t1.1 #t2.
@@ -3913,8 +3816,8 @@ lemma T_CT_1_client_inclusionViol_verif_nonempty:
 /*
 guarded formula characterizing all counter-examples:
 "∃ L M fields session #t #t1.
-  (AssertsNot( M, 'This loggers log currently includes these fields.', L,
-               <fields, session>
+  (Asserts( M, 'This loggers log currently does not include these fields.',
+            L, <fields, session>
    ) @ #t) ∧
   (CTTransparencyCheckSession( L, fields, session ) @ #t1)
  ∧
@@ -3932,27 +3835,30 @@ by sorry
 lemma T_CT_1_client_inclusionViol_min:
   all-traces
   "∀ L M fields session #t #t1.
-    ((AssertsNot( M, 'This loggers log currently includes these fields.', L,
-                  <fields, session>
+    ((Asserts( M,
+               'This loggers log currently does not include these fields.', L,
+               <fields, session>
       ) @ #t) ∧
      (CTTransparencyCheckSession( L, fields, session ) @ #t1)) ⇒
     (¬(∃ L.1 M.1 fields.1 session.1 #t.1 #t1.1.
-        ((AssertsNot( M.1, 'This loggers log currently includes these fields.',
-                      L.1, <fields.1, session.1>
+        ((Asserts( M.1,
+                   'This loggers log currently does not include these fields.', L.1,
+                   <fields.1, session.1>
           ) @ #t.1) ∧
          (CTTransparencyCheckSession( L.1, fields.1, session.1 ) @ #t1.1)) ∧
         ((L.1 = L) ∧ (¬(L = L.1)))))"
 /*
 guarded formula characterizing all counter-examples:
 "∃ L M fields session #t #t1.
-  (AssertsNot( M, 'This loggers log currently includes these fields.', L,
-               <fields, session>
+  (Asserts( M, 'This loggers log currently does not include these fields.',
+            L, <fields, session>
    ) @ #t) ∧
   (CTTransparencyCheckSession( L, fields, session ) @ #t1)
  ∧
   ∃ L.1 M.1 fields.1 session.1 #t.1 #t1.1.
-   (AssertsNot( M.1, 'This loggers log currently includes these fields.',
-                L.1, <fields.1, session.1>
+   (Asserts( M.1,
+             'This loggers log currently does not include these fields.', L.1,
+             <fields.1, session.1>
     ) @ #t.1) ∧
    (CTTransparencyCheckSession( L.1, fields.1, session.1 ) @ #t1.1) ∧
    (L.1 = L)
@@ -3964,16 +3870,17 @@ by sorry
 lemma T_CT_1_client_inclusionViol_uniq:
   all-traces
   "∀ L M fields session #t #t1.
-    ((AssertsNot( M, 'This loggers log currently includes these fields.', L,
-                  <fields, session>
+    ((Asserts( M,
+               'This loggers log currently does not include these fields.', L,
+               <fields, session>
       ) @ #t) ∧
      (CTTransparencyCheckSession( L, fields, session ) @ #t1)) ⇒
     (∃ #i. Corrupted( L ) @ #i)"
 /*
 guarded formula characterizing all counter-examples:
 "∃ L M fields session #t #t1.
-  (AssertsNot( M, 'This loggers log currently includes these fields.', L,
-               <fields, session>
+  (Asserts( M, 'This loggers log currently does not include these fields.',
+            L, <fields, session>
    ) @ #t) ∧
   (CTTransparencyCheckSession( L, fields, session ) @ #t1)
  ∧
@@ -3992,27 +3899,30 @@ by sorry
 lemma T_CT_1_client_inclusionViol_single:
   exists-trace
   "∃ L M fields session #t #t1.
-    ((AssertsNot( M, 'This loggers log currently includes these fields.', L,
-                  <fields, session>
+    ((Asserts( M,
+               'This loggers log currently does not include these fields.', L,
+               <fields, session>
       ) @ #t) ∧
      (CTTransparencyCheckSession( L, fields, session ) @ #t1)) ∧
     (∀ L.1 M.1 fields.1 session.1 #t.1 #t1.1.
-      ((AssertsNot( M.1, 'This loggers log currently includes these fields.',
-                    L.1, <fields.1, session.1>
+      ((Asserts( M.1,
+                 'This loggers log currently does not include these fields.', L.1,
+                 <fields.1, session.1>
         ) @ #t.1) ∧
        (CTTransparencyCheckSession( L.1, fields.1, session.1 ) @ #t1.1)) ⇒
       (L.1 = L))"
 /*
 guarded formula characterizing all satisfying traces:
 "∃ L M fields session #t #t1.
-  (AssertsNot( M, 'This loggers log currently includes these fields.', L,
-               <fields, session>
+  (Asserts( M, 'This loggers log currently does not include these fields.',
+            L, <fields, session>
    ) @ #t) ∧
   (CTTransparencyCheckSession( L, fields, session ) @ #t1)
  ∧
   ∀ L.1 M.1 fields.1 session.1 #t.1 #t1.1.
-   (AssertsNot( M.1, 'This loggers log currently includes these fields.',
-                L.1, <fields.1, session.1>
+   (Asserts( M.1,
+             'This loggers log currently does not include these fields.', L.1,
+             <fields.1, session.1>
     ) @ #t.1) ∧
    (CTTransparencyCheckSession( L.1, fields.1, session.1 ) @ #t1.1)
   ⇒
@@ -4501,7 +4411,505 @@ guarded formula characterizing all satisfying traces:
 */
 by sorry
 
-lemma A_CT_2_ca_rogue_honest_log_suff:
+lemma A_CT_2_ca_rogue_honest_mon_suff:
+  exists-trace
+  "∃ CA M rootCA fields ca_fields #t0 #t1 #t2.
+    (((((CTCheck( M, fields, CA, ca_fields ) @ #t0) ∧
+        (Asserts( M, 'Blame this CA.', CA, <fields, ca_fields> ) @ #t1)) ∧
+       (Asserts( rootCA, 'I signed this intermediate CA.', CA, ca_fields
+        ) @ #t2)) ∧
+      (¬(∃ #t. CompromiseMonitor( M ) @ #t))) ∧
+     (∀ CA.1 M.1 rootCA.1 fields.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+       ((((CTCheck( M.1, fields.1, CA.1, ca_fields.1 ) @ #t0.1) ∧
+          (Asserts( M.1, 'Blame this CA.', CA.1, <fields.1, ca_fields.1>
+           ) @ #t1.1)) ∧
+         (Asserts( rootCA.1, 'I signed this intermediate CA.', CA.1, ca_fields.1
+          ) @ #t2.1)) ∧
+        (¬(∃ #t. CompromiseMonitor( M.1 ) @ #t))) ⇒
+       (CA.1 = CA))) ∧
+    ((∀ a #i. (Corrupted( a ) @ #i) ⇒ (a = CA)) ∧
+     (¬(∃ rootCA.1 M.1 CA.1 fields.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+         (((CTCheck( M.1, fields.1, CA.1, ca_fields.1 ) @ #t0.1) ∧
+           (Asserts( M.1, 'Blame this CA.', CA.1, <fields.1, ca_fields.1>
+            ) @ #t1.1)) ∧
+          (Asserts( 'CCADB', 'No root CA signed this CA.', CA.1,
+                    <ca_fields.1, rootCA.1>
+           ) @ #t2.1)) ∧
+         (¬(∃ #t. CompromiseMonitor( M.1 ) @ #t)))))"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ CA M rootCA fields ca_fields #t0 #t1 #t2.
+  (CTCheck( M, fields, CA, ca_fields ) @ #t0) ∧
+  (Asserts( M, 'Blame this CA.', CA, <fields, ca_fields> ) @ #t1) ∧
+  (Asserts( rootCA, 'I signed this intermediate CA.', CA, ca_fields
+   ) @ #t2)
+ ∧
+  (∀ #t. (CompromiseMonitor( M ) @ #t) ⇒ ⊥) ∧
+  (∀ CA.1 M.1 rootCA.1 fields.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+    (CTCheck( M.1, fields.1, CA.1, ca_fields.1 ) @ #t0.1) ∧
+    (Asserts( M.1, 'Blame this CA.', CA.1, <fields.1, ca_fields.1>
+     ) @ #t1.1) ∧
+    (Asserts( rootCA.1, 'I signed this intermediate CA.', CA.1, ca_fields.1
+     ) @ #t2.1)
+   ⇒
+    ((∃ #t. (CompromiseMonitor( M.1 ) @ #t)) ∨ (CA.1 = CA))) ∧
+  (∀ a #i. (Corrupted( a ) @ #i) ⇒ a = CA) ∧
+  (∀ rootCA.1 M.1 CA.1 fields.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+    (CTCheck( M.1, fields.1, CA.1, ca_fields.1 ) @ #t0.1) ∧
+    (Asserts( M.1, 'Blame this CA.', CA.1, <fields.1, ca_fields.1>
+     ) @ #t1.1) ∧
+    (Asserts( 'CCADB', 'No root CA signed this CA.', CA.1,
+              <ca_fields.1, rootCA.1>
+     ) @ #t2.1)
+   ⇒
+    ∃ #t. (CompromiseMonitor( M.1 ) @ #t))"
+*/
+by sorry
+
+lemma A_CT_2_root_ca_rogue_honest_mon_suff:
+  exists-trace
+  "∃ rootCA M CA fields ca_fields #t0 #t1 #t2.
+    (((((CTCheck( M, fields, CA, ca_fields ) @ #t0) ∧
+        (Asserts( M, 'Blame this CA.', CA, <fields, ca_fields> ) @ #t1)) ∧
+       (Asserts( 'CCADB', 'No root CA signed this CA.', CA, <ca_fields, rootCA>
+        ) @ #t2)) ∧
+      (¬(∃ #t. CompromiseMonitor( M ) @ #t))) ∧
+     (∀ rootCA.1 M.1 CA.1 fields.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+       ((((CTCheck( M.1, fields.1, CA.1, ca_fields.1 ) @ #t0.1) ∧
+          (Asserts( M.1, 'Blame this CA.', CA.1, <fields.1, ca_fields.1>
+           ) @ #t1.1)) ∧
+         (Asserts( 'CCADB', 'No root CA signed this CA.', CA.1,
+                   <ca_fields.1, rootCA.1>
+          ) @ #t2.1)) ∧
+        (¬(∃ #t. CompromiseMonitor( M.1 ) @ #t))) ⇒
+       (rootCA.1 = rootCA))) ∧
+    ((∀ a #i. (Corrupted( a ) @ #i) ⇒ (a = rootCA)) ∧
+     (¬(∃ CA.1 M.1 rootCA.1 fields.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+         (((CTCheck( M.1, fields.1, CA.1, ca_fields.1 ) @ #t0.1) ∧
+           (Asserts( M.1, 'Blame this CA.', CA.1, <fields.1, ca_fields.1>
+            ) @ #t1.1)) ∧
+          (Asserts( rootCA.1, 'I signed this intermediate CA.', CA.1, ca_fields.1
+           ) @ #t2.1)) ∧
+         (¬(∃ #t. CompromiseMonitor( M.1 ) @ #t)))))"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ rootCA M CA fields ca_fields #t0 #t1 #t2.
+  (CTCheck( M, fields, CA, ca_fields ) @ #t0) ∧
+  (Asserts( M, 'Blame this CA.', CA, <fields, ca_fields> ) @ #t1) ∧
+  (Asserts( 'CCADB', 'No root CA signed this CA.', CA, <ca_fields, rootCA>
+   ) @ #t2)
+ ∧
+  (∀ #t. (CompromiseMonitor( M ) @ #t) ⇒ ⊥) ∧
+  (∀ rootCA.1 M.1 CA.1 fields.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+    (CTCheck( M.1, fields.1, CA.1, ca_fields.1 ) @ #t0.1) ∧
+    (Asserts( M.1, 'Blame this CA.', CA.1, <fields.1, ca_fields.1>
+     ) @ #t1.1) ∧
+    (Asserts( 'CCADB', 'No root CA signed this CA.', CA.1,
+              <ca_fields.1, rootCA.1>
+     ) @ #t2.1)
+   ⇒
+    ((∃ #t. (CompromiseMonitor( M.1 ) @ #t)) ∨ (rootCA.1 = rootCA))) ∧
+  (∀ a #i. (Corrupted( a ) @ #i) ⇒ a = rootCA) ∧
+  (∀ CA.1 M.1 rootCA.1 fields.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+    (CTCheck( M.1, fields.1, CA.1, ca_fields.1 ) @ #t0.1) ∧
+    (Asserts( M.1, 'Blame this CA.', CA.1, <fields.1, ca_fields.1>
+     ) @ #t1.1) ∧
+    (Asserts( rootCA.1, 'I signed this intermediate CA.', CA.1, ca_fields.1
+     ) @ #t2.1)
+   ⇒
+    ∃ #t. (CompromiseMonitor( M.1 ) @ #t))"
+*/
+by sorry
+
+lemma A_CT_2_verif_empty:
+  all-traces
+  "(¬((∃ CA M rootCA fields ca_fields #t0 #t1 #t2.
+        (((CTCheck( M, fields, CA, ca_fields ) @ #t0) ∧
+          (Asserts( M, 'Blame this CA.', CA, <fields, ca_fields> ) @ #t1)) ∧
+         (Asserts( rootCA, 'I signed this intermediate CA.', CA, ca_fields
+          ) @ #t2)) ∧
+        (¬(∃ #t. CompromiseMonitor( M ) @ #t))) ∨
+      (∃ rootCA M CA fields ca_fields #t0 #t1 #t2.
+        (((CTCheck( M, fields, CA, ca_fields ) @ #t0) ∧
+          (Asserts( M, 'Blame this CA.', CA, <fields, ca_fields> ) @ #t1)) ∧
+         (Asserts( 'CCADB', 'No root CA signed this CA.', CA, <ca_fields, rootCA>
+          ) @ #t2)) ∧
+        (¬(∃ #t. CompromiseMonitor( M ) @ #t))))) ⇒
+   (∀ CA fields rootCA ca_fields L1 L2 M #t0 #t1.
+     (((CTCheck( M, fields, CA, ca_fields ) @ #t0) ∧
+       (BrowserAcceptsChain( CA, fields, rootCA, ca_fields, L1, L2 ) @ #t1)) ∧
+      (¬(∃ #t. CompromiseMonitor( M ) @ #t))) ⇒
+     (∃ #t. GroundTruth( CA, fields ) @ #t))"
+/*
+guarded formula characterizing all counter-examples:
+"(∀ CA M rootCA fields ca_fields #t0 #t1 #t2.
+   (CTCheck( M, fields, CA, ca_fields ) @ #t0) ∧
+   (Asserts( M, 'Blame this CA.', CA, <fields, ca_fields> ) @ #t1) ∧
+   (Asserts( rootCA, 'I signed this intermediate CA.', CA, ca_fields
+    ) @ #t2)
+  ⇒
+   ∃ #t. (CompromiseMonitor( M ) @ #t)) ∧
+ (∀ rootCA M CA fields ca_fields #t0 #t1 #t2.
+   (CTCheck( M, fields, CA, ca_fields ) @ #t0) ∧
+   (Asserts( M, 'Blame this CA.', CA, <fields, ca_fields> ) @ #t1) ∧
+   (Asserts( 'CCADB', 'No root CA signed this CA.', CA, <ca_fields, rootCA>
+    ) @ #t2)
+  ⇒
+   ∃ #t. (CompromiseMonitor( M ) @ #t)) ∧
+ (∃ CA fields rootCA ca_fields L1 L2 M #t0 #t1.
+   (CTCheck( M, fields, CA, ca_fields ) @ #t0) ∧
+   (BrowserAcceptsChain( CA, fields, rootCA, ca_fields, L1, L2 ) @ #t1)
+  ∧
+   (∀ #t. (CompromiseMonitor( M ) @ #t) ⇒ ⊥) ∧
+   (∀ #t. (GroundTruth( CA, fields ) @ #t) ⇒ ⊥))"
+*/
+by sorry
+
+lemma A_CT_2_ca_rogue_honest_mon_verif_nonempty:
+  all-traces
+  "∀ CA M rootCA fields ca_fields #t0 #t1 #t2.
+    ((((CTCheck( M, fields, CA, ca_fields ) @ #t0) ∧
+       (Asserts( M, 'Blame this CA.', CA, <fields, ca_fields> ) @ #t1)) ∧
+      (Asserts( rootCA, 'I signed this intermediate CA.', CA, ca_fields
+       ) @ #t2)) ∧
+     (¬(∃ #t. CompromiseMonitor( M ) @ #t))) ⇒
+    (¬(∀ CA.1 fields.1 rootCA.1 ca_fields.1 L1 L2 M.1 #t0.1 #t1.1.
+        (((CTCheck( M.1, fields.1, CA.1, ca_fields.1 ) @ #t0.1) ∧
+          (BrowserAcceptsChain( CA.1, fields.1, rootCA.1, ca_fields.1, L1, L2
+           ) @ #t1.1)) ∧
+         (¬(∃ #t. CompromiseMonitor( M.1 ) @ #t))) ⇒
+        (∃ #t. GroundTruth( CA.1, fields.1 ) @ #t)))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ CA M rootCA fields ca_fields #t0 #t1 #t2.
+  (CTCheck( M, fields, CA, ca_fields ) @ #t0) ∧
+  (Asserts( M, 'Blame this CA.', CA, <fields, ca_fields> ) @ #t1) ∧
+  (Asserts( rootCA, 'I signed this intermediate CA.', CA, ca_fields
+   ) @ #t2)
+ ∧
+  (∀ #t. (CompromiseMonitor( M ) @ #t) ⇒ ⊥) ∧
+  (∀ CA.1 fields.1 rootCA.1 ca_fields.1 L1 L2 M.1 #t0.1 #t1.1.
+    (CTCheck( M.1, fields.1, CA.1, ca_fields.1 ) @ #t0.1) ∧
+    (BrowserAcceptsChain( CA.1, fields.1, rootCA.1, ca_fields.1, L1, L2
+     ) @ #t1.1)
+   ⇒
+    ((∃ #t. (CompromiseMonitor( M.1 ) @ #t)) ∨
+     (∃ #t. (GroundTruth( CA.1, fields.1 ) @ #t))))"
+*/
+by sorry
+
+lemma A_CT_2_root_ca_rogue_honest_mon_verif_nonempty:
+  all-traces
+  "∀ rootCA M CA fields ca_fields #t0 #t1 #t2.
+    ((((CTCheck( M, fields, CA, ca_fields ) @ #t0) ∧
+       (Asserts( M, 'Blame this CA.', CA, <fields, ca_fields> ) @ #t1)) ∧
+      (Asserts( 'CCADB', 'No root CA signed this CA.', CA, <ca_fields, rootCA>
+       ) @ #t2)) ∧
+     (¬(∃ #t. CompromiseMonitor( M ) @ #t))) ⇒
+    (¬(∀ CA.1 fields.1 rootCA.1 ca_fields.1 L1 L2 M.1 #t0.1 #t1.1.
+        (((CTCheck( M.1, fields.1, CA.1, ca_fields.1 ) @ #t0.1) ∧
+          (BrowserAcceptsChain( CA.1, fields.1, rootCA.1, ca_fields.1, L1, L2
+           ) @ #t1.1)) ∧
+         (¬(∃ #t. CompromiseMonitor( M.1 ) @ #t))) ⇒
+        (∃ #t. GroundTruth( CA.1, fields.1 ) @ #t)))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ rootCA M CA fields ca_fields #t0 #t1 #t2.
+  (CTCheck( M, fields, CA, ca_fields ) @ #t0) ∧
+  (Asserts( M, 'Blame this CA.', CA, <fields, ca_fields> ) @ #t1) ∧
+  (Asserts( 'CCADB', 'No root CA signed this CA.', CA, <ca_fields, rootCA>
+   ) @ #t2)
+ ∧
+  (∀ #t. (CompromiseMonitor( M ) @ #t) ⇒ ⊥) ∧
+  (∀ CA.1 fields.1 rootCA.1 ca_fields.1 L1 L2 M.1 #t0.1 #t1.1.
+    (CTCheck( M.1, fields.1, CA.1, ca_fields.1 ) @ #t0.1) ∧
+    (BrowserAcceptsChain( CA.1, fields.1, rootCA.1, ca_fields.1, L1, L2
+     ) @ #t1.1)
+   ⇒
+    ((∃ #t. (CompromiseMonitor( M.1 ) @ #t)) ∨
+     (∃ #t. (GroundTruth( CA.1, fields.1 ) @ #t))))"
+*/
+by sorry
+
+lemma A_CT_2_ca_rogue_honest_mon_min:
+  all-traces
+  "∀ CA M rootCA fields ca_fields #t0 #t1 #t2.
+    ((((CTCheck( M, fields, CA, ca_fields ) @ #t0) ∧
+       (Asserts( M, 'Blame this CA.', CA, <fields, ca_fields> ) @ #t1)) ∧
+      (Asserts( rootCA, 'I signed this intermediate CA.', CA, ca_fields
+       ) @ #t2)) ∧
+     (¬(∃ #t. CompromiseMonitor( M ) @ #t))) ⇒
+    ((¬(∃ CA.1 M.1 rootCA.1 fields.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+         ((((CTCheck( M.1, fields.1, CA.1, ca_fields.1 ) @ #t0.1) ∧
+            (Asserts( M.1, 'Blame this CA.', CA.1, <fields.1, ca_fields.1>
+             ) @ #t1.1)) ∧
+           (Asserts( rootCA.1, 'I signed this intermediate CA.', CA.1, ca_fields.1
+            ) @ #t2.1)) ∧
+          (¬(∃ #t. CompromiseMonitor( M.1 ) @ #t))) ∧
+         ((CA.1 = CA) ∧ (¬(CA = CA.1))))) ∧
+     (¬(∃ rootCA.1 M.1 CA.1 fields.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+         ((((CTCheck( M.1, fields.1, CA.1, ca_fields.1 ) @ #t0.1) ∧
+            (Asserts( M.1, 'Blame this CA.', CA.1, <fields.1, ca_fields.1>
+             ) @ #t1.1)) ∧
+           (Asserts( 'CCADB', 'No root CA signed this CA.', CA.1,
+                     <ca_fields.1, rootCA.1>
+            ) @ #t2.1)) ∧
+          (¬(∃ #t. CompromiseMonitor( M.1 ) @ #t))) ∧
+         ((rootCA.1 = CA) ∧ (¬(CA = rootCA.1))))))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ CA M rootCA fields ca_fields #t0 #t1 #t2.
+  (CTCheck( M, fields, CA, ca_fields ) @ #t0) ∧
+  (Asserts( M, 'Blame this CA.', CA, <fields, ca_fields> ) @ #t1) ∧
+  (Asserts( rootCA, 'I signed this intermediate CA.', CA, ca_fields
+   ) @ #t2)
+ ∧
+  (∀ #t. (CompromiseMonitor( M ) @ #t) ⇒ ⊥) ∧
+  (((∃ CA.1 M.1 rootCA.1 fields.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+      (CTCheck( M.1, fields.1, CA.1, ca_fields.1 ) @ #t0.1) ∧
+      (Asserts( M.1, 'Blame this CA.', CA.1, <fields.1, ca_fields.1>
+       ) @ #t1.1) ∧
+      (Asserts( rootCA.1, 'I signed this intermediate CA.', CA.1, ca_fields.1
+       ) @ #t2.1) ∧
+      (CA.1 = CA)
+     ∧
+      (∀ #t. (CompromiseMonitor( M.1 ) @ #t) ⇒ ⊥) ∧ (¬(CA = CA.1))) ∨
+    (∃ rootCA.1 M.1 CA.1 fields.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+      (CTCheck( M.1, fields.1, CA.1, ca_fields.1 ) @ #t0.1) ∧
+      (Asserts( M.1, 'Blame this CA.', CA.1, <fields.1, ca_fields.1>
+       ) @ #t1.1) ∧
+      (Asserts( 'CCADB', 'No root CA signed this CA.', CA.1,
+                <ca_fields.1, rootCA.1>
+       ) @ #t2.1) ∧
+      (rootCA.1 = CA)
+     ∧
+      (∀ #t. (CompromiseMonitor( M.1 ) @ #t) ⇒ ⊥) ∧ (¬(CA = rootCA.1)))))"
+*/
+by sorry
+
+lemma A_CT_2_root_ca_rogue_honest_mon_min:
+  all-traces
+  "∀ rootCA M CA fields ca_fields #t0 #t1 #t2.
+    ((((CTCheck( M, fields, CA, ca_fields ) @ #t0) ∧
+       (Asserts( M, 'Blame this CA.', CA, <fields, ca_fields> ) @ #t1)) ∧
+      (Asserts( 'CCADB', 'No root CA signed this CA.', CA, <ca_fields, rootCA>
+       ) @ #t2)) ∧
+     (¬(∃ #t. CompromiseMonitor( M ) @ #t))) ⇒
+    ((¬(∃ CA.1 M.1 rootCA.1 fields.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+         ((((CTCheck( M.1, fields.1, CA.1, ca_fields.1 ) @ #t0.1) ∧
+            (Asserts( M.1, 'Blame this CA.', CA.1, <fields.1, ca_fields.1>
+             ) @ #t1.1)) ∧
+           (Asserts( rootCA.1, 'I signed this intermediate CA.', CA.1, ca_fields.1
+            ) @ #t2.1)) ∧
+          (¬(∃ #t. CompromiseMonitor( M.1 ) @ #t))) ∧
+         ((CA.1 = rootCA) ∧ (¬(rootCA = CA.1))))) ∧
+     (¬(∃ rootCA.1 M.1 CA.1 fields.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+         ((((CTCheck( M.1, fields.1, CA.1, ca_fields.1 ) @ #t0.1) ∧
+            (Asserts( M.1, 'Blame this CA.', CA.1, <fields.1, ca_fields.1>
+             ) @ #t1.1)) ∧
+           (Asserts( 'CCADB', 'No root CA signed this CA.', CA.1,
+                     <ca_fields.1, rootCA.1>
+            ) @ #t2.1)) ∧
+          (¬(∃ #t. CompromiseMonitor( M.1 ) @ #t))) ∧
+         ((rootCA.1 = rootCA) ∧ (¬(rootCA = rootCA.1))))))"
+/*
+guarded formula characterizing all counter-examples:
+"∃ rootCA M CA fields ca_fields #t0 #t1 #t2.
+  (CTCheck( M, fields, CA, ca_fields ) @ #t0) ∧
+  (Asserts( M, 'Blame this CA.', CA, <fields, ca_fields> ) @ #t1) ∧
+  (Asserts( 'CCADB', 'No root CA signed this CA.', CA, <ca_fields, rootCA>
+   ) @ #t2)
+ ∧
+  (∀ #t. (CompromiseMonitor( M ) @ #t) ⇒ ⊥) ∧
+  (((∃ CA.1 M.1 rootCA.1 fields.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+      (CTCheck( M.1, fields.1, CA.1, ca_fields.1 ) @ #t0.1) ∧
+      (Asserts( M.1, 'Blame this CA.', CA.1, <fields.1, ca_fields.1>
+       ) @ #t1.1) ∧
+      (Asserts( rootCA.1, 'I signed this intermediate CA.', CA.1, ca_fields.1
+       ) @ #t2.1) ∧
+      (CA.1 = rootCA)
+     ∧
+      (∀ #t. (CompromiseMonitor( M.1 ) @ #t) ⇒ ⊥) ∧ (¬(rootCA = CA.1))) ∨
+    (∃ rootCA.1 M.1 CA.1 fields.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+      (CTCheck( M.1, fields.1, CA.1, ca_fields.1 ) @ #t0.1) ∧
+      (Asserts( M.1, 'Blame this CA.', CA.1, <fields.1, ca_fields.1>
+       ) @ #t1.1) ∧
+      (Asserts( 'CCADB', 'No root CA signed this CA.', CA.1,
+                <ca_fields.1, rootCA.1>
+       ) @ #t2.1) ∧
+      (rootCA.1 = rootCA)
+     ∧
+      (∀ #t. (CompromiseMonitor( M.1 ) @ #t) ⇒ ⊥) ∧ (¬(rootCA = rootCA.1)))))"
+*/
+by sorry
+
+lemma A_CT_2_ca_rogue_honest_mon_uniq:
+  all-traces
+  "∀ CA M rootCA fields ca_fields #t0 #t1 #t2.
+    ((((CTCheck( M, fields, CA, ca_fields ) @ #t0) ∧
+       (Asserts( M, 'Blame this CA.', CA, <fields, ca_fields> ) @ #t1)) ∧
+      (Asserts( rootCA, 'I signed this intermediate CA.', CA, ca_fields
+       ) @ #t2)) ∧
+     (¬(∃ #t. CompromiseMonitor( M ) @ #t))) ⇒
+    (∃ #i. Corrupted( CA ) @ #i)"
+/*
+guarded formula characterizing all counter-examples:
+"∃ CA M rootCA fields ca_fields #t0 #t1 #t2.
+  (CTCheck( M, fields, CA, ca_fields ) @ #t0) ∧
+  (Asserts( M, 'Blame this CA.', CA, <fields, ca_fields> ) @ #t1) ∧
+  (Asserts( rootCA, 'I signed this intermediate CA.', CA, ca_fields
+   ) @ #t2)
+ ∧
+  (∀ #t. (CompromiseMonitor( M ) @ #t) ⇒ ⊥) ∧
+  (∀ #i. (Corrupted( CA ) @ #i) ⇒ ⊥)"
+*/
+by sorry
+
+lemma A_CT_2_root_ca_rogue_honest_mon_uniq:
+  all-traces
+  "∀ rootCA M CA fields ca_fields #t0 #t1 #t2.
+    ((((CTCheck( M, fields, CA, ca_fields ) @ #t0) ∧
+       (Asserts( M, 'Blame this CA.', CA, <fields, ca_fields> ) @ #t1)) ∧
+      (Asserts( 'CCADB', 'No root CA signed this CA.', CA, <ca_fields, rootCA>
+       ) @ #t2)) ∧
+     (¬(∃ #t. CompromiseMonitor( M ) @ #t))) ⇒
+    (∃ #i. Corrupted( rootCA ) @ #i)"
+/*
+guarded formula characterizing all counter-examples:
+"∃ rootCA M CA fields ca_fields #t0 #t1 #t2.
+  (CTCheck( M, fields, CA, ca_fields ) @ #t0) ∧
+  (Asserts( M, 'Blame this CA.', CA, <fields, ca_fields> ) @ #t1) ∧
+  (Asserts( 'CCADB', 'No root CA signed this CA.', CA, <ca_fields, rootCA>
+   ) @ #t2)
+ ∧
+  (∀ #t. (CompromiseMonitor( M ) @ #t) ⇒ ⊥) ∧
+  (∀ #i. (Corrupted( rootCA ) @ #i) ⇒ ⊥)"
+*/
+by sorry
+
+lemma A_CT_2_ca_rogue_honest_mon_inj:
+  all-traces "⊤"
+/*
+guarded formula characterizing all counter-examples:
+"⊥"
+*/
+by sorry
+
+lemma A_CT_2_root_ca_rogue_honest_mon_inj:
+  all-traces "⊤"
+/*
+guarded formula characterizing all counter-examples:
+"⊥"
+*/
+by sorry
+
+lemma A_CT_2_ca_rogue_honest_mon_single:
+  exists-trace
+  "∃ CA M rootCA fields ca_fields #t0 #t1 #t2.
+    (((((CTCheck( M, fields, CA, ca_fields ) @ #t0) ∧
+        (Asserts( M, 'Blame this CA.', CA, <fields, ca_fields> ) @ #t1)) ∧
+       (Asserts( rootCA, 'I signed this intermediate CA.', CA, ca_fields
+        ) @ #t2)) ∧
+      (¬(∃ #t. CompromiseMonitor( M ) @ #t))) ∧
+     (∀ CA.1 M.1 rootCA.1 fields.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+       ((((CTCheck( M.1, fields.1, CA.1, ca_fields.1 ) @ #t0.1) ∧
+          (Asserts( M.1, 'Blame this CA.', CA.1, <fields.1, ca_fields.1>
+           ) @ #t1.1)) ∧
+         (Asserts( rootCA.1, 'I signed this intermediate CA.', CA.1, ca_fields.1
+          ) @ #t2.1)) ∧
+        (¬(∃ #t. CompromiseMonitor( M.1 ) @ #t))) ⇒
+       (CA.1 = CA))) ∧
+    (¬(∃ rootCA.1 M.1 CA.1 fields.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+        (((CTCheck( M.1, fields.1, CA.1, ca_fields.1 ) @ #t0.1) ∧
+          (Asserts( M.1, 'Blame this CA.', CA.1, <fields.1, ca_fields.1>
+           ) @ #t1.1)) ∧
+         (Asserts( 'CCADB', 'No root CA signed this CA.', CA.1,
+                   <ca_fields.1, rootCA.1>
+          ) @ #t2.1)) ∧
+        (¬(∃ #t. CompromiseMonitor( M.1 ) @ #t))))"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ CA M rootCA fields ca_fields #t0 #t1 #t2.
+  (CTCheck( M, fields, CA, ca_fields ) @ #t0) ∧
+  (Asserts( M, 'Blame this CA.', CA, <fields, ca_fields> ) @ #t1) ∧
+  (Asserts( rootCA, 'I signed this intermediate CA.', CA, ca_fields
+   ) @ #t2)
+ ∧
+  (∀ #t. (CompromiseMonitor( M ) @ #t) ⇒ ⊥) ∧
+  (∀ CA.1 M.1 rootCA.1 fields.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+    (CTCheck( M.1, fields.1, CA.1, ca_fields.1 ) @ #t0.1) ∧
+    (Asserts( M.1, 'Blame this CA.', CA.1, <fields.1, ca_fields.1>
+     ) @ #t1.1) ∧
+    (Asserts( rootCA.1, 'I signed this intermediate CA.', CA.1, ca_fields.1
+     ) @ #t2.1)
+   ⇒
+    ((∃ #t. (CompromiseMonitor( M.1 ) @ #t)) ∨ (CA.1 = CA))) ∧
+  (∀ rootCA.1 M.1 CA.1 fields.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+    (CTCheck( M.1, fields.1, CA.1, ca_fields.1 ) @ #t0.1) ∧
+    (Asserts( M.1, 'Blame this CA.', CA.1, <fields.1, ca_fields.1>
+     ) @ #t1.1) ∧
+    (Asserts( 'CCADB', 'No root CA signed this CA.', CA.1,
+              <ca_fields.1, rootCA.1>
+     ) @ #t2.1)
+   ⇒
+    ∃ #t. (CompromiseMonitor( M.1 ) @ #t))"
+*/
+by sorry
+
+lemma A_CT_2_root_ca_rogue_honest_mon_single:
+  exists-trace
+  "∃ rootCA M CA fields ca_fields #t0 #t1 #t2.
+    (((((CTCheck( M, fields, CA, ca_fields ) @ #t0) ∧
+        (Asserts( M, 'Blame this CA.', CA, <fields, ca_fields> ) @ #t1)) ∧
+       (Asserts( 'CCADB', 'No root CA signed this CA.', CA, <ca_fields, rootCA>
+        ) @ #t2)) ∧
+      (¬(∃ #t. CompromiseMonitor( M ) @ #t))) ∧
+     (∀ rootCA.1 M.1 CA.1 fields.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+       ((((CTCheck( M.1, fields.1, CA.1, ca_fields.1 ) @ #t0.1) ∧
+          (Asserts( M.1, 'Blame this CA.', CA.1, <fields.1, ca_fields.1>
+           ) @ #t1.1)) ∧
+         (Asserts( 'CCADB', 'No root CA signed this CA.', CA.1,
+                   <ca_fields.1, rootCA.1>
+          ) @ #t2.1)) ∧
+        (¬(∃ #t. CompromiseMonitor( M.1 ) @ #t))) ⇒
+       (rootCA.1 = rootCA))) ∧
+    (¬(∃ CA.1 M.1 rootCA.1 fields.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+        (((CTCheck( M.1, fields.1, CA.1, ca_fields.1 ) @ #t0.1) ∧
+          (Asserts( M.1, 'Blame this CA.', CA.1, <fields.1, ca_fields.1>
+           ) @ #t1.1)) ∧
+         (Asserts( rootCA.1, 'I signed this intermediate CA.', CA.1, ca_fields.1
+          ) @ #t2.1)) ∧
+        (¬(∃ #t. CompromiseMonitor( M.1 ) @ #t))))"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ rootCA M CA fields ca_fields #t0 #t1 #t2.
+  (CTCheck( M, fields, CA, ca_fields ) @ #t0) ∧
+  (Asserts( M, 'Blame this CA.', CA, <fields, ca_fields> ) @ #t1) ∧
+  (Asserts( 'CCADB', 'No root CA signed this CA.', CA, <ca_fields, rootCA>
+   ) @ #t2)
+ ∧
+  (∀ #t. (CompromiseMonitor( M ) @ #t) ⇒ ⊥) ∧
+  (∀ rootCA.1 M.1 CA.1 fields.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+    (CTCheck( M.1, fields.1, CA.1, ca_fields.1 ) @ #t0.1) ∧
+    (Asserts( M.1, 'Blame this CA.', CA.1, <fields.1, ca_fields.1>
+     ) @ #t1.1) ∧
+    (Asserts( 'CCADB', 'No root CA signed this CA.', CA.1,
+              <ca_fields.1, rootCA.1>
+     ) @ #t2.1)
+   ⇒
+    ((∃ #t. (CompromiseMonitor( M.1 ) @ #t)) ∨ (rootCA.1 = rootCA))) ∧
+  (∀ CA.1 M.1 rootCA.1 fields.1 ca_fields.1 #t0.1 #t1.1 #t2.1.
+    (CTCheck( M.1, fields.1, CA.1, ca_fields.1 ) @ #t0.1) ∧
+    (Asserts( M.1, 'Blame this CA.', CA.1, <fields.1, ca_fields.1>
+     ) @ #t1.1) ∧
+    (Asserts( rootCA.1, 'I signed this intermediate CA.', CA.1, ca_fields.1
+     ) @ #t2.1)
+   ⇒
+    ∃ #t. (CompromiseMonitor( M.1 ) @ #t))"
+*/
+by sorry
+
+lemma A_CT_3_ca_rogue_honest_log_suff:
   exists-trace
   "∃ CA M rootCA fields ca_fields #t0 #t1 #t2.
     ((((((CTCheck( M, fields, CA, ca_fields ) @ #t0) ∧
@@ -4563,7 +4971,7 @@ guarded formula characterizing all satisfying traces:
 */
 by sorry
 
-lemma A_CT_2_root_ca_rogue_honest_log_suff:
+lemma A_CT_3_root_ca_rogue_honest_log_suff:
   exists-trace
   "∃ rootCA M CA fields ca_fields #t0 #t1 #t2.
     ((((((CTCheck( M, fields, CA, ca_fields ) @ #t0) ∧
@@ -4625,7 +5033,7 @@ guarded formula characterizing all satisfying traces:
 */
 by sorry
 
-lemma A_CT_2_verif_empty:
+lemma A_CT_3_verif_empty:
   all-traces
   "(¬((∃ CA M rootCA fields ca_fields #t0 #t1 #t2.
         ((((CTCheck( M, fields, CA, ca_fields ) @ #t0) ∧
@@ -4675,7 +5083,7 @@ guarded formula characterizing all counter-examples:
 */
 by sorry
 
-lemma A_CT_2_ca_rogue_honest_log_verif_nonempty:
+lemma A_CT_3_ca_rogue_honest_log_verif_nonempty:
   all-traces
   "∀ CA M rootCA fields ca_fields #t0 #t1 #t2.
     (((((CTCheck( M, fields, CA, ca_fields ) @ #t0) ∧
@@ -4712,7 +5120,7 @@ guarded formula characterizing all counter-examples:
 */
 by sorry
 
-lemma A_CT_2_root_ca_rogue_honest_log_verif_nonempty:
+lemma A_CT_3_root_ca_rogue_honest_log_verif_nonempty:
   all-traces
   "∀ rootCA M CA fields ca_fields #t0 #t1 #t2.
     (((((CTCheck( M, fields, CA, ca_fields ) @ #t0) ∧
@@ -4749,7 +5157,7 @@ guarded formula characterizing all counter-examples:
 */
 by sorry
 
-lemma A_CT_2_ca_rogue_honest_log_min:
+lemma A_CT_3_ca_rogue_honest_log_min:
   all-traces
   "∀ CA M rootCA fields ca_fields #t0 #t1 #t2.
     (((((CTCheck( M, fields, CA, ca_fields ) @ #t0) ∧
@@ -4813,7 +5221,7 @@ guarded formula characterizing all counter-examples:
 */
 by sorry
 
-lemma A_CT_2_root_ca_rogue_honest_log_min:
+lemma A_CT_3_root_ca_rogue_honest_log_min:
   all-traces
   "∀ rootCA M CA fields ca_fields #t0 #t1 #t2.
     (((((CTCheck( M, fields, CA, ca_fields ) @ #t0) ∧
@@ -4877,7 +5285,7 @@ guarded formula characterizing all counter-examples:
 */
 by sorry
 
-lemma A_CT_2_ca_rogue_honest_log_uniq:
+lemma A_CT_3_ca_rogue_honest_log_uniq:
   all-traces
   "∀ CA M rootCA fields ca_fields #t0 #t1 #t2.
     (((((CTCheck( M, fields, CA, ca_fields ) @ #t0) ∧
@@ -4901,7 +5309,7 @@ guarded formula characterizing all counter-examples:
 */
 by sorry
 
-lemma A_CT_2_root_ca_rogue_honest_log_uniq:
+lemma A_CT_3_root_ca_rogue_honest_log_uniq:
   all-traces
   "∀ rootCA M CA fields ca_fields #t0 #t1 #t2.
     (((((CTCheck( M, fields, CA, ca_fields ) @ #t0) ∧
@@ -4925,7 +5333,7 @@ guarded formula characterizing all counter-examples:
 */
 by sorry
 
-lemma A_CT_2_ca_rogue_honest_log_inj:
+lemma A_CT_3_ca_rogue_honest_log_inj:
   all-traces "⊤"
 /*
 guarded formula characterizing all counter-examples:
@@ -4933,7 +5341,7 @@ guarded formula characterizing all counter-examples:
 */
 by sorry
 
-lemma A_CT_2_root_ca_rogue_honest_log_inj:
+lemma A_CT_3_root_ca_rogue_honest_log_inj:
   all-traces "⊤"
 /*
 guarded formula characterizing all counter-examples:
@@ -4941,7 +5349,7 @@ guarded formula characterizing all counter-examples:
 */
 by sorry
 
-lemma A_CT_2_ca_rogue_honest_log_single:
+lemma A_CT_3_ca_rogue_honest_log_single:
   exists-trace
   "∃ CA M rootCA fields ca_fields #t0 #t1 #t2.
     ((((((CTCheck( M, fields, CA, ca_fields ) @ #t0) ∧
@@ -5001,7 +5409,7 @@ guarded formula characterizing all satisfying traces:
 */
 by sorry
 
-lemma A_CT_2_root_ca_rogue_honest_log_single:
+lemma A_CT_3_root_ca_rogue_honest_log_single:
   exists-trace
   "∃ rootCA M CA fields ca_fields #t0 #t1 #t2.
     ((((((CTCheck( M, fields, CA, ca_fields ) @ #t0) ∧
@@ -5080,9 +5488,9 @@ by sorry
 /*
 Generated from:
 Tamarin version 1.10.0
-Maude version 3.4
+Maude version 2.7.1
 Git revision: UNKNOWN, branch: UNKNOWN
-Compiled at: 2025-11-06 13:03:12.032661 UTC
+Compiled at: 2024-10-30 14:56:23.355649243 UTC
 */
 
 end

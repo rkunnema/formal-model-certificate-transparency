@@ -1,5 +1,5 @@
 /*
- * Protocol: Certficate Transparency with additions for SCT Auditing, STH Gossiping
+ * Protocol: Certficate Transparency SCT Auditing
  * Modeler:  anonymized
  * Date:     July 2025
  * Sources:  RFC6962, RFC 9162, "Opt-in SCT Auditing", Emily Stark and Chris Thompson, and partly rooted on "Provable Security for PKI Schemes" by Wrótniak et al.
@@ -7,7 +7,7 @@
  * Notes:    consult README for instructions on evaluating this model
  */
 
-theory ct_audit
+theory sct_audit
 begin
 
 functions:
@@ -294,7 +294,7 @@ rule monitorCanFindCertificate [color= #f3d664]:
         Eq(verify(ca_sig, ca_fields, pkRootCA), true()),
         MonitorObservesEntry($M, $L, fields, <ca_fields, ca_sig>, sth, session), /* see restriction */
         BenignCert($iss, fields), /* cert is found benign, see restriction */
-        AssertsNot($M, 'Blame this CA.', $CA, <fields, ca_fields>),
+        Asserts($M, 'Do not blame this CA.', $CA, <fields, ca_fields>),
 
         Time($now),
         San_monitorCanFindCertificate()
@@ -310,7 +310,7 @@ rule monitorCannotFindCertificate [color= #f3d664]:
     [ !LoggerDict($M, $L), !TrackSubject($M, su), In(fields), In(cert_sig), In(ca_fields), In(ca_sig), !TLS_L_to_M($L, $M, $snapshot, sth, session, $time), !Root_CA($rootCA, pkRootCA) ]
     --[ 
         NothingObserved($M, $L, fields, sth, session), /* see restriction */
-        AssertsNot($M, 'Blame this CA.', $CA, <fields, ca_fields>),
+        Asserts($M, 'Do not blame this CA.', $CA, <fields, ca_fields>),
 
         Time($now),
         San_monitorCannotFindCertificate()
@@ -389,7 +389,7 @@ rule monitorAudit_no_viol:
         Eq(verify(ca_sig, ca_fields, pkRootCA), true()),
         _restrict((sct_to_audit = sct1) | (sct_to_audit = sct2)), /* only one sct at a time is considered */
         BenignCert($CA, fields), /* see restriction */
-        AssertsNot($M, 'This CA has the following fields and it failed the SCT audit for the following fields.', $CA, <fields, ca_fields>),
+        Asserts($M, 'This CA has the following fields and it passed the SCT audit for the following fields.', $CA, <fields, ca_fields>),
 
         Time($now),
         San_monitorAudit_no_viol(),
@@ -857,7 +857,7 @@ rule ParticipantFindsInclusionViolation [color= #e65208]:
     in
     [ !TLS_L_to_P($L, $P, $snapshot, sth, session, $time), !Logger($L, pkL),In(fields), In(ca_cert) /* entry to check for */ ]
     --[
-        AssertsNot($P, 'This loggers log currently includes these fields.', $L, <fields, session>),
+        Asserts($P, 'This loggers log currently does not include these fields.', $L, <fields, session>),
         InclusionProofFails($P, $L, fields, ca_cert, sth, session), /* entry is not contained in the snapshot, see restriction */
         
         Time($now),
@@ -929,7 +929,7 @@ rule ConsultDocumentation_Fails:
     [ In(ca_fields), In(ca_sig), !Root_CA($rootCA, pkRCA) ]
     --[
         UndocumentedIntermediateCA($rootCA, $CA, ca_fields), // see restriction externalCA_no_proof below
-        AssertsNot($rootCA, 'I signed this intermediate CA.', $CA, <ca_fields>),
+        Asserts('CCADB', 'No root CA signed this CA.', $CA, <ca_fields,$rootCA>),
         Eq(verify(ca_sig, ca_fields, pkRCA), true()), // signed by root CA
         ExternalCheckCCADB($rootCA, ca_fields),
         
@@ -949,34 +949,6 @@ restriction externalCA_no_proof:
 
 /*** Predicate Rules ***/
 
-/* CTCheck with CCADB check included */
-
-rule MonitorCheck_Found_CCADB:
-    [ !BAccept_State($CA, fields, $L1, $sct1, $L2, $sct2),
-      MonitorFoundCert($M, $L, fields, $CA, ca_fields, $time_of_proof_fetch, session), CCADBConsulted($rootCA, ca_fields) ]
-    --[ 
-        CTCheck($M, fields, $CA, ca_fields),
-        _restrict(($L1 = $L) | ($L2 = $L)),
-        
-        San_MonitorCheck_Found()
-    ]->
-    [  ]
-
-rule MonitorCheck_NotFound_CCADB:
-    [ !BAccept_State($CA, fields, $L1, $sct1, $L2, $sct2),
-      MonitorCouldNotFindCert($M, fields, $L1, $CA, ca_fields, $proof1, session1), MonitorCouldNotFindCert($M, fields, $L2, $CA, ca_fields, $proof2, session2),
-      CCADBConsulted($rootCA, ca_fields) ]
-    --[ 
-        CTCheck($M, fields, $CA, ca_fields),
-        MMD_passed($sct1, $proof1), // $sct < $time_of_proof_fetch => MMD passed for both
-        MMD_passed($sct2, $proof2),
-
-        San_MonitorCheck_NotFound()
-    ]->
-    [  ]
-
-/*  */
-
 restriction mmd_passed: // "before < after"
     "All before after #t2 #t1 #t0. 
         MMD_passed(before, after)@t2 & Time(before)@t0 & Time(after)@t1
@@ -985,6 +957,11 @@ restriction mmd_passed: // "before < after"
 
 // SCT Auditing Checks
 
+/*
+SCTAuditTransparencyCheck(). Contributed evidence.
+- Monitor (designated auditor), (and client): received a certificate chain with incorporated SCTs from a client
+- Participant: Inclusion proof (respecting MMD) after 
+*/
 rule SCTAuditTransparencyCheck_Success:
     let
         ca_fields = <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
@@ -1013,6 +990,10 @@ rule SCTAuditTransparencyCheck_Failed:
     ]->
     [  ]
 
+/* SCTAuditCheck(). Contributed evidence:
+- Monitor (designated auditor), (and client): received a certificate chain with incorporated SCTs from a client
+- CCADB Result of consulting the database for the legitimacy of the CA
+*/
 rule SCTAuditCheck:
     [ MAudit_SCT($M, $L, fields, ca_fields, $sct),
       CCADBConsulted($rootCA, ca_fields) ]
@@ -1073,7 +1054,7 @@ restriction time_monotonicity:
                                 & #t2 < #t3 ==> tp = t )"
 
 
-/* whenever a party checks the validity period of a certificate, that time must not happened before the check, i.e. the time did not pass yet */
+/* whenever a party checks the validity period of a certificate, that time must not happen before the check, i.e. the time did not pass yet */
 restriction certStillValid:
     "All currTime valid_till #t1.
         Time(currTime)@t1 & CheckValidUntil(currTime, valid_till)@t1
@@ -1413,21 +1394,6 @@ lemma san_ConsultDocumentation_Fails:
            (∃ rootCA. CompromiseRootCA( rootCA ) @ #t.1))"
 
 
-lemma san_MonitorCheck_Found:
-  exists-trace
-  "∃ #t.
-         (San_MonitorCheck_Found( ) @ #t) ∧
-         (¬(∃ #t.1. Compromise( ) @ #t.1))"
-
-
-lemma san_MonitorCheck_NotFound:
-  exists-trace
-  "∃ #t.
-         (San_MonitorCheck_NotFound( ) @ #t) ∧
-         (∀ #t.1.
-           (Compromise( ) @ #t.1) ⇒ (∃ L. CompromiseLogger( L ) @ #t.1))"
-
-
 lemma san_SCTAuditTransparencyCheck_Success:
   exists-trace
   "∃ #t.
@@ -1463,6 +1429,14 @@ lemma san_compromiseMonitor:
   exists-trace "∃ #t. San_compromiseMonitor( ) @ #t"
 
 
+lemma authenticity:
+  exists-trace
+  "∃ L1 L2 rootCA ca_fields CA fields #j.
+         (BrowserAcceptsChain( CA, fields, rootCA, ca_fields, L1, L2
+          ) @ #j) ∧
+         (¬(∃ #i. (GroundTruth( CA, fields ) @ #i) ∧ (#i < #j)))"
+
+
 lemma transparency_SCT_Auditing:
   all-traces
   "∀ CA fields rootCA ca_fields L1 L2 L #t1 #t2.
@@ -1490,8 +1464,8 @@ lemma A_uniq1_helper [reuse]:
 lemma A_uniq2_helper [reuse]:
   all-traces
   "∀ rootCA CA ca_fields #t.
-         (AssertsNot( rootCA, 'I signed this intermediate CA.', CA,
-                      ca_fields
+         (Asserts( 'CCADB', 'No root CA signed this CA.',
+                   CA, <ca_fields, rootCA>
           ) @ #t) ⇒
          (∃ #t.1. Corrupted( rootCA ) @ #t.1)"
 
@@ -1499,15 +1473,15 @@ lemma A_uniq2_helper [reuse]:
 lemma T_Audit_audit_inclusionViol_suff:
   exists-trace
   "∃ L M fields session #t #t1.
-         (((AssertsNot( M,
-                        'This loggers log currently includes these fields.', L,
-                        <fields, session>
+         (((Asserts( M,
+                     'This loggers log currently does not include these fields.',
+                     L, <fields, session>
             ) @ #t) ∧
            (SCTAuditTransparencyCheckSession( L, fields, session ) @ #t1)) ∧
           (∀ L.1 M.1 fields.1 session.1 #t.1 #t1.1.
-            ((AssertsNot( M.1,
-                          'This loggers log currently includes these fields.', L.1,
-                          <fields.1, session.1>
+            ((Asserts( M.1,
+                       'This loggers log currently does not include these fields.',
+                       L.1, <fields.1, session.1>
               ) @ #t.1) ∧
              (SCTAuditTransparencyCheckSession( L.1, fields.1, session.1
               ) @ #t1.1)) ⇒
@@ -1518,9 +1492,9 @@ lemma T_Audit_audit_inclusionViol_suff:
 lemma T_Audit_verif_empty:
   all-traces
   "(¬(∃ L M fields session #t #t1.
-            (AssertsNot( M,
-                         'This loggers log currently includes these fields.', L,
-                         <fields, session>
+            (Asserts( M,
+                      'This loggers log currently does not include these fields.',
+                      L, <fields, session>
              ) @ #t) ∧
             (SCTAuditTransparencyCheckSession( L, fields, session ) @ #t1))) ⇒
         (∀ CA fields rootCA ca_fields L1 L2 L #t1 #t2.
@@ -1535,9 +1509,9 @@ lemma T_Audit_verif_empty:
 lemma T_Audit_audit_inclusionViol_verif_nonempty:
   all-traces
   "∀ L M fields session #t #t1.
-         ((AssertsNot( M,
-                       'This loggers log currently includes these fields.', L,
-                       <fields, session>
+         ((Asserts( M,
+                    'This loggers log currently does not include these fields.',
+                    L, <fields, session>
            ) @ #t) ∧
           (SCTAuditTransparencyCheckSession( L, fields, session ) @ #t1)) ⇒
          (¬(∀ CA fields.1 rootCA ca_fields L1 L2 L.1 #t1.1 #t2.
@@ -1552,15 +1526,15 @@ lemma T_Audit_audit_inclusionViol_verif_nonempty:
 lemma T_Audit_audit_inclusionViol_min:
   all-traces
   "∀ L M fields session #t #t1.
-         ((AssertsNot( M,
-                       'This loggers log currently includes these fields.', L,
-                       <fields, session>
+         ((Asserts( M,
+                    'This loggers log currently does not include these fields.',
+                    L, <fields, session>
            ) @ #t) ∧
           (SCTAuditTransparencyCheckSession( L, fields, session ) @ #t1)) ⇒
          (¬(∃ L.1 M.1 fields.1 session.1 #t.1 #t1.1.
-             ((AssertsNot( M.1,
-                           'This loggers log currently includes these fields.', L.1,
-                           <fields.1, session.1>
+             ((Asserts( M.1,
+                        'This loggers log currently does not include these fields.',
+                        L.1, <fields.1, session.1>
                ) @ #t.1) ∧
               (SCTAuditTransparencyCheckSession( L.1, fields.1, session.1
                ) @ #t1.1)) ∧
@@ -1570,9 +1544,9 @@ lemma T_Audit_audit_inclusionViol_min:
 lemma T_Audit_audit_inclusionViol_uniq:
   all-traces
   "∀ L M fields session #t #t1.
-         ((AssertsNot( M,
-                       'This loggers log currently includes these fields.', L,
-                       <fields, session>
+         ((Asserts( M,
+                    'This loggers log currently does not include these fields.',
+                    L, <fields, session>
            ) @ #t) ∧
           (SCTAuditTransparencyCheckSession( L, fields, session ) @ #t1)) ⇒
          (∃ #i. Corrupted( L ) @ #i)"
@@ -1585,15 +1559,15 @@ lemma T_Audit_audit_inclusionViol_inj:
 lemma T_Audit_audit_inclusionViol_single:
   exists-trace
   "∃ L M fields session #t #t1.
-         ((AssertsNot( M,
-                       'This loggers log currently includes these fields.', L,
-                       <fields, session>
+         ((Asserts( M,
+                    'This loggers log currently does not include these fields.',
+                    L, <fields, session>
            ) @ #t) ∧
           (SCTAuditTransparencyCheckSession( L, fields, session ) @ #t1)) ∧
          (∀ L.1 M.1 fields.1 session.1 #t.1 #t1.1.
-           ((AssertsNot( M.1,
-                         'This loggers log currently includes these fields.', L.1,
-                         <fields.1, session.1>
+           ((Asserts( M.1,
+                      'This loggers log currently does not include these fields.',
+                      L.1, <fields.1, session.1>
              ) @ #t.1) ∧
             (SCTAuditTransparencyCheckSession( L.1, fields.1, session.1
              ) @ #t1.1)) ⇒
@@ -1630,8 +1604,8 @@ lemma A_CTAudit_1_ca_rogue_audit_mon_honest_suff:
                           'This CA has the following fields and it failed the SCT audit for the following fields.',
                           CA.1, <fields.1, ca_fields.1>
                  ) @ #t0.1)) ∧
-               (AssertsNot( rootCA.1, 'I signed this intermediate CA.',
-                            CA.1, ca_fields.1
+               (Asserts( 'CCADB', 'No root CA signed this CA.',
+                         CA.1, <ca_fields.1, rootCA.1>
                 ) @ #t1.1)) ∧
               (¬(∃ #t.2. Corrupted( M.1 ) @ #t.2)))))"
 
@@ -1644,8 +1618,8 @@ lemma A_CTAudit_1_root_ca_rogue_audit_mon_honest_suff:
                        'This CA has the following fields and it failed the SCT audit for the following fields.',
                        CA, <fields, ca_fields>
               ) @ #t0)) ∧
-            (AssertsNot( rootCA, 'I signed this intermediate CA.', CA,
-                         ca_fields
+            (Asserts( 'CCADB', 'No root CA signed this CA.',
+                      CA, <ca_fields, rootCA>
              ) @ #t1)) ∧
            (¬(∃ #t.1. Corrupted( M ) @ #t.1))) ∧
           (∀ rootCA.1 M.1 ca_fields.1 fields.1 CA.1 #t.1 #t0.1 #t1.1.
@@ -1654,8 +1628,8 @@ lemma A_CTAudit_1_root_ca_rogue_audit_mon_honest_suff:
                          'This CA has the following fields and it failed the SCT audit for the following fields.',
                          CA.1, <fields.1, ca_fields.1>
                 ) @ #t0.1)) ∧
-              (AssertsNot( rootCA.1, 'I signed this intermediate CA.',
-                           CA.1, ca_fields.1
+              (Asserts( 'CCADB', 'No root CA signed this CA.',
+                        CA.1, <ca_fields.1, rootCA.1>
                ) @ #t1.1)) ∧
              (¬(∃ #t.2. Corrupted( M.1 ) @ #t.2))) ⇒
             (rootCA.1 = rootCA))) ∧
@@ -1690,8 +1664,8 @@ lemma A_CTAudit_1_verif_empty:
                          'This CA has the following fields and it failed the SCT audit for the following fields.',
                          CA, <fields, ca_fields>
                 ) @ #t0)) ∧
-              (AssertsNot( rootCA, 'I signed this intermediate CA.', CA,
-                           ca_fields
+              (Asserts( 'CCADB', 'No root CA signed this CA.',
+                        CA, <ca_fields, rootCA>
                ) @ #t1)) ∧
              (¬(∃ #t.1. Corrupted( M ) @ #t.1))))) ⇒
         (∀ CA fields rootCA ca_fields L1 L2 M #t0 #t1.
@@ -1730,8 +1704,8 @@ lemma A_CTAudit_1_root_ca_rogue_audit_mon_honest_verif_nonempty:
                       'This CA has the following fields and it failed the SCT audit for the following fields.',
                       CA, <fields, ca_fields>
              ) @ #t0)) ∧
-           (AssertsNot( rootCA, 'I signed this intermediate CA.', CA,
-                        ca_fields
+           (Asserts( 'CCADB', 'No root CA signed this CA.',
+                     CA, <ca_fields, rootCA>
             ) @ #t1)) ∧
           (¬(∃ #t.1. Corrupted( M ) @ #t.1))) ⇒
          (¬(∀ CA.1 fields.1 rootCA.1 ca_fields.1 L1 L2 M.1 #t0.1 #t1.1.
@@ -1771,8 +1745,8 @@ lemma A_CTAudit_1_ca_rogue_audit_mon_honest_min:
                            'This CA has the following fields and it failed the SCT audit for the following fields.',
                            CA.1, <fields.1, ca_fields.1>
                   ) @ #t0.1)) ∧
-                (AssertsNot( rootCA.1, 'I signed this intermediate CA.',
-                             CA.1, ca_fields.1
+                (Asserts( 'CCADB', 'No root CA signed this CA.',
+                          CA.1, <ca_fields.1, rootCA.1>
                  ) @ #t1.1)) ∧
                (¬(∃ #t.2. Corrupted( M.1 ) @ #t.2))) ∧
               ((rootCA.1 = CA) ∧ (¬(CA = rootCA.1))))))"
@@ -1786,8 +1760,8 @@ lemma A_CTAudit_1_root_ca_rogue_audit_mon_honest_min:
                       'This CA has the following fields and it failed the SCT audit for the following fields.',
                       CA, <fields, ca_fields>
              ) @ #t0)) ∧
-           (AssertsNot( rootCA, 'I signed this intermediate CA.', CA,
-                        ca_fields
+           (Asserts( 'CCADB', 'No root CA signed this CA.',
+                     CA, <ca_fields, rootCA>
             ) @ #t1)) ∧
           (¬(∃ #t.1. Corrupted( M ) @ #t.1))) ⇒
          ((¬(∃ CA.1 M.1 ca_fields.1 fields.1 rootCA.1 #t.1 #t0.1 #t1.1.
@@ -1807,8 +1781,8 @@ lemma A_CTAudit_1_root_ca_rogue_audit_mon_honest_min:
                            'This CA has the following fields and it failed the SCT audit for the following fields.',
                            CA.1, <fields.1, ca_fields.1>
                   ) @ #t0.1)) ∧
-                (AssertsNot( rootCA.1, 'I signed this intermediate CA.',
-                             CA.1, ca_fields.1
+                (Asserts( 'CCADB', 'No root CA signed this CA.',
+                          CA.1, <ca_fields.1, rootCA.1>
                  ) @ #t1.1)) ∧
                (¬(∃ #t.2. Corrupted( M.1 ) @ #t.2))) ∧
               ((rootCA.1 = rootCA) ∧ (¬(rootCA = rootCA.1))))))"
@@ -1837,8 +1811,8 @@ lemma A_CTAudit_1_root_ca_rogue_audit_mon_honest_uniq:
                       'This CA has the following fields and it failed the SCT audit for the following fields.',
                       CA, <fields, ca_fields>
              ) @ #t0)) ∧
-           (AssertsNot( rootCA, 'I signed this intermediate CA.', CA,
-                        ca_fields
+           (Asserts( 'CCADB', 'No root CA signed this CA.',
+                     CA, <ca_fields, rootCA>
             ) @ #t1)) ∧
           (¬(∃ #t.1. Corrupted( M ) @ #t.1))) ⇒
          (∃ #i. Corrupted( rootCA ) @ #i)"
@@ -1881,8 +1855,8 @@ lemma A_CTAudit_1_ca_rogue_audit_mon_honest_single:
                          'This CA has the following fields and it failed the SCT audit for the following fields.',
                          CA.1, <fields.1, ca_fields.1>
                 ) @ #t0.1)) ∧
-              (AssertsNot( rootCA.1, 'I signed this intermediate CA.',
-                           CA.1, ca_fields.1
+              (Asserts( 'CCADB', 'No root CA signed this CA.',
+                        CA.1, <ca_fields.1, rootCA.1>
                ) @ #t1.1)) ∧
              (¬(∃ #t.2. Corrupted( M.1 ) @ #t.2))))"
 
@@ -1895,8 +1869,8 @@ lemma A_CTAudit_1_root_ca_rogue_audit_mon_honest_single:
                        'This CA has the following fields and it failed the SCT audit for the following fields.',
                        CA, <fields, ca_fields>
               ) @ #t0)) ∧
-            (AssertsNot( rootCA, 'I signed this intermediate CA.', CA,
-                         ca_fields
+            (Asserts( 'CCADB', 'No root CA signed this CA.',
+                      CA, <ca_fields, rootCA>
              ) @ #t1)) ∧
            (¬(∃ #t.1. Corrupted( M ) @ #t.1))) ∧
           (∀ rootCA.1 M.1 ca_fields.1 fields.1 CA.1 #t.1 #t0.1 #t1.1.
@@ -1905,8 +1879,8 @@ lemma A_CTAudit_1_root_ca_rogue_audit_mon_honest_single:
                          'This CA has the following fields and it failed the SCT audit for the following fields.',
                          CA.1, <fields.1, ca_fields.1>
                 ) @ #t0.1)) ∧
-              (AssertsNot( rootCA.1, 'I signed this intermediate CA.',
-                           CA.1, ca_fields.1
+              (Asserts( 'CCADB', 'No root CA signed this CA.',
+                        CA.1, <ca_fields.1, rootCA.1>
                ) @ #t1.1)) ∧
              (¬(∃ #t.2. Corrupted( M.1 ) @ #t.2))) ⇒
             (rootCA.1 = rootCA))) ∧
@@ -1950,8 +1924,8 @@ lemma A_CTAudit_2_ca_rogue_audit_suff:
                          'This CA has the following fields and it failed the SCT audit for the following fields.',
                          CA.1, <fields.1, ca_fields.1>
                 ) @ #t0.1)) ∧
-              (AssertsNot( rootCA.1, 'I signed this intermediate CA.',
-                           CA.1, ca_fields.1
+              (Asserts( 'CCADB', 'No root CA signed this CA.',
+                        CA.1, <ca_fields.1, rootCA.1>
                ) @ #t1.1))))"
 
 
@@ -1963,8 +1937,8 @@ lemma A_CTAudit_2_root_ca_rogue_audit_suff:
                       'This CA has the following fields and it failed the SCT audit for the following fields.',
                       CA, <fields, ca_fields>
              ) @ #t0)) ∧
-           (AssertsNot( rootCA, 'I signed this intermediate CA.', CA,
-                        ca_fields
+           (Asserts( 'CCADB', 'No root CA signed this CA.',
+                     CA, <ca_fields, rootCA>
             ) @ #t1)) ∧
           (∀ rootCA.1 M.1 ca_fields.1 fields.1 CA.1 #t.1 #t0.1 #t1.1.
             (((SCTAuditCheck( M.1, fields.1, ca_fields.1 ) @ #t.1) ∧
@@ -1972,8 +1946,8 @@ lemma A_CTAudit_2_root_ca_rogue_audit_suff:
                         'This CA has the following fields and it failed the SCT audit for the following fields.',
                         CA.1, <fields.1, ca_fields.1>
                ) @ #t0.1)) ∧
-             (AssertsNot( rootCA.1, 'I signed this intermediate CA.',
-                          CA.1, ca_fields.1
+             (Asserts( 'CCADB', 'No root CA signed this CA.',
+                       CA.1, <ca_fields.1, rootCA.1>
               ) @ #t1.1)) ⇒
             (rootCA.1 = rootCA))) ∧
          ((∀ a #i. (Corrupted( a ) @ #i) ⇒ (a = rootCA)) ∧
@@ -2005,8 +1979,8 @@ lemma A_CTAudit_2_verif_empty:
                         'This CA has the following fields and it failed the SCT audit for the following fields.',
                         CA, <fields, ca_fields>
                ) @ #t0)) ∧
-             (AssertsNot( rootCA, 'I signed this intermediate CA.', CA,
-                          ca_fields
+             (Asserts( 'CCADB', 'No root CA signed this CA.',
+                       CA, <ca_fields, rootCA>
               ) @ #t1)))) ⇒
         (∀ CA fields rootCA ca_fields L1 L2 M #t0 #t1.
           ((SCTAuditCheck( M, fields, ca_fields ) @ #t0) ∧
@@ -2041,8 +2015,8 @@ lemma A_CTAudit_2_root_ca_rogue_audit_verif_nonempty:
                      'This CA has the following fields and it failed the SCT audit for the following fields.',
                      CA, <fields, ca_fields>
             ) @ #t0)) ∧
-          (AssertsNot( rootCA, 'I signed this intermediate CA.', CA,
-                       ca_fields
+          (Asserts( 'CCADB', 'No root CA signed this CA.',
+                    CA, <ca_fields, rootCA>
            ) @ #t1)) ⇒
          (¬(∀ CA.1 fields.1 rootCA.1 ca_fields.1 L1 L2 M.1 #t0.1 #t1.1.
              ((SCTAuditCheck( M.1, fields.1, ca_fields.1 ) @ #t0.1) ∧
@@ -2078,8 +2052,8 @@ lemma A_CTAudit_2_ca_rogue_audit_min:
                           'This CA has the following fields and it failed the SCT audit for the following fields.',
                           CA.1, <fields.1, ca_fields.1>
                  ) @ #t0.1)) ∧
-               (AssertsNot( rootCA.1, 'I signed this intermediate CA.',
-                            CA.1, ca_fields.1
+               (Asserts( 'CCADB', 'No root CA signed this CA.',
+                         CA.1, <ca_fields.1, rootCA.1>
                 ) @ #t1.1)) ∧
               ((rootCA.1 = CA) ∧ (¬(CA = rootCA.1))))))"
 
@@ -2092,8 +2066,8 @@ lemma A_CTAudit_2_root_ca_rogue_audit_min:
                      'This CA has the following fields and it failed the SCT audit for the following fields.',
                      CA, <fields, ca_fields>
             ) @ #t0)) ∧
-          (AssertsNot( rootCA, 'I signed this intermediate CA.', CA,
-                       ca_fields
+          (Asserts( 'CCADB', 'No root CA signed this CA.',
+                    CA, <ca_fields, rootCA>
            ) @ #t1)) ⇒
          ((¬(∃ CA.1 M.1 ca_fields.1 fields.1 rootCA.1 #t.1 #t0.1 #t1.1.
               (((SCTAuditCheck( M.1, fields.1, ca_fields.1 ) @ #t.1) ∧
@@ -2111,8 +2085,8 @@ lemma A_CTAudit_2_root_ca_rogue_audit_min:
                           'This CA has the following fields and it failed the SCT audit for the following fields.',
                           CA.1, <fields.1, ca_fields.1>
                  ) @ #t0.1)) ∧
-               (AssertsNot( rootCA.1, 'I signed this intermediate CA.',
-                            CA.1, ca_fields.1
+               (Asserts( 'CCADB', 'No root CA signed this CA.',
+                         CA.1, <ca_fields.1, rootCA.1>
                 ) @ #t1.1)) ∧
               ((rootCA.1 = rootCA) ∧ (¬(rootCA = rootCA.1))))))"
 
@@ -2139,8 +2113,8 @@ lemma A_CTAudit_2_root_ca_rogue_audit_uniq:
                      'This CA has the following fields and it failed the SCT audit for the following fields.',
                      CA, <fields, ca_fields>
             ) @ #t0)) ∧
-          (AssertsNot( rootCA, 'I signed this intermediate CA.', CA,
-                       ca_fields
+          (Asserts( 'CCADB', 'No root CA signed this CA.',
+                    CA, <ca_fields, rootCA>
            ) @ #t1)) ⇒
          (∃ #i. Corrupted( rootCA ) @ #i)"
 
@@ -2180,8 +2154,8 @@ lemma A_CTAudit_2_ca_rogue_audit_single:
                         'This CA has the following fields and it failed the SCT audit for the following fields.',
                         CA.1, <fields.1, ca_fields.1>
                ) @ #t0.1)) ∧
-             (AssertsNot( rootCA.1, 'I signed this intermediate CA.',
-                          CA.1, ca_fields.1
+             (Asserts( 'CCADB', 'No root CA signed this CA.',
+                       CA.1, <ca_fields.1, rootCA.1>
               ) @ #t1.1)))"
 
 
@@ -2193,8 +2167,8 @@ lemma A_CTAudit_2_root_ca_rogue_audit_single:
                       'This CA has the following fields and it failed the SCT audit for the following fields.',
                       CA, <fields, ca_fields>
              ) @ #t0)) ∧
-           (AssertsNot( rootCA, 'I signed this intermediate CA.', CA,
-                        ca_fields
+           (Asserts( 'CCADB', 'No root CA signed this CA.',
+                     CA, <ca_fields, rootCA>
             ) @ #t1)) ∧
           (∀ rootCA.1 M.1 ca_fields.1 fields.1 CA.1 #t.1 #t0.1 #t1.1.
             (((SCTAuditCheck( M.1, fields.1, ca_fields.1 ) @ #t.1) ∧
@@ -2202,8 +2176,8 @@ lemma A_CTAudit_2_root_ca_rogue_audit_single:
                         'This CA has the following fields and it failed the SCT audit for the following fields.',
                         CA.1, <fields.1, ca_fields.1>
                ) @ #t0.1)) ∧
-             (AssertsNot( rootCA.1, 'I signed this intermediate CA.',
-                          CA.1, ca_fields.1
+             (Asserts( 'CCADB', 'No root CA signed this CA.',
+                       CA.1, <ca_fields.1, rootCA.1>
               ) @ #t1.1)) ⇒
             (rootCA.1 = rootCA))) ∧
          (¬(∃ CA.1 M.1 ca_fields.1 fields.1 rootCA.1 #t.1 #t0.1 #t1.1.

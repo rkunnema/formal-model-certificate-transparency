@@ -1,11 +1,11 @@
 {
   "task_id": "--san_monitorCanFindCertificate--default",
   "warnings": [],
-  "tamarin_timing": 27.5,
+  "tamarin_timing": 27.81,
   "wrapper_measures": {
-    "time": 27.702210187911987,
-    "avg_memory": 216.47000558035714,
-    "peak_memory": 459.046875
+    "time": 28.04798197746277,
+    "avg_memory": 211.4921875,
+    "peak_memory": 465.4765625
   },
   "output_spthy": "results/sct_audit/proofs/--san_monitorCanFindCertificate--default.spthy",
   "verified_lemma": {
@@ -53,8 +53,6 @@
     "san_ParticipantVerifiesInclusion",
     "san_ConsultDocumentation_Success",
     "san_ConsultDocumentation_Fails",
-    "san_MonitorCheck_Found",
-    "san_MonitorCheck_NotFound",
     "san_SCTAuditTransparencyCheck_Success",
     "san_SCTAuditTransparencyCheck_Failed",
     "san_SCTAuditCheck",
@@ -62,6 +60,7 @@
     "san_compromiseRootCA",
     "san_compromiseLogger",
     "san_compromiseMonitor",
+    "authenticity",
     "transparency_SCT_Auditing",
     "A_uniq1_helper",
     "A_uniq2_helper",

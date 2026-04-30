@@ -4,17 +4,23 @@
 
 - `README.md` This file
 
-### Model:
+### Models:
 
-- `ct.spthy` model for CT and extensions
-- `pki.spthy` model for PKI
-- `acc_oracle` oracle used to guide proofs in those models
+
+- `pki.spthy`: PKI model
+- `ct.spthy`: standard CT
+- `sct_audit.spthy`: CT + SCT Auditing
+- `ct_receipt.spthy`: CT + SCT Auditing + receipts
+- `ct_gossip.spthy`: CT + STH gossiping
+- `acc_oracle` TODO T do we still use that?
 
 ### Use with batch-tamarin
 
 `batch-tamarin` (see below) needs the accountability lemmas to be translated
-before running. These files are generated from `ct.spthy` and `pki.spthy` by
+before running. These files are generated from the above models by
 clicking "Download" in interactive mode after loading.
+
+TODO T: 
 
 - `ct_lemmas_pregen.spthy`
 - `pki_lemma_pregen.spthy`

@@ -1,11 +1,11 @@
 {
   "task_id": "--san_monitorFindsRogueCertificate--default",
   "warnings": [],
-  "tamarin_timing": 55.85,
+  "tamarin_timing": 60.22,
   "wrapper_measures": {
-    "time": 56.139803647994995,
-    "avg_memory": 551.1392299107142,
-    "peak_memory": 1112.3984375
+    "time": 60.54120755195618,
+    "avg_memory": 536.2984375,
+    "peak_memory": 1119.26171875
   },
   "output_spthy": "results/ct_receipt/proofs/--san_monitorFindsRogueCertificate--default.spthy",
   "verified_lemma": {
@@ -64,6 +64,7 @@
     "san_domainOwnerVerifiesReceipt_1",
     "san_domainOwnerVerifiesReceipt_2",
     "san_SCTReceiptCheck",
+    "authenticity",
     "A_uniq1_helper",
     "A_uniq2_helper",
     "A_Receipt_inj3_helper",

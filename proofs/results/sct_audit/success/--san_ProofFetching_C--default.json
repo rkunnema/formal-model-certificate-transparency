@@ -1,11 +1,11 @@
 {
   "task_id": "--san_ProofFetching_C--default",
   "warnings": [],
-  "tamarin_timing": 22.57,
+  "tamarin_timing": 21.77,
   "wrapper_measures": {
-    "time": 22.779021978378296,
-    "avg_memory": 164.95346467391303,
-    "peak_memory": 362.4453125
+    "time": 21.959540367126465,
+    "avg_memory": 160.9675071022727,
+    "peak_memory": 348.30078125
   },
   "output_spthy": "results/sct_audit/proofs/--san_ProofFetching_C--default.spthy",
   "verified_lemma": {
@@ -53,8 +53,6 @@
     "san_ParticipantVerifiesInclusion",
     "san_ConsultDocumentation_Success",
     "san_ConsultDocumentation_Fails",
-    "san_MonitorCheck_Found",
-    "san_MonitorCheck_NotFound",
     "san_SCTAuditTransparencyCheck_Success",
     "san_SCTAuditTransparencyCheck_Failed",
     "san_SCTAuditCheck",
@@ -62,6 +60,7 @@
     "san_compromiseRootCA",
     "san_compromiseLogger",
     "san_compromiseMonitor",
+    "authenticity",
     "transparency_SCT_Auditing",
     "A_uniq1_helper",
     "A_uniq2_helper",
