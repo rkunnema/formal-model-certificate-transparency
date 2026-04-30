@@ -1,0 +1,13 @@
+{
+  "task_id": "--san_Domain_Owner_Init--default",
+  "error_description": "The task timed out. Review the timeout setting for this task.",
+  "wrapper_measures": {
+    "time": 300.6017632484436,
+    "avg_memory": 130.71551003344484,
+    "peak_memory": 155.50390625
+  },
+  "return_code": -1,
+  "last_stderr_lines": [
+    "Process timed out"
+  ]
+}

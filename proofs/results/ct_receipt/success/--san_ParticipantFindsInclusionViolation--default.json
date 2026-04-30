@@ -1,11 +1,11 @@
 {
   "task_id": "--san_ParticipantFindsInclusionViolation--default",
   "warnings": [],
-  "tamarin_timing": 58.83,
+  "tamarin_timing": 29.39,
   "wrapper_measures": {
-    "time": 59.1239447593689,
-    "avg_memory": 524.602092161017,
-    "peak_memory": 1101.71875
+    "time": 29.580492973327637,
+    "avg_memory": 508.8067708333334,
+    "peak_memory": 1123.6875
   },
   "output_spthy": "results/ct_receipt/proofs/--san_ParticipantFindsInclusionViolation--default.spthy",
   "verified_lemma": {

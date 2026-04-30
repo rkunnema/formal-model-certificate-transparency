@@ -1,0 +1,2076 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Batch Tamarin Execution Summary</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1, h2, h3 { color: #2c3e50; }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #dfe9ee;
+            font-weight: 600;
+        }
+        tr:nth-child(even) {
+            background-color: #f6f6f6;
+        }
+        /* Simple task and lemma alternating colors */
+        .task-table tr.task-white { background-color: white; }
+        .task-table tr.task-light-gray { background-color: #f4fbff; } /* light blue accent */
+
+        /* Lemma alternation within white tasks */
+        .task-table tr.task-white.lemma-alt { background-color: #f6f6f6; } /* lighter gray */
+
+        /* Lemma alternation within light gray tasks */
+        .task-table tr.task-light-gray.lemma-alt { background-color: #edf7ff; } /* deeper blue accent */
+        .success { color: #28a745; }     /* green for verified */
+        .failed { color: #ec1026; }      /* red for failed */
+        .warning { color: #ea9400; }     /* orange with green for timeout */
+        .info { color: #116dd7; }        /* blue for info */
+        .darkinfo { color: #1200b9; } /* darker blue for info */
+        .memory { color: #8b5cf6; }      /* violet for memory limit */
+        .falsified { color: #e600ff; }   /* light violet for falsified */
+        .unterminated { color: #dbc100; } /* yellow-orange for unterminated */
+        pre {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        .error-details {
+            background-color: #ffeaec;
+            border: 1px solid #ffdcdf;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        .error-details h3 {
+            margin: 0;
+        }
+        .settings, .summary {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+    <script>hljs.highlightAll();</script>
+</head>
+<body>
+    <h1>Batch Tamarin Execution Summary</h1>
+
+    <div class="info">
+        <strong>Executed :</strong> 2026-04-30 11:16:18<br>
+        <strong>Full execution parameters :</strong> <a href="./execution_report.json">execution_report.json</a>
+    </div>
+
+    <h2>⚙️ Configuration</h2>
+    <div class="settings">
+        <table>
+            <thead>
+                <tr>
+                    <th>Setting</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Max cores</td>
+                    <td>16</td>
+                </tr>
+                <tr>
+                    <td>Max memory</td>
+                    <td>8GB</td>
+                </tr>
+                <tr>
+                    <td>Default timeout</td>
+                    <td>180s</td>
+                </tr>
+            </tbody>
+        </table>
+        <table>
+            <thead>
+                <tr>
+                    <th>Alias</th>
+                    <th>Path</th>
+                    <th>Version</th>
+                </tr>
+            </thead>
+            <tbody>
+                
+                <tr>
+                    <td>default</td>
+                    <td><code>tamarin-prover</code></td>
+                    <td>v1.10.0</td>
+                </tr>
+                
+            </tbody>
+        </table>
+    </div>
+
+    <h2>📊 Global Summary</h2>
+
+    <h3>Global Statistics</h3>
+    <div class="summary">
+        <table>
+            <thead>
+                <tr>
+                    <th>Metric</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Total Executed Lemmas</td>
+                    <td>82</td>
+                </tr>
+                <tr>
+                    <td>Verified Lemmas</td>
+                    <td class="success">80 (97.6%)</td>
+                </tr>
+                <tr>
+                    <td>Falsified Lemmas</td>
+                    <td class="falsified">2 (2.4%)</td>
+                </tr>
+                <tr>
+                    <td>Unterminated Lemmas</td>
+                    <td class="unterminated">0 (0.0%)</td>
+                </tr>
+                <tr>
+                    <td>Failed Executions</td>
+                    <td class="failed">0 (0.0%)</td>
+                </tr>
+                <tr>
+                    <td>Lemmas killed by timeout</td>
+                    <td class="warning">0 (0.0%)</td>
+                </tr>
+                <tr>
+                    <td>Lemmas killed for memory limit</td>
+                    <td class="memory">0 (0.0%)</td>
+                </tr>
+            </tbody>
+        </table>
+        <table>
+            <thead>
+                <tr>
+                    <th>Metric</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Total runtime</td>
+                    <td>1662.7s</td>
+                </tr>
+                <tr>
+                    <td>Total peak memory used</td>
+                    <td>47.3GB</td>
+                </tr>
+                <tr>
+                    <td>Max peak memory used</td>
+                    <td>6.4GB</td>
+                </tr>
+                <tr>
+                    <td>Freshly executed tasks</td>
+                    <td class="darkinfo">82 (100.0%)</td>
+                </tr>
+                <tr>
+                    <td>Cache hits</td>
+                    <td class="info">0 (0.0%)</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h3>🔍 By task details</h3>
+    <table class="task-table">
+        <thead>
+            <tr>
+                <th>Task</th>
+                <th>Extracted lemma</th>
+                <th>Tamarin Version</th>
+                <th>Status</th>
+                <th>Runtime</th>
+                <th>Peak Memory Used</th>
+                <th>Cache Hit</th>
+            </tr>
+        </thead>
+        <tbody>
+            
+                
+                
+                
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white">
+                            
+                                <td rowspan="46">
+                                    <strong>normal</strong><br>
+                                    <small style="color: #6c757d;">pregen_models/sct_audit_pregen.spthy</small>
+                                </td>
+                            
+                            
+                                <td>san_ClientFindsAppendOnlyViolation</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>16.1s</td>
+                            <td>404.7MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white lemma-alt">
+                            
+                            
+                                <td>san_Start_Log_malicious</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>13.1s</td>
+                            <td>347.7MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white">
+                            
+                            
+                                <td>san_ParticipantVerifiesInclusion</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>14.3s</td>
+                            <td>411.6MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white lemma-alt">
+                            
+                            
+                                <td>san_forge_log_view</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>13.0s</td>
+                            <td>325.0MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white">
+                            
+                            
+                                <td>san_PubKeyCertify</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>14.6s</td>
+                            <td>423.4MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white lemma-alt">
+                            
+                            
+                                <td>san_LoggerSnapshot_C</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>13.2s</td>
+                            <td>384.2MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white">
+                            
+                            
+                                <td>san_SCTAuditTransparencyCheck_Failed</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>36.8s</td>
+                            <td>733.5MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white lemma-alt">
+                            
+                            
+                                <td>san_monitorFindsRogueCertificate</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>14.7s</td>
+                            <td>403.0MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white">
+                            
+                            
+                                <td>san_ParticipantFindsInclusionViolation</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>13.5s</td>
+                            <td>357.7MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white lemma-alt">
+                            
+                            
+                                <td>san_ProofFetching_C</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>13.4s</td>
+                            <td>398.0MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white">
+                            
+                            
+                                <td>san_compromiseCA</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>13.4s</td>
+                            <td>376.6MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white lemma-alt">
+                            
+                            
+                                <td>san_ConsultDocumentation_Success</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>13.9s</td>
+                            <td>381.5MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white">
+                            
+                            
+                                <td>san_SCTAuditCheck</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>23.9s</td>
+                            <td>751.2MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white lemma-alt">
+                            
+                            
+                                <td>san_monitorAudit_no_viol</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>18.7s</td>
+                            <td>504.5MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white">
+                            
+                            
+                                <td>san_ConsultDocumentation_Fails</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>13.6s</td>
+                            <td>369.5MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white lemma-alt">
+                            
+                            
+                                <td>san_monitorTrackSubject</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>13.5s</td>
+                            <td>359.0MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white">
+                            
+                            
+                                <td>san_compromiseRootCA</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>13.7s</td>
+                            <td>350.4MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white lemma-alt">
+                            
+                            
+                                <td>san_ClientValidate</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>18.1s</td>
+                            <td>530.7MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white">
+                            
+                            
+                                <td>san_monitorAudit_CA_Viol</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>17.3s</td>
+                            <td>420.3MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white lemma-alt">
+                            
+                            
+                                <td>san_Start_Log</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>13.7s</td>
+                            <td>381.4MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white">
+                            
+                            
+                                <td>san_StartMonitoring</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>13.7s</td>
+                            <td>385.2MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white lemma-alt">
+                            
+                            
+                                <td>san_monitorCanFindCertificate</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>16.9s</td>
+                            <td>463.8MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white">
+                            
+                            
+                                <td>san_LoggerSnapshot_M</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>13.8s</td>
+                            <td>363.7MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white lemma-alt">
+                            
+                            
+                                <td>san_Logger_Init</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>12.6s</td>
+                            <td>181.0MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white">
+                            
+                            
+                                <td>san_ProofFetching_M</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>13.7s</td>
+                            <td>387.0MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white lemma-alt">
+                            
+                            
+                                <td>san_SCTAuditTransparencyCheck_Success</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>22.3s</td>
+                            <td>551.0MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white">
+                            
+                            
+                                <td>san_ClientVerifiesAppendOnly</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>22.4s</td>
+                            <td>805.4MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white lemma-alt">
+                            
+                            
+                                <td>san_monitorCannotFindCertificate</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>14.0s</td>
+                            <td>347.2MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white">
+                            
+                            
+                                <td>san_Monitor_Init</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>12.5s</td>
+                            <td>180.8MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white lemma-alt">
+                            
+                            
+                                <td>san_Domain_Owner_Init</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>12.4s</td>
+                            <td>180.8MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white">
+                            
+                            
+                                <td>san_PreCertify</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>13.9s</td>
+                            <td>357.6MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white lemma-alt">
+                            
+                            
+                                <td>san_compromiseMonitor</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>13.8s</td>
+                            <td>372.1MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white">
+                            
+                            
+                                <td>san_add_preC_to_log</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>14.8s</td>
+                            <td>403.0MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white lemma-alt">
+                            
+                            
+                                <td>san_compromiseLogger</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>13.9s</td>
+                            <td>387.7MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white">
+                            
+                            
+                                <td>san_ClientStoresSnapshot</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>13.8s</td>
+                            <td>379.7MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white lemma-alt">
+                            
+                            
+                                <td>san_Intermediate_CA_Init</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>13.8s</td>
+                            <td>386.9MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white">
+                            
+                            
+                                <td>san_ChainValidator_Valid</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>15.3s</td>
+                            <td>434.9MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white lemma-alt">
+                            
+                            
+                                <td>san_ClientInitiatesAuditing</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>16.9s</td>
+                            <td>506.6MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white">
+                            
+                            
+                                <td>san_MonitorStoresSnapshot</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>13.8s</td>
+                            <td>381.8MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white lemma-alt">
+                            
+                            
+                                <td>san_monitorVerifiesAppendOnly</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>22.2s</td>
+                            <td>523.7MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white">
+                            
+                            
+                                <td>san_ChainValidator_Invalid</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>13.8s</td>
+                            <td>369.5MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white lemma-alt">
+                            
+                            
+                                <td>san_monitorFindsRogueCertificate_Sleep</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>15.3s</td>
+                            <td>391.9MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white">
+                            
+                            
+                                <td>san_Root_CA_Init</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>12.6s</td>
+                            <td>181.0MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white lemma-alt">
+                            
+                            
+                                <td>san_monitorAudit_Sleep</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>17.4s</td>
+                            <td>425.6MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white">
+                            
+                            
+                                <td>san_monitorFindsAppendOnlyViolation</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>16.8s</td>
+                            <td>408.7MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white lemma-alt">
+                            
+                            
+                                <td>authenticity</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>16.0s</td>
+                            <td>444.8MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+            
+                
+                
+                
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-light-gray">
+                            
+                                <td rowspan="27">
+                                    <strong>acc_authenticity</strong><br>
+                                    <small style="color: #6c757d;">pregen_models/sct_audit_pregen.spthy</small>
+                                </td>
+                            
+                            
+                                <td>A_CTAudit_1_ca_rogue_audit_mon_honest_suff</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>32.5s</td>
+                            <td>583.8MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-light-gray lemma-alt">
+                            
+                            
+                                <td>A_CTAudit_1_root_ca_rogue_audit_mon_honest_suff</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>39.9s</td>
+                            <td>696.5MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-light-gray">
+                            
+                            
+                                <td>A_CTAudit_1_verif_empty</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>14.3s</td>
+                            <td>394.7MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-light-gray lemma-alt">
+                            
+                            
+                                <td>A_CTAudit_1_ca_rogue_audit_mon_honest_verif_nonempty</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>14.6s</td>
+                            <td>420.0MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-light-gray">
+                            
+                            
+                                <td>A_CTAudit_1_root_ca_rogue_audit_mon_honest_verif_nonempty</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>14.7s</td>
+                            <td>404.0MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-light-gray lemma-alt">
+                            
+                            
+                                <td>A_CTAudit_1_ca_rogue_audit_mon_honest_min</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>13.9s</td>
+                            <td>377.7MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-light-gray">
+                            
+                            
+                                <td>A_CTAudit_1_root_ca_rogue_audit_mon_honest_min</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>13.9s</td>
+                            <td>368.5MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-light-gray lemma-alt">
+                            
+                            
+                                <td>A_CTAudit_1_ca_rogue_audit_mon_honest_uniq</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>12.5s</td>
+                            <td>182.2MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-light-gray">
+                            
+                            
+                                <td>A_CTAudit_1_root_ca_rogue_audit_mon_honest_uniq</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>12.7s</td>
+                            <td>182.8MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-light-gray lemma-alt">
+                            
+                            
+                                <td>A_CTAudit_1_ca_rogue_audit_mon_honest_inj</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>12.8s</td>
+                            <td>181.8MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-light-gray">
+                            
+                            
+                                <td>A_CTAudit_1_root_ca_rogue_audit_mon_honest_inj</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>12.6s</td>
+                            <td>180.8MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-light-gray lemma-alt">
+                            
+                            
+                                <td>A_CTAudit_1_root_ca_rogue_audit_mon_honest_single</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>91.4s</td>
+                            <td>4756.1MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-light-gray">
+                            
+                            
+                                <td>A_CTAudit_2_ca_rogue_audit_single</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>62.3s</td>
+                            <td>3654.1MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-light-gray lemma-alt">
+                            
+                            
+                                <td>A_CTAudit_2_verif_empty</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="falsified">
+                                
+                                    ❗ Falsified
+                                    
+                                
+                            </td>
+                            <td>38.2s</td>
+                            <td>1642.5MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-light-gray">
+                            
+                            
+                                <td>A_CTAudit_2_ca_rogue_audit_uniq</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>12.6s</td>
+                            <td>183.3MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-light-gray lemma-alt">
+                            
+                            
+                                <td>A_CTAudit_2_ca_rogue_audit_inj</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>12.8s</td>
+                            <td>180.7MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-light-gray">
+                            
+                            
+                                <td>A_CTAudit_2_ca_rogue_audit_suff</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>32.1s</td>
+                            <td>571.6MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-light-gray lemma-alt">
+                            
+                            
+                                <td>A_CTAudit_2_root_ca_rogue_audit_inj</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>12.7s</td>
+                            <td>181.1MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-light-gray">
+                            
+                            
+                                <td>A_CTAudit_2_root_ca_rogue_audit_uniq</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>12.5s</td>
+                            <td>179.8MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-light-gray lemma-alt">
+                            
+                            
+                                <td>A_CTAudit_2_ca_rogue_audit_min</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>13.8s</td>
+                            <td>364.5MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-light-gray">
+                            
+                            
+                                <td>A_CTAudit_2_root_ca_rogue_audit_single</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>149.0s</td>
+                            <td>6600.4MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-light-gray lemma-alt">
+                            
+                            
+                                <td>A_CTAudit_2_ca_rogue_audit_verif_nonempty</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>14.7s</td>
+                            <td>406.1MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-light-gray">
+                            
+                            
+                                <td>A_CTAudit_2_root_ca_rogue_audit_suff</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>39.8s</td>
+                            <td>710.1MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-light-gray lemma-alt">
+                            
+                            
+                                <td>A_CTAudit_2_root_ca_rogue_audit_min</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>13.9s</td>
+                            <td>368.5MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-light-gray">
+                            
+                            
+                                <td>A_CTAudit_2_root_ca_rogue_audit_verif_nonempty</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>14.6s</td>
+                            <td>407.6MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-light-gray lemma-alt">
+                            
+                            
+                                <td>A_uniq1_helper</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>16.1s</td>
+                            <td>399.9MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-light-gray">
+                            
+                            
+                                <td>A_uniq2_helper</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>14.0s</td>
+                            <td>380.5MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+            
+                
+                
+                
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white">
+                            
+                                <td rowspan="7">
+                                    <strong>acc_transparency</strong><br>
+                                    <small style="color: #6c757d;">pregen_models/sct_audit_pregen.spthy</small>
+                                </td>
+                            
+                            
+                                <td>T_Audit_audit_inclusionViol_suff</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>25.0s</td>
+                            <td>544.0MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white lemma-alt">
+                            
+                            
+                                <td>T_Audit_audit_inclusionViol_min</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>12.6s</td>
+                            <td>182.1MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white">
+                            
+                            
+                                <td>T_Audit_audit_inclusionViol_verif_nonempty</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>19.4s</td>
+                            <td>424.7MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white lemma-alt">
+                            
+                            
+                                <td>T_Audit_audit_inclusionViol_single</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>37.1s</td>
+                            <td>1053.8MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white">
+                            
+                            
+                                <td>T_Audit_audit_inclusionViol_uniq</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>22.7s</td>
+                            <td>494.7MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white lemma-alt">
+                            
+                            
+                                <td>T_Audit_verif_empty</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>14.8s</td>
+                            <td>411.7MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-white">
+                            
+                            
+                                <td>T_Audit_audit_inclusionViol_inj</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>12.6s</td>
+                            <td>182.0MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+            
+                
+                
+                
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-light-gray">
+                            
+                                <td rowspan="2">
+                                    <strong>manual</strong><br>
+                                    <small style="color: #6c757d;">pregen_models/sct_audit_pregen.spthy</small>
+                                </td>
+                            
+                            
+                                <td>transparency_SCT_Auditing</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="falsified">
+                                
+                                    ❗ Falsified
+                                    
+                                
+                            </td>
+                            <td>31.9s</td>
+                            <td>934.8MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+                    
+                    
+                    
+                    
+                        <tr class="task-light-gray lemma-alt">
+                            
+                            
+                                <td>A_CTAudit_1_ca_rogue_audit_mon_honest_single</td>
+                            
+                            <td>default (v1.10.0)</td>
+                            <td class="success">
+                                
+                                    ✅ Verified
+                                    
+                                
+                            </td>
+                            <td>20.6s</td>
+                            <td>477.2MB</td>
+                            <td class="info">💻 No</td>
+                        </tr>
+                    
+                
+            
+        </tbody>
+    </table>
+
+    
+
+    
+
+    <hr>
+    <footer>
+        <p><em>Summary generated by Batch Tamarin on 2026-04-30 11:16:18<br>
+        For more details, generate a report with the following command: <code>batch-tamarin report results/sct_audit_30-04-26_10-48-26</code></em></p>
+    </footer>
+</body>
+</html>

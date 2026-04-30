@@ -1,0 +1,8 @@
+digraph "trace_ct_SL2-AS0-CL0-A1-C1-NB_san_Root_CA_Init" {
+nodesep="0.3";
+ranksep="0.3";
+node[fontsize="8",fontname="Helvetica",width="0.3",height="0.2"];
+edge[fontsize="8",fontname="Helvetica"];
+n8[shape="record",label="{{<n0> Fr( ~skCA )|<n1> Fr( ~sn )}|{<n2> #t : Root_CA_Init[CA_Registered( $CA, ~skCA, pk(~skCA) ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Root_CA_Init( $CA ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Time( $now ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;San_Root_CA_Init( )]\l}|{<n3> Out( \<$CA, $CA, \l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pk(~skCA), 'selfCert', \l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~sn, $now, $j\>\l)\l|<n4> Out( sign(\<$CA, $CA, \l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pk(~skCA), 'selfCert', ~sn, \l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$now, $j\>,\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~skCA)\l)\l|<n5> Out( \<$CA, pk(~skCA)\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\>\l)\l|<n6> !Root_CA_s0( $CA,\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~skCA, pk(~skCA)\l)\l|<n7> !Root_CA( $CA,\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pk(~skCA)\l)\l}}",fillcolor="#620c97",style="filled",fontcolor="white",role="Undefined"];
+
+}

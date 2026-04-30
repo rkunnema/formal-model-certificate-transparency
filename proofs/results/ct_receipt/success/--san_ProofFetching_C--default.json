@@ -1,11 +1,11 @@
 {
   "task_id": "--san_ProofFetching_C--default",
   "warnings": [],
-  "tamarin_timing": 58.0,
+  "tamarin_timing": 29.08,
   "wrapper_measures": {
-    "time": 58.26054549217224,
-    "avg_memory": 504.0207435344828,
-    "peak_memory": 1092.0390625
+    "time": 29.266785144805908,
+    "avg_memory": 493.8679956896551,
+    "peak_memory": 1116.609375
   },
   "output_spthy": "results/ct_receipt/proofs/--san_ProofFetching_C--default.spthy",
   "verified_lemma": {

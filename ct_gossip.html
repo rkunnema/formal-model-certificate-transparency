@@ -964,7 +964,7 @@ STHGossipTransparencyCheck(). Contributed evidence:
 <span class="keyword">rule</span> <a name="rule:GossipTransparencyCheck_Success"></a><span class="rule.identifier">GossipTransparencyCheck_Success</span><span class="punctuation">:</span>
     [ 
     ClientGossiped($C, $M, $L, gossiped_session, $gossiped_proof_time, fields, ca_fields, chain),
-    AppendOnlyChecked($M, gossiped_session, session), /* then gossiped this proof to the monitor (proof, session) but without fields. Monitor checks for append only (may or may not hold), if it does not monitor emitted an assert blaming the logger */
+    AppendOnlyChecked($M, gossiped_session, session), // then gossiped this proof to the monitor (proof, session) but without fields. Monitor checks for append only (may or may not hold), if it does not monitor emitted an assert blaming the logger
     MonitorFoundCert($M, $L, fields, $CA, ca_fields, $time_of_proof_fetch, session) // TODO: replace with inclusion proof? i guess so &lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;
 ]
     --[
@@ -983,13 +983,13 @@ rule GossipTransparencyCheck_Failed:
     in
     [ 
     ClientGossiped($C, $M, $L, gossiped_session, $gossiped_proof_time, fields, ca_fields, chain),
-    AppendOnlyChecked($M, gossiped_session, session), /* then gossiped this proof to the monitor (proof, session) but without fields. Monitor checks for append only (may or may not hold), if it does not monitor emitted an assert blaming the logger */
+    AppendOnlyChecked($M, gossiped_session, session), // then gossiped this proof to the monitor (proof, session) but without fields. Monitor checks for append only (may or may not hold), if it does not monitor emitted an assert blaming the logger
     MonitorCouldNotFindCert($M, fields, $L, $CA, ca_fields, $time_of_proof_fetch, session),
     !Root_CA($rootCA, pkRootCA)
 ]
     --[
         Eq(verify(cert_sig, cert_fields, pkCA), true()),
-        Eq(verify(ca_sig, ca_fields, pkRootCA), true()), /* We only consider valid chains found by the client (if the monitor finds the cert this already implies that the chain is valid) */
+        Eq(verify(ca_sig, ca_fields, pkRootCA), true()), // We only consider valid chains found by the client (if the monitor finds the cert this already implies that the chain is valid) 
         ProofFetchAfterGossip($gossiped_proof_time, $time_of_proof_fetch),
         STHGossipTransparencyCheck($M, $L, fields, $CA, ca_fields, session, gossiped_session),
         CTGossipTransparencyCheck_NotFound($M, $L, fields, $CA, ca_fields, session, gossiped_session),
@@ -1005,7 +1005,7 @@ STHGossipCheck(). Contributed evidence:
 - CCADB Result of consulting the database for the legitimacy of the CA
 - Note that the root CA keys are assumed to be known by everyone
 */
-rule GossipingCheck:
+<span class="keyword">rule</span> <a name="rule:GossipingCheck"></a><span class="rule.identifier">GossipingCheck</span><span class="punctuation">:</span>
     let
         ca_fields = &lt;$rootCA, $CA, pkCA, &#39;pubKey-CA&#39;, snCA, $i0, $j0&gt;
         fields = &lt;$CA, $subj, ke, &#39;pubKey&#39;, sn, $i, $j&gt;
@@ -1013,22 +1013,22 @@ rule GossipingCheck:
     in
     [ 
     ClientGossiped($C, $M, $L, gossiped_session, $gossiped_proof_time, fields, ca_fields, chain),
-    AppendOnlyChecked($M, gossiped_session, session), /* then gossiped this proof to the monitor (proof, session) but without fields. Monitor checks for append only (may or may not hold), if it does not monitor emitted an assert blaming the logger */
+    AppendOnlyChecked($M, gossiped_session, session), // then gossiped this proof to the monitor (proof, session) but without fields. Monitor checks for append only (may or may not hold), if it does not monitor emitted an assert blaming the logger 
     MonitorInspected($M, $L, fields, $CA, ca_fields, $time_of_proof_fetch, session),
     CCADBConsulted($rootCA, ca_fields),
     !Root_CA($rootCA, pkRootCA)
 ]
     --[
         Eq(verify(cert_sig, cert_fields, pkCA), true()),
-        Eq(verify(ca_sig, ca_fields, pkRootCA), true()), /* We only consider valid chains (if the monitor finds the cert this already implies that the chain is valid) */
+        Eq(verify(ca_sig, ca_fields, pkRootCA), true()), // We only consider valid chains (if the monitor finds the cert this already implies that the chain is valid)
         ProofFetchAfterGossip($proof, $time_of_proof_fetch),
         STHGossipCheck($M, $L, fields, $CA, ca_fields, session, gossiped_session),
 
-        San_GossipingCheck_Found(),
+        San_GossipingCheck_Found()
     ]-&gt;
     [ ]
 
-restriction proofFetchAfterGossip: // before &lt;= after
+<span class="keyword">restriction</span> proofFetchAfterGossip: // before &lt;= after
     &#34;All before after #t1 #t2 #t. ProofFetchAfterGossip(before, after)@t &amp; Time(before)@t1 &amp; Time(after)@t2 ==&gt; #t1 &lt; #t2&#34;
 
 // ==========================================
@@ -1037,42 +1037,42 @@ restriction proofFetchAfterGossip: // before &lt;= after
 
 /* We require that the main roles in our model are conducted by pairwise distinct entities. This is in accordance with the CT standard as CAs should not act as loggers. Everyone can become a monitor in general, but in order to get meaningful results there actual supervision between these roles happens, we require them to be distinct. */
 
-restriction rootCA_CA_distinct:
+<span class="keyword">restriction</span> rootCA_CA_distinct:
     &#34;All rootCA CA #t1 #t2. Root_CA_Init(rootCA)@t1 &amp; NonRoot_CA_Init(CA)@t2 
     ==&gt; not (rootCA = CA)&#34;
 
-restriction rootCA_Logger_distinct:
+<span class="keyword">restriction</span> rootCA_Logger_distinct:
     &#34;All rootCA L #t1 #t2. Root_CA_Init(rootCA)@t1 &amp; Logger_Registered(L)@t2 
     ==&gt; not (rootCA = L)&#34;
 
-restriction RootCA_Monitor_distinct:
+<span class="keyword">restriction</span> RootCA_Monitor_distinct:
     &#34;All rootCA M #t1 #t2. Root_CA_Init(rootCA)@t1 &amp; Monitor_Registered(M)@t2 
     ==&gt; not (rootCA = M)&#34;
 
-restriction CA_Logger_distinct:
+<span class="keyword">restriction</span> CA_Logger_distinct:
     &#34;All CA L #t1 #t2. NonRoot_CA_Init(CA)@t1 &amp; Logger_Registered(L)@t2 
     ==&gt; not (CA = L)&#34;
 
-restriction CA_Monitor_distinct:
+<span class="keyword">restriction</span> CA_Monitor_distinct:
     &#34;All CA M #t1 #t2. NonRoot_CA_Init(CA)@t1 &amp; Monitor_Registered(M)@t2 
     ==&gt; not (CA = M)&#34;
 
-restriction Logger_Monitor_distinct:
+<span class="keyword">restriction</span> Logger_Monitor_distinct:
     &#34;All L M #t1 #t2. Logger_Registered(L)@t1 &amp; Monitor_Registered(M)@t2 
     ==&gt; not (L = M)&#34;
 
 /* identity of loggers is unique and they only have one key pair */
-restriction LoggersUnique:
+<span class="keyword">restriction</span> LoggersUnique:
     &#34;All L #t1 #t2. Logger_Registered(L)@t1 &amp; Logger_Registered(L)@t2 ==&gt; #t1 = #t2&#34;
 
 /* identity of CAs is unique, they only have one key pair. Note that this property can be violated by a malicious root CA. */
-restriction CAsUnique:
+<span class="keyword">restriction</span> CAsUnique:
     &#34;All CA pk1 sk1 pk2 sk2 #t1 #t2. CA_Registered(CA, sk1, pk1)@t1 &amp; CA_Registered(CA, sk2, pk2)@t2 ==&gt; #t1 = #t2&#34;
 
-restriction eq:
+<span class="keyword">restriction</span> eq:
     &#34; All e1 e2 #t. Eq(e1, e2)@t ==&gt; e1 = e2&#34;
 
-restriction time_monotonicity:
+<span class="keyword">restriction</span> time_monotonicity:
 &#34;All t #t1 #t3. Time(t)@t1
                 &amp; Time(t)@t3
                 &amp; #t1 &lt; #t3
@@ -1082,7 +1082,7 @@ restriction time_monotonicity:
 
 
 /* whenever a party checks the validity period of a certificate, that time must not happen before the check, i.e. the time did not pass yet */
-restriction certStillValid:
+<span class="keyword">restriction</span> certStillValid:
     &#34;All currTime valid_till #t1.
         Time(currTime)@t1 &amp; CheckValidUntil(currTime, valid_till)@t1
          ==&gt; not (Ex #t2. #t2 &lt; #t1 &amp; Time(valid_till)@t2)&#34;
@@ -1090,7 +1090,7 @@ restriction certStillValid:
 /* ----------- Compromise Rules ----------- */
 
 /* CA key leakage */
-rule compromiseCA [color= #d40808 ]:
+<span class="keyword">rule</span> <a name="rule:compromiseCA"></a><span class="rule.identifier">compromiseCA</span> [color= #d40808 ]<span class="punctuation">:</span>
     [!CA_s0($CA, ~skCA, pk(~skCA), ca_fields, CA_sig)] 
     --[ 
         CompromiseCA($CA), 
@@ -1103,7 +1103,7 @@ rule compromiseCA [color= #d40808 ]:
     [ Out(~skCA) ] 
 
 /* Root CA key leakage */
-rule compromiseRootCA [color= #d40808 ]:
+<span class="keyword">rule</span> <a name="rule:compromiseRootCA"></a><span class="rule.identifier">compromiseRootCA</span> [color= #d40808 ]<span class="punctuation">:</span>
     [ !Root_CA_s0($CA, skCA, pkCA) ] 
     --[ 
         CompromiseRootCA($CA), 
@@ -1116,7 +1116,7 @@ rule compromiseRootCA [color= #d40808 ]:
     [ Out(skCA) ]
 
 /* Logger key leakage. !Corrupted_Logger is later additionally used to perform rogue log modifications. */
-rule compromiseLogger [color= #d40808 ]:
+<span class="keyword">rule</span> <a name="rule:compromiseLogger"></a><span class="rule.identifier">compromiseLogger</span> [color= #d40808 ]<span class="punctuation">:</span>
     [ !Logger_s($L, ~skL, pk(~skL)) ] 
     --[ 
         CompromiseLogger($L), 
@@ -1130,7 +1130,7 @@ rule compromiseLogger [color= #d40808 ]:
     [ Out(~skL), !Corrupted_Logger($L, ~skL, pk(~skL)) ] 
 
 /* !St_bad_Monitors can sleep when performing checks */
-rule compromiseMonitor [color= #d40808 ]:
+<span class="keyword">rule</span> <a name="rule:compromiseMonitor"></a><span class="rule.identifier">compromiseMonitor</span> [color= #d40808 ]<span class="punctuation">:</span>
     [ !Monitor($M) ] 
     --[ 
         Compromise(),
@@ -1144,98 +1144,98 @@ rule compromiseMonitor [color= #d40808 ]:
 
 /* BEGIN LEMMAS */
 
-lemma san_Root_CA_Init:
+<span class="keyword">lemma</span> <a name="lem:san_Root_CA_Init"></a><span class="lemma.identifier">san_Root_CA_Init</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_Root_CA_Init()@t
 	&amp; not (Ex #t. Compromise()@t)
 &#34;
 
-lemma san_Intermediate_CA_Init:
+<span class="keyword">lemma</span> <a name="lem:san_Intermediate_CA_Init"></a><span class="lemma.identifier">san_Intermediate_CA_Init</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_Intermediate_CA_Init()@t
 	&amp; not (Ex #t. Compromise()@t)
 &#34;
 
-lemma san_Domain_Owner_Init:
+<span class="keyword">lemma</span> <a name="lem:san_Domain_Owner_Init"></a><span class="lemma.identifier">san_Domain_Owner_Init</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_Domain_Owner_Init()@t
 	&amp; not (Ex #t. Compromise()@t)
 &#34;
 
-lemma san_Monitor_Init:
+<span class="keyword">lemma</span> <a name="lem:san_Monitor_Init"></a><span class="lemma.identifier">san_Monitor_Init</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_Monitor_Init()@t
 	&amp; not (Ex #t. Compromise()@t)
 &#34;
 
-lemma san_StartMonitoring:
+<span class="keyword">lemma</span> <a name="lem:san_StartMonitoring"></a><span class="lemma.identifier">san_StartMonitoring</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_StartMonitoring()@t
 	&amp; not (Ex #t. Compromise()@t)
 &#34;
 
-lemma san_monitorFindsAppendOnlyViolation:
+<span class="keyword">lemma</span> <a name="lem:san_monitorFindsAppendOnlyViolation"></a><span class="lemma.identifier">san_monitorFindsAppendOnlyViolation</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_monitorFindsAppendOnlyViolation()@t
     &amp; (All #t. Compromise()@t ==&gt; (Ex L. CompromiseLogger(L)@t)) // only logger corruptions allowed
 &#34;
 
-lemma san_monitorVerifiesAppendOnly:
+<span class="keyword">lemma</span> <a name="lem:san_monitorVerifiesAppendOnly"></a><span class="lemma.identifier">san_monitorVerifiesAppendOnly</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_monitorVerifiesAppendOnly()@t
 	&amp; not (Ex #t. Compromise()@t)
 &#34;
 
-lemma san_monitorTrackSubject:
+<span class="keyword">lemma</span> <a name="lem:san_monitorTrackSubject"></a><span class="lemma.identifier">san_monitorTrackSubject</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_monitorTrackSubject()@t
 	&amp; not (Ex #t. Compromise()@t)
 &#34;
 
-lemma san_ChainValidator_Valid:
+<span class="keyword">lemma</span> <a name="lem:san_ChainValidator_Valid"></a><span class="lemma.identifier">san_ChainValidator_Valid</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_ChainValidator_Valid()@t
 	&amp; not (Ex #t. Compromise()@t)
 &#34;
 
-lemma san_ChainValidator_Invalid:
+<span class="keyword">lemma</span> <a name="lem:san_ChainValidator_Invalid"></a><span class="lemma.identifier">san_ChainValidator_Invalid</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_ChainValidator_Invalid()@t
 	&amp; not (Ex #t. Compromise()@t)
 &#34;
 
-lemma san_monitorFindsRogueCertificate:
+<span class="keyword">lemma</span> <a name="lem:san_monitorFindsRogueCertificate"></a><span class="lemma.identifier">san_monitorFindsRogueCertificate</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_monitorFindsRogueCertificate()@t
 	&amp; (All #t. Compromise()@t ==&gt; (Ex CA. CompromiseCA(CA)@t)) // only CA corruptions allowed
 &#34;
 
-lemma san_monitorCanFindCertificate:
+<span class="keyword">lemma</span> <a name="lem:san_monitorCanFindCertificate"></a><span class="lemma.identifier">san_monitorCanFindCertificate</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_monitorCanFindCertificate()@t
 	&amp; not (Ex #t. Compromise()@t)
 &#34;
 
-lemma san_monitorCannotFindCertificate:
+<span class="keyword">lemma</span> <a name="lem:san_monitorCannotFindCertificate"></a><span class="lemma.identifier">san_monitorCannotFindCertificate</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_monitorCannotFindCertificate()@t
 	&amp; not (Ex #t. Compromise()@t)
 &#34;
 
-lemma san_monitorFindsRogueCertificate_Sleep:
+<span class="keyword">lemma</span> <a name="lem:san_monitorFindsRogueCertificate_Sleep"></a><span class="lemma.identifier">san_monitorFindsRogueCertificate_Sleep</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_monitorFindsRogueCertificate_Sleep()@t
@@ -1243,174 +1243,174 @@ lemma san_monitorFindsRogueCertificate_Sleep:
     | (Ex CA. CompromiseCA(CA)@t)) // only monitor and CA corruptions allowed
 &#34;
 
-lemma san_Logger_Init:
+<span class="keyword">lemma</span> <a name="lem:san_Logger_Init"></a><span class="lemma.identifier">san_Logger_Init</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_Logger_Init()@t
 	&amp; not (Ex #t. Compromise()@t)
 &#34;
 
-lemma san_Start_Log:
+<span class="keyword">lemma</span> <a name="lem:san_Start_Log"></a><span class="lemma.identifier">san_Start_Log</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_Start_Log()@t
 	&amp; not (Ex #t. Compromise()@t)
 &#34;
 
-lemma san_Start_Log_malicious:
+<span class="keyword">lemma</span> <a name="lem:san_Start_Log_malicious"></a><span class="lemma.identifier">san_Start_Log_malicious</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_Start_Log_malicious()@t
 	&amp; (All #t. Compromise()@t ==&gt; (Ex L. CompromiseLogger(L)@t)) // only logger corruptions allowed
 &#34;
 
-lemma san_add_preC_to_log:
+<span class="keyword">lemma</span> <a name="lem:san_add_preC_to_log"></a><span class="lemma.identifier">san_add_preC_to_log</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_add_preC_to_log()@t
 	&amp; not (Ex #t. Compromise()@t)
 &#34;
 
-lemma san_forge_log_view:
+<span class="keyword">lemma</span> <a name="lem:san_forge_log_view"></a><span class="lemma.identifier">san_forge_log_view</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_forge_log_view()@t
 	&amp; (All #t. Compromise()@t ==&gt; (Ex L. CompromiseLogger(L)@t)) // only logger corruptions allowed
 &#34;
 
-lemma san_PreCertify:
+<span class="keyword">lemma</span> <a name="lem:san_PreCertify"></a><span class="lemma.identifier">san_PreCertify</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_PreCertify()@t
 	&amp; not (Ex #t. Compromise()@t)
 &#34;
 
-lemma san_PubKeyCertify:
+<span class="keyword">lemma</span> <a name="lem:san_PubKeyCertify"></a><span class="lemma.identifier">san_PubKeyCertify</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_PubKeyCertify()@t
 	&amp; not (Ex #t. Compromise()@t)
 &#34;
 
-lemma san_ClientValidate:
+<span class="keyword">lemma</span> <a name="lem:san_ClientValidate"></a><span class="lemma.identifier">san_ClientValidate</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_ClientValidate()@t
 	&amp; not (Ex #t. Compromise()@t)
 &#34;
 
-lemma san_MonitorStoresSnapshot:
+<span class="keyword">lemma</span> <a name="lem:san_MonitorStoresSnapshot"></a><span class="lemma.identifier">san_MonitorStoresSnapshot</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_MonitorStoresSnapshot()@t
 	&amp; not (Ex #t. Compromise()@t)
 &#34;
 
-lemma san_ClientStoresSnapshot:
+<span class="keyword">lemma</span> <a name="lem:san_ClientStoresSnapshot"></a><span class="lemma.identifier">san_ClientStoresSnapshot</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_ClientStoresSnapshot()@t
 	&amp; not (Ex #t. Compromise()@t)
 &#34;
 
-lemma san_ClientFindsAppendOnlyViolation:
+<span class="keyword">lemma</span> <a name="lem:san_ClientFindsAppendOnlyViolation"></a><span class="lemma.identifier">san_ClientFindsAppendOnlyViolation</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_ClientFindsAppendOnlyViolation()@t
 	&amp; (All #t. Compromise()@t ==&gt; (Ex L. CompromiseLogger(L)@t)) // only logger corruptions allowed
 &#34;
 
-lemma san_ClientVerifiesAppendOnly:
+<span class="keyword">lemma</span> <a name="lem:san_ClientVerifiesAppendOnly"></a><span class="lemma.identifier">san_ClientVerifiesAppendOnly</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_ClientVerifiesAppendOnly()@t
 	&amp; not (Ex #t. Compromise()@t)
 &#34;
 
-lemma san_ProofFetching_M:
+<span class="keyword">lemma</span> <a name="lem:san_ProofFetching_M"></a><span class="lemma.identifier">san_ProofFetching_M</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_ProofFetching_M()@t
 	&amp; not (Ex #t. Compromise()@t)
 &#34;
 
-lemma san_ProofFetching_C:
+<span class="keyword">lemma</span> <a name="lem:san_ProofFetching_C"></a><span class="lemma.identifier">san_ProofFetching_C</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_ProofFetching_C()@t
 	&amp; not (Ex #t. Compromise()@t)
 &#34;
 
-lemma san_LoggerSnapshot_M:
+<span class="keyword">lemma</span> <a name="lem:san_LoggerSnapshot_M"></a><span class="lemma.identifier">san_LoggerSnapshot_M</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_LoggerSnapshot_M()@t
 	&amp; not (Ex #t. Compromise()@t)
 &#34;
 
-lemma san_LoggerSnapshot_C:
+<span class="keyword">lemma</span> <a name="lem:san_LoggerSnapshot_C"></a><span class="lemma.identifier">san_LoggerSnapshot_C</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_LoggerSnapshot_C()@t
 	&amp; not (Ex #t. Compromise()@t)
 &#34;
 
-lemma san_ParticipantFindsInclusionViolation:
+<span class="keyword">lemma</span> <a name="lem:san_ParticipantFindsInclusionViolation"></a><span class="lemma.identifier">san_ParticipantFindsInclusionViolation</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_ParticipantFindsInclusionViolation()@t
 	&amp; not (Ex #t. Compromise()@t) // violation is possible if MMD is not respected
 &#34;
 
-lemma san_ParticipantVerifiesInclusion:
+<span class="keyword">lemma</span> <a name="lem:san_ParticipantVerifiesInclusion"></a><span class="lemma.identifier">san_ParticipantVerifiesInclusion</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_ParticipantVerifiesInclusion()@t
 	&amp; not (Ex #t. Compromise()@t)
 &#34;
 
-lemma san_clientGossipsToMonitor:
+<span class="keyword">lemma</span> <a name="lem:san_clientGossipsToMonitor"></a><span class="lemma.identifier">san_clientGossipsToMonitor</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_clientGossipsToMonitor()@t
 	&amp; not (Ex #t. Compromise()@t)
 &#34;
 
-lemma san_monitorFindsAppendOnlyViolation_Gossiped:
+<span class="keyword">lemma</span> <a name="lem:san_monitorFindsAppendOnlyViolation_Gossiped"></a><span class="lemma.identifier">san_monitorFindsAppendOnlyViolation_Gossiped</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_monitorFindsAppendOnlyViolation_Gossiped()@t
 	&amp; (All #t. Compromise()@t ==&gt; (Ex L. CompromiseLogger(L)@t)) // only logger corruptions allowed
 &#34;
 
-lemma san_monitorVerifiesAppendOnly_Gossiped:
+<span class="keyword">lemma</span> <a name="lem:san_monitorVerifiesAppendOnly_Gossiped"></a><span class="lemma.identifier">san_monitorVerifiesAppendOnly_Gossiped</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_monitorVerifiesAppendOnly_Gossiped()@t
 	&amp; not (Ex #t. Compromise()@t)
 &#34;
 
-lemma san_ConsultDocumentation_Success:
+<span class="keyword">lemma</span> <a name="lem:san_ConsultDocumentation_Success"></a><span class="lemma.identifier">san_ConsultDocumentation_Success</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_ConsultDocumentation_Success()@t
 	&amp; not (Ex #t. Compromise()@t)
 &#34;
 
-lemma san_ConsultDocumentation_Fails:
+<span class="keyword">lemma</span> <a name="lem:san_ConsultDocumentation_Fails"></a><span class="lemma.identifier">san_ConsultDocumentation_Fails</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_ConsultDocumentation_Fails()@t
 	&amp; (All #t. Compromise()@t ==&gt; (Ex rootCA. CompromiseRootCA(rootCA)@t))
 &#34;
 
-lemma suff_san_GossipTransparencyCheck_Success:
+<span class="keyword">lemma</span> <a name="lem:suff_san_GossipTransparencyCheck_Success"></a><span class="lemma.identifier">suff_san_GossipTransparencyCheck_Success</span><span class="punctuation">:</span>
   exists-trace
   &#34;Ex #t.
         San_GossipTransparencyCheck_Success( )@t
         &amp; not(Ex #t1. Compromise( )@t1)&#34;
 
-lemma suff_san_GossipTransparencyCheck_Failed:
+<span class="keyword">lemma</span> <a name="lem:suff_san_GossipTransparencyCheck_Failed"></a><span class="lemma.identifier">suff_san_GossipTransparencyCheck_Failed</span><span class="punctuation">:</span>
   exists-trace
   &#34;Ex #t.
         San_GossipTransparencyCheck_Failed( )@t
@@ -1419,31 +1419,31 @@ lemma suff_san_GossipTransparencyCheck_Failed:
            ==&gt; (Ex L. CompromiseLogger(L)@t1)
     )&#34;
 
-lemma suff_san_GossipingCheck_Found:
+<span class="keyword">lemma</span> <a name="lem:suff_san_GossipingCheck_Found"></a><span class="lemma.identifier">suff_san_GossipingCheck_Found</span><span class="punctuation">:</span>
   exists-trace
   &#34;Ex #t.
         San_GossipingCheck_Found( )@t
         &amp; not(Ex #t1. Compromise( )@t1)&#34;
 
-lemma san_compromiseCA:
+<span class="keyword">lemma</span> <a name="lem:san_compromiseCA"></a><span class="lemma.identifier">san_compromiseCA</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_compromiseCA()@t
 &#34;
 
-lemma san_compromiseRootCA:
+<span class="keyword">lemma</span> <a name="lem:san_compromiseRootCA"></a><span class="lemma.identifier">san_compromiseRootCA</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_compromiseRootCA()@t
 &#34;
 
-lemma san_compromiseLogger:
+<span class="keyword">lemma</span> <a name="lem:san_compromiseLogger"></a><span class="lemma.identifier">san_compromiseLogger</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_compromiseLogger()@t
 &#34;
 
-lemma san_compromiseMonitor:
+<span class="keyword">lemma</span> <a name="lem:san_compromiseMonitor"></a><span class="lemma.identifier">san_compromiseMonitor</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_compromiseMonitor()@t
@@ -1452,7 +1452,7 @@ lemma san_compromiseMonitor:
 /* Authenticity */
 
 // counterexample to authenticity
-lemma authenticity:
+<span class="keyword">lemma</span> <a name="lem:authenticity"></a><span class="lemma.identifier">authenticity</span><span class="punctuation">:</span>
     exists-trace
     &#34;Ex L1 L2 rootCA ca_fields CA fields #j.
         BrowserAcceptsChain(CA, fields, rootCA, ca_fields, L1, L2)@j 
@@ -1464,7 +1464,7 @@ lemma authenticity:
    --------------------- */
 
 /* falsified. Gossiping alone does not guarantee that the monitor who was gossiped to will see an entry. But it will be detectable which we will explore in T_Gossip. */
-lemma transparency_Gossip:
+<span class="keyword">lemma</span> <a name="lem:transparency_Gossip"></a><span class="lemma.identifier">transparency_Gossip</span><span class="punctuation">:</span>
     &#34;All M L L1 L2 CA rootCA fields ca_fields session gossiped_session #t0 #t1.
         BrowserAcceptsChain(CA, fields, rootCA, ca_fields, L1, L2)@t0
         &amp; STHGossipTransparencyCheck(M, L, fields, CA, ca_fields, session, gossiped_session)@t1
@@ -1480,7 +1480,7 @@ lemma transparency_Gossip:
 
 /* ----- Accountable Transparency ----- */
 
-test gossip_appendOnly_viol:
+<span class="keyword">test</span> <a name="test:gossip_appendOnly_viol"></a><span class="test.identifier">gossip_appendOnly_viol</span><span class="punctuation">:</span>
     &#34;Ex M fields CA ca_fields session gossiped_session #t #t1.
         CTGossipTransparencyCheck_NotFound(M, L, fields, CA, ca_fields, session, gossiped_session)@t
         &amp; Asserts(M, &#39;The log has violated the append-only property between these two snapshots.&#39;, L, &lt;gossiped_session, session&gt;)@t1
@@ -1489,7 +1489,7 @@ test gossip_appendOnly_viol:
 /*
 The monitor that was gossiped to can use the append only check to hold the logger accountable for the entry that the client accepted earlier.
 */
-lemma T_Gossip [heuristic=o &#34;acc_oracle&#34;]:
+<span class="keyword">lemma</span> <a name="lem:T_Gossip"></a><span class="lemma.identifier">T_Gossip</span> [heuristic=o &#34;acc_oracle&#34;]<span class="punctuation">:</span>
     gossip_appendOnly_viol accounts for
     &#34;All M L L1 L2 CA rootCA fields ca_fields session gossiped_session #t0 #t1.
         BrowserAcceptsChain(CA, fields, rootCA, ca_fields, L1, L2)@t0

@@ -14,183 +14,18 @@
   },
   "execution_metadata": {
     "total_tasks": 79,
-    "total_successes": 78,
-    "total_failures": 1,
+    "total_successes": 79,
+    "total_failures": 0,
     "total_cache_hit": 0,
-    "total_runtime": 6890.998206377029,
-    "total_memory": 95968.4921875,
-    "max_runtime": 757.6720082759857,
-    "max_memory": 7313.87890625
+    "total_runtime": 3596.896403312683,
+    "total_memory": 97468.875,
+    "max_runtime": 462.05621218681335,
+    "max_memory": 7065.546875
   },
   "tasks": {
     "normal": {
       "theory_file": "pregen_models/ct_receipt_pregen.spthy",
       "subtasks": {
-        "--san_clientReceivesReceipt--default": {
-          "task_config": {
-            "tamarin_alias": "default",
-            "lemma": "san_clientReceivesReceipt",
-            "output_theory_file": "results/ct_receipt/proofs/--san_clientReceivesReceipt--default.spthy",
-            "output_trace_file": "results/ct_receipt/traces/--san_clientReceivesReceipt--default.json",
-            "options": [
-              "--derivcheck-timeout=99999"
-            ],
-            "resources": {
-              "cores": 16,
-              "memory": 14,
-              "timeout": 1200
-            }
-          },
-          "task_execution_metadata": {
-            "command": [],
-            "status": "completed",
-            "cache_hit": false,
-            "exec_start": "2026-04-29T22:16:41.466007",
-            "exec_end": "2026-04-29T22:18:57.200721",
-            "exec_duration_monotonic": 135.73471450805664,
-            "avg_memory": 1120.2495370370368,
-            "peak_memory": 2004.6953125
-          },
-          "task_result": {
-            "warnings": [],
-            "real_time_tamarin_measure": 135.46,
-            "lemma_result": "verified",
-            "steps": 30,
-            "analysis_type": "exists-trace"
-          }
-        },
-        "--san_ConsultDocumentation_Fails--default": {
-          "task_config": {
-            "tamarin_alias": "default",
-            "lemma": "san_ConsultDocumentation_Fails",
-            "output_theory_file": "results/ct_receipt/proofs/--san_ConsultDocumentation_Fails--default.spthy",
-            "output_trace_file": "results/ct_receipt/traces/--san_ConsultDocumentation_Fails--default.json",
-            "options": [
-              "--derivcheck-timeout=99999"
-            ],
-            "resources": {
-              "cores": 16,
-              "memory": 14,
-              "timeout": 1200
-            }
-          },
-          "task_execution_metadata": {
-            "command": [],
-            "status": "completed",
-            "cache_hit": false,
-            "exec_start": "2026-04-29T22:18:57.234626",
-            "exec_end": "2026-04-29T22:19:50.898353",
-            "exec_duration_monotonic": 53.663726806640625,
-            "avg_memory": 518.4115566037736,
-            "peak_memory": 1103.53515625
-          },
-          "task_result": {
-            "warnings": [],
-            "real_time_tamarin_measure": 53.33,
-            "lemma_result": "verified",
-            "steps": 5,
-            "analysis_type": "exists-trace"
-          }
-        },
-        "--san_PubKeyCertify--default": {
-          "task_config": {
-            "tamarin_alias": "default",
-            "lemma": "san_PubKeyCertify",
-            "output_theory_file": "results/ct_receipt/proofs/--san_PubKeyCertify--default.spthy",
-            "output_trace_file": "results/ct_receipt/traces/--san_PubKeyCertify--default.json",
-            "options": [
-              "--derivcheck-timeout=99999"
-            ],
-            "resources": {
-              "cores": 16,
-              "memory": 14,
-              "timeout": 1200
-            }
-          },
-          "task_execution_metadata": {
-            "command": [],
-            "status": "completed",
-            "cache_hit": false,
-            "exec_start": "2026-04-29T22:19:50.964426",
-            "exec_end": "2026-04-29T22:20:54.443002",
-            "exec_duration_monotonic": 63.47857642173767,
-            "avg_memory": 556.5477430555555,
-            "peak_memory": 1060.9765625
-          },
-          "task_result": {
-            "warnings": [],
-            "real_time_tamarin_measure": 63.19,
-            "lemma_result": "verified",
-            "steps": 16,
-            "analysis_type": "exists-trace"
-          }
-        },
-        "--san_ParticipantFindsInclusionViolation--default": {
-          "task_config": {
-            "tamarin_alias": "default",
-            "lemma": "san_ParticipantFindsInclusionViolation",
-            "output_theory_file": "results/ct_receipt/proofs/--san_ParticipantFindsInclusionViolation--default.spthy",
-            "output_trace_file": "results/ct_receipt/traces/--san_ParticipantFindsInclusionViolation--default.json",
-            "options": [
-              "--derivcheck-timeout=99999"
-            ],
-            "resources": {
-              "cores": 16,
-              "memory": 14,
-              "timeout": 1200
-            }
-          },
-          "task_execution_metadata": {
-            "command": [],
-            "status": "completed",
-            "cache_hit": false,
-            "exec_start": "2026-04-29T22:20:54.565358",
-            "exec_end": "2026-04-29T22:21:53.689303",
-            "exec_duration_monotonic": 59.1239447593689,
-            "avg_memory": 524.602092161017,
-            "peak_memory": 1101.71875
-          },
-          "task_result": {
-            "warnings": [],
-            "real_time_tamarin_measure": 58.83,
-            "lemma_result": "verified",
-            "steps": 8,
-            "analysis_type": "exists-trace"
-          }
-        },
-        "--san_monitorCanFindCertificate--default": {
-          "task_config": {
-            "tamarin_alias": "default",
-            "lemma": "san_monitorCanFindCertificate",
-            "output_theory_file": "results/ct_receipt/proofs/--san_monitorCanFindCertificate--default.spthy",
-            "output_trace_file": "results/ct_receipt/traces/--san_monitorCanFindCertificate--default.json",
-            "options": [
-              "--derivcheck-timeout=99999"
-            ],
-            "resources": {
-              "cores": 16,
-              "memory": 14,
-              "timeout": 1200
-            }
-          },
-          "task_execution_metadata": {
-            "command": [],
-            "status": "completed",
-            "cache_hit": false,
-            "exec_start": "2026-04-29T22:21:53.784910",
-            "exec_end": "2026-04-29T22:22:59.407182",
-            "exec_duration_monotonic": 65.62227153778076,
-            "avg_memory": 562.995372596154,
-            "peak_memory": 1079.9296875
-          },
-          "task_result": {
-            "warnings": [],
-            "real_time_tamarin_measure": 65.36,
-            "lemma_result": "verified",
-            "steps": 26,
-            "analysis_type": "exists-trace"
-          }
-        },
         "--san_ClientFindsAppendOnlyViolation--default": {
           "task_config": {
             "tamarin_alias": "default",
@@ -210,50 +45,17 @@
             "command": [],
             "status": "completed",
             "cache_hit": false,
-            "exec_start": "2026-04-29T22:22:59.526433",
-            "exec_end": "2026-04-29T22:24:02.551422",
-            "exec_duration_monotonic": 63.02498960494995,
-            "avg_memory": 573.7224702380953,
-            "peak_memory": 1084.76953125
+            "exec_start": "2026-04-30T11:23:33.208599",
+            "exec_end": "2026-04-30T11:24:04.507605",
+            "exec_duration_monotonic": 31.29900598526001,
+            "avg_memory": 568.171875,
+            "peak_memory": 1160.71875
           },
           "task_result": {
             "warnings": [],
-            "real_time_tamarin_measure": 62.71,
+            "real_time_tamarin_measure": 31.12,
             "lemma_result": "verified",
             "steps": 31,
-            "analysis_type": "exists-trace"
-          }
-        },
-        "--san_ProofFetching_M--default": {
-          "task_config": {
-            "tamarin_alias": "default",
-            "lemma": "san_ProofFetching_M",
-            "output_theory_file": "results/ct_receipt/proofs/--san_ProofFetching_M--default.spthy",
-            "output_trace_file": "results/ct_receipt/traces/--san_ProofFetching_M--default.json",
-            "options": [
-              "--derivcheck-timeout=99999"
-            ],
-            "resources": {
-              "cores": 16,
-              "memory": 14,
-              "timeout": 1200
-            }
-          },
-          "task_execution_metadata": {
-            "command": [],
-            "status": "completed",
-            "cache_hit": false,
-            "exec_start": "2026-04-29T22:24:02.618750",
-            "exec_end": "2026-04-29T22:25:00.554397",
-            "exec_duration_monotonic": 57.93564701080322,
-            "avg_memory": 521.0911907327586,
-            "peak_memory": 1110.92578125
-          },
-          "task_result": {
-            "warnings": [],
-            "real_time_tamarin_measure": 57.64,
-            "lemma_result": "verified",
-            "steps": 4,
             "analysis_type": "exists-trace"
           }
         },
@@ -276,83 +78,17 @@
             "command": [],
             "status": "completed",
             "cache_hit": false,
-            "exec_start": "2026-04-29T22:25:00.670510",
-            "exec_end": "2026-04-29T22:25:58.650313",
-            "exec_duration_monotonic": 57.97980308532715,
-            "avg_memory": 515.4246363146551,
-            "peak_memory": 1101.47265625
+            "exec_start": "2026-04-30T11:24:04.607454",
+            "exec_end": "2026-04-30T11:24:33.201801",
+            "exec_duration_monotonic": 28.59434700012207,
+            "avg_memory": 508.80765086206895,
+            "peak_memory": 1054.75
           },
           "task_result": {
             "warnings": [],
-            "real_time_tamarin_measure": 57.63,
+            "real_time_tamarin_measure": 28.41,
             "lemma_result": "verified",
             "steps": 3,
-            "analysis_type": "exists-trace"
-          }
-        },
-        "--san_Monitor_Init--default": {
-          "task_config": {
-            "tamarin_alias": "default",
-            "lemma": "san_Monitor_Init",
-            "output_theory_file": "results/ct_receipt/proofs/--san_Monitor_Init--default.spthy",
-            "output_trace_file": "results/ct_receipt/traces/--san_Monitor_Init--default.json",
-            "options": [
-              "--derivcheck-timeout=99999"
-            ],
-            "resources": {
-              "cores": 16,
-              "memory": 14,
-              "timeout": 1200
-            }
-          },
-          "task_execution_metadata": {
-            "command": [],
-            "status": "completed",
-            "cache_hit": false,
-            "exec_start": "2026-04-29T22:25:58.742042",
-            "exec_end": "2026-04-29T22:26:24.434254",
-            "exec_duration_monotonic": 25.692212343215942,
-            "avg_memory": 147.8560697115385,
-            "peak_memory": 157.92578125
-          },
-          "task_result": {
-            "warnings": [],
-            "real_time_tamarin_measure": 25.45,
-            "lemma_result": "verified",
-            "steps": 2,
-            "analysis_type": "exists-trace"
-          }
-        },
-        "--san_monitorFindsRogueCertificate_Sleep--default": {
-          "task_config": {
-            "tamarin_alias": "default",
-            "lemma": "san_monitorFindsRogueCertificate_Sleep",
-            "output_theory_file": "results/ct_receipt/proofs/--san_monitorFindsRogueCertificate_Sleep--default.spthy",
-            "output_trace_file": "results/ct_receipt/traces/--san_monitorFindsRogueCertificate_Sleep--default.json",
-            "options": [
-              "--derivcheck-timeout=99999"
-            ],
-            "resources": {
-              "cores": 16,
-              "memory": 14,
-              "timeout": 1200
-            }
-          },
-          "task_execution_metadata": {
-            "command": [],
-            "status": "completed",
-            "cache_hit": false,
-            "exec_start": "2026-04-29T22:26:24.499776",
-            "exec_end": "2026-04-29T22:27:27.369944",
-            "exec_duration_monotonic": 62.87016797065735,
-            "avg_memory": 537.6836557539682,
-            "peak_memory": 1085.03125
-          },
-          "task_result": {
-            "warnings": [],
-            "real_time_tamarin_measure": 62.54,
-            "lemma_result": "verified",
-            "steps": 21,
             "analysis_type": "exists-trace"
           }
         },
@@ -375,26 +111,26 @@
             "command": [],
             "status": "completed",
             "cache_hit": false,
-            "exec_start": "2026-04-29T22:27:27.414320",
-            "exec_end": "2026-04-29T22:28:27.816685",
-            "exec_duration_monotonic": 60.40236449241638,
-            "avg_memory": 536.8544921874999,
-            "peak_memory": 1103.43359375
+            "exec_start": "2026-04-30T11:24:33.284817",
+            "exec_end": "2026-04-30T11:25:03.897647",
+            "exec_duration_monotonic": 30.61283016204834,
+            "avg_memory": 537.3694556451612,
+            "peak_memory": 1121.9375
           },
           "task_result": {
             "warnings": [],
-            "real_time_tamarin_measure": 60.12,
+            "real_time_tamarin_measure": 30.42,
             "lemma_result": "verified",
             "steps": 16,
             "analysis_type": "exists-trace"
           }
         },
-        "--san_signReceipt--default": {
+        "--san_forge_log_view--default": {
           "task_config": {
             "tamarin_alias": "default",
-            "lemma": "san_signReceipt",
-            "output_theory_file": "results/ct_receipt/proofs/--san_signReceipt--default.spthy",
-            "output_trace_file": "results/ct_receipt/traces/--san_signReceipt--default.json",
+            "lemma": "san_forge_log_view",
+            "output_theory_file": "results/ct_receipt/proofs/--san_forge_log_view--default.spthy",
+            "output_trace_file": "results/ct_receipt/traces/--san_forge_log_view--default.json",
             "options": [
               "--derivcheck-timeout=99999"
             ],
@@ -408,59 +144,26 @@
             "command": [],
             "status": "completed",
             "cache_hit": false,
-            "exec_start": "2026-04-29T22:28:27.859914",
-            "exec_end": "2026-04-29T22:29:41.966353",
-            "exec_duration_monotonic": 74.1064383983612,
-            "avg_memory": 693.1364020270271,
-            "peak_memory": 1262.84765625
+            "exec_start": "2026-04-30T11:25:03.974648",
+            "exec_end": "2026-04-30T11:25:33.596186",
+            "exec_duration_monotonic": 29.621538162231445,
+            "avg_memory": 496.99270833333344,
+            "peak_memory": 1066.03125
           },
           "task_result": {
             "warnings": [],
-            "real_time_tamarin_measure": 73.8,
-            "lemma_result": "verified",
-            "steps": 18,
-            "analysis_type": "exists-trace"
-          }
-        },
-        "--san_Intermediate_CA_Init--default": {
-          "task_config": {
-            "tamarin_alias": "default",
-            "lemma": "san_Intermediate_CA_Init",
-            "output_theory_file": "results/ct_receipt/proofs/--san_Intermediate_CA_Init--default.spthy",
-            "output_trace_file": "results/ct_receipt/traces/--san_Intermediate_CA_Init--default.json",
-            "options": [
-              "--derivcheck-timeout=99999"
-            ],
-            "resources": {
-              "cores": 16,
-              "memory": 14,
-              "timeout": 1200
-            }
-          },
-          "task_execution_metadata": {
-            "command": [],
-            "status": "completed",
-            "cache_hit": false,
-            "exec_start": "2026-04-29T22:29:42.093052",
-            "exec_end": "2026-04-29T22:30:35.243179",
-            "exec_duration_monotonic": 53.15012764930725,
-            "avg_memory": 517.9635908018868,
-            "peak_memory": 1108.3671875
-          },
-          "task_result": {
-            "warnings": [],
-            "real_time_tamarin_measure": 52.85,
+            "real_time_tamarin_measure": 29.42,
             "lemma_result": "verified",
             "steps": 3,
             "analysis_type": "exists-trace"
           }
         },
-        "--san_ChainValidator_Invalid--default": {
+        "--san_PubKeyCertify--default": {
           "task_config": {
             "tamarin_alias": "default",
-            "lemma": "san_ChainValidator_Invalid",
-            "output_theory_file": "results/ct_receipt/proofs/--san_ChainValidator_Invalid--default.spthy",
-            "output_trace_file": "results/ct_receipt/traces/--san_ChainValidator_Invalid--default.json",
+            "lemma": "san_PubKeyCertify",
+            "output_theory_file": "results/ct_receipt/proofs/--san_PubKeyCertify--default.spthy",
+            "output_trace_file": "results/ct_receipt/traces/--san_PubKeyCertify--default.json",
             "options": [
               "--derivcheck-timeout=99999"
             ],
@@ -474,26 +177,26 @@
             "command": [],
             "status": "completed",
             "cache_hit": false,
-            "exec_start": "2026-04-29T22:30:35.336086",
-            "exec_end": "2026-04-29T22:31:31.121458",
-            "exec_duration_monotonic": 55.785372734069824,
-            "avg_memory": 536.9817243303571,
-            "peak_memory": 1127.9140625
+            "exec_start": "2026-04-30T11:25:33.688637",
+            "exec_end": "2026-04-30T11:26:05.343818",
+            "exec_duration_monotonic": 31.65518093109131,
+            "avg_memory": 545.1650390625001,
+            "peak_memory": 1078.921875
           },
           "task_result": {
             "warnings": [],
-            "real_time_tamarin_measure": 55.37,
+            "real_time_tamarin_measure": 31.46,
             "lemma_result": "verified",
-            "steps": 5,
+            "steps": 16,
             "analysis_type": "exists-trace"
           }
         },
-        "--san_ClientVerifiesAppendOnly--default": {
+        "--san_LoggerSnapshot_C--default": {
           "task_config": {
             "tamarin_alias": "default",
-            "lemma": "san_ClientVerifiesAppendOnly",
-            "output_theory_file": "results/ct_receipt/proofs/--san_ClientVerifiesAppendOnly--default.spthy",
-            "output_trace_file": "results/ct_receipt/traces/--san_ClientVerifiesAppendOnly--default.json",
+            "lemma": "san_LoggerSnapshot_C",
+            "output_theory_file": "results/ct_receipt/proofs/--san_LoggerSnapshot_C--default.spthy",
+            "output_trace_file": "results/ct_receipt/traces/--san_LoggerSnapshot_C--default.json",
             "options": [
               "--derivcheck-timeout=99999"
             ],
@@ -507,26 +210,26 @@
             "command": [],
             "status": "completed",
             "cache_hit": false,
-            "exec_start": "2026-04-29T22:31:31.257309",
-            "exec_end": "2026-04-29T22:32:51.501357",
-            "exec_duration_monotonic": 80.24404764175415,
-            "avg_memory": 666.8205566406251,
-            "peak_memory": 1354.546875
+            "exec_start": "2026-04-30T11:26:05.396763",
+            "exec_end": "2026-04-30T11:26:35.017215",
+            "exec_duration_monotonic": 29.620452165603638,
+            "avg_memory": 504.40364583333337,
+            "peak_memory": 1073.984375
           },
           "task_result": {
             "warnings": [],
-            "real_time_tamarin_measure": 79.89,
+            "real_time_tamarin_measure": 29.43,
             "lemma_result": "verified",
-            "steps": 34,
+            "steps": 6,
             "analysis_type": "exists-trace"
           }
         },
-        "--san_compromiseLogger--default": {
+        "--san_monitorFindsRogueCertificate--default": {
           "task_config": {
             "tamarin_alias": "default",
-            "lemma": "san_compromiseLogger",
-            "output_theory_file": "results/ct_receipt/proofs/--san_compromiseLogger--default.spthy",
-            "output_trace_file": "results/ct_receipt/traces/--san_compromiseLogger--default.json",
+            "lemma": "san_monitorFindsRogueCertificate",
+            "output_theory_file": "results/ct_receipt/proofs/--san_monitorFindsRogueCertificate--default.spthy",
+            "output_trace_file": "results/ct_receipt/traces/--san_monitorFindsRogueCertificate--default.json",
             "options": [
               "--derivcheck-timeout=99999"
             ],
@@ -540,15 +243,114 @@
             "command": [],
             "status": "completed",
             "cache_hit": false,
-            "exec_start": "2026-04-29T22:32:51.590841",
-            "exec_end": "2026-04-29T22:33:53.680564",
-            "exec_duration_monotonic": 62.089723110198975,
-            "avg_memory": 525.5273437500001,
-            "peak_memory": 1083.921875
+            "exec_start": "2026-04-30T11:26:35.088006",
+            "exec_end": "2026-04-30T11:27:06.409139",
+            "exec_duration_monotonic": 31.321133136749268,
+            "avg_memory": 523.3503024193549,
+            "peak_memory": 1109.671875
           },
           "task_result": {
             "warnings": [],
-            "real_time_tamarin_measure": 61.8,
+            "real_time_tamarin_measure": 31.12,
+            "lemma_result": "verified",
+            "steps": 18,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--san_SCTReceiptCheck--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "san_SCTReceiptCheck",
+            "output_theory_file": "results/ct_receipt/proofs/--san_SCTReceiptCheck--default.spthy",
+            "output_trace_file": "results/ct_receipt/traces/--san_SCTReceiptCheck--default.json",
+            "options": [
+              "--derivcheck-timeout=99999"
+            ],
+            "resources": {
+              "cores": 16,
+              "memory": 14,
+              "timeout": 1200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2026-04-30T11:27:06.508209",
+            "exec_end": "2026-04-30T11:28:28.639847",
+            "exec_duration_monotonic": 82.13163781166077,
+            "avg_memory": 1252.5241996951218,
+            "peak_memory": 2279.90625
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 81.91,
+            "lemma_result": "verified",
+            "steps": 32,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--san_ParticipantFindsInclusionViolation--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "san_ParticipantFindsInclusionViolation",
+            "output_theory_file": "results/ct_receipt/proofs/--san_ParticipantFindsInclusionViolation--default.spthy",
+            "output_trace_file": "results/ct_receipt/traces/--san_ParticipantFindsInclusionViolation--default.json",
+            "options": [
+              "--derivcheck-timeout=99999"
+            ],
+            "resources": {
+              "cores": 16,
+              "memory": 14,
+              "timeout": 1200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2026-04-30T11:28:28.680007",
+            "exec_end": "2026-04-30T11:28:58.260500",
+            "exec_duration_monotonic": 29.580492973327637,
+            "avg_memory": 508.8067708333334,
+            "peak_memory": 1123.6875
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 29.39,
+            "lemma_result": "verified",
+            "steps": 8,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--san_ProofFetching_C--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "san_ProofFetching_C",
+            "output_theory_file": "results/ct_receipt/proofs/--san_ProofFetching_C--default.spthy",
+            "output_trace_file": "results/ct_receipt/traces/--san_ProofFetching_C--default.json",
+            "options": [
+              "--derivcheck-timeout=99999"
+            ],
+            "resources": {
+              "cores": 16,
+              "memory": 14,
+              "timeout": 1200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2026-04-30T11:28:58.283750",
+            "exec_end": "2026-04-30T11:29:27.550535",
+            "exec_duration_monotonic": 29.266785144805908,
+            "avg_memory": 493.8679956896551,
+            "peak_memory": 1116.609375
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 29.08,
             "lemma_result": "verified",
             "steps": 3,
             "analysis_type": "exists-trace"
@@ -573,26 +375,26 @@
             "command": [],
             "status": "completed",
             "cache_hit": false,
-            "exec_start": "2026-04-29T22:33:53.752547",
-            "exec_end": "2026-04-29T22:34:54.177527",
-            "exec_duration_monotonic": 60.42498016357422,
-            "avg_memory": 514.1819661458334,
-            "peak_memory": 1090.54296875
+            "exec_start": "2026-04-30T11:29:27.593310",
+            "exec_end": "2026-04-30T11:29:57.210916",
+            "exec_duration_monotonic": 29.617606163024902,
+            "avg_memory": 502.77656249999995,
+            "peak_memory": 1094.75
           },
           "task_result": {
             "warnings": [],
-            "real_time_tamarin_measure": 60.11,
+            "real_time_tamarin_measure": 29.43,
             "lemma_result": "verified",
             "steps": 3,
             "analysis_type": "exists-trace"
           }
         },
-        "--san_monitorTrackSubject--default": {
+        "--san_domainOwnerVerifiesReceipt_1--default": {
           "task_config": {
             "tamarin_alias": "default",
-            "lemma": "san_monitorTrackSubject",
-            "output_theory_file": "results/ct_receipt/proofs/--san_monitorTrackSubject--default.spthy",
-            "output_trace_file": "results/ct_receipt/traces/--san_monitorTrackSubject--default.json",
+            "lemma": "san_domainOwnerVerifiesReceipt_1",
+            "output_theory_file": "results/ct_receipt/proofs/--san_domainOwnerVerifiesReceipt_1--default.spthy",
+            "output_trace_file": "results/ct_receipt/traces/--san_domainOwnerVerifiesReceipt_1--default.json",
             "options": [
               "--derivcheck-timeout=99999"
             ],
@@ -606,281 +408,17 @@
             "command": [],
             "status": "completed",
             "cache_hit": false,
-            "exec_start": "2026-04-29T22:34:54.320089",
-            "exec_end": "2026-04-29T22:35:50.007498",
-            "exec_duration_monotonic": 55.687408208847046,
-            "avg_memory": 506.32296316964283,
-            "peak_memory": 1132.62109375
+            "exec_start": "2026-04-30T11:29:57.298118",
+            "exec_end": "2026-04-30T11:34:40.443286",
+            "exec_duration_monotonic": 283.1451680660248,
+            "avg_memory": 2689.511899466192,
+            "peak_memory": 4583.5625
           },
           "task_result": {
             "warnings": [],
-            "real_time_tamarin_measure": 55.43,
+            "real_time_tamarin_measure": 282.93,
             "lemma_result": "verified",
-            "steps": 4,
-            "analysis_type": "exists-trace"
-          }
-        },
-        "--san_LoggerSnapshot_M--default": {
-          "task_config": {
-            "tamarin_alias": "default",
-            "lemma": "san_LoggerSnapshot_M",
-            "output_theory_file": "results/ct_receipt/proofs/--san_LoggerSnapshot_M--default.spthy",
-            "output_trace_file": "results/ct_receipt/traces/--san_LoggerSnapshot_M--default.json",
-            "options": [
-              "--derivcheck-timeout=99999"
-            ],
-            "resources": {
-              "cores": 16,
-              "memory": 14,
-              "timeout": 1200
-            }
-          },
-          "task_execution_metadata": {
-            "command": [],
-            "status": "completed",
-            "cache_hit": false,
-            "exec_start": "2026-04-29T22:35:50.110721",
-            "exec_end": "2026-04-29T22:36:43.281052",
-            "exec_duration_monotonic": 53.1703314781189,
-            "avg_memory": 511.55896226415103,
-            "peak_memory": 1096.92578125
-          },
-          "task_result": {
-            "warnings": [],
-            "real_time_tamarin_measure": 52.92,
-            "lemma_result": "verified",
-            "steps": 6,
-            "analysis_type": "exists-trace"
-          }
-        },
-        "--san_Root_CA_Init--default": {
-          "task_config": {
-            "tamarin_alias": "default",
-            "lemma": "san_Root_CA_Init",
-            "output_theory_file": "results/ct_receipt/proofs/--san_Root_CA_Init--default.spthy",
-            "output_trace_file": "results/ct_receipt/traces/--san_Root_CA_Init--default.json",
-            "options": [
-              "--derivcheck-timeout=99999"
-            ],
-            "resources": {
-              "cores": 16,
-              "memory": 14,
-              "timeout": 1200
-            }
-          },
-          "task_execution_metadata": {
-            "command": [],
-            "status": "completed",
-            "cache_hit": false,
-            "exec_start": "2026-04-29T22:36:43.352130",
-            "exec_end": "2026-04-29T22:37:06.643902",
-            "exec_duration_monotonic": 23.291771173477173,
-            "avg_memory": 146.69173177083334,
-            "peak_memory": 179.40234375
-          },
-          "task_result": {
-            "warnings": [],
-            "real_time_tamarin_measure": 23.06,
-            "lemma_result": "verified",
-            "steps": 2,
-            "analysis_type": "exists-trace"
-          }
-        },
-        "--san_add_preC_to_log--default": {
-          "task_config": {
-            "tamarin_alias": "default",
-            "lemma": "san_add_preC_to_log",
-            "output_theory_file": "results/ct_receipt/proofs/--san_add_preC_to_log--default.spthy",
-            "output_trace_file": "results/ct_receipt/traces/--san_add_preC_to_log--default.json",
-            "options": [
-              "--derivcheck-timeout=99999"
-            ],
-            "resources": {
-              "cores": 16,
-              "memory": 14,
-              "timeout": 1200
-            }
-          },
-          "task_execution_metadata": {
-            "command": [],
-            "status": "completed",
-            "cache_hit": false,
-            "exec_start": "2026-04-29T22:37:06.744051",
-            "exec_end": "2026-04-29T22:38:02.024646",
-            "exec_duration_monotonic": 55.28059411048889,
-            "avg_memory": 547.3803977272727,
-            "peak_memory": 1103.859375
-          },
-          "task_result": {
-            "warnings": [],
-            "real_time_tamarin_measure": 55.02,
-            "lemma_result": "verified",
-            "steps": 11,
-            "analysis_type": "exists-trace"
-          }
-        },
-        "--san_ClientStoresSnapshot--default": {
-          "task_config": {
-            "tamarin_alias": "default",
-            "lemma": "san_ClientStoresSnapshot",
-            "output_theory_file": "results/ct_receipt/proofs/--san_ClientStoresSnapshot--default.spthy",
-            "output_trace_file": "results/ct_receipt/traces/--san_ClientStoresSnapshot--default.json",
-            "options": [
-              "--derivcheck-timeout=99999"
-            ],
-            "resources": {
-              "cores": 16,
-              "memory": 14,
-              "timeout": 1200
-            }
-          },
-          "task_execution_metadata": {
-            "command": [],
-            "status": "completed",
-            "cache_hit": false,
-            "exec_start": "2026-04-29T22:38:02.135196",
-            "exec_end": "2026-04-29T22:38:54.994801",
-            "exec_duration_monotonic": 52.85960507392883,
-            "avg_memory": 517.2635613207547,
-            "peak_memory": 1057.296875
-          },
-          "task_result": {
-            "warnings": [],
-            "real_time_tamarin_measure": 52.58,
-            "lemma_result": "verified",
-            "steps": 6,
-            "analysis_type": "exists-trace"
-          }
-        },
-        "--san_monitorAudit_Sleep--default": {
-          "task_config": {
-            "tamarin_alias": "default",
-            "lemma": "san_monitorAudit_Sleep",
-            "output_theory_file": "results/ct_receipt/proofs/--san_monitorAudit_Sleep--default.spthy",
-            "output_trace_file": "results/ct_receipt/traces/--san_monitorAudit_Sleep--default.json",
-            "options": [
-              "--derivcheck-timeout=99999"
-            ],
-            "resources": {
-              "cores": 16,
-              "memory": 14,
-              "timeout": 1200
-            }
-          },
-          "task_execution_metadata": {
-            "command": [],
-            "status": "completed",
-            "cache_hit": false,
-            "exec_start": "2026-04-29T22:38:55.036661",
-            "exec_end": "2026-04-29T22:39:55.829845",
-            "exec_duration_monotonic": 60.79318404197693,
-            "avg_memory": 594.1741162909836,
-            "peak_memory": 1098.5078125
-          },
-          "task_result": {
-            "warnings": [],
-            "real_time_tamarin_measure": 60.5,
-            "lemma_result": "verified",
-            "steps": 21,
-            "analysis_type": "exists-trace"
-          }
-        },
-        "--san_domainOwnerVerifiesReceipt_2--default": {
-          "task_config": {
-            "tamarin_alias": "default",
-            "lemma": "san_domainOwnerVerifiesReceipt_2",
-            "output_theory_file": "results/ct_receipt/proofs/--san_domainOwnerVerifiesReceipt_2--default.spthy",
-            "output_trace_file": "results/ct_receipt/traces/--san_domainOwnerVerifiesReceipt_2--default.json",
-            "options": [
-              "--derivcheck-timeout=99999"
-            ],
-            "resources": {
-              "cores": 16,
-              "memory": 14,
-              "timeout": 1200
-            }
-          },
-          "task_execution_metadata": {
-            "command": [],
-            "status": "completed",
-            "cache_hit": false,
-            "exec_start": "2026-04-29T22:39:55.943576",
-            "exec_end": "2026-04-29T22:41:58.812055",
-            "exec_duration_monotonic": 122.86847972869873,
-            "avg_memory": 1155.7683145491806,
-            "peak_memory": 2030.97265625
-          },
-          "task_result": {
-            "warnings": [],
-            "real_time_tamarin_measure": 122.57,
-            "lemma_result": "verified",
-            "steps": 32,
-            "analysis_type": "exists-trace"
-          }
-        },
-        "--san_Domain_Owner_Init--default": {
-          "task_config": {
-            "tamarin_alias": "default",
-            "lemma": "san_Domain_Owner_Init",
-            "output_theory_file": "results/ct_receipt/proofs/--san_Domain_Owner_Init--default.spthy",
-            "output_trace_file": "results/ct_receipt/traces/--san_Domain_Owner_Init--default.json",
-            "options": [
-              "--derivcheck-timeout=99999"
-            ],
-            "resources": {
-              "cores": 16,
-              "memory": 14,
-              "timeout": 1200
-            }
-          },
-          "task_execution_metadata": {
-            "command": [],
-            "status": "completed",
-            "cache_hit": false,
-            "exec_start": "2026-04-29T22:41:58.951995",
-            "exec_end": "2026-04-29T22:42:22.447885",
-            "exec_duration_monotonic": 23.495890140533447,
-            "avg_memory": 146.91471354166666,
-            "peak_memory": 158.01171875
-          },
-          "task_result": {
-            "warnings": [],
-            "real_time_tamarin_measure": 23.24,
-            "lemma_result": "verified",
-            "steps": 2,
-            "analysis_type": "exists-trace"
-          }
-        },
-        "--san_domainOwnerBlamesMonitor--default": {
-          "task_config": {
-            "tamarin_alias": "default",
-            "lemma": "san_domainOwnerBlamesMonitor",
-            "output_theory_file": "results/ct_receipt/proofs/--san_domainOwnerBlamesMonitor--default.spthy",
-            "output_trace_file": "results/ct_receipt/traces/--san_domainOwnerBlamesMonitor--default.json",
-            "options": [
-              "--derivcheck-timeout=99999"
-            ],
-            "resources": {
-              "cores": 16,
-              "memory": 14,
-              "timeout": 1200
-            }
-          },
-          "task_execution_metadata": {
-            "command": [],
-            "status": "completed",
-            "cache_hit": false,
-            "exec_start": "2026-04-29T22:42:22.580781",
-            "exec_end": "2026-04-29T22:55:00.252789",
-            "exec_duration_monotonic": 757.6720082759857,
-            "avg_memory": 4093.1572954810263,
-            "peak_memory": 7313.87890625
-          },
-          "task_result": {
-            "warnings": [],
-            "real_time_tamarin_measure": 757.21,
-            "lemma_result": "verified",
-            "steps": 46,
+            "steps": 44,
             "analysis_type": "exists-trace"
           }
         },
@@ -903,26 +441,26 @@
             "command": [],
             "status": "completed",
             "cache_hit": false,
-            "exec_start": "2026-04-29T22:55:00.404409",
-            "exec_end": "2026-04-29T22:55:56.137602",
-            "exec_duration_monotonic": 55.733193159103394,
-            "avg_memory": 544.1333705357143,
-            "peak_memory": 1116.60546875
+            "exec_start": "2026-04-30T11:34:40.533046",
+            "exec_end": "2026-04-30T11:35:10.296305",
+            "exec_duration_monotonic": 29.763258934020996,
+            "avg_memory": 512.4526041666667,
+            "peak_memory": 1129.75
           },
           "task_result": {
             "warnings": [],
-            "real_time_tamarin_measure": 55.42,
+            "real_time_tamarin_measure": 29.58,
             "lemma_result": "verified",
             "steps": 7,
             "analysis_type": "exists-trace"
           }
         },
-        "--san_StartMonitoring--default": {
+        "--san_monitorAudit_no_viol--default": {
           "task_config": {
             "tamarin_alias": "default",
-            "lemma": "san_StartMonitoring",
-            "output_theory_file": "results/ct_receipt/proofs/--san_StartMonitoring--default.spthy",
-            "output_trace_file": "results/ct_receipt/traces/--san_StartMonitoring--default.json",
+            "lemma": "san_monitorAudit_no_viol",
+            "output_theory_file": "results/ct_receipt/proofs/--san_monitorAudit_no_viol--default.spthy",
+            "output_trace_file": "results/ct_receipt/traces/--san_monitorAudit_no_viol--default.json",
             "options": [
               "--derivcheck-timeout=99999"
             ],
@@ -936,215 +474,83 @@
             "command": [],
             "status": "completed",
             "cache_hit": false,
-            "exec_start": "2026-04-29T22:55:56.276918",
-            "exec_end": "2026-04-29T22:56:51.208401",
-            "exec_duration_monotonic": 54.93148326873779,
-            "avg_memory": 530.2443181818182,
-            "peak_memory": 1093.8515625
+            "exec_start": "2026-04-30T11:35:10.356775",
+            "exec_end": "2026-04-30T11:35:46.564045",
+            "exec_duration_monotonic": 36.20727014541626,
+            "avg_memory": 604.1888020833334,
+            "peak_memory": 1122.828125
           },
           "task_result": {
             "warnings": [],
-            "real_time_tamarin_measure": 54.68,
+            "real_time_tamarin_measure": 36.01,
+            "lemma_result": "verified",
+            "steps": 22,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--san_ConsultDocumentation_Fails--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "san_ConsultDocumentation_Fails",
+            "output_theory_file": "results/ct_receipt/proofs/--san_ConsultDocumentation_Fails--default.spthy",
+            "output_trace_file": "results/ct_receipt/traces/--san_ConsultDocumentation_Fails--default.json",
+            "options": [
+              "--derivcheck-timeout=99999"
+            ],
+            "resources": {
+              "cores": 16,
+              "memory": 14,
+              "timeout": 1200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2026-04-30T11:35:46.649692",
+            "exec_end": "2026-04-30T11:36:16.245824",
+            "exec_duration_monotonic": 29.596132278442383,
+            "avg_memory": 516.4572916666666,
+            "peak_memory": 1131.09375
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 29.41,
+            "lemma_result": "verified",
+            "steps": 5,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--san_monitorTrackSubject--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "san_monitorTrackSubject",
+            "output_theory_file": "results/ct_receipt/proofs/--san_monitorTrackSubject--default.spthy",
+            "output_trace_file": "results/ct_receipt/traces/--san_monitorTrackSubject--default.json",
+            "options": [
+              "--derivcheck-timeout=99999"
+            ],
+            "resources": {
+              "cores": 16,
+              "memory": 14,
+              "timeout": 1200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2026-04-30T11:36:16.374657",
+            "exec_end": "2026-04-30T11:36:45.621612",
+            "exec_duration_monotonic": 29.246955156326294,
+            "avg_memory": 495.23275862068965,
+            "peak_memory": 1123.390625
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 29.05,
             "lemma_result": "verified",
             "steps": 4,
-            "analysis_type": "exists-trace"
-          }
-        },
-        "--san_monitorFindsRogueCertificate--default": {
-          "task_config": {
-            "tamarin_alias": "default",
-            "lemma": "san_monitorFindsRogueCertificate",
-            "output_theory_file": "results/ct_receipt/proofs/--san_monitorFindsRogueCertificate--default.spthy",
-            "output_trace_file": "results/ct_receipt/traces/--san_monitorFindsRogueCertificate--default.json",
-            "options": [
-              "--derivcheck-timeout=99999"
-            ],
-            "resources": {
-              "cores": 16,
-              "memory": 14,
-              "timeout": 1200
-            }
-          },
-          "task_execution_metadata": {
-            "command": [],
-            "status": "completed",
-            "cache_hit": false,
-            "exec_start": "2026-04-29T22:56:51.356000",
-            "exec_end": "2026-04-29T22:57:51.897208",
-            "exec_duration_monotonic": 60.54120755195618,
-            "avg_memory": 536.2984375,
-            "peak_memory": 1119.26171875
-          },
-          "task_result": {
-            "warnings": [],
-            "real_time_tamarin_measure": 60.22,
-            "lemma_result": "verified",
-            "steps": 18,
-            "analysis_type": "exists-trace"
-          }
-        },
-        "--san_DomainOwnerContract--default": {
-          "task_config": {
-            "tamarin_alias": "default",
-            "lemma": "san_DomainOwnerContract",
-            "output_theory_file": "results/ct_receipt/proofs/--san_DomainOwnerContract--default.spthy",
-            "output_trace_file": "results/ct_receipt/traces/--san_DomainOwnerContract--default.json",
-            "options": [
-              "--derivcheck-timeout=99999"
-            ],
-            "resources": {
-              "cores": 16,
-              "memory": 14,
-              "timeout": 1200
-            }
-          },
-          "task_execution_metadata": {
-            "command": [],
-            "status": "completed",
-            "cache_hit": false,
-            "exec_start": "2026-04-29T22:57:52.030421",
-            "exec_end": "2026-04-29T22:58:49.838933",
-            "exec_duration_monotonic": 57.80851101875305,
-            "avg_memory": 523.5060614224138,
-            "peak_memory": 1084.8203125
-          },
-          "task_result": {
-            "warnings": [],
-            "real_time_tamarin_measure": 57.53,
-            "lemma_result": "verified",
-            "steps": 3,
-            "analysis_type": "exists-trace"
-          }
-        },
-        "--san_ProofFetching_C--default": {
-          "task_config": {
-            "tamarin_alias": "default",
-            "lemma": "san_ProofFetching_C",
-            "output_theory_file": "results/ct_receipt/proofs/--san_ProofFetching_C--default.spthy",
-            "output_trace_file": "results/ct_receipt/traces/--san_ProofFetching_C--default.json",
-            "options": [
-              "--derivcheck-timeout=99999"
-            ],
-            "resources": {
-              "cores": 16,
-              "memory": 14,
-              "timeout": 1200
-            }
-          },
-          "task_execution_metadata": {
-            "command": [],
-            "status": "completed",
-            "cache_hit": false,
-            "exec_start": "2026-04-29T22:58:49.993838",
-            "exec_end": "2026-04-29T22:59:48.254384",
-            "exec_duration_monotonic": 58.26054549217224,
-            "avg_memory": 504.0207435344828,
-            "peak_memory": 1092.0390625
-          },
-          "task_result": {
-            "warnings": [],
-            "real_time_tamarin_measure": 58.0,
-            "lemma_result": "verified",
-            "steps": 3,
-            "analysis_type": "exists-trace"
-          }
-        },
-        "--san_Logger_Init--default": {
-          "task_config": {
-            "tamarin_alias": "default",
-            "lemma": "san_Logger_Init",
-            "output_theory_file": "results/ct_receipt/proofs/--san_Logger_Init--default.spthy",
-            "output_trace_file": "results/ct_receipt/traces/--san_Logger_Init--default.json",
-            "options": [
-              "--derivcheck-timeout=99999"
-            ],
-            "resources": {
-              "cores": 16,
-              "memory": 14,
-              "timeout": 1200
-            }
-          },
-          "task_execution_metadata": {
-            "command": [],
-            "status": "completed",
-            "cache_hit": false,
-            "exec_start": "2026-04-29T22:59:48.361330",
-            "exec_end": "2026-04-29T23:00:12.675432",
-            "exec_duration_monotonic": 24.314102172851562,
-            "avg_memory": 149.318125,
-            "peak_memory": 165.61328125
-          },
-          "task_result": {
-            "warnings": [],
-            "real_time_tamarin_measure": 24.07,
-            "lemma_result": "verified",
-            "steps": 2,
-            "analysis_type": "exists-trace"
-          }
-        },
-        "--san_Start_Log--default": {
-          "task_config": {
-            "tamarin_alias": "default",
-            "lemma": "san_Start_Log",
-            "output_theory_file": "results/ct_receipt/proofs/--san_Start_Log--default.spthy",
-            "output_trace_file": "results/ct_receipt/traces/--san_Start_Log--default.json",
-            "options": [
-              "--derivcheck-timeout=99999"
-            ],
-            "resources": {
-              "cores": 16,
-              "memory": 14,
-              "timeout": 1200
-            }
-          },
-          "task_execution_metadata": {
-            "command": [],
-            "status": "completed",
-            "cache_hit": false,
-            "exec_start": "2026-04-29T23:00:12.813981",
-            "exec_end": "2026-04-29T23:01:14.226323",
-            "exec_duration_monotonic": 61.4123420715332,
-            "avg_memory": 518.3784579918033,
-            "peak_memory": 1100.70703125
-          },
-          "task_result": {
-            "warnings": [],
-            "real_time_tamarin_measure": 61.11,
-            "lemma_result": "verified",
-            "steps": 3,
-            "analysis_type": "exists-trace"
-          }
-        },
-        "--san_monitorFindsAppendOnlyViolation--default": {
-          "task_config": {
-            "tamarin_alias": "default",
-            "lemma": "san_monitorFindsAppendOnlyViolation",
-            "output_theory_file": "results/ct_receipt/proofs/--san_monitorFindsAppendOnlyViolation--default.spthy",
-            "output_trace_file": "results/ct_receipt/traces/--san_monitorFindsAppendOnlyViolation--default.json",
-            "options": [
-              "--derivcheck-timeout=99999"
-            ],
-            "resources": {
-              "cores": 16,
-              "memory": 14,
-              "timeout": 1200
-            }
-          },
-          "task_execution_metadata": {
-            "command": [],
-            "status": "completed",
-            "cache_hit": false,
-            "exec_start": "2026-04-29T23:01:14.400414",
-            "exec_end": "2026-04-29T23:02:17.383740",
-            "exec_duration_monotonic": 62.983325242996216,
-            "avg_memory": 617.4621155753968,
-            "peak_memory": 1162.265625
-          },
-          "task_result": {
-            "warnings": [],
-            "real_time_tamarin_measure": 62.69,
-            "lemma_result": "verified",
-            "steps": 31,
             "analysis_type": "exists-trace"
           }
         },
@@ -1167,15 +573,708 @@
             "command": [],
             "status": "completed",
             "cache_hit": false,
-            "exec_start": "2026-04-29T23:02:17.523198",
-            "exec_end": "2026-04-29T23:03:20.114792",
-            "exec_duration_monotonic": 62.591593503952026,
-            "avg_memory": 514.5011970766128,
-            "peak_memory": 1077.22265625
+            "exec_start": "2026-04-30T11:36:45.687064",
+            "exec_end": "2026-04-30T11:37:15.297506",
+            "exec_duration_monotonic": 29.61044192314148,
+            "avg_memory": 496.7864583333333,
+            "peak_memory": 1038.125
           },
           "task_result": {
             "warnings": [],
-            "real_time_tamarin_measure": 62.27,
+            "real_time_tamarin_measure": 29.42,
+            "lemma_result": "verified",
+            "steps": 3,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--san_ClientValidate--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "san_ClientValidate",
+            "output_theory_file": "results/ct_receipt/proofs/--san_ClientValidate--default.spthy",
+            "output_trace_file": "results/ct_receipt/traces/--san_ClientValidate--default.json",
+            "options": [
+              "--derivcheck-timeout=99999"
+            ],
+            "resources": {
+              "cores": 16,
+              "memory": 14,
+              "timeout": 1200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2026-04-30T11:37:15.414073",
+            "exec_end": "2026-04-30T11:37:50.495010",
+            "exec_duration_monotonic": 35.0809371471405,
+            "avg_memory": 606.6928571428571,
+            "peak_memory": 1141.0
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 34.88,
+            "lemma_result": "verified",
+            "steps": 17,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--san_monitorAudit_CA_Viol--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "san_monitorAudit_CA_Viol",
+            "output_theory_file": "results/ct_receipt/proofs/--san_monitorAudit_CA_Viol--default.spthy",
+            "output_trace_file": "results/ct_receipt/traces/--san_monitorAudit_CA_Viol--default.json",
+            "options": [
+              "--derivcheck-timeout=99999"
+            ],
+            "resources": {
+              "cores": 16,
+              "memory": 14,
+              "timeout": 1200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2026-04-30T11:37:50.589527",
+            "exec_end": "2026-04-30T11:38:25.106644",
+            "exec_duration_monotonic": 34.51711678504944,
+            "avg_memory": 612.6982142857142,
+            "peak_memory": 1149.171875
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 34.33,
+            "lemma_result": "verified",
+            "steps": 19,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--san_Start_Log--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "san_Start_Log",
+            "output_theory_file": "results/ct_receipt/proofs/--san_Start_Log--default.spthy",
+            "output_trace_file": "results/ct_receipt/traces/--san_Start_Log--default.json",
+            "options": [
+              "--derivcheck-timeout=99999"
+            ],
+            "resources": {
+              "cores": 16,
+              "memory": 14,
+              "timeout": 1200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2026-04-30T11:38:25.160388",
+            "exec_end": "2026-04-30T11:38:54.462411",
+            "exec_duration_monotonic": 29.30202293395996,
+            "avg_memory": 480.0571120689655,
+            "peak_memory": 1114.859375
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 29.12,
+            "lemma_result": "verified",
+            "steps": 3,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--san_StartMonitoring--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "san_StartMonitoring",
+            "output_theory_file": "results/ct_receipt/proofs/--san_StartMonitoring--default.spthy",
+            "output_trace_file": "results/ct_receipt/traces/--san_StartMonitoring--default.json",
+            "options": [
+              "--derivcheck-timeout=99999"
+            ],
+            "resources": {
+              "cores": 16,
+              "memory": 14,
+              "timeout": 1200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2026-04-30T11:38:54.596140",
+            "exec_end": "2026-04-30T11:39:23.914145",
+            "exec_duration_monotonic": 29.318004846572876,
+            "avg_memory": 497.5231681034482,
+            "peak_memory": 1109.171875
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 29.13,
+            "lemma_result": "verified",
+            "steps": 4,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--san_monitorCanFindCertificate--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "san_monitorCanFindCertificate",
+            "output_theory_file": "results/ct_receipt/proofs/--san_monitorCanFindCertificate--default.spthy",
+            "output_trace_file": "results/ct_receipt/traces/--san_monitorCanFindCertificate--default.json",
+            "options": [
+              "--derivcheck-timeout=99999"
+            ],
+            "resources": {
+              "cores": 16,
+              "memory": 14,
+              "timeout": 1200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2026-04-30T11:39:24.018090",
+            "exec_end": "2026-04-30T11:39:56.978091",
+            "exec_duration_monotonic": 32.96000099182129,
+            "avg_memory": 565.9176136363636,
+            "peak_memory": 1106.671875
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 32.78,
+            "lemma_result": "verified",
+            "steps": 26,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--san_LoggerSnapshot_M--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "san_LoggerSnapshot_M",
+            "output_theory_file": "results/ct_receipt/proofs/--san_LoggerSnapshot_M--default.spthy",
+            "output_trace_file": "results/ct_receipt/traces/--san_LoggerSnapshot_M--default.json",
+            "options": [
+              "--derivcheck-timeout=99999"
+            ],
+            "resources": {
+              "cores": 16,
+              "memory": 14,
+              "timeout": 1200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2026-04-30T11:39:57.071774",
+            "exec_end": "2026-04-30T11:40:26.432022",
+            "exec_duration_monotonic": 29.36024808883667,
+            "avg_memory": 492.6837284482759,
+            "peak_memory": 1124.234375
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 29.16,
+            "lemma_result": "verified",
+            "steps": 6,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--san_Logger_Init--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "san_Logger_Init",
+            "output_theory_file": "results/ct_receipt/proofs/--san_Logger_Init--default.spthy",
+            "output_trace_file": "results/ct_receipt/traces/--san_Logger_Init--default.json",
+            "options": [
+              "--derivcheck-timeout=99999"
+            ],
+            "resources": {
+              "cores": 16,
+              "memory": 14,
+              "timeout": 1200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2026-04-30T11:40:26.503564",
+            "exec_end": "2026-04-30T11:40:42.586742",
+            "exec_duration_monotonic": 16.0831778049469,
+            "avg_memory": 170.8701171875,
+            "peak_memory": 189.921875
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 15.9,
+            "lemma_result": "verified",
+            "steps": 2,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--san_ProofFetching_M--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "san_ProofFetching_M",
+            "output_theory_file": "results/ct_receipt/proofs/--san_ProofFetching_M--default.spthy",
+            "output_trace_file": "results/ct_receipt/traces/--san_ProofFetching_M--default.json",
+            "options": [
+              "--derivcheck-timeout=99999"
+            ],
+            "resources": {
+              "cores": 16,
+              "memory": 14,
+              "timeout": 1200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2026-04-30T11:40:42.722326",
+            "exec_end": "2026-04-30T11:41:11.831628",
+            "exec_duration_monotonic": 29.109302043914795,
+            "avg_memory": 498.07219827586215,
+            "peak_memory": 1075.4375
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 28.91,
+            "lemma_result": "verified",
+            "steps": 4,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--san_domainOwnerBlamesMonitor--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "san_domainOwnerBlamesMonitor",
+            "output_theory_file": "results/ct_receipt/proofs/--san_domainOwnerBlamesMonitor--default.spthy",
+            "output_trace_file": "results/ct_receipt/traces/--san_domainOwnerBlamesMonitor--default.json",
+            "options": [
+              "--derivcheck-timeout=99999"
+            ],
+            "resources": {
+              "cores": 16,
+              "memory": 14,
+              "timeout": 1200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2026-04-30T11:41:11.954353",
+            "exec_end": "2026-04-30T11:48:54.010565",
+            "exec_duration_monotonic": 462.05621218681335,
+            "avg_memory": 4046.9973958333317,
+            "peak_memory": 7065.546875
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 461.83,
+            "lemma_result": "verified",
+            "steps": 46,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--san_ClientVerifiesAppendOnly--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "san_ClientVerifiesAppendOnly",
+            "output_theory_file": "results/ct_receipt/proofs/--san_ClientVerifiesAppendOnly--default.spthy",
+            "output_trace_file": "results/ct_receipt/traces/--san_ClientVerifiesAppendOnly--default.json",
+            "options": [
+              "--derivcheck-timeout=99999"
+            ],
+            "resources": {
+              "cores": 16,
+              "memory": 14,
+              "timeout": 1200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2026-04-30T11:48:54.168604",
+            "exec_end": "2026-04-30T11:49:32.983361",
+            "exec_duration_monotonic": 38.814757108688354,
+            "avg_memory": 683.6025641025642,
+            "peak_memory": 1394.828125
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 38.61,
+            "lemma_result": "verified",
+            "steps": 34,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--san_clientReceivesReceipt--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "san_clientReceivesReceipt",
+            "output_theory_file": "results/ct_receipt/proofs/--san_clientReceivesReceipt--default.spthy",
+            "output_trace_file": "results/ct_receipt/traces/--san_clientReceivesReceipt--default.json",
+            "options": [
+              "--derivcheck-timeout=99999"
+            ],
+            "resources": {
+              "cores": 16,
+              "memory": 14,
+              "timeout": 1200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2026-04-30T11:49:33.106827",
+            "exec_end": "2026-04-30T11:50:50.619291",
+            "exec_duration_monotonic": 77.51246380805969,
+            "avg_memory": 1147.3305600649353,
+            "peak_memory": 1990.53125
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 77.31,
+            "lemma_result": "verified",
+            "steps": 30,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--san_monitorCannotFindCertificate--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "san_monitorCannotFindCertificate",
+            "output_theory_file": "results/ct_receipt/proofs/--san_monitorCannotFindCertificate--default.spthy",
+            "output_trace_file": "results/ct_receipt/traces/--san_monitorCannotFindCertificate--default.json",
+            "options": [
+              "--derivcheck-timeout=99999"
+            ],
+            "resources": {
+              "cores": 16,
+              "memory": 14,
+              "timeout": 1200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2026-04-30T11:50:50.732159",
+            "exec_end": "2026-04-30T11:51:20.339566",
+            "exec_duration_monotonic": 29.607407093048096,
+            "avg_memory": 519.8161458333333,
+            "peak_memory": 1092.78125
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 29.42,
+            "lemma_result": "verified",
+            "steps": 10,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--san_Monitor_Init--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "san_Monitor_Init",
+            "output_theory_file": "results/ct_receipt/proofs/--san_Monitor_Init--default.spthy",
+            "output_trace_file": "results/ct_receipt/traces/--san_Monitor_Init--default.json",
+            "options": [
+              "--derivcheck-timeout=99999"
+            ],
+            "resources": {
+              "cores": 16,
+              "memory": 14,
+              "timeout": 1200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2026-04-30T11:51:20.472517",
+            "exec_end": "2026-04-30T11:51:36.646295",
+            "exec_duration_monotonic": 16.17377805709839,
+            "avg_memory": 170.56640625,
+            "peak_memory": 189.765625
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 15.99,
+            "lemma_result": "verified",
+            "steps": 2,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--san_Domain_Owner_Init--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "san_Domain_Owner_Init",
+            "output_theory_file": "results/ct_receipt/proofs/--san_Domain_Owner_Init--default.spthy",
+            "output_trace_file": "results/ct_receipt/traces/--san_Domain_Owner_Init--default.json",
+            "options": [
+              "--derivcheck-timeout=99999"
+            ],
+            "resources": {
+              "cores": 16,
+              "memory": 14,
+              "timeout": 1200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2026-04-30T11:51:36.792631",
+            "exec_end": "2026-04-30T11:51:52.727459",
+            "exec_duration_monotonic": 15.93482780456543,
+            "avg_memory": 171.19140625,
+            "peak_memory": 191.0625
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 15.75,
+            "lemma_result": "verified",
+            "steps": 2,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--san_PreCertify--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "san_PreCertify",
+            "output_theory_file": "results/ct_receipt/proofs/--san_PreCertify--default.spthy",
+            "output_trace_file": "results/ct_receipt/traces/--san_PreCertify--default.json",
+            "options": [
+              "--derivcheck-timeout=99999"
+            ],
+            "resources": {
+              "cores": 16,
+              "memory": 14,
+              "timeout": 1200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2026-04-30T11:51:52.814005",
+            "exec_end": "2026-04-30T11:52:21.967015",
+            "exec_duration_monotonic": 29.15301012992859,
+            "avg_memory": 503.08782327586215,
+            "peak_memory": 1111.265625
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 28.95,
+            "lemma_result": "verified",
+            "steps": 4,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--san_compromiseMonitor--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "san_compromiseMonitor",
+            "output_theory_file": "results/ct_receipt/proofs/--san_compromiseMonitor--default.spthy",
+            "output_trace_file": "results/ct_receipt/traces/--san_compromiseMonitor--default.json",
+            "options": [
+              "--derivcheck-timeout=99999"
+            ],
+            "resources": {
+              "cores": 16,
+              "memory": 14,
+              "timeout": 1200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2026-04-30T11:52:22.057659",
+            "exec_end": "2026-04-30T11:52:51.226923",
+            "exec_duration_monotonic": 29.16926407814026,
+            "avg_memory": 496.62446120689657,
+            "peak_memory": 1100.59375
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 28.97,
+            "lemma_result": "verified",
+            "steps": 3,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--san_add_preC_to_log--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "san_add_preC_to_log",
+            "output_theory_file": "results/ct_receipt/proofs/--san_add_preC_to_log--default.spthy",
+            "output_trace_file": "results/ct_receipt/traces/--san_add_preC_to_log--default.json",
+            "options": [
+              "--derivcheck-timeout=99999"
+            ],
+            "resources": {
+              "cores": 16,
+              "memory": 14,
+              "timeout": 1200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2026-04-30T11:52:51.307011",
+            "exec_end": "2026-04-30T11:53:22.006941",
+            "exec_duration_monotonic": 30.69992971420288,
+            "avg_memory": 527.9304435483871,
+            "peak_memory": 1070.828125
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 30.51,
+            "lemma_result": "verified",
+            "steps": 11,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--san_compromiseLogger--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "san_compromiseLogger",
+            "output_theory_file": "results/ct_receipt/proofs/--san_compromiseLogger--default.spthy",
+            "output_trace_file": "results/ct_receipt/traces/--san_compromiseLogger--default.json",
+            "options": [
+              "--derivcheck-timeout=99999"
+            ],
+            "resources": {
+              "cores": 16,
+              "memory": 14,
+              "timeout": 1200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2026-04-30T11:53:22.179290",
+            "exec_end": "2026-04-30T11:53:51.608069",
+            "exec_duration_monotonic": 29.428779125213623,
+            "avg_memory": 511.15989583333334,
+            "peak_memory": 1060.1875
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 29.24,
+            "lemma_result": "verified",
+            "steps": 3,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--san_domainOwnerVerifiesReceipt_2--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "san_domainOwnerVerifiesReceipt_2",
+            "output_theory_file": "results/ct_receipt/proofs/--san_domainOwnerVerifiesReceipt_2--default.spthy",
+            "output_trace_file": "results/ct_receipt/traces/--san_domainOwnerVerifiesReceipt_2--default.json",
+            "options": [
+              "--derivcheck-timeout=99999"
+            ],
+            "resources": {
+              "cores": 16,
+              "memory": 14,
+              "timeout": 1200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2026-04-30T11:53:51.737702",
+            "exec_end": "2026-04-30T11:55:01.301968",
+            "exec_duration_monotonic": 69.5642659664154,
+            "avg_memory": 1151.0002264492753,
+            "peak_memory": 1982.8125
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 69.35,
+            "lemma_result": "verified",
+            "steps": 32,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--san_ClientStoresSnapshot--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "san_ClientStoresSnapshot",
+            "output_theory_file": "results/ct_receipt/proofs/--san_ClientStoresSnapshot--default.spthy",
+            "output_trace_file": "results/ct_receipt/traces/--san_ClientStoresSnapshot--default.json",
+            "options": [
+              "--derivcheck-timeout=99999"
+            ],
+            "resources": {
+              "cores": 16,
+              "memory": 14,
+              "timeout": 1200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2026-04-30T11:55:01.476912",
+            "exec_end": "2026-04-30T11:55:30.889098",
+            "exec_duration_monotonic": 29.41218590736389,
+            "avg_memory": 513.9697916666668,
+            "peak_memory": 1091.734375
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 29.21,
+            "lemma_result": "verified",
+            "steps": 6,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--san_Intermediate_CA_Init--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "san_Intermediate_CA_Init",
+            "output_theory_file": "results/ct_receipt/proofs/--san_Intermediate_CA_Init--default.spthy",
+            "output_trace_file": "results/ct_receipt/traces/--san_Intermediate_CA_Init--default.json",
+            "options": [
+              "--derivcheck-timeout=99999"
+            ],
+            "resources": {
+              "cores": 16,
+              "memory": 14,
+              "timeout": 1200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2026-04-30T11:55:31.050967",
+            "exec_end": "2026-04-30T11:56:00.247223",
+            "exec_duration_monotonic": 29.196256160736084,
+            "avg_memory": 501.71228448275866,
+            "peak_memory": 1114.078125
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 28.99,
             "lemma_result": "verified",
             "steps": 3,
             "analysis_type": "exists-trace"
@@ -1200,182 +1299,17 @@
             "command": [],
             "status": "completed",
             "cache_hit": false,
-            "exec_start": "2026-04-29T23:03:20.258713",
-            "exec_end": "2026-04-29T23:04:21.852997",
-            "exec_duration_monotonic": 61.59428381919861,
-            "avg_memory": 544.5201716188526,
-            "peak_memory": 1096.28515625
+            "exec_start": "2026-04-30T11:56:00.401131",
+            "exec_end": "2026-04-30T11:56:31.555686",
+            "exec_duration_monotonic": 31.154555082321167,
+            "avg_memory": 534.7132056451615,
+            "peak_memory": 1109.25
           },
           "task_result": {
             "warnings": [],
-            "real_time_tamarin_measure": 61.33,
+            "real_time_tamarin_measure": 30.96,
             "lemma_result": "verified",
             "steps": 9,
-            "analysis_type": "exists-trace"
-          }
-        },
-        "--san_forge_log_view--default": {
-          "task_config": {
-            "tamarin_alias": "default",
-            "lemma": "san_forge_log_view",
-            "output_theory_file": "results/ct_receipt/proofs/--san_forge_log_view--default.spthy",
-            "output_trace_file": "results/ct_receipt/traces/--san_forge_log_view--default.json",
-            "options": [
-              "--derivcheck-timeout=99999"
-            ],
-            "resources": {
-              "cores": 16,
-              "memory": 14,
-              "timeout": 1200
-            }
-          },
-          "task_execution_metadata": {
-            "command": [],
-            "status": "completed",
-            "cache_hit": false,
-            "exec_start": "2026-04-29T23:04:22.037358",
-            "exec_end": "2026-04-29T23:05:21.296319",
-            "exec_duration_monotonic": 59.258960247039795,
-            "avg_memory": 520.5548199152544,
-            "peak_memory": 1124.3515625
-          },
-          "task_result": {
-            "warnings": [],
-            "real_time_tamarin_measure": 58.94,
-            "lemma_result": "verified",
-            "steps": 3,
-            "analysis_type": "exists-trace"
-          }
-        },
-        "--san_monitorCannotFindCertificate--default": {
-          "task_config": {
-            "tamarin_alias": "default",
-            "lemma": "san_monitorCannotFindCertificate",
-            "output_theory_file": "results/ct_receipt/proofs/--san_monitorCannotFindCertificate--default.spthy",
-            "output_trace_file": "results/ct_receipt/traces/--san_monitorCannotFindCertificate--default.json",
-            "options": [
-              "--derivcheck-timeout=99999"
-            ],
-            "resources": {
-              "cores": 16,
-              "memory": 14,
-              "timeout": 1200
-            }
-          },
-          "task_execution_metadata": {
-            "command": [],
-            "status": "completed",
-            "cache_hit": false,
-            "exec_start": "2026-04-29T23:05:21.438665",
-            "exec_end": "2026-04-29T23:06:21.091218",
-            "exec_duration_monotonic": 59.65255355834961,
-            "avg_memory": 508.50112552966095,
-            "peak_memory": 1108.78125
-          },
-          "task_result": {
-            "warnings": [],
-            "real_time_tamarin_measure": 59.35,
-            "lemma_result": "verified",
-            "steps": 10,
-            "analysis_type": "exists-trace"
-          }
-        },
-        "--san_domainOwnerVerifiesReceipt_1--default": {
-          "task_config": {
-            "tamarin_alias": "default",
-            "lemma": "san_domainOwnerVerifiesReceipt_1",
-            "output_theory_file": "results/ct_receipt/proofs/--san_domainOwnerVerifiesReceipt_1--default.spthy",
-            "output_trace_file": "results/ct_receipt/traces/--san_domainOwnerVerifiesReceipt_1--default.json",
-            "options": [
-              "--derivcheck-timeout=99999"
-            ],
-            "resources": {
-              "cores": 16,
-              "memory": 14,
-              "timeout": 1200
-            }
-          },
-          "task_execution_metadata": {
-            "command": [],
-            "status": "completed",
-            "cache_hit": false,
-            "exec_start": "2026-04-29T23:06:21.211677",
-            "exec_end": "2026-04-29T23:14:56.132515",
-            "exec_duration_monotonic": 514.9208383560181,
-            "avg_memory": 2612.4178155637273,
-            "peak_memory": 4584.984375
-          },
-          "task_result": {
-            "warnings": [],
-            "real_time_tamarin_measure": 514.56,
-            "lemma_result": "verified",
-            "steps": 44,
-            "analysis_type": "exists-trace"
-          }
-        },
-        "--san_ClientValidate--default": {
-          "task_config": {
-            "tamarin_alias": "default",
-            "lemma": "san_ClientValidate",
-            "output_theory_file": "results/ct_receipt/proofs/--san_ClientValidate--default.spthy",
-            "output_trace_file": "results/ct_receipt/traces/--san_ClientValidate--default.json",
-            "options": [
-              "--derivcheck-timeout=99999"
-            ],
-            "resources": {
-              "cores": 16,
-              "memory": 14,
-              "timeout": 1200
-            }
-          },
-          "task_execution_metadata": {
-            "command": [],
-            "status": "completed",
-            "cache_hit": false,
-            "exec_start": "2026-04-29T23:14:56.304003",
-            "exec_end": "2026-04-29T23:16:01.937695",
-            "exec_duration_monotonic": 65.63369250297546,
-            "avg_memory": 601.3948918269231,
-            "peak_memory": 1115.2890625
-          },
-          "task_result": {
-            "warnings": [],
-            "real_time_tamarin_measure": 65.3,
-            "lemma_result": "verified",
-            "steps": 17,
-            "analysis_type": "exists-trace"
-          }
-        },
-        "--san_monitorAudit_no_viol--default": {
-          "task_config": {
-            "tamarin_alias": "default",
-            "lemma": "san_monitorAudit_no_viol",
-            "output_theory_file": "results/ct_receipt/proofs/--san_monitorAudit_no_viol--default.spthy",
-            "output_trace_file": "results/ct_receipt/traces/--san_monitorAudit_no_viol--default.json",
-            "options": [
-              "--derivcheck-timeout=99999"
-            ],
-            "resources": {
-              "cores": 16,
-              "memory": 14,
-              "timeout": 1200
-            }
-          },
-          "task_execution_metadata": {
-            "command": [],
-            "status": "completed",
-            "cache_hit": false,
-            "exec_start": "2026-04-29T23:16:02.151419",
-            "exec_end": "2026-04-29T23:17:09.980345",
-            "exec_duration_monotonic": 67.82892608642578,
-            "avg_memory": 631.9155560661765,
-            "peak_memory": 1118.3125
-          },
-          "task_result": {
-            "warnings": [],
-            "real_time_tamarin_measure": 67.54,
-            "lemma_result": "verified",
-            "steps": 22,
             "analysis_type": "exists-trace"
           }
         },
@@ -1398,116 +1332,17 @@
             "command": [],
             "status": "completed",
             "cache_hit": false,
-            "exec_start": "2026-04-29T23:17:10.169649",
-            "exec_end": "2026-04-29T23:18:12.841051",
-            "exec_duration_monotonic": 62.67140173912048,
-            "avg_memory": 585.4688760080645,
-            "peak_memory": 1107.7890625
+            "exec_start": "2026-04-30T11:56:31.718085",
+            "exec_end": "2026-04-30T11:57:05.393260",
+            "exec_duration_monotonic": 33.675174951553345,
+            "avg_memory": 580.826286764706,
+            "peak_memory": 1111.484375
           },
           "task_result": {
             "warnings": [],
-            "real_time_tamarin_measure": 62.33,
+            "real_time_tamarin_measure": 33.48,
             "lemma_result": "verified",
             "steps": 15,
-            "analysis_type": "exists-trace"
-          }
-        },
-        "--san_PreCertify--default": {
-          "task_config": {
-            "tamarin_alias": "default",
-            "lemma": "san_PreCertify",
-            "output_theory_file": "results/ct_receipt/proofs/--san_PreCertify--default.spthy",
-            "output_trace_file": "results/ct_receipt/traces/--san_PreCertify--default.json",
-            "options": [
-              "--derivcheck-timeout=99999"
-            ],
-            "resources": {
-              "cores": 16,
-              "memory": 14,
-              "timeout": 1200
-            }
-          },
-          "task_execution_metadata": {
-            "command": [],
-            "status": "completed",
-            "cache_hit": false,
-            "exec_start": "2026-04-29T23:18:13.002002",
-            "exec_end": "2026-04-29T23:19:13.697510",
-            "exec_duration_monotonic": 60.69550824165344,
-            "avg_memory": 509.5620442708334,
-            "peak_memory": 1036.1015625
-          },
-          "task_result": {
-            "warnings": [],
-            "real_time_tamarin_measure": 60.41,
-            "lemma_result": "verified",
-            "steps": 4,
-            "analysis_type": "exists-trace"
-          }
-        },
-        "--san_LoggerSnapshot_C--default": {
-          "task_config": {
-            "tamarin_alias": "default",
-            "lemma": "san_LoggerSnapshot_C",
-            "output_theory_file": "results/ct_receipt/proofs/--san_LoggerSnapshot_C--default.spthy",
-            "output_trace_file": "results/ct_receipt/traces/--san_LoggerSnapshot_C--default.json",
-            "options": [
-              "--derivcheck-timeout=99999"
-            ],
-            "resources": {
-              "cores": 16,
-              "memory": 14,
-              "timeout": 1200
-            }
-          },
-          "task_execution_metadata": {
-            "command": [],
-            "status": "completed",
-            "cache_hit": false,
-            "exec_start": "2026-04-29T23:19:13.866349",
-            "exec_end": "2026-04-29T23:20:14.529762",
-            "exec_duration_monotonic": 60.66341257095337,
-            "avg_memory": 514.0020182291667,
-            "peak_memory": 1071.5390625
-          },
-          "task_result": {
-            "warnings": [],
-            "real_time_tamarin_measure": 60.34,
-            "lemma_result": "verified",
-            "steps": 6,
-            "analysis_type": "exists-trace"
-          }
-        },
-        "--san_monitorVerifiesAppendOnly--default": {
-          "task_config": {
-            "tamarin_alias": "default",
-            "lemma": "san_monitorVerifiesAppendOnly",
-            "output_theory_file": "results/ct_receipt/proofs/--san_monitorVerifiesAppendOnly--default.spthy",
-            "output_trace_file": "results/ct_receipt/traces/--san_monitorVerifiesAppendOnly--default.json",
-            "options": [
-              "--derivcheck-timeout=99999"
-            ],
-            "resources": {
-              "cores": 16,
-              "memory": 14,
-              "timeout": 1200
-            }
-          },
-          "task_execution_metadata": {
-            "command": [],
-            "status": "completed",
-            "cache_hit": false,
-            "exec_start": "2026-04-29T23:20:14.660180",
-            "exec_end": "2026-04-29T23:21:27.988278",
-            "exec_duration_monotonic": 73.32809829711914,
-            "avg_memory": 625.2909353595892,
-            "peak_memory": 1118.95703125
-          },
-          "task_result": {
-            "warnings": [],
-            "real_time_tamarin_measure": 73.01,
-            "lemma_result": "verified",
-            "steps": 41,
             "analysis_type": "exists-trace"
           }
         },
@@ -1530,26 +1365,26 @@
             "command": [],
             "status": "completed",
             "cache_hit": false,
-            "exec_start": "2026-04-29T23:21:28.144315",
-            "exec_end": "2026-04-29T23:22:26.367032",
-            "exec_duration_monotonic": 58.222716331481934,
-            "avg_memory": 516.0607489224137,
-            "peak_memory": 1056.12109375
+            "exec_start": "2026-04-30T11:57:05.554774",
+            "exec_end": "2026-04-30T11:57:35.120777",
+            "exec_duration_monotonic": 29.56600284576416,
+            "avg_memory": 497.6984375,
+            "peak_memory": 1006.9375
           },
           "task_result": {
             "warnings": [],
-            "real_time_tamarin_measure": 57.9,
+            "real_time_tamarin_measure": 29.37,
             "lemma_result": "verified",
             "steps": 7,
             "analysis_type": "exists-trace"
           }
         },
-        "--san_monitorAudit_CA_Viol--default": {
+        "--san_monitorVerifiesAppendOnly--default": {
           "task_config": {
             "tamarin_alias": "default",
-            "lemma": "san_monitorAudit_CA_Viol",
-            "output_theory_file": "results/ct_receipt/proofs/--san_monitorAudit_CA_Viol--default.spthy",
-            "output_trace_file": "results/ct_receipt/traces/--san_monitorAudit_CA_Viol--default.json",
+            "lemma": "san_monitorVerifiesAppendOnly",
+            "output_theory_file": "results/ct_receipt/proofs/--san_monitorVerifiesAppendOnly--default.spthy",
+            "output_trace_file": "results/ct_receipt/traces/--san_monitorVerifiesAppendOnly--default.json",
             "options": [
               "--derivcheck-timeout=99999"
             ],
@@ -1563,26 +1398,26 @@
             "command": [],
             "status": "completed",
             "cache_hit": false,
-            "exec_start": "2026-04-29T23:22:26.556219",
-            "exec_end": "2026-04-29T23:23:34.619330",
-            "exec_duration_monotonic": 68.06311082839966,
-            "avg_memory": 587.464728860294,
-            "peak_memory": 1066.671875
+            "exec_start": "2026-04-30T11:57:35.224259",
+            "exec_end": "2026-04-30T11:58:12.859083",
+            "exec_duration_monotonic": 37.6348237991333,
+            "avg_memory": 640.5065789473683,
+            "peak_memory": 1144.109375
           },
           "task_result": {
             "warnings": [],
-            "real_time_tamarin_measure": 67.78,
+            "real_time_tamarin_measure": 37.42,
             "lemma_result": "verified",
-            "steps": 19,
+            "steps": 41,
             "analysis_type": "exists-trace"
           }
         },
-        "--san_compromiseMonitor--default": {
+        "--san_ChainValidator_Invalid--default": {
           "task_config": {
             "tamarin_alias": "default",
-            "lemma": "san_compromiseMonitor",
-            "output_theory_file": "results/ct_receipt/proofs/--san_compromiseMonitor--default.spthy",
-            "output_trace_file": "results/ct_receipt/traces/--san_compromiseMonitor--default.json",
+            "lemma": "san_ChainValidator_Invalid",
+            "output_theory_file": "results/ct_receipt/proofs/--san_ChainValidator_Invalid--default.spthy",
+            "output_trace_file": "results/ct_receipt/traces/--san_ChainValidator_Invalid--default.json",
             "options": [
               "--derivcheck-timeout=99999"
             ],
@@ -1596,26 +1431,125 @@
             "command": [],
             "status": "completed",
             "cache_hit": false,
-            "exec_start": "2026-04-29T23:23:34.772048",
-            "exec_end": "2026-04-29T23:24:32.728275",
-            "exec_duration_monotonic": 57.95622754096985,
-            "avg_memory": 519.8927801724138,
-            "peak_memory": 1105.91015625
+            "exec_start": "2026-04-30T11:58:13.019479",
+            "exec_end": "2026-04-30T11:58:42.301395",
+            "exec_duration_monotonic": 29.28191590309143,
+            "avg_memory": 506.70851293103453,
+            "peak_memory": 1155.078125
           },
           "task_result": {
             "warnings": [],
-            "real_time_tamarin_measure": 57.65,
+            "real_time_tamarin_measure": 29.08,
+            "lemma_result": "verified",
+            "steps": 5,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--san_monitorFindsRogueCertificate_Sleep--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "san_monitorFindsRogueCertificate_Sleep",
+            "output_theory_file": "results/ct_receipt/proofs/--san_monitorFindsRogueCertificate_Sleep--default.spthy",
+            "output_trace_file": "results/ct_receipt/traces/--san_monitorFindsRogueCertificate_Sleep--default.json",
+            "options": [
+              "--derivcheck-timeout=99999"
+            ],
+            "resources": {
+              "cores": 16,
+              "memory": 14,
+              "timeout": 1200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2026-04-30T11:58:42.491053",
+            "exec_end": "2026-04-30T11:59:13.206986",
+            "exec_duration_monotonic": 30.715932846069336,
+            "avg_memory": 532.2565524193548,
+            "peak_memory": 1075.109375
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 30.52,
+            "lemma_result": "verified",
+            "steps": 21,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--san_Root_CA_Init--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "san_Root_CA_Init",
+            "output_theory_file": "results/ct_receipt/proofs/--san_Root_CA_Init--default.spthy",
+            "output_trace_file": "results/ct_receipt/traces/--san_Root_CA_Init--default.json",
+            "options": [
+              "--derivcheck-timeout=99999"
+            ],
+            "resources": {
+              "cores": 16,
+              "memory": 14,
+              "timeout": 1200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2026-04-30T11:59:13.298157",
+            "exec_end": "2026-04-30T11:59:29.258837",
+            "exec_duration_monotonic": 15.96068000793457,
+            "avg_memory": 171.3095703125,
+            "peak_memory": 191.109375
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 15.77,
+            "lemma_result": "verified",
+            "steps": 2,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--san_DomainOwnerContract--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "san_DomainOwnerContract",
+            "output_theory_file": "results/ct_receipt/proofs/--san_DomainOwnerContract--default.spthy",
+            "output_trace_file": "results/ct_receipt/traces/--san_DomainOwnerContract--default.json",
+            "options": [
+              "--derivcheck-timeout=99999"
+            ],
+            "resources": {
+              "cores": 16,
+              "memory": 14,
+              "timeout": 1200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2026-04-30T11:59:29.459450",
+            "exec_end": "2026-04-30T11:59:58.371724",
+            "exec_duration_monotonic": 28.91227412223816,
+            "avg_memory": 502.5625,
+            "peak_memory": 1068.875
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 28.73,
             "lemma_result": "verified",
             "steps": 3,
             "analysis_type": "exists-trace"
           }
         },
-        "--san_SCTReceiptCheck--default": {
+        "--san_signReceipt--default": {
           "task_config": {
             "tamarin_alias": "default",
-            "lemma": "san_SCTReceiptCheck",
-            "output_theory_file": "results/ct_receipt/proofs/--san_SCTReceiptCheck--default.spthy",
-            "output_trace_file": "results/ct_receipt/traces/--san_SCTReceiptCheck--default.json",
+            "lemma": "san_signReceipt",
+            "output_theory_file": "results/ct_receipt/proofs/--san_signReceipt--default.spthy",
+            "output_trace_file": "results/ct_receipt/traces/--san_signReceipt--default.json",
             "options": [
               "--derivcheck-timeout=99999"
             ],
@@ -1629,17 +1563,83 @@
             "command": [],
             "status": "completed",
             "cache_hit": false,
-            "exec_start": "2026-04-29T23:24:32.921221",
-            "exec_end": "2026-04-29T23:27:02.276444",
-            "exec_duration_monotonic": 149.35522389411926,
-            "avg_memory": 1272.178367820946,
-            "peak_memory": 2304.81640625
+            "exec_start": "2026-04-30T11:59:58.526919",
+            "exec_end": "2026-04-30T12:00:39.483234",
+            "exec_duration_monotonic": 40.95631527900696,
+            "avg_memory": 686.0221036585367,
+            "peak_memory": 1312.640625
           },
           "task_result": {
             "warnings": [],
-            "real_time_tamarin_measure": 149.02,
+            "real_time_tamarin_measure": 40.75,
             "lemma_result": "verified",
-            "steps": 32,
+            "steps": 18,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--san_monitorAudit_Sleep--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "san_monitorAudit_Sleep",
+            "output_theory_file": "results/ct_receipt/proofs/--san_monitorAudit_Sleep--default.spthy",
+            "output_trace_file": "results/ct_receipt/traces/--san_monitorAudit_Sleep--default.json",
+            "options": [
+              "--derivcheck-timeout=99999"
+            ],
+            "resources": {
+              "cores": 16,
+              "memory": 14,
+              "timeout": 1200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2026-04-30T12:00:39.602180",
+            "exec_end": "2026-04-30T12:01:13.677800",
+            "exec_duration_monotonic": 34.07561993598938,
+            "avg_memory": 585.3354779411765,
+            "peak_memory": 1127.921875
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 33.88,
+            "lemma_result": "verified",
+            "steps": 21,
+            "analysis_type": "exists-trace"
+          }
+        },
+        "--san_monitorFindsAppendOnlyViolation--default": {
+          "task_config": {
+            "tamarin_alias": "default",
+            "lemma": "san_monitorFindsAppendOnlyViolation",
+            "output_theory_file": "results/ct_receipt/proofs/--san_monitorFindsAppendOnlyViolation--default.spthy",
+            "output_trace_file": "results/ct_receipt/traces/--san_monitorFindsAppendOnlyViolation--default.json",
+            "options": [
+              "--derivcheck-timeout=99999"
+            ],
+            "resources": {
+              "cores": 16,
+              "memory": 14,
+              "timeout": 1200
+            }
+          },
+          "task_execution_metadata": {
+            "command": [],
+            "status": "completed",
+            "cache_hit": false,
+            "exec_start": "2026-04-30T12:01:13.824294",
+            "exec_end": "2026-04-30T12:01:46.372313",
+            "exec_duration_monotonic": 32.54801917076111,
+            "avg_memory": 577.4692234848484,
+            "peak_memory": 1146.296875
+          },
+          "task_result": {
+            "warnings": [],
+            "real_time_tamarin_measure": 32.34,
+            "lemma_result": "verified",
+            "steps": 31,
             "analysis_type": "exists-trace"
           }
         },
@@ -1662,15 +1662,15 @@
             "command": [],
             "status": "completed",
             "cache_hit": false,
-            "exec_start": "2026-04-29T23:27:02.536370",
-            "exec_end": "2026-04-29T23:28:09.453943",
-            "exec_duration_monotonic": 66.91757369041443,
-            "avg_memory": 578.9329524253732,
-            "peak_memory": 1115.640625
+            "exec_start": "2026-04-30T12:01:46.532542",
+            "exec_end": "2026-04-30T12:02:18.588292",
+            "exec_duration_monotonic": 32.055750131607056,
+            "avg_memory": 552.7241210937501,
+            "peak_memory": 1128.65625
           },
           "task_result": {
             "warnings": [],
-            "real_time_tamarin_measure": 66.62,
+            "real_time_tamarin_measure": 31.86,
             "lemma_result": "verified",
             "steps": 15,
             "analysis_type": "exists-trace"
@@ -1700,15 +1700,15 @@
             "command": [],
             "status": "completed",
             "cache_hit": false,
-            "exec_start": "2026-04-29T23:28:09.693604",
-            "exec_end": "2026-04-29T23:29:37.709109",
-            "exec_duration_monotonic": 88.01550507545471,
-            "avg_memory": 858.0626346982762,
-            "peak_memory": 1763.2265625
+            "exec_start": "2026-04-30T12:02:18.774690",
+            "exec_end": "2026-04-30T12:03:04.121270",
+            "exec_duration_monotonic": 45.346579790115356,
+            "avg_memory": 878.6027777777779,
+            "peak_memory": 1823.0
           },
           "task_result": {
             "warnings": [],
-            "real_time_tamarin_measure": 87.69,
+            "real_time_tamarin_measure": 45.13,
             "lemma_result": "verified",
             "steps": 185,
             "analysis_type": "all-traces"
@@ -1733,15 +1733,15 @@
             "command": [],
             "status": "completed",
             "cache_hit": false,
-            "exec_start": "2026-04-29T23:29:37.944646",
-            "exec_end": "2026-04-29T23:30:31.783047",
-            "exec_duration_monotonic": 53.838401317596436,
-            "avg_memory": 529.7337962962962,
-            "peak_memory": 1064.69140625
+            "exec_start": "2026-04-30T12:03:04.321993",
+            "exec_end": "2026-04-30T12:03:33.634616",
+            "exec_duration_monotonic": 29.312623262405396,
+            "avg_memory": 486.33728448275866,
+            "peak_memory": 1040.078125
           },
           "task_result": {
             "warnings": [],
-            "real_time_tamarin_measure": 53.59,
+            "real_time_tamarin_measure": 29.12,
             "lemma_result": "verified",
             "steps": 8,
             "analysis_type": "all-traces"
@@ -1766,15 +1766,15 @@
             "command": [],
             "status": "completed",
             "cache_hit": false,
-            "exec_start": "2026-04-29T23:30:31.967648",
-            "exec_end": "2026-04-29T23:31:49.244788",
-            "exec_duration_monotonic": 77.27714014053345,
-            "avg_memory": 614.0058340097403,
-            "peak_memory": 1120.5
+            "exec_start": "2026-04-30T12:03:33.787591",
+            "exec_end": "2026-04-30T12:04:23.611968",
+            "exec_duration_monotonic": 49.82437705993652,
+            "avg_memory": 573.1856250000002,
+            "peak_memory": 1131.953125
           },
           "task_result": {
             "warnings": [],
-            "real_time_tamarin_measure": 76.94,
+            "real_time_tamarin_measure": 49.62,
             "lemma_result": "verified",
             "steps": 232,
             "analysis_type": "all-traces"
@@ -1799,15 +1799,15 @@
             "command": [],
             "status": "completed",
             "cache_hit": false,
-            "exec_start": "2026-04-29T23:31:49.431177",
-            "exec_end": "2026-04-29T23:33:03.598006",
-            "exec_duration_monotonic": 74.16682982444763,
-            "avg_memory": 641.3070101351351,
-            "peak_memory": 1123.09765625
+            "exec_start": "2026-04-30T12:04:23.787034",
+            "exec_end": "2026-04-30T12:05:06.472748",
+            "exec_duration_monotonic": 42.68571400642395,
+            "avg_memory": 600.4883720930233,
+            "peak_memory": 1128.03125
           },
           "task_result": {
             "warnings": [],
-            "real_time_tamarin_measure": 73.83,
+            "real_time_tamarin_measure": 42.48,
             "lemma_result": "verified",
             "steps": 208,
             "analysis_type": "all-traces"
@@ -1832,15 +1832,15 @@
             "command": [],
             "status": "completed",
             "cache_hit": false,
-            "exec_start": "2026-04-29T23:33:03.780459",
-            "exec_end": "2026-04-29T23:34:09.251666",
-            "exec_duration_monotonic": 65.47120714187622,
-            "avg_memory": 550.6719951923078,
-            "peak_memory": 1141.2890625
+            "exec_start": "2026-04-30T12:05:06.585251",
+            "exec_end": "2026-04-30T12:05:37.394083",
+            "exec_duration_monotonic": 30.808831930160522,
+            "avg_memory": 528.9027217741935,
+            "peak_memory": 1121.921875
           },
           "task_result": {
             "warnings": [],
-            "real_time_tamarin_measure": 65.2,
+            "real_time_tamarin_measure": 30.62,
             "lemma_result": "verified",
             "steps": 54,
             "analysis_type": "all-traces"
@@ -1865,15 +1865,15 @@
             "command": [],
             "status": "completed",
             "cache_hit": false,
-            "exec_start": "2026-04-29T23:34:09.434560",
-            "exec_end": "2026-04-29T23:35:11.765227",
-            "exec_duration_monotonic": 62.33066773414612,
-            "avg_memory": 559.8944052419355,
-            "peak_memory": 1106.875
+            "exec_start": "2026-04-30T12:05:37.598356",
+            "exec_end": "2026-04-30T12:06:09.056879",
+            "exec_duration_monotonic": 31.45852303504944,
+            "avg_memory": 559.2631835937501,
+            "peak_memory": 1119.375
           },
           "task_result": {
             "warnings": [],
-            "real_time_tamarin_measure": 62.03,
+            "real_time_tamarin_measure": 31.24,
             "lemma_result": "verified",
             "steps": 40,
             "analysis_type": "all-traces"
@@ -1898,15 +1898,15 @@
             "command": [],
             "status": "completed",
             "cache_hit": false,
-            "exec_start": "2026-04-29T23:35:11.971678",
-            "exec_end": "2026-04-29T23:36:17.215435",
-            "exec_duration_monotonic": 65.2437572479248,
-            "avg_memory": 575.6202524038462,
-            "peak_memory": 1091.8671875
+            "exec_start": "2026-04-30T12:06:09.208619",
+            "exec_end": "2026-04-30T12:06:40.829909",
+            "exec_duration_monotonic": 31.6212899684906,
+            "avg_memory": 558.51318359375,
+            "peak_memory": 1103.390625
           },
           "task_result": {
             "warnings": [],
-            "real_time_tamarin_measure": 64.94,
+            "real_time_tamarin_measure": 31.42,
             "lemma_result": "verified",
             "steps": 40,
             "analysis_type": "all-traces"
@@ -1931,15 +1931,15 @@
             "command": [],
             "status": "completed",
             "cache_hit": false,
-            "exec_start": "2026-04-29T23:36:17.448557",
-            "exec_end": "2026-04-29T23:37:16.325686",
-            "exec_duration_monotonic": 58.877129554748535,
-            "avg_memory": 570.0803098516949,
-            "peak_memory": 1128.64453125
+            "exec_start": "2026-04-30T12:06:41.003091",
+            "exec_end": "2026-04-30T12:07:12.573618",
+            "exec_duration_monotonic": 31.57052707672119,
+            "avg_memory": 564.56298828125,
+            "peak_memory": 1130.796875
           },
           "task_result": {
             "warnings": [],
-            "real_time_tamarin_measure": 58.59,
+            "real_time_tamarin_measure": 31.38,
             "lemma_result": "verified",
             "steps": 40,
             "analysis_type": "all-traces"
@@ -1964,15 +1964,15 @@
             "command": [],
             "status": "completed",
             "cache_hit": false,
-            "exec_start": "2026-04-29T23:37:16.499903",
-            "exec_end": "2026-04-29T23:38:15.647381",
-            "exec_duration_monotonic": 59.14747858047485,
-            "avg_memory": 554.996623411017,
-            "peak_memory": 1126.53125
+            "exec_start": "2026-04-30T12:07:12.728358",
+            "exec_end": "2026-04-30T12:07:44.229089",
+            "exec_duration_monotonic": 31.500731229782104,
+            "avg_memory": 544.541015625,
+            "peak_memory": 1080.46875
           },
           "task_result": {
             "warnings": [],
-            "real_time_tamarin_measure": 58.86,
+            "real_time_tamarin_measure": 31.3,
             "lemma_result": "verified",
             "steps": 40,
             "analysis_type": "all-traces"
@@ -1997,15 +1997,15 @@
             "command": [],
             "status": "completed",
             "cache_hit": false,
-            "exec_start": "2026-04-29T23:38:15.864248",
-            "exec_end": "2026-04-29T23:39:11.941489",
-            "exec_duration_monotonic": 56.07724094390869,
-            "avg_memory": 525.0682896205357,
-            "peak_memory": 1138.421875
+            "exec_start": "2026-04-30T12:07:44.353487",
+            "exec_end": "2026-04-30T12:08:13.466654",
+            "exec_duration_monotonic": 29.11316704750061,
+            "avg_memory": 506.50915948275855,
+            "peak_memory": 1101.59375
           },
           "task_result": {
             "warnings": [],
-            "real_time_tamarin_measure": 55.78,
+            "real_time_tamarin_measure": 28.89,
             "lemma_result": "verified",
             "steps": 6,
             "analysis_type": "all-traces"
@@ -2030,15 +2030,15 @@
             "command": [],
             "status": "completed",
             "cache_hit": false,
-            "exec_start": "2026-04-29T23:39:12.180166",
-            "exec_end": "2026-04-29T23:40:08.117169",
-            "exec_duration_monotonic": 55.937002420425415,
-            "avg_memory": 536.6849190848213,
-            "peak_memory": 1126.96484375
+            "exec_start": "2026-04-30T12:08:13.637450",
+            "exec_end": "2026-04-30T12:08:42.922292",
+            "exec_duration_monotonic": 29.284842014312744,
+            "avg_memory": 501.2532327586206,
+            "peak_memory": 1117.40625
           },
           "task_result": {
             "warnings": [],
-            "real_time_tamarin_measure": 55.65,
+            "real_time_tamarin_measure": 29.09,
             "lemma_result": "verified",
             "steps": 6,
             "analysis_type": "all-traces"
@@ -2063,15 +2063,15 @@
             "command": [],
             "status": "completed",
             "cache_hit": false,
-            "exec_start": "2026-04-29T23:40:08.336606",
-            "exec_end": "2026-04-29T23:41:05.691430",
-            "exec_duration_monotonic": 57.35482406616211,
-            "avg_memory": 526.9567571271929,
-            "peak_memory": 1078.703125
+            "exec_start": "2026-04-30T12:08:43.138949",
+            "exec_end": "2026-04-30T12:09:12.323606",
+            "exec_duration_monotonic": 29.184656858444214,
+            "avg_memory": 499.83674568965523,
+            "peak_memory": 1108.859375
           },
           "task_result": {
             "warnings": [],
-            "real_time_tamarin_measure": 57.06,
+            "real_time_tamarin_measure": 28.99,
             "lemma_result": "verified",
             "steps": 18,
             "analysis_type": "all-traces"
@@ -2096,15 +2096,15 @@
             "command": [],
             "status": "completed",
             "cache_hit": false,
-            "exec_start": "2026-04-29T23:41:05.936381",
-            "exec_end": "2026-04-29T23:42:08.704794",
-            "exec_duration_monotonic": 62.768413066864014,
-            "avg_memory": 514.0933719758065,
-            "peak_memory": 1106.72265625
+            "exec_start": "2026-04-30T12:09:12.523720",
+            "exec_end": "2026-04-30T12:09:41.937187",
+            "exec_duration_monotonic": 29.413466930389404,
+            "avg_memory": 514.5635416666667,
+            "peak_memory": 1116.65625
           },
           "task_result": {
             "warnings": [],
-            "real_time_tamarin_measure": 62.49,
+            "real_time_tamarin_measure": 29.22,
             "lemma_result": "verified",
             "steps": 18,
             "analysis_type": "all-traces"
@@ -2129,15 +2129,15 @@
             "command": [],
             "status": "completed",
             "cache_hit": false,
-            "exec_start": "2026-04-29T23:42:08.916621",
-            "exec_end": "2026-04-29T23:42:33.105014",
-            "exec_duration_monotonic": 24.188393115997314,
-            "avg_memory": 145.34033203124997,
-            "peak_memory": 154.41796875
+            "exec_start": "2026-04-30T12:09:42.092228",
+            "exec_end": "2026-04-30T12:09:58.037509",
+            "exec_duration_monotonic": 15.945281028747559,
+            "avg_memory": 170.98339843750003,
+            "peak_memory": 191.0625
           },
           "task_result": {
             "warnings": [],
-            "real_time_tamarin_measure": 23.93,
+            "real_time_tamarin_measure": 15.77,
             "lemma_result": "verified",
             "steps": 2,
             "analysis_type": "all-traces"
@@ -2162,15 +2162,15 @@
             "command": [],
             "status": "completed",
             "cache_hit": false,
-            "exec_start": "2026-04-29T23:42:33.278320",
-            "exec_end": "2026-04-29T23:42:58.741511",
-            "exec_duration_monotonic": 25.463191032409668,
-            "avg_memory": 147.47145432692307,
-            "peak_memory": 158.7421875
+            "exec_start": "2026-04-30T12:09:58.148067",
+            "exec_end": "2026-04-30T12:10:13.981559",
+            "exec_duration_monotonic": 15.833492040634155,
+            "avg_memory": 170.7822265625,
+            "peak_memory": 190.46875
           },
           "task_result": {
             "warnings": [],
-            "real_time_tamarin_measure": 25.26,
+            "real_time_tamarin_measure": 15.65,
             "lemma_result": "verified",
             "steps": 2,
             "analysis_type": "all-traces"
@@ -2195,15 +2195,15 @@
             "command": [],
             "status": "completed",
             "cache_hit": false,
-            "exec_start": "2026-04-29T23:42:58.921904",
-            "exec_end": "2026-04-29T23:44:04.732019",
-            "exec_duration_monotonic": 65.81011486053467,
-            "avg_memory": 574.2578125000001,
-            "peak_memory": 1123.12109375
+            "exec_start": "2026-04-30T12:10:14.101562",
+            "exec_end": "2026-04-30T12:10:46.031970",
+            "exec_duration_monotonic": 31.930408000946045,
+            "avg_memory": 569.9184570312499,
+            "peak_memory": 1256.1875
           },
           "task_result": {
             "warnings": [],
-            "real_time_tamarin_measure": 65.51,
+            "real_time_tamarin_measure": 31.74,
             "lemma_result": "verified",
             "steps": 80,
             "analysis_type": "all-traces"
@@ -2228,15 +2228,15 @@
             "command": [],
             "status": "completed",
             "cache_hit": false,
-            "exec_start": "2026-04-29T23:44:04.930969",
-            "exec_end": "2026-04-29T23:45:08.760359",
-            "exec_duration_monotonic": 63.82939004898071,
-            "avg_memory": 578.9632936507937,
-            "peak_memory": 1215.48046875
+            "exec_start": "2026-04-30T12:10:46.229146",
+            "exec_end": "2026-04-30T12:11:18.253218",
+            "exec_duration_monotonic": 32.02407193183899,
+            "avg_memory": 565.7070312500001,
+            "peak_memory": 1220.3125
           },
           "task_result": {
             "warnings": [],
-            "real_time_tamarin_measure": 63.51,
+            "real_time_tamarin_measure": 31.82,
             "lemma_result": "verified",
             "steps": 80,
             "analysis_type": "all-traces"
@@ -2261,15 +2261,15 @@
             "command": [],
             "status": "completed",
             "cache_hit": false,
-            "exec_start": "2026-04-29T23:45:08.963013",
-            "exec_end": "2026-04-29T23:45:36.698161",
-            "exec_duration_monotonic": 27.735148429870605,
-            "avg_memory": 149.3385881696429,
-            "peak_memory": 160.953125
+            "exec_start": "2026-04-30T12:11:18.463231",
+            "exec_end": "2026-04-30T12:11:34.443758",
+            "exec_duration_monotonic": 15.9805269241333,
+            "avg_memory": 171.53515625,
+            "peak_memory": 191.5
           },
           "task_result": {
             "warnings": [],
-            "real_time_tamarin_measure": 27.53,
+            "real_time_tamarin_measure": 15.78,
             "lemma_result": "verified",
             "steps": 1,
             "analysis_type": "all-traces"
@@ -2294,15 +2294,15 @@
             "command": [],
             "status": "completed",
             "cache_hit": false,
-            "exec_start": "2026-04-29T23:45:36.926531",
-            "exec_end": "2026-04-29T23:46:02.600603",
-            "exec_duration_monotonic": 25.674071788787842,
-            "avg_memory": 147.6452824519231,
-            "peak_memory": 156.68359375
+            "exec_start": "2026-04-30T12:11:34.618088",
+            "exec_end": "2026-04-30T12:11:50.489349",
+            "exec_duration_monotonic": 15.87126111984253,
+            "avg_memory": 171.6669921875,
+            "peak_memory": 192.140625
           },
           "task_result": {
             "warnings": [],
-            "real_time_tamarin_measure": 25.42,
+            "real_time_tamarin_measure": 15.68,
             "lemma_result": "verified",
             "steps": 1,
             "analysis_type": "all-traces"
@@ -2325,21 +2325,20 @@
           },
           "task_execution_metadata": {
             "command": [],
-            "status": "timeout",
+            "status": "completed",
             "cache_hit": false,
-            "exec_start": "2026-04-29T23:46:02.797745",
-            "exec_end": "2026-04-29T23:51:03.343265",
-            "exec_duration_monotonic": 300.54552030563354,
-            "avg_memory": 98.48761047979801,
-            "peak_memory": 98.8203125
+            "exec_start": "2026-04-30T12:11:50.660285",
+            "exec_end": "2026-04-30T12:12:19.667489",
+            "exec_duration_monotonic": 29.007204055786133,
+            "avg_memory": 494.9649784482759,
+            "peak_memory": 1102.875
           },
           "task_result": {
-            "return_code": "-1",
-            "error_type": "timeout",
-            "error_description": "Task timed out during execution",
-            "last_stderr_lines": [
-              "Process timed out"
-            ]
+            "warnings": [],
+            "real_time_tamarin_measure": 28.81,
+            "lemma_result": "verified",
+            "steps": 4,
+            "analysis_type": "all-traces"
           }
         },
         "--A_Receipt_receipt_4_inj--default": {
@@ -2361,15 +2360,15 @@
             "command": [],
             "status": "completed",
             "cache_hit": false,
-            "exec_start": "2026-04-29T23:51:03.496416",
-            "exec_end": "2026-04-29T23:52:01.725808",
-            "exec_duration_monotonic": 58.229392528533936,
-            "avg_memory": 531.9017376077586,
-            "peak_memory": 1124.5859375
+            "exec_start": "2026-04-30T12:12:19.837705",
+            "exec_end": "2026-04-30T12:12:48.896861",
+            "exec_duration_monotonic": 29.05915594100952,
+            "avg_memory": 491.65086206896547,
+            "peak_memory": 1056.140625
           },
           "task_result": {
             "warnings": [],
-            "real_time_tamarin_measure": 57.95,
+            "real_time_tamarin_measure": 28.86,
             "lemma_result": "verified",
             "steps": 4,
             "analysis_type": "all-traces"
@@ -2400,15 +2399,15 @@
             "command": [],
             "status": "completed",
             "cache_hit": false,
-            "exec_start": "2026-04-29T23:52:01.901281",
-            "exec_end": "2026-04-29T23:54:10.141165",
-            "exec_duration_monotonic": 128.23988366127014,
-            "avg_memory": 710.0998708169293,
-            "peak_memory": 1101.765625
+            "exec_start": "2026-04-30T12:12:49.005666",
+            "exec_end": "2026-04-30T12:13:43.051836",
+            "exec_duration_monotonic": 54.0461699962616,
+            "avg_memory": 732.9484953703706,
+            "peak_memory": 1101.6875
           },
           "task_result": {
             "warnings": [],
-            "real_time_tamarin_measure": 127.97,
+            "real_time_tamarin_measure": 53.83,
             "lemma_result": "verified",
             "steps": 46,
             "analysis_type": "exists-trace"
@@ -2434,15 +2433,15 @@
             "command": [],
             "status": "completed",
             "cache_hit": false,
-            "exec_start": "2026-04-29T23:54:10.336511",
-            "exec_end": "2026-04-29T23:55:53.651431",
-            "exec_duration_monotonic": 103.31491994857788,
-            "avg_memory": 784.1629626820392,
-            "peak_memory": 1409.59375
+            "exec_start": "2026-04-30T12:13:43.197702",
+            "exec_end": "2026-04-30T12:14:41.244645",
+            "exec_duration_monotonic": 58.04694318771362,
+            "avg_memory": 809.9447737068966,
+            "peak_memory": 1401.53125
           },
           "task_result": {
             "warnings": [],
-            "real_time_tamarin_measure": 103.01,
+            "real_time_tamarin_measure": 57.85,
             "lemma_result": "verified",
             "steps": 47,
             "analysis_type": "exists-trace"
@@ -2468,15 +2467,15 @@
             "command": [],
             "status": "completed",
             "cache_hit": false,
-            "exec_start": "2026-04-29T23:55:53.861497",
-            "exec_end": "2026-04-29T23:58:22.767329",
-            "exec_duration_monotonic": 148.90583205223083,
-            "avg_memory": 997.7645692567563,
-            "peak_memory": 1648.8203125
+            "exec_start": "2026-04-30T12:14:41.408366",
+            "exec_end": "2026-04-30T12:16:11.975659",
+            "exec_duration_monotonic": 90.56729292869568,
+            "avg_memory": 1021.0942766853933,
+            "peak_memory": 1650.734375
           },
           "task_result": {
             "warnings": [],
-            "real_time_tamarin_measure": 148.58,
+            "real_time_tamarin_measure": 90.36,
             "lemma_result": "verified",
             "steps": 47,
             "analysis_type": "exists-trace"
@@ -2502,15 +2501,15 @@
             "command": [],
             "status": "completed",
             "cache_hit": false,
-            "exec_start": "2026-04-29T23:58:23.030650",
-            "exec_end": "2026-04-30T00:01:13.983812",
-            "exec_duration_monotonic": 170.95316195487976,
-            "avg_memory": 1010.3178855399408,
-            "peak_memory": 1821.1015625
+            "exec_start": "2026-04-30T12:16:12.124969",
+            "exec_end": "2026-04-30T12:17:45.582605",
+            "exec_duration_monotonic": 93.45763611793518,
+            "avg_memory": 1050.936995967742,
+            "peak_memory": 1855.234375
           },
           "task_result": {
             "warnings": [],
-            "real_time_tamarin_measure": 170.65,
+            "real_time_tamarin_measure": 93.25,
             "lemma_result": "verified",
             "steps": 48,
             "analysis_type": "exists-trace"
@@ -2536,15 +2535,15 @@
             "command": [],
             "status": "completed",
             "cache_hit": false,
-            "exec_start": "2026-04-30T00:01:14.234465",
-            "exec_end": "2026-04-30T00:03:49.650065",
-            "exec_duration_monotonic": 155.4155993461609,
-            "avg_memory": 885.162007913961,
-            "peak_memory": 1347.4921875
+            "exec_start": "2026-04-30T12:17:45.780962",
+            "exec_end": "2026-04-30T12:19:12.808330",
+            "exec_duration_monotonic": 87.02736806869507,
+            "avg_memory": 913.8491379310345,
+            "peak_memory": 1387.609375
           },
           "task_result": {
             "warnings": [],
-            "real_time_tamarin_measure": 155.12,
+            "real_time_tamarin_measure": 86.83,
             "lemma_result": "verified",
             "steps": 46,
             "analysis_type": "exists-trace"
@@ -2570,15 +2569,15 @@
             "command": [],
             "status": "completed",
             "cache_hit": false,
-            "exec_start": "2026-04-30T00:03:49.973835",
-            "exec_end": "2026-04-30T00:06:26.529672",
-            "exec_duration_monotonic": 156.55583715438843,
-            "avg_memory": 897.9555191532256,
-            "peak_memory": 1495.8359375
+            "exec_start": "2026-04-30T12:19:12.975814",
+            "exec_end": "2026-04-30T12:20:41.571932",
+            "exec_duration_monotonic": 88.59611797332764,
+            "avg_memory": 943.8162286931819,
+            "peak_memory": 1650.46875
           },
           "task_result": {
             "warnings": [],
-            "real_time_tamarin_measure": 156.29,
+            "real_time_tamarin_measure": 88.41,
             "lemma_result": "verified",
             "steps": 46,
             "analysis_type": "exists-trace"
@@ -2604,15 +2603,15 @@
             "command": [],
             "status": "completed",
             "cache_hit": false,
-            "exec_start": "2026-04-30T00:06:26.826204",
-            "exec_end": "2026-04-30T00:09:03.627481",
-            "exec_duration_monotonic": 156.8012764453888,
-            "avg_memory": 970.8994140625,
-            "peak_memory": 1727.50390625
+            "exec_start": "2026-04-30T12:20:41.804549",
+            "exec_end": "2026-04-30T12:22:10.764446",
+            "exec_duration_monotonic": 88.95989680290222,
+            "avg_memory": 1020.512784090909,
+            "peak_memory": 1720.375
           },
           "task_result": {
             "warnings": [],
-            "real_time_tamarin_measure": 156.51,
+            "real_time_tamarin_measure": 88.76,
             "lemma_result": "verified",
             "steps": 47,
             "analysis_type": "exists-trace"
@@ -2638,15 +2637,15 @@
             "command": [],
             "status": "completed",
             "cache_hit": false,
-            "exec_start": "2026-04-30T00:09:03.977848",
-            "exec_end": "2026-04-30T00:11:45.021513",
-            "exec_duration_monotonic": 161.04366493225098,
-            "avg_memory": 956.8753662109376,
-            "peak_memory": 1768.0703125
+            "exec_start": "2026-04-30T12:22:11.023566",
+            "exec_end": "2026-04-30T12:23:40.560565",
+            "exec_duration_monotonic": 89.53699898719788,
+            "avg_memory": 1006.3788623595508,
+            "peak_memory": 1723.34375
           },
           "task_result": {
             "warnings": [],
-            "real_time_tamarin_measure": 160.74,
+            "real_time_tamarin_measure": 89.33,
             "lemma_result": "verified",
             "steps": 47,
             "analysis_type": "exists-trace"

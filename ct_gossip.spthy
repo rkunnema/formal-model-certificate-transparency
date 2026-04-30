@@ -956,7 +956,7 @@ STHGossipTransparencyCheck(). Contributed evidence:
 rule GossipTransparencyCheck_Success:
     [ 
     ClientGossiped($C, $M, $L, gossiped_session, $gossiped_proof_time, fields, ca_fields, chain),
-    AppendOnlyChecked($M, gossiped_session, session), /* then gossiped this proof to the monitor (proof, session) but without fields. Monitor checks for append only (may or may not hold), if it does not monitor emitted an assert blaming the logger */
+    AppendOnlyChecked($M, gossiped_session, session), // then gossiped this proof to the monitor (proof, session) but without fields. Monitor checks for append only (may or may not hold), if it does not monitor emitted an assert blaming the logger
     MonitorFoundCert($M, $L, fields, $CA, ca_fields, $time_of_proof_fetch, session) // TODO: replace with inclusion proof? i guess so <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 ]
     --[
@@ -975,13 +975,13 @@ rule GossipTransparencyCheck_Failed:
     in
     [ 
     ClientGossiped($C, $M, $L, gossiped_session, $gossiped_proof_time, fields, ca_fields, chain),
-    AppendOnlyChecked($M, gossiped_session, session), /* then gossiped this proof to the monitor (proof, session) but without fields. Monitor checks for append only (may or may not hold), if it does not monitor emitted an assert blaming the logger */
+    AppendOnlyChecked($M, gossiped_session, session), // then gossiped this proof to the monitor (proof, session) but without fields. Monitor checks for append only (may or may not hold), if it does not monitor emitted an assert blaming the logger
     MonitorCouldNotFindCert($M, fields, $L, $CA, ca_fields, $time_of_proof_fetch, session),
     !Root_CA($rootCA, pkRootCA)
 ]
     --[
         Eq(verify(cert_sig, cert_fields, pkCA), true()),
-        Eq(verify(ca_sig, ca_fields, pkRootCA), true()), /* We only consider valid chains found by the client (if the monitor finds the cert this already implies that the chain is valid) */
+        Eq(verify(ca_sig, ca_fields, pkRootCA), true()), // We only consider valid chains found by the client (if the monitor finds the cert this already implies that the chain is valid) 
         ProofFetchAfterGossip($gossiped_proof_time, $time_of_proof_fetch),
         STHGossipTransparencyCheck($M, $L, fields, $CA, ca_fields, session, gossiped_session),
         CTGossipTransparencyCheck_NotFound($M, $L, fields, $CA, ca_fields, session, gossiped_session),
@@ -1005,18 +1005,18 @@ rule GossipingCheck:
     in
     [ 
     ClientGossiped($C, $M, $L, gossiped_session, $gossiped_proof_time, fields, ca_fields, chain),
-    AppendOnlyChecked($M, gossiped_session, session), /* then gossiped this proof to the monitor (proof, session) but without fields. Monitor checks for append only (may or may not hold), if it does not monitor emitted an assert blaming the logger */
+    AppendOnlyChecked($M, gossiped_session, session), // then gossiped this proof to the monitor (proof, session) but without fields. Monitor checks for append only (may or may not hold), if it does not monitor emitted an assert blaming the logger 
     MonitorInspected($M, $L, fields, $CA, ca_fields, $time_of_proof_fetch, session),
     CCADBConsulted($rootCA, ca_fields),
     !Root_CA($rootCA, pkRootCA)
 ]
     --[
         Eq(verify(cert_sig, cert_fields, pkCA), true()),
-        Eq(verify(ca_sig, ca_fields, pkRootCA), true()), /* We only consider valid chains (if the monitor finds the cert this already implies that the chain is valid) */
+        Eq(verify(ca_sig, ca_fields, pkRootCA), true()), // We only consider valid chains (if the monitor finds the cert this already implies that the chain is valid)
         ProofFetchAfterGossip($proof, $time_of_proof_fetch),
         STHGossipCheck($M, $L, fields, $CA, ca_fields, session, gossiped_session),
 
-        San_GossipingCheck_Found(),
+        San_GossipingCheck_Found()
     ]->
     [ ]
 

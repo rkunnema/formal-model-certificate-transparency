@@ -1,0 +1,2592 @@
+{
+    "graphs": [
+        {
+            "jgAbbrevs": [
+                {
+                    "jgaAbbrev": {
+                        "jgnConst": "TH1"
+                    },
+                    "jgaExpansion": {
+                        "jgnConst": "'This loggers log currently does not include these fields.'"
+                    },
+                    "jgaTerm": {
+                        "jgnConst": "'This loggers log currently does not include these fields.'"
+                    }
+                },
+                {
+                    "jgaAbbrev": {
+                        "jgnConst": "PR1"
+                    },
+                    "jgaExpansion": {
+                        "jgnConst": "$proof_time"
+                    },
+                    "jgaTerm": {
+                        "jgnConst": "$proof_time"
+                    }
+                },
+                {
+                    "jgaAbbrev": {
+                        "jgnConst": "CA1"
+                    },
+                    "jgaExpansion": {
+                        "jgnConst": "ca_fields.1"
+                    },
+                    "jgaTerm": {
+                        "jgnConst": "ca_fields.1"
+                    }
+                }
+            ],
+            "jgClusters": [],
+            "jgDirected": true,
+            "jgEdges": [
+                {
+                    "jgeRelation": "PersistentFact",
+                    "jgeSource": "#t0:c0",
+                    "jgeTarget": "#t:p0"
+                },
+                {
+                    "jgeRelation": "PersistentFact",
+                    "jgeSource": "#t0:c0",
+                    "jgeTarget": "#vr.2:p0"
+                },
+                {
+                    "jgeRelation": "default",
+                    "jgeSource": "#vf:c0",
+                    "jgeTarget": "#t:p2"
+                },
+                {
+                    "jgeRelation": "PersistentFact",
+                    "jgeSource": "#vr:c0",
+                    "jgeTarget": "#t0:p0"
+                },
+                {
+                    "jgeRelation": "PersistentFact",
+                    "jgeSource": "#vr:c0",
+                    "jgeTarget": "#t0.1:p0"
+                },
+                {
+                    "jgeRelation": "PersistentFact",
+                    "jgeSource": "#vr:c1",
+                    "jgeTarget": "#t:p1"
+                },
+                {
+                    "jgeRelation": "PersistentFact",
+                    "jgeSource": "#vr:c1",
+                    "jgeTarget": "#vr.1:p2"
+                },
+                {
+                    "jgeRelation": "PersistentFact",
+                    "jgeSource": "#vr:c1",
+                    "jgeTarget": "#vr.2:p1"
+                },
+                {
+                    "jgeRelation": "default",
+                    "jgeSource": "#vf.1:c0",
+                    "jgeTarget": "#t:p3"
+                },
+                {
+                    "jgeRelation": "ProtoFact",
+                    "jgeSource": "#vr.1:c0",
+                    "jgeTarget": "#t0:p2"
+                },
+                {
+                    "jgeRelation": "ProtoFact",
+                    "jgeSource": "#vr.2:c0",
+                    "jgeTarget": "#t1:p0"
+                },
+                {
+                    "jgeRelation": "default",
+                    "jgeSource": "#vf.5:c0",
+                    "jgeTarget": "#vr.1:p1"
+                },
+                {
+                    "jgeRelation": "default",
+                    "jgeSource": "#vf.6:c0",
+                    "jgeTarget": "#vr.2:p2"
+                },
+                {
+                    "jgeRelation": "default",
+                    "jgeSource": "#vf.7:c0",
+                    "jgeTarget": "#vr.2:p3"
+                },
+                {
+                    "jgeRelation": "LessAtoms",
+                    "jgeSource": "#t0.1",
+                    "jgeTarget": "#t0"
+                },
+                {
+                    "jgeRelation": "LessAtoms",
+                    "jgeSource": "#vk.5",
+                    "jgeTarget": "#vf"
+                },
+                {
+                    "jgeRelation": "LessAtoms",
+                    "jgeSource": "#vk.5",
+                    "jgeTarget": "#vf.6"
+                },
+                {
+                    "jgeRelation": "LessAtoms",
+                    "jgeSource": "#vk.9",
+                    "jgeTarget": "#vf"
+                },
+                {
+                    "jgeRelation": "LessAtoms",
+                    "jgeSource": "#vk.9",
+                    "jgeTarget": "#vf.6"
+                },
+                {
+                    "jgeRelation": "LessAtoms",
+                    "jgeSource": "#vk.14",
+                    "jgeTarget": "#vf.1"
+                },
+                {
+                    "jgeRelation": "LessAtoms",
+                    "jgeSource": "#vk.15",
+                    "jgeTarget": "#vf.1"
+                },
+                {
+                    "jgeRelation": "LessAtoms",
+                    "jgeSource": "#vk.18",
+                    "jgeTarget": "#vf.7"
+                },
+                {
+                    "jgeRelation": "LessAtoms",
+                    "jgeSource": "#vk.19",
+                    "jgeTarget": "#vf.7"
+                }
+            ],
+            "jgLabel": "trace_ct_SL2-AS0-CL0-A1-C1-NB_T_CT_1_client_inclusionViol_uniq-ParticipantFindsInclusionViolation-LoggerSnapshot_P-Logger_Init-TransparencyCheck_Failed-ParticipantFindsInclusionViolation-LoggerSnapshot_P-Start_Log-Logger_Init-LoggerSnapshot_P",
+            "jgNodes": [
+                {
+                    "jgnId": "#t",
+                    "jgnLabel": "ParticipantFindsInclusionViolation",
+                    "jgnMetadata": {
+                        "jgnActs": [
+                            {
+                                "jgnFactId": "action",
+                                "jgnFactMult": "",
+                                "jgnFactName": "Asserts",
+                                "jgnFactShow": "Asserts( $P, 'This loggers log currently does not include these fields.', $L, <<$CA, $id, pkID, 'pubKey', sn, $i, $j>, ~session>)",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "$P"
+                                    },
+                                    {
+                                        "jgnConst": "'This loggers log currently does not include these fields.'"
+                                    },
+                                    {
+                                        "jgnConst": "$L"
+                                    },
+                                    {
+                                        "jgnFunct": "pair",
+                                        "jgnParams": [
+                                            {
+                                                "jgnFunct": "pair",
+                                                "jgnParams": [
+                                                    {
+                                                        "jgnConst": "$CA"
+                                                    },
+                                                    {
+                                                        "jgnFunct": "pair",
+                                                        "jgnParams": [
+                                                            {
+                                                                "jgnConst": "$id"
+                                                            },
+                                                            {
+                                                                "jgnFunct": "pair",
+                                                                "jgnParams": [
+                                                                    {
+                                                                        "jgnConst": "pkID"
+                                                                    },
+                                                                    {
+                                                                        "jgnFunct": "pair",
+                                                                        "jgnParams": [
+                                                                            {
+                                                                                "jgnConst": "'pubKey'"
+                                                                            },
+                                                                            {
+                                                                                "jgnFunct": "pair",
+                                                                                "jgnParams": [
+                                                                                    {
+                                                                                        "jgnConst": "sn"
+                                                                                    },
+                                                                                    {
+                                                                                        "jgnFunct": "pair",
+                                                                                        "jgnParams": [
+                                                                                            {
+                                                                                                "jgnConst": "$i"
+                                                                                            },
+                                                                                            {
+                                                                                                "jgnConst": "$j"
+                                                                                            }
+                                                                                        ],
+                                                                                        "jgnShow": "pair($i,$j)"
+                                                                                    }
+                                                                                ],
+                                                                                "jgnShow": "pair(sn,pair($i,$j))"
+                                                                            }
+                                                                        ],
+                                                                        "jgnShow": "pair('pubKey',pair(sn,pair($i,$j)))"
+                                                                    }
+                                                                ],
+                                                                "jgnShow": "pair(pkID,pair('pubKey',pair(sn,pair($i,$j))))"
+                                                            }
+                                                        ],
+                                                        "jgnShow": "pair($id,pair(pkID,pair('pubKey',pair(sn,pair($i,$j)))))"
+                                                    }
+                                                ],
+                                                "jgnShow": "pair($CA,pair($id,pair(pkID,pair('pubKey',pair(sn,pair($i,$j))))))"
+                                            },
+                                            {
+                                                "jgnConst": "~session"
+                                            }
+                                        ],
+                                        "jgnShow": "pair(pair($CA,pair($id,pair(pkID,pair('pubKey',pair(sn,pair($i,$j)))))),~session)"
+                                    }
+                                ]
+                            },
+                            {
+                                "jgnFactId": "action",
+                                "jgnFactMult": "",
+                                "jgnFactName": "InclusionProofFails",
+                                "jgnFactShow": "InclusionProofFails( $P, $L, <$CA, $id, pkID, 'pubKey', sn, $i, $j>, <ca_fields, ca_sig>, ~sth, ~session)",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "$P"
+                                    },
+                                    {
+                                        "jgnConst": "$L"
+                                    },
+                                    {
+                                        "jgnFunct": "pair",
+                                        "jgnParams": [
+                                            {
+                                                "jgnConst": "$CA"
+                                            },
+                                            {
+                                                "jgnFunct": "pair",
+                                                "jgnParams": [
+                                                    {
+                                                        "jgnConst": "$id"
+                                                    },
+                                                    {
+                                                        "jgnFunct": "pair",
+                                                        "jgnParams": [
+                                                            {
+                                                                "jgnConst": "pkID"
+                                                            },
+                                                            {
+                                                                "jgnFunct": "pair",
+                                                                "jgnParams": [
+                                                                    {
+                                                                        "jgnConst": "'pubKey'"
+                                                                    },
+                                                                    {
+                                                                        "jgnFunct": "pair",
+                                                                        "jgnParams": [
+                                                                            {
+                                                                                "jgnConst": "sn"
+                                                                            },
+                                                                            {
+                                                                                "jgnFunct": "pair",
+                                                                                "jgnParams": [
+                                                                                    {
+                                                                                        "jgnConst": "$i"
+                                                                                    },
+                                                                                    {
+                                                                                        "jgnConst": "$j"
+                                                                                    }
+                                                                                ],
+                                                                                "jgnShow": "pair($i,$j)"
+                                                                            }
+                                                                        ],
+                                                                        "jgnShow": "pair(sn,pair($i,$j))"
+                                                                    }
+                                                                ],
+                                                                "jgnShow": "pair('pubKey',pair(sn,pair($i,$j)))"
+                                                            }
+                                                        ],
+                                                        "jgnShow": "pair(pkID,pair('pubKey',pair(sn,pair($i,$j))))"
+                                                    }
+                                                ],
+                                                "jgnShow": "pair($id,pair(pkID,pair('pubKey',pair(sn,pair($i,$j)))))"
+                                            }
+                                        ],
+                                        "jgnShow": "pair($CA,pair($id,pair(pkID,pair('pubKey',pair(sn,pair($i,$j))))))"
+                                    },
+                                    {
+                                        "jgnFunct": "pair",
+                                        "jgnParams": [
+                                            {
+                                                "jgnConst": "ca_fields"
+                                            },
+                                            {
+                                                "jgnConst": "ca_sig"
+                                            }
+                                        ],
+                                        "jgnShow": "pair(ca_fields,ca_sig)"
+                                    },
+                                    {
+                                        "jgnConst": "~sth"
+                                    },
+                                    {
+                                        "jgnConst": "~session"
+                                    }
+                                ]
+                            },
+                            {
+                                "jgnFactId": "action",
+                                "jgnFactMult": "",
+                                "jgnFactName": "Time",
+                                "jgnFactShow": "Time( $now )",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "$now"
+                                    }
+                                ]
+                            },
+                            {
+                                "jgnFactId": "action",
+                                "jgnFactMult": "",
+                                "jgnFactName": "San_ParticipantFindsInclusionViolation",
+                                "jgnFactShow": "San_ParticipantFindsInclusionViolation( )",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": []
+                            }
+                        ],
+                        "jgnConcs": [
+                            {
+                                "jgnFactId": "#t:c0",
+                                "jgnFactMult": "",
+                                "jgnFactName": "InclusionFalsified",
+                                "jgnFactShow": "InclusionFalsified( $P, $L, <$CA, $id, pkID, 'pubKey', sn, $i, $j>, $proof_time, ~session, ca_fields)",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "$P"
+                                    },
+                                    {
+                                        "jgnConst": "$L"
+                                    },
+                                    {
+                                        "jgnFunct": "pair",
+                                        "jgnParams": [
+                                            {
+                                                "jgnConst": "$CA"
+                                            },
+                                            {
+                                                "jgnFunct": "pair",
+                                                "jgnParams": [
+                                                    {
+                                                        "jgnConst": "$id"
+                                                    },
+                                                    {
+                                                        "jgnFunct": "pair",
+                                                        "jgnParams": [
+                                                            {
+                                                                "jgnConst": "pkID"
+                                                            },
+                                                            {
+                                                                "jgnFunct": "pair",
+                                                                "jgnParams": [
+                                                                    {
+                                                                        "jgnConst": "'pubKey'"
+                                                                    },
+                                                                    {
+                                                                        "jgnFunct": "pair",
+                                                                        "jgnParams": [
+                                                                            {
+                                                                                "jgnConst": "sn"
+                                                                            },
+                                                                            {
+                                                                                "jgnFunct": "pair",
+                                                                                "jgnParams": [
+                                                                                    {
+                                                                                        "jgnConst": "$i"
+                                                                                    },
+                                                                                    {
+                                                                                        "jgnConst": "$j"
+                                                                                    }
+                                                                                ],
+                                                                                "jgnShow": "pair($i,$j)"
+                                                                            }
+                                                                        ],
+                                                                        "jgnShow": "pair(sn,pair($i,$j))"
+                                                                    }
+                                                                ],
+                                                                "jgnShow": "pair('pubKey',pair(sn,pair($i,$j)))"
+                                                            }
+                                                        ],
+                                                        "jgnShow": "pair(pkID,pair('pubKey',pair(sn,pair($i,$j))))"
+                                                    }
+                                                ],
+                                                "jgnShow": "pair($id,pair(pkID,pair('pubKey',pair(sn,pair($i,$j)))))"
+                                            }
+                                        ],
+                                        "jgnShow": "pair($CA,pair($id,pair(pkID,pair('pubKey',pair(sn,pair($i,$j))))))"
+                                    },
+                                    {
+                                        "jgnConst": "$proof_time"
+                                    },
+                                    {
+                                        "jgnConst": "~session"
+                                    },
+                                    {
+                                        "jgnConst": "ca_fields"
+                                    }
+                                ]
+                            }
+                        ],
+                        "jgnPrems": [
+                            {
+                                "jgnFactId": "#t:p0",
+                                "jgnFactMult": "!",
+                                "jgnFactName": "!TLS_L_to_P",
+                                "jgnFactShow": "!TLS_L_to_P( $L, $P, $snapshot, ~sth, ~session, $proof_time )",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "$L"
+                                    },
+                                    {
+                                        "jgnConst": "$P"
+                                    },
+                                    {
+                                        "jgnConst": "$snapshot"
+                                    },
+                                    {
+                                        "jgnConst": "~sth"
+                                    },
+                                    {
+                                        "jgnConst": "~session"
+                                    },
+                                    {
+                                        "jgnConst": "$proof_time"
+                                    }
+                                ]
+                            },
+                            {
+                                "jgnFactId": "#t:p1",
+                                "jgnFactMult": "!",
+                                "jgnFactName": "!Logger",
+                                "jgnFactShow": "!Logger( $L, pk(~skL) )",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "$L"
+                                    },
+                                    {
+                                        "jgnFunct": "pk",
+                                        "jgnParams": [
+                                            {
+                                                "jgnConst": "~skL"
+                                            }
+                                        ],
+                                        "jgnShow": "pk(~skL)"
+                                    }
+                                ]
+                            },
+                            {
+                                "jgnFactId": "#t:p2",
+                                "jgnFactMult": "",
+                                "jgnFactName": "In",
+                                "jgnFactShow": "In( <$CA, $id, pkID, 'pubKey', sn, $i, $j> )",
+                                "jgnFactTag": "InFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnFunct": "pair",
+                                        "jgnParams": [
+                                            {
+                                                "jgnConst": "$CA"
+                                            },
+                                            {
+                                                "jgnFunct": "pair",
+                                                "jgnParams": [
+                                                    {
+                                                        "jgnConst": "$id"
+                                                    },
+                                                    {
+                                                        "jgnFunct": "pair",
+                                                        "jgnParams": [
+                                                            {
+                                                                "jgnConst": "pkID"
+                                                            },
+                                                            {
+                                                                "jgnFunct": "pair",
+                                                                "jgnParams": [
+                                                                    {
+                                                                        "jgnConst": "'pubKey'"
+                                                                    },
+                                                                    {
+                                                                        "jgnFunct": "pair",
+                                                                        "jgnParams": [
+                                                                            {
+                                                                                "jgnConst": "sn"
+                                                                            },
+                                                                            {
+                                                                                "jgnFunct": "pair",
+                                                                                "jgnParams": [
+                                                                                    {
+                                                                                        "jgnConst": "$i"
+                                                                                    },
+                                                                                    {
+                                                                                        "jgnConst": "$j"
+                                                                                    }
+                                                                                ],
+                                                                                "jgnShow": "pair($i,$j)"
+                                                                            }
+                                                                        ],
+                                                                        "jgnShow": "pair(sn,pair($i,$j))"
+                                                                    }
+                                                                ],
+                                                                "jgnShow": "pair('pubKey',pair(sn,pair($i,$j)))"
+                                                            }
+                                                        ],
+                                                        "jgnShow": "pair(pkID,pair('pubKey',pair(sn,pair($i,$j))))"
+                                                    }
+                                                ],
+                                                "jgnShow": "pair($id,pair(pkID,pair('pubKey',pair(sn,pair($i,$j)))))"
+                                            }
+                                        ],
+                                        "jgnShow": "pair($CA,pair($id,pair(pkID,pair('pubKey',pair(sn,pair($i,$j))))))"
+                                    }
+                                ]
+                            },
+                            {
+                                "jgnFactId": "#t:p3",
+                                "jgnFactMult": "",
+                                "jgnFactName": "In",
+                                "jgnFactShow": "In( <ca_fields, ca_sig> )",
+                                "jgnFactTag": "InFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnFunct": "pair",
+                                        "jgnParams": [
+                                            {
+                                                "jgnConst": "ca_fields"
+                                            },
+                                            {
+                                                "jgnConst": "ca_sig"
+                                            }
+                                        ],
+                                        "jgnShow": "pair(ca_fields,ca_sig)"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "jgnType": "isProtocolRule"
+                },
+                {
+                    "jgnId": "#t0",
+                    "jgnLabel": "LoggerSnapshot_P",
+                    "jgnMetadata": {
+                        "jgnActs": [
+                            {
+                                "jgnFactId": "action",
+                                "jgnFactMult": "",
+                                "jgnFactName": "LoggerPresentsView",
+                                "jgnFactShow": "LoggerPresentsView( $L, $P, $log_id, $now.1, ~sth, ~session )",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "$L"
+                                    },
+                                    {
+                                        "jgnConst": "$P"
+                                    },
+                                    {
+                                        "jgnConst": "$log_id"
+                                    },
+                                    {
+                                        "jgnConst": "$now.1"
+                                    },
+                                    {
+                                        "jgnConst": "~sth"
+                                    },
+                                    {
+                                        "jgnConst": "~session"
+                                    }
+                                ]
+                            },
+                            {
+                                "jgnFactId": "action",
+                                "jgnFactMult": "",
+                                "jgnFactName": "LoggerHandsOutSTH",
+                                "jgnFactShow": "LoggerHandsOutSTH( $L, ~sth, ~session )",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "$L"
+                                    },
+                                    {
+                                        "jgnConst": "~sth"
+                                    },
+                                    {
+                                        "jgnConst": "~session"
+                                    }
+                                ]
+                            },
+                            {
+                                "jgnFactId": "action",
+                                "jgnFactMult": "",
+                                "jgnFactName": "Time",
+                                "jgnFactShow": "Time( $now.1 )",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "$now.1"
+                                    }
+                                ]
+                            },
+                            {
+                                "jgnFactId": "action",
+                                "jgnFactMult": "",
+                                "jgnFactName": "San_LoggerSnapshot_P",
+                                "jgnFactShow": "San_LoggerSnapshot_P( )",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": []
+                            }
+                        ],
+                        "jgnConcs": [
+                            {
+                                "jgnFactId": "#t0:c0",
+                                "jgnFactMult": "!",
+                                "jgnFactName": "!TLS_L_to_P",
+                                "jgnFactShow": "!TLS_L_to_P( $L, $P, $snapshot, ~sth, ~session, $proof_time )",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "$L"
+                                    },
+                                    {
+                                        "jgnConst": "$P"
+                                    },
+                                    {
+                                        "jgnConst": "$snapshot"
+                                    },
+                                    {
+                                        "jgnConst": "~sth"
+                                    },
+                                    {
+                                        "jgnConst": "~session"
+                                    },
+                                    {
+                                        "jgnConst": "$proof_time"
+                                    }
+                                ]
+                            }
+                        ],
+                        "jgnPrems": [
+                            {
+                                "jgnFactId": "#t0:p0",
+                                "jgnFactMult": "!",
+                                "jgnFactName": "!Logger_s",
+                                "jgnFactShow": "!Logger_s( $L, ~skL, pk(~skL) )",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "$L"
+                                    },
+                                    {
+                                        "jgnConst": "~skL"
+                                    },
+                                    {
+                                        "jgnFunct": "pk",
+                                        "jgnParams": [
+                                            {
+                                                "jgnConst": "~skL"
+                                            }
+                                        ],
+                                        "jgnShow": "pk(~skL)"
+                                    }
+                                ]
+                            },
+                            {
+                                "jgnFactId": "#t0:p1",
+                                "jgnFactMult": "",
+                                "jgnFactName": "Fr",
+                                "jgnFactShow": "Fr( ~sth )",
+                                "jgnFactTag": "FreshFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "~sth"
+                                    }
+                                ]
+                            },
+                            {
+                                "jgnFactId": "#t0:p2",
+                                "jgnFactMult": "",
+                                "jgnFactName": "TLS_P_to_L",
+                                "jgnFactShow": "TLS_P_to_L( $P, $L, ~session, $proof_time )",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "$P"
+                                    },
+                                    {
+                                        "jgnConst": "$L"
+                                    },
+                                    {
+                                        "jgnConst": "~session"
+                                    },
+                                    {
+                                        "jgnConst": "$proof_time"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "jgnType": "isProtocolRule"
+                },
+                {
+                    "jgnId": "#t1",
+                    "jgnLabel": "TransparencyCheck_Failed",
+                    "jgnMetadata": {
+                        "jgnActs": [
+                            {
+                                "jgnFactId": "action",
+                                "jgnFactMult": "",
+                                "jgnFactName": "CTTransparencyCheckSession",
+                                "jgnFactShow": "CTTransparencyCheckSession( $L, <$CA, $id, pkID, 'pubKey', sn, $i, $j>, ~session)",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "$L"
+                                    },
+                                    {
+                                        "jgnFunct": "pair",
+                                        "jgnParams": [
+                                            {
+                                                "jgnConst": "$CA"
+                                            },
+                                            {
+                                                "jgnFunct": "pair",
+                                                "jgnParams": [
+                                                    {
+                                                        "jgnConst": "$id"
+                                                    },
+                                                    {
+                                                        "jgnFunct": "pair",
+                                                        "jgnParams": [
+                                                            {
+                                                                "jgnConst": "pkID"
+                                                            },
+                                                            {
+                                                                "jgnFunct": "pair",
+                                                                "jgnParams": [
+                                                                    {
+                                                                        "jgnConst": "'pubKey'"
+                                                                    },
+                                                                    {
+                                                                        "jgnFunct": "pair",
+                                                                        "jgnParams": [
+                                                                            {
+                                                                                "jgnConst": "sn"
+                                                                            },
+                                                                            {
+                                                                                "jgnFunct": "pair",
+                                                                                "jgnParams": [
+                                                                                    {
+                                                                                        "jgnConst": "$i"
+                                                                                    },
+                                                                                    {
+                                                                                        "jgnConst": "$j"
+                                                                                    }
+                                                                                ],
+                                                                                "jgnShow": "pair($i,$j)"
+                                                                            }
+                                                                        ],
+                                                                        "jgnShow": "pair(sn,pair($i,$j))"
+                                                                    }
+                                                                ],
+                                                                "jgnShow": "pair('pubKey',pair(sn,pair($i,$j)))"
+                                                            }
+                                                        ],
+                                                        "jgnShow": "pair(pkID,pair('pubKey',pair(sn,pair($i,$j))))"
+                                                    }
+                                                ],
+                                                "jgnShow": "pair($id,pair(pkID,pair('pubKey',pair(sn,pair($i,$j)))))"
+                                            }
+                                        ],
+                                        "jgnShow": "pair($CA,pair($id,pair(pkID,pair('pubKey',pair(sn,pair($i,$j))))))"
+                                    },
+                                    {
+                                        "jgnConst": "~session"
+                                    }
+                                ]
+                            },
+                            {
+                                "jgnFactId": "action",
+                                "jgnFactMult": "",
+                                "jgnFactName": "CTTransparencyCheckTime",
+                                "jgnFactShow": "CTTransparencyCheckTime( $L, <$CA, $id, pkID, 'pubKey', sn, $i, $j>, ~session, $proof_time)",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "$L"
+                                    },
+                                    {
+                                        "jgnFunct": "pair",
+                                        "jgnParams": [
+                                            {
+                                                "jgnConst": "$CA"
+                                            },
+                                            {
+                                                "jgnFunct": "pair",
+                                                "jgnParams": [
+                                                    {
+                                                        "jgnConst": "$id"
+                                                    },
+                                                    {
+                                                        "jgnFunct": "pair",
+                                                        "jgnParams": [
+                                                            {
+                                                                "jgnConst": "pkID"
+                                                            },
+                                                            {
+                                                                "jgnFunct": "pair",
+                                                                "jgnParams": [
+                                                                    {
+                                                                        "jgnConst": "'pubKey'"
+                                                                    },
+                                                                    {
+                                                                        "jgnFunct": "pair",
+                                                                        "jgnParams": [
+                                                                            {
+                                                                                "jgnConst": "sn"
+                                                                            },
+                                                                            {
+                                                                                "jgnFunct": "pair",
+                                                                                "jgnParams": [
+                                                                                    {
+                                                                                        "jgnConst": "$i"
+                                                                                    },
+                                                                                    {
+                                                                                        "jgnConst": "$j"
+                                                                                    }
+                                                                                ],
+                                                                                "jgnShow": "pair($i,$j)"
+                                                                            }
+                                                                        ],
+                                                                        "jgnShow": "pair(sn,pair($i,$j))"
+                                                                    }
+                                                                ],
+                                                                "jgnShow": "pair('pubKey',pair(sn,pair($i,$j)))"
+                                                            }
+                                                        ],
+                                                        "jgnShow": "pair(pkID,pair('pubKey',pair(sn,pair($i,$j))))"
+                                                    }
+                                                ],
+                                                "jgnShow": "pair($id,pair(pkID,pair('pubKey',pair(sn,pair($i,$j)))))"
+                                            }
+                                        ],
+                                        "jgnShow": "pair($CA,pair($id,pair(pkID,pair('pubKey',pair(sn,pair($i,$j))))))"
+                                    },
+                                    {
+                                        "jgnConst": "~session"
+                                    },
+                                    {
+                                        "jgnConst": "$proof_time"
+                                    }
+                                ]
+                            },
+                            {
+                                "jgnFactId": "action",
+                                "jgnFactMult": "",
+                                "jgnFactName": "CTTransparencyCheck",
+                                "jgnFactShow": "CTTransparencyCheck( $L, <$CA, $id, pkID, 'pubKey', sn, $i, $j> )",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "$L"
+                                    },
+                                    {
+                                        "jgnFunct": "pair",
+                                        "jgnParams": [
+                                            {
+                                                "jgnConst": "$CA"
+                                            },
+                                            {
+                                                "jgnFunct": "pair",
+                                                "jgnParams": [
+                                                    {
+                                                        "jgnConst": "$id"
+                                                    },
+                                                    {
+                                                        "jgnFunct": "pair",
+                                                        "jgnParams": [
+                                                            {
+                                                                "jgnConst": "pkID"
+                                                            },
+                                                            {
+                                                                "jgnFunct": "pair",
+                                                                "jgnParams": [
+                                                                    {
+                                                                        "jgnConst": "'pubKey'"
+                                                                    },
+                                                                    {
+                                                                        "jgnFunct": "pair",
+                                                                        "jgnParams": [
+                                                                            {
+                                                                                "jgnConst": "sn"
+                                                                            },
+                                                                            {
+                                                                                "jgnFunct": "pair",
+                                                                                "jgnParams": [
+                                                                                    {
+                                                                                        "jgnConst": "$i"
+                                                                                    },
+                                                                                    {
+                                                                                        "jgnConst": "$j"
+                                                                                    }
+                                                                                ],
+                                                                                "jgnShow": "pair($i,$j)"
+                                                                            }
+                                                                        ],
+                                                                        "jgnShow": "pair(sn,pair($i,$j))"
+                                                                    }
+                                                                ],
+                                                                "jgnShow": "pair('pubKey',pair(sn,pair($i,$j)))"
+                                                            }
+                                                        ],
+                                                        "jgnShow": "pair(pkID,pair('pubKey',pair(sn,pair($i,$j))))"
+                                                    }
+                                                ],
+                                                "jgnShow": "pair($id,pair(pkID,pair('pubKey',pair(sn,pair($i,$j)))))"
+                                            }
+                                        ],
+                                        "jgnShow": "pair($CA,pair($id,pair(pkID,pair('pubKey',pair(sn,pair($i,$j))))))"
+                                    }
+                                ]
+                            },
+                            {
+                                "jgnFactId": "action",
+                                "jgnFactMult": "",
+                                "jgnFactName": "San_TransparencyCheck_Failed",
+                                "jgnFactShow": "San_TransparencyCheck_Failed( )",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": []
+                            }
+                        ],
+                        "jgnConcs": [],
+                        "jgnPrems": [
+                            {
+                                "jgnFactId": "#t1:p0",
+                                "jgnFactMult": "",
+                                "jgnFactName": "InclusionFalsified",
+                                "jgnFactShow": "InclusionFalsified( $P, $L, <$CA, $id, pkID, 'pubKey', sn, $i, $j>, $proof_time, ~session, ca_fields.1)",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "$P"
+                                    },
+                                    {
+                                        "jgnConst": "$L"
+                                    },
+                                    {
+                                        "jgnFunct": "pair",
+                                        "jgnParams": [
+                                            {
+                                                "jgnConst": "$CA"
+                                            },
+                                            {
+                                                "jgnFunct": "pair",
+                                                "jgnParams": [
+                                                    {
+                                                        "jgnConst": "$id"
+                                                    },
+                                                    {
+                                                        "jgnFunct": "pair",
+                                                        "jgnParams": [
+                                                            {
+                                                                "jgnConst": "pkID"
+                                                            },
+                                                            {
+                                                                "jgnFunct": "pair",
+                                                                "jgnParams": [
+                                                                    {
+                                                                        "jgnConst": "'pubKey'"
+                                                                    },
+                                                                    {
+                                                                        "jgnFunct": "pair",
+                                                                        "jgnParams": [
+                                                                            {
+                                                                                "jgnConst": "sn"
+                                                                            },
+                                                                            {
+                                                                                "jgnFunct": "pair",
+                                                                                "jgnParams": [
+                                                                                    {
+                                                                                        "jgnConst": "$i"
+                                                                                    },
+                                                                                    {
+                                                                                        "jgnConst": "$j"
+                                                                                    }
+                                                                                ],
+                                                                                "jgnShow": "pair($i,$j)"
+                                                                            }
+                                                                        ],
+                                                                        "jgnShow": "pair(sn,pair($i,$j))"
+                                                                    }
+                                                                ],
+                                                                "jgnShow": "pair('pubKey',pair(sn,pair($i,$j)))"
+                                                            }
+                                                        ],
+                                                        "jgnShow": "pair(pkID,pair('pubKey',pair(sn,pair($i,$j))))"
+                                                    }
+                                                ],
+                                                "jgnShow": "pair($id,pair(pkID,pair('pubKey',pair(sn,pair($i,$j)))))"
+                                            }
+                                        ],
+                                        "jgnShow": "pair($CA,pair($id,pair(pkID,pair('pubKey',pair(sn,pair($i,$j))))))"
+                                    },
+                                    {
+                                        "jgnConst": "$proof_time"
+                                    },
+                                    {
+                                        "jgnConst": "~session"
+                                    },
+                                    {
+                                        "jgnConst": "ca_fields.1"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "jgnType": "isProtocolRule"
+                },
+                {
+                    "jgnId": "#vf",
+                    "jgnLabel": "Send",
+                    "jgnMetadata": {
+                        "jgnActs": [
+                            {
+                                "jgnFactId": "action",
+                                "jgnFactMult": "",
+                                "jgnFactName": "K",
+                                "jgnFactShow": "K( <$CA, $id, pkID, 'pubKey', sn, $i, $j> )",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnFunct": "pair",
+                                        "jgnParams": [
+                                            {
+                                                "jgnConst": "$CA"
+                                            },
+                                            {
+                                                "jgnFunct": "pair",
+                                                "jgnParams": [
+                                                    {
+                                                        "jgnConst": "$id"
+                                                    },
+                                                    {
+                                                        "jgnFunct": "pair",
+                                                        "jgnParams": [
+                                                            {
+                                                                "jgnConst": "pkID"
+                                                            },
+                                                            {
+                                                                "jgnFunct": "pair",
+                                                                "jgnParams": [
+                                                                    {
+                                                                        "jgnConst": "'pubKey'"
+                                                                    },
+                                                                    {
+                                                                        "jgnFunct": "pair",
+                                                                        "jgnParams": [
+                                                                            {
+                                                                                "jgnConst": "sn"
+                                                                            },
+                                                                            {
+                                                                                "jgnFunct": "pair",
+                                                                                "jgnParams": [
+                                                                                    {
+                                                                                        "jgnConst": "$i"
+                                                                                    },
+                                                                                    {
+                                                                                        "jgnConst": "$j"
+                                                                                    }
+                                                                                ],
+                                                                                "jgnShow": "pair($i,$j)"
+                                                                            }
+                                                                        ],
+                                                                        "jgnShow": "pair(sn,pair($i,$j))"
+                                                                    }
+                                                                ],
+                                                                "jgnShow": "pair('pubKey',pair(sn,pair($i,$j)))"
+                                                            }
+                                                        ],
+                                                        "jgnShow": "pair(pkID,pair('pubKey',pair(sn,pair($i,$j))))"
+                                                    }
+                                                ],
+                                                "jgnShow": "pair($id,pair(pkID,pair('pubKey',pair(sn,pair($i,$j)))))"
+                                            }
+                                        ],
+                                        "jgnShow": "pair($CA,pair($id,pair(pkID,pair('pubKey',pair(sn,pair($i,$j))))))"
+                                    }
+                                ]
+                            }
+                        ],
+                        "jgnConcs": [
+                            {
+                                "jgnFactId": "#vf:c0",
+                                "jgnFactMult": "",
+                                "jgnFactName": "In",
+                                "jgnFactShow": "In( <$CA, $id, pkID, 'pubKey', sn, $i, $j> )",
+                                "jgnFactTag": "InFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnFunct": "pair",
+                                        "jgnParams": [
+                                            {
+                                                "jgnConst": "$CA"
+                                            },
+                                            {
+                                                "jgnFunct": "pair",
+                                                "jgnParams": [
+                                                    {
+                                                        "jgnConst": "$id"
+                                                    },
+                                                    {
+                                                        "jgnFunct": "pair",
+                                                        "jgnParams": [
+                                                            {
+                                                                "jgnConst": "pkID"
+                                                            },
+                                                            {
+                                                                "jgnFunct": "pair",
+                                                                "jgnParams": [
+                                                                    {
+                                                                        "jgnConst": "'pubKey'"
+                                                                    },
+                                                                    {
+                                                                        "jgnFunct": "pair",
+                                                                        "jgnParams": [
+                                                                            {
+                                                                                "jgnConst": "sn"
+                                                                            },
+                                                                            {
+                                                                                "jgnFunct": "pair",
+                                                                                "jgnParams": [
+                                                                                    {
+                                                                                        "jgnConst": "$i"
+                                                                                    },
+                                                                                    {
+                                                                                        "jgnConst": "$j"
+                                                                                    }
+                                                                                ],
+                                                                                "jgnShow": "pair($i,$j)"
+                                                                            }
+                                                                        ],
+                                                                        "jgnShow": "pair(sn,pair($i,$j))"
+                                                                    }
+                                                                ],
+                                                                "jgnShow": "pair('pubKey',pair(sn,pair($i,$j)))"
+                                                            }
+                                                        ],
+                                                        "jgnShow": "pair(pkID,pair('pubKey',pair(sn,pair($i,$j))))"
+                                                    }
+                                                ],
+                                                "jgnShow": "pair($id,pair(pkID,pair('pubKey',pair(sn,pair($i,$j)))))"
+                                            }
+                                        ],
+                                        "jgnShow": "pair($CA,pair($id,pair(pkID,pair('pubKey',pair(sn,pair($i,$j))))))"
+                                    }
+                                ]
+                            }
+                        ],
+                        "jgnPrems": [
+                            {
+                                "jgnFactId": "#vf:p0",
+                                "jgnFactMult": "!",
+                                "jgnFactName": "!KU",
+                                "jgnFactShow": "!KU( <$CA, $id, pkID, 'pubKey', sn, $i, $j> )",
+                                "jgnFactTag": "KUFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnFunct": "pair",
+                                        "jgnParams": [
+                                            {
+                                                "jgnConst": "$CA"
+                                            },
+                                            {
+                                                "jgnFunct": "pair",
+                                                "jgnParams": [
+                                                    {
+                                                        "jgnConst": "$id"
+                                                    },
+                                                    {
+                                                        "jgnFunct": "pair",
+                                                        "jgnParams": [
+                                                            {
+                                                                "jgnConst": "pkID"
+                                                            },
+                                                            {
+                                                                "jgnFunct": "pair",
+                                                                "jgnParams": [
+                                                                    {
+                                                                        "jgnConst": "'pubKey'"
+                                                                    },
+                                                                    {
+                                                                        "jgnFunct": "pair",
+                                                                        "jgnParams": [
+                                                                            {
+                                                                                "jgnConst": "sn"
+                                                                            },
+                                                                            {
+                                                                                "jgnFunct": "pair",
+                                                                                "jgnParams": [
+                                                                                    {
+                                                                                        "jgnConst": "$i"
+                                                                                    },
+                                                                                    {
+                                                                                        "jgnConst": "$j"
+                                                                                    }
+                                                                                ],
+                                                                                "jgnShow": "pair($i,$j)"
+                                                                            }
+                                                                        ],
+                                                                        "jgnShow": "pair(sn,pair($i,$j))"
+                                                                    }
+                                                                ],
+                                                                "jgnShow": "pair('pubKey',pair(sn,pair($i,$j)))"
+                                                            }
+                                                        ],
+                                                        "jgnShow": "pair(pkID,pair('pubKey',pair(sn,pair($i,$j))))"
+                                                    }
+                                                ],
+                                                "jgnShow": "pair($id,pair(pkID,pair('pubKey',pair(sn,pair($i,$j)))))"
+                                            }
+                                        ],
+                                        "jgnShow": "pair($CA,pair($id,pair(pkID,pair('pubKey',pair(sn,pair($i,$j))))))"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "jgnType": "isIntruderRule"
+                },
+                {
+                    "jgnId": "#vr",
+                    "jgnLabel": "Logger_Init",
+                    "jgnMetadata": {
+                        "jgnActs": [
+                            {
+                                "jgnFactId": "action",
+                                "jgnFactMult": "",
+                                "jgnFactName": "Logger_Registered",
+                                "jgnFactShow": "Logger_Registered( $L )",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "$L"
+                                    }
+                                ]
+                            },
+                            {
+                                "jgnFactId": "action",
+                                "jgnFactMult": "",
+                                "jgnFactName": "Time",
+                                "jgnFactShow": "Time( $now.2 )",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "$now.2"
+                                    }
+                                ]
+                            },
+                            {
+                                "jgnFactId": "action",
+                                "jgnFactMult": "",
+                                "jgnFactName": "San_Logger_Init",
+                                "jgnFactShow": "San_Logger_Init( )",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": []
+                            }
+                        ],
+                        "jgnConcs": [
+                            {
+                                "jgnFactId": "#vr:c0",
+                                "jgnFactMult": "!",
+                                "jgnFactName": "!Logger_s",
+                                "jgnFactShow": "!Logger_s( $L, ~skL, pk(~skL) )",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "$L"
+                                    },
+                                    {
+                                        "jgnConst": "~skL"
+                                    },
+                                    {
+                                        "jgnFunct": "pk",
+                                        "jgnParams": [
+                                            {
+                                                "jgnConst": "~skL"
+                                            }
+                                        ],
+                                        "jgnShow": "pk(~skL)"
+                                    }
+                                ]
+                            },
+                            {
+                                "jgnFactId": "#vr:c1",
+                                "jgnFactMult": "!",
+                                "jgnFactName": "!Logger",
+                                "jgnFactShow": "!Logger( $L, pk(~skL) )",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "$L"
+                                    },
+                                    {
+                                        "jgnFunct": "pk",
+                                        "jgnParams": [
+                                            {
+                                                "jgnConst": "~skL"
+                                            }
+                                        ],
+                                        "jgnShow": "pk(~skL)"
+                                    }
+                                ]
+                            }
+                        ],
+                        "jgnPrems": [
+                            {
+                                "jgnFactId": "#vr:p0",
+                                "jgnFactMult": "",
+                                "jgnFactName": "Fr",
+                                "jgnFactShow": "Fr( ~skL )",
+                                "jgnFactTag": "FreshFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "~skL"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "jgnType": "isProtocolRule"
+                },
+                {
+                    "jgnId": "#t0.1",
+                    "jgnLabel": "Start_Log",
+                    "jgnMetadata": {
+                        "jgnActs": [
+                            {
+                                "jgnFactId": "action",
+                                "jgnFactMult": "",
+                                "jgnFactName": "StartedLog",
+                                "jgnFactShow": "StartedLog( $L, $log_id )",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "$L"
+                                    },
+                                    {
+                                        "jgnConst": "$log_id"
+                                    }
+                                ]
+                            },
+                            {
+                                "jgnFactId": "action",
+                                "jgnFactMult": "",
+                                "jgnFactName": "HonestStartedLog",
+                                "jgnFactShow": "HonestStartedLog( $L, $log_id )",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "$L"
+                                    },
+                                    {
+                                        "jgnConst": "$log_id"
+                                    }
+                                ]
+                            },
+                            {
+                                "jgnFactId": "action",
+                                "jgnFactMult": "",
+                                "jgnFactName": "Time",
+                                "jgnFactShow": "Time( $now.3 )",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "$now.3"
+                                    }
+                                ]
+                            },
+                            {
+                                "jgnFactId": "action",
+                                "jgnFactMult": "",
+                                "jgnFactName": "San_Start_Log",
+                                "jgnFactShow": "San_Start_Log( )",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": []
+                            }
+                        ],
+                        "jgnConcs": [
+                            {
+                                "jgnFactId": "#t0.1:c0",
+                                "jgnFactMult": "!",
+                                "jgnFactName": "!Log",
+                                "jgnFactShow": "!Log( $L, $log_id )",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "$L"
+                                    },
+                                    {
+                                        "jgnConst": "$log_id"
+                                    }
+                                ]
+                            }
+                        ],
+                        "jgnPrems": [
+                            {
+                                "jgnFactId": "#t0.1:p0",
+                                "jgnFactMult": "!",
+                                "jgnFactName": "!Logger_s",
+                                "jgnFactShow": "!Logger_s( $L, ~skL, pk(~skL) )",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "$L"
+                                    },
+                                    {
+                                        "jgnConst": "~skL"
+                                    },
+                                    {
+                                        "jgnFunct": "pk",
+                                        "jgnParams": [
+                                            {
+                                                "jgnConst": "~skL"
+                                            }
+                                        ],
+                                        "jgnShow": "pk(~skL)"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "jgnType": "isProtocolRule"
+                },
+                {
+                    "jgnId": "#vf.1",
+                    "jgnLabel": "Send",
+                    "jgnMetadata": {
+                        "jgnActs": [
+                            {
+                                "jgnFactId": "action",
+                                "jgnFactMult": "",
+                                "jgnFactName": "K",
+                                "jgnFactShow": "K( <ca_fields, ca_sig> )",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnFunct": "pair",
+                                        "jgnParams": [
+                                            {
+                                                "jgnConst": "ca_fields"
+                                            },
+                                            {
+                                                "jgnConst": "ca_sig"
+                                            }
+                                        ],
+                                        "jgnShow": "pair(ca_fields,ca_sig)"
+                                    }
+                                ]
+                            }
+                        ],
+                        "jgnConcs": [
+                            {
+                                "jgnFactId": "#vf.1:c0",
+                                "jgnFactMult": "",
+                                "jgnFactName": "In",
+                                "jgnFactShow": "In( <ca_fields, ca_sig> )",
+                                "jgnFactTag": "InFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnFunct": "pair",
+                                        "jgnParams": [
+                                            {
+                                                "jgnConst": "ca_fields"
+                                            },
+                                            {
+                                                "jgnConst": "ca_sig"
+                                            }
+                                        ],
+                                        "jgnShow": "pair(ca_fields,ca_sig)"
+                                    }
+                                ]
+                            }
+                        ],
+                        "jgnPrems": [
+                            {
+                                "jgnFactId": "#vf.1:p0",
+                                "jgnFactMult": "!",
+                                "jgnFactName": "!KU",
+                                "jgnFactShow": "!KU( <ca_fields, ca_sig> )",
+                                "jgnFactTag": "KUFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnFunct": "pair",
+                                        "jgnParams": [
+                                            {
+                                                "jgnConst": "ca_fields"
+                                            },
+                                            {
+                                                "jgnConst": "ca_sig"
+                                            }
+                                        ],
+                                        "jgnShow": "pair(ca_fields,ca_sig)"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "jgnType": "isIntruderRule"
+                },
+                {
+                    "jgnId": "#vr.1",
+                    "jgnLabel": "ProofFetching_P",
+                    "jgnMetadata": {
+                        "jgnActs": [
+                            {
+                                "jgnFactId": "action",
+                                "jgnFactMult": "",
+                                "jgnFactName": "FetchLogSnapshot",
+                                "jgnFactShow": "FetchLogSnapshot( $P, $L, ~session )",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "$P"
+                                    },
+                                    {
+                                        "jgnConst": "$L"
+                                    },
+                                    {
+                                        "jgnConst": "~session"
+                                    }
+                                ]
+                            },
+                            {
+                                "jgnFactId": "action",
+                                "jgnFactMult": "",
+                                "jgnFactName": "FetchLogSnapshotTime",
+                                "jgnFactShow": "FetchLogSnapshotTime( $C, $L, ~session, $proof_time )",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "$C"
+                                    },
+                                    {
+                                        "jgnConst": "$L"
+                                    },
+                                    {
+                                        "jgnConst": "~session"
+                                    },
+                                    {
+                                        "jgnConst": "$proof_time"
+                                    }
+                                ]
+                            },
+                            {
+                                "jgnFactId": "action",
+                                "jgnFactMult": "",
+                                "jgnFactName": "Time",
+                                "jgnFactShow": "Time( $proof_time )",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "$proof_time"
+                                    }
+                                ]
+                            },
+                            {
+                                "jgnFactId": "action",
+                                "jgnFactMult": "",
+                                "jgnFactName": "San_ProofFetching_P",
+                                "jgnFactShow": "San_ProofFetching_P( )",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": []
+                            }
+                        ],
+                        "jgnConcs": [
+                            {
+                                "jgnFactId": "#vr.1:c0",
+                                "jgnFactMult": "",
+                                "jgnFactName": "TLS_P_to_L",
+                                "jgnFactShow": "TLS_P_to_L( $P, $L, ~session, $proof_time )",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "$P"
+                                    },
+                                    {
+                                        "jgnConst": "$L"
+                                    },
+                                    {
+                                        "jgnConst": "~session"
+                                    },
+                                    {
+                                        "jgnConst": "$proof_time"
+                                    }
+                                ]
+                            }
+                        ],
+                        "jgnPrems": [
+                            {
+                                "jgnFactId": "#vr.1:p0",
+                                "jgnFactMult": "",
+                                "jgnFactName": "Fr",
+                                "jgnFactShow": "Fr( ~session )",
+                                "jgnFactTag": "FreshFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "~session"
+                                    }
+                                ]
+                            },
+                            {
+                                "jgnFactId": "#vr.1:p1",
+                                "jgnFactMult": "",
+                                "jgnFactName": "In",
+                                "jgnFactShow": "In( $P )",
+                                "jgnFactTag": "InFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "$P"
+                                    }
+                                ]
+                            },
+                            {
+                                "jgnFactId": "#vr.1:p2",
+                                "jgnFactMult": "!",
+                                "jgnFactName": "!Logger",
+                                "jgnFactShow": "!Logger( $L, pk(~skL) )",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "$L"
+                                    },
+                                    {
+                                        "jgnFunct": "pk",
+                                        "jgnParams": [
+                                            {
+                                                "jgnConst": "~skL"
+                                            }
+                                        ],
+                                        "jgnShow": "pk(~skL)"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "jgnType": "isProtocolRule"
+                },
+                {
+                    "jgnId": "#vr.2",
+                    "jgnLabel": "ParticipantFindsInclusionViolation",
+                    "jgnMetadata": {
+                        "jgnActs": [
+                            {
+                                "jgnFactId": "action",
+                                "jgnFactMult": "",
+                                "jgnFactName": "Asserts",
+                                "jgnFactShow": "Asserts( $P, 'This loggers log currently does not include these fields.', $L, <<$CA, $id, pkID, 'pubKey', sn, $i, $j>, ~session>)",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "$P"
+                                    },
+                                    {
+                                        "jgnConst": "'This loggers log currently does not include these fields.'"
+                                    },
+                                    {
+                                        "jgnConst": "$L"
+                                    },
+                                    {
+                                        "jgnFunct": "pair",
+                                        "jgnParams": [
+                                            {
+                                                "jgnFunct": "pair",
+                                                "jgnParams": [
+                                                    {
+                                                        "jgnConst": "$CA"
+                                                    },
+                                                    {
+                                                        "jgnFunct": "pair",
+                                                        "jgnParams": [
+                                                            {
+                                                                "jgnConst": "$id"
+                                                            },
+                                                            {
+                                                                "jgnFunct": "pair",
+                                                                "jgnParams": [
+                                                                    {
+                                                                        "jgnConst": "pkID"
+                                                                    },
+                                                                    {
+                                                                        "jgnFunct": "pair",
+                                                                        "jgnParams": [
+                                                                            {
+                                                                                "jgnConst": "'pubKey'"
+                                                                            },
+                                                                            {
+                                                                                "jgnFunct": "pair",
+                                                                                "jgnParams": [
+                                                                                    {
+                                                                                        "jgnConst": "sn"
+                                                                                    },
+                                                                                    {
+                                                                                        "jgnFunct": "pair",
+                                                                                        "jgnParams": [
+                                                                                            {
+                                                                                                "jgnConst": "$i"
+                                                                                            },
+                                                                                            {
+                                                                                                "jgnConst": "$j"
+                                                                                            }
+                                                                                        ],
+                                                                                        "jgnShow": "pair($i,$j)"
+                                                                                    }
+                                                                                ],
+                                                                                "jgnShow": "pair(sn,pair($i,$j))"
+                                                                            }
+                                                                        ],
+                                                                        "jgnShow": "pair('pubKey',pair(sn,pair($i,$j)))"
+                                                                    }
+                                                                ],
+                                                                "jgnShow": "pair(pkID,pair('pubKey',pair(sn,pair($i,$j))))"
+                                                            }
+                                                        ],
+                                                        "jgnShow": "pair($id,pair(pkID,pair('pubKey',pair(sn,pair($i,$j)))))"
+                                                    }
+                                                ],
+                                                "jgnShow": "pair($CA,pair($id,pair(pkID,pair('pubKey',pair(sn,pair($i,$j))))))"
+                                            },
+                                            {
+                                                "jgnConst": "~session"
+                                            }
+                                        ],
+                                        "jgnShow": "pair(pair($CA,pair($id,pair(pkID,pair('pubKey',pair(sn,pair($i,$j)))))),~session)"
+                                    }
+                                ]
+                            },
+                            {
+                                "jgnFactId": "action",
+                                "jgnFactMult": "",
+                                "jgnFactName": "InclusionProofFails",
+                                "jgnFactShow": "InclusionProofFails( $P, $L, <$CA, $id, pkID, 'pubKey', sn, $i, $j>, <ca_fields.1, ca_sig.1>, ~sth, ~session)",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "$P"
+                                    },
+                                    {
+                                        "jgnConst": "$L"
+                                    },
+                                    {
+                                        "jgnFunct": "pair",
+                                        "jgnParams": [
+                                            {
+                                                "jgnConst": "$CA"
+                                            },
+                                            {
+                                                "jgnFunct": "pair",
+                                                "jgnParams": [
+                                                    {
+                                                        "jgnConst": "$id"
+                                                    },
+                                                    {
+                                                        "jgnFunct": "pair",
+                                                        "jgnParams": [
+                                                            {
+                                                                "jgnConst": "pkID"
+                                                            },
+                                                            {
+                                                                "jgnFunct": "pair",
+                                                                "jgnParams": [
+                                                                    {
+                                                                        "jgnConst": "'pubKey'"
+                                                                    },
+                                                                    {
+                                                                        "jgnFunct": "pair",
+                                                                        "jgnParams": [
+                                                                            {
+                                                                                "jgnConst": "sn"
+                                                                            },
+                                                                            {
+                                                                                "jgnFunct": "pair",
+                                                                                "jgnParams": [
+                                                                                    {
+                                                                                        "jgnConst": "$i"
+                                                                                    },
+                                                                                    {
+                                                                                        "jgnConst": "$j"
+                                                                                    }
+                                                                                ],
+                                                                                "jgnShow": "pair($i,$j)"
+                                                                            }
+                                                                        ],
+                                                                        "jgnShow": "pair(sn,pair($i,$j))"
+                                                                    }
+                                                                ],
+                                                                "jgnShow": "pair('pubKey',pair(sn,pair($i,$j)))"
+                                                            }
+                                                        ],
+                                                        "jgnShow": "pair(pkID,pair('pubKey',pair(sn,pair($i,$j))))"
+                                                    }
+                                                ],
+                                                "jgnShow": "pair($id,pair(pkID,pair('pubKey',pair(sn,pair($i,$j)))))"
+                                            }
+                                        ],
+                                        "jgnShow": "pair($CA,pair($id,pair(pkID,pair('pubKey',pair(sn,pair($i,$j))))))"
+                                    },
+                                    {
+                                        "jgnFunct": "pair",
+                                        "jgnParams": [
+                                            {
+                                                "jgnConst": "ca_fields.1"
+                                            },
+                                            {
+                                                "jgnConst": "ca_sig.1"
+                                            }
+                                        ],
+                                        "jgnShow": "pair(ca_fields.1,ca_sig.1)"
+                                    },
+                                    {
+                                        "jgnConst": "~sth"
+                                    },
+                                    {
+                                        "jgnConst": "~session"
+                                    }
+                                ]
+                            },
+                            {
+                                "jgnFactId": "action",
+                                "jgnFactMult": "",
+                                "jgnFactName": "Time",
+                                "jgnFactShow": "Time( $now.4 )",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "$now.4"
+                                    }
+                                ]
+                            },
+                            {
+                                "jgnFactId": "action",
+                                "jgnFactMult": "",
+                                "jgnFactName": "San_ParticipantFindsInclusionViolation",
+                                "jgnFactShow": "San_ParticipantFindsInclusionViolation( )",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": []
+                            }
+                        ],
+                        "jgnConcs": [
+                            {
+                                "jgnFactId": "#vr.2:c0",
+                                "jgnFactMult": "",
+                                "jgnFactName": "InclusionFalsified",
+                                "jgnFactShow": "InclusionFalsified( $P, $L, <$CA, $id, pkID, 'pubKey', sn, $i, $j>, $proof_time, ~session, ca_fields.1)",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "$P"
+                                    },
+                                    {
+                                        "jgnConst": "$L"
+                                    },
+                                    {
+                                        "jgnFunct": "pair",
+                                        "jgnParams": [
+                                            {
+                                                "jgnConst": "$CA"
+                                            },
+                                            {
+                                                "jgnFunct": "pair",
+                                                "jgnParams": [
+                                                    {
+                                                        "jgnConst": "$id"
+                                                    },
+                                                    {
+                                                        "jgnFunct": "pair",
+                                                        "jgnParams": [
+                                                            {
+                                                                "jgnConst": "pkID"
+                                                            },
+                                                            {
+                                                                "jgnFunct": "pair",
+                                                                "jgnParams": [
+                                                                    {
+                                                                        "jgnConst": "'pubKey'"
+                                                                    },
+                                                                    {
+                                                                        "jgnFunct": "pair",
+                                                                        "jgnParams": [
+                                                                            {
+                                                                                "jgnConst": "sn"
+                                                                            },
+                                                                            {
+                                                                                "jgnFunct": "pair",
+                                                                                "jgnParams": [
+                                                                                    {
+                                                                                        "jgnConst": "$i"
+                                                                                    },
+                                                                                    {
+                                                                                        "jgnConst": "$j"
+                                                                                    }
+                                                                                ],
+                                                                                "jgnShow": "pair($i,$j)"
+                                                                            }
+                                                                        ],
+                                                                        "jgnShow": "pair(sn,pair($i,$j))"
+                                                                    }
+                                                                ],
+                                                                "jgnShow": "pair('pubKey',pair(sn,pair($i,$j)))"
+                                                            }
+                                                        ],
+                                                        "jgnShow": "pair(pkID,pair('pubKey',pair(sn,pair($i,$j))))"
+                                                    }
+                                                ],
+                                                "jgnShow": "pair($id,pair(pkID,pair('pubKey',pair(sn,pair($i,$j)))))"
+                                            }
+                                        ],
+                                        "jgnShow": "pair($CA,pair($id,pair(pkID,pair('pubKey',pair(sn,pair($i,$j))))))"
+                                    },
+                                    {
+                                        "jgnConst": "$proof_time"
+                                    },
+                                    {
+                                        "jgnConst": "~session"
+                                    },
+                                    {
+                                        "jgnConst": "ca_fields.1"
+                                    }
+                                ]
+                            }
+                        ],
+                        "jgnPrems": [
+                            {
+                                "jgnFactId": "#vr.2:p0",
+                                "jgnFactMult": "!",
+                                "jgnFactName": "!TLS_L_to_P",
+                                "jgnFactShow": "!TLS_L_to_P( $L, $P, $snapshot, ~sth, ~session, $proof_time )",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "$L"
+                                    },
+                                    {
+                                        "jgnConst": "$P"
+                                    },
+                                    {
+                                        "jgnConst": "$snapshot"
+                                    },
+                                    {
+                                        "jgnConst": "~sth"
+                                    },
+                                    {
+                                        "jgnConst": "~session"
+                                    },
+                                    {
+                                        "jgnConst": "$proof_time"
+                                    }
+                                ]
+                            },
+                            {
+                                "jgnFactId": "#vr.2:p1",
+                                "jgnFactMult": "!",
+                                "jgnFactName": "!Logger",
+                                "jgnFactShow": "!Logger( $L, pk(~skL) )",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "$L"
+                                    },
+                                    {
+                                        "jgnFunct": "pk",
+                                        "jgnParams": [
+                                            {
+                                                "jgnConst": "~skL"
+                                            }
+                                        ],
+                                        "jgnShow": "pk(~skL)"
+                                    }
+                                ]
+                            },
+                            {
+                                "jgnFactId": "#vr.2:p2",
+                                "jgnFactMult": "",
+                                "jgnFactName": "In",
+                                "jgnFactShow": "In( <$CA, $id, pkID, 'pubKey', sn, $i, $j> )",
+                                "jgnFactTag": "InFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnFunct": "pair",
+                                        "jgnParams": [
+                                            {
+                                                "jgnConst": "$CA"
+                                            },
+                                            {
+                                                "jgnFunct": "pair",
+                                                "jgnParams": [
+                                                    {
+                                                        "jgnConst": "$id"
+                                                    },
+                                                    {
+                                                        "jgnFunct": "pair",
+                                                        "jgnParams": [
+                                                            {
+                                                                "jgnConst": "pkID"
+                                                            },
+                                                            {
+                                                                "jgnFunct": "pair",
+                                                                "jgnParams": [
+                                                                    {
+                                                                        "jgnConst": "'pubKey'"
+                                                                    },
+                                                                    {
+                                                                        "jgnFunct": "pair",
+                                                                        "jgnParams": [
+                                                                            {
+                                                                                "jgnConst": "sn"
+                                                                            },
+                                                                            {
+                                                                                "jgnFunct": "pair",
+                                                                                "jgnParams": [
+                                                                                    {
+                                                                                        "jgnConst": "$i"
+                                                                                    },
+                                                                                    {
+                                                                                        "jgnConst": "$j"
+                                                                                    }
+                                                                                ],
+                                                                                "jgnShow": "pair($i,$j)"
+                                                                            }
+                                                                        ],
+                                                                        "jgnShow": "pair(sn,pair($i,$j))"
+                                                                    }
+                                                                ],
+                                                                "jgnShow": "pair('pubKey',pair(sn,pair($i,$j)))"
+                                                            }
+                                                        ],
+                                                        "jgnShow": "pair(pkID,pair('pubKey',pair(sn,pair($i,$j))))"
+                                                    }
+                                                ],
+                                                "jgnShow": "pair($id,pair(pkID,pair('pubKey',pair(sn,pair($i,$j)))))"
+                                            }
+                                        ],
+                                        "jgnShow": "pair($CA,pair($id,pair(pkID,pair('pubKey',pair(sn,pair($i,$j))))))"
+                                    }
+                                ]
+                            },
+                            {
+                                "jgnFactId": "#vr.2:p3",
+                                "jgnFactMult": "",
+                                "jgnFactName": "In",
+                                "jgnFactShow": "In( <ca_fields.1, ca_sig.1> )",
+                                "jgnFactTag": "InFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnFunct": "pair",
+                                        "jgnParams": [
+                                            {
+                                                "jgnConst": "ca_fields.1"
+                                            },
+                                            {
+                                                "jgnConst": "ca_sig.1"
+                                            }
+                                        ],
+                                        "jgnShow": "pair(ca_fields.1,ca_sig.1)"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "jgnType": "isProtocolRule"
+                },
+                {
+                    "jgnId": "#vf.5",
+                    "jgnLabel": "Send",
+                    "jgnMetadata": {
+                        "jgnActs": [
+                            {
+                                "jgnFactId": "action",
+                                "jgnFactMult": "",
+                                "jgnFactName": "K",
+                                "jgnFactShow": "K( $P )",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "$P"
+                                    }
+                                ]
+                            }
+                        ],
+                        "jgnConcs": [
+                            {
+                                "jgnFactId": "#vf.5:c0",
+                                "jgnFactMult": "",
+                                "jgnFactName": "In",
+                                "jgnFactShow": "In( $P )",
+                                "jgnFactTag": "InFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "$P"
+                                    }
+                                ]
+                            }
+                        ],
+                        "jgnPrems": [
+                            {
+                                "jgnFactId": "#vf.5:p0",
+                                "jgnFactMult": "!",
+                                "jgnFactName": "!KU",
+                                "jgnFactShow": "!KU( $P )",
+                                "jgnFactTag": "KUFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "$P"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "jgnType": "isIntruderRule"
+                },
+                {
+                    "jgnId": "#vf.6",
+                    "jgnLabel": "Send",
+                    "jgnMetadata": {
+                        "jgnActs": [
+                            {
+                                "jgnFactId": "action",
+                                "jgnFactMult": "",
+                                "jgnFactName": "K",
+                                "jgnFactShow": "K( <$CA, $id, pkID, 'pubKey', sn, $i, $j> )",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnFunct": "pair",
+                                        "jgnParams": [
+                                            {
+                                                "jgnConst": "$CA"
+                                            },
+                                            {
+                                                "jgnFunct": "pair",
+                                                "jgnParams": [
+                                                    {
+                                                        "jgnConst": "$id"
+                                                    },
+                                                    {
+                                                        "jgnFunct": "pair",
+                                                        "jgnParams": [
+                                                            {
+                                                                "jgnConst": "pkID"
+                                                            },
+                                                            {
+                                                                "jgnFunct": "pair",
+                                                                "jgnParams": [
+                                                                    {
+                                                                        "jgnConst": "'pubKey'"
+                                                                    },
+                                                                    {
+                                                                        "jgnFunct": "pair",
+                                                                        "jgnParams": [
+                                                                            {
+                                                                                "jgnConst": "sn"
+                                                                            },
+                                                                            {
+                                                                                "jgnFunct": "pair",
+                                                                                "jgnParams": [
+                                                                                    {
+                                                                                        "jgnConst": "$i"
+                                                                                    },
+                                                                                    {
+                                                                                        "jgnConst": "$j"
+                                                                                    }
+                                                                                ],
+                                                                                "jgnShow": "pair($i,$j)"
+                                                                            }
+                                                                        ],
+                                                                        "jgnShow": "pair(sn,pair($i,$j))"
+                                                                    }
+                                                                ],
+                                                                "jgnShow": "pair('pubKey',pair(sn,pair($i,$j)))"
+                                                            }
+                                                        ],
+                                                        "jgnShow": "pair(pkID,pair('pubKey',pair(sn,pair($i,$j))))"
+                                                    }
+                                                ],
+                                                "jgnShow": "pair($id,pair(pkID,pair('pubKey',pair(sn,pair($i,$j)))))"
+                                            }
+                                        ],
+                                        "jgnShow": "pair($CA,pair($id,pair(pkID,pair('pubKey',pair(sn,pair($i,$j))))))"
+                                    }
+                                ]
+                            }
+                        ],
+                        "jgnConcs": [
+                            {
+                                "jgnFactId": "#vf.6:c0",
+                                "jgnFactMult": "",
+                                "jgnFactName": "In",
+                                "jgnFactShow": "In( <$CA, $id, pkID, 'pubKey', sn, $i, $j> )",
+                                "jgnFactTag": "InFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnFunct": "pair",
+                                        "jgnParams": [
+                                            {
+                                                "jgnConst": "$CA"
+                                            },
+                                            {
+                                                "jgnFunct": "pair",
+                                                "jgnParams": [
+                                                    {
+                                                        "jgnConst": "$id"
+                                                    },
+                                                    {
+                                                        "jgnFunct": "pair",
+                                                        "jgnParams": [
+                                                            {
+                                                                "jgnConst": "pkID"
+                                                            },
+                                                            {
+                                                                "jgnFunct": "pair",
+                                                                "jgnParams": [
+                                                                    {
+                                                                        "jgnConst": "'pubKey'"
+                                                                    },
+                                                                    {
+                                                                        "jgnFunct": "pair",
+                                                                        "jgnParams": [
+                                                                            {
+                                                                                "jgnConst": "sn"
+                                                                            },
+                                                                            {
+                                                                                "jgnFunct": "pair",
+                                                                                "jgnParams": [
+                                                                                    {
+                                                                                        "jgnConst": "$i"
+                                                                                    },
+                                                                                    {
+                                                                                        "jgnConst": "$j"
+                                                                                    }
+                                                                                ],
+                                                                                "jgnShow": "pair($i,$j)"
+                                                                            }
+                                                                        ],
+                                                                        "jgnShow": "pair(sn,pair($i,$j))"
+                                                                    }
+                                                                ],
+                                                                "jgnShow": "pair('pubKey',pair(sn,pair($i,$j)))"
+                                                            }
+                                                        ],
+                                                        "jgnShow": "pair(pkID,pair('pubKey',pair(sn,pair($i,$j))))"
+                                                    }
+                                                ],
+                                                "jgnShow": "pair($id,pair(pkID,pair('pubKey',pair(sn,pair($i,$j)))))"
+                                            }
+                                        ],
+                                        "jgnShow": "pair($CA,pair($id,pair(pkID,pair('pubKey',pair(sn,pair($i,$j))))))"
+                                    }
+                                ]
+                            }
+                        ],
+                        "jgnPrems": [
+                            {
+                                "jgnFactId": "#vf.6:p0",
+                                "jgnFactMult": "!",
+                                "jgnFactName": "!KU",
+                                "jgnFactShow": "!KU( <$CA, $id, pkID, 'pubKey', sn, $i, $j> )",
+                                "jgnFactTag": "KUFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnFunct": "pair",
+                                        "jgnParams": [
+                                            {
+                                                "jgnConst": "$CA"
+                                            },
+                                            {
+                                                "jgnFunct": "pair",
+                                                "jgnParams": [
+                                                    {
+                                                        "jgnConst": "$id"
+                                                    },
+                                                    {
+                                                        "jgnFunct": "pair",
+                                                        "jgnParams": [
+                                                            {
+                                                                "jgnConst": "pkID"
+                                                            },
+                                                            {
+                                                                "jgnFunct": "pair",
+                                                                "jgnParams": [
+                                                                    {
+                                                                        "jgnConst": "'pubKey'"
+                                                                    },
+                                                                    {
+                                                                        "jgnFunct": "pair",
+                                                                        "jgnParams": [
+                                                                            {
+                                                                                "jgnConst": "sn"
+                                                                            },
+                                                                            {
+                                                                                "jgnFunct": "pair",
+                                                                                "jgnParams": [
+                                                                                    {
+                                                                                        "jgnConst": "$i"
+                                                                                    },
+                                                                                    {
+                                                                                        "jgnConst": "$j"
+                                                                                    }
+                                                                                ],
+                                                                                "jgnShow": "pair($i,$j)"
+                                                                            }
+                                                                        ],
+                                                                        "jgnShow": "pair(sn,pair($i,$j))"
+                                                                    }
+                                                                ],
+                                                                "jgnShow": "pair('pubKey',pair(sn,pair($i,$j)))"
+                                                            }
+                                                        ],
+                                                        "jgnShow": "pair(pkID,pair('pubKey',pair(sn,pair($i,$j))))"
+                                                    }
+                                                ],
+                                                "jgnShow": "pair($id,pair(pkID,pair('pubKey',pair(sn,pair($i,$j)))))"
+                                            }
+                                        ],
+                                        "jgnShow": "pair($CA,pair($id,pair(pkID,pair('pubKey',pair(sn,pair($i,$j))))))"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "jgnType": "isIntruderRule"
+                },
+                {
+                    "jgnId": "#vf.7",
+                    "jgnLabel": "Send",
+                    "jgnMetadata": {
+                        "jgnActs": [
+                            {
+                                "jgnFactId": "action",
+                                "jgnFactMult": "",
+                                "jgnFactName": "K",
+                                "jgnFactShow": "K( <ca_fields.1, ca_sig.1> )",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnFunct": "pair",
+                                        "jgnParams": [
+                                            {
+                                                "jgnConst": "ca_fields.1"
+                                            },
+                                            {
+                                                "jgnConst": "ca_sig.1"
+                                            }
+                                        ],
+                                        "jgnShow": "pair(ca_fields.1,ca_sig.1)"
+                                    }
+                                ]
+                            }
+                        ],
+                        "jgnConcs": [
+                            {
+                                "jgnFactId": "#vf.7:c0",
+                                "jgnFactMult": "",
+                                "jgnFactName": "In",
+                                "jgnFactShow": "In( <ca_fields.1, ca_sig.1> )",
+                                "jgnFactTag": "InFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnFunct": "pair",
+                                        "jgnParams": [
+                                            {
+                                                "jgnConst": "ca_fields.1"
+                                            },
+                                            {
+                                                "jgnConst": "ca_sig.1"
+                                            }
+                                        ],
+                                        "jgnShow": "pair(ca_fields.1,ca_sig.1)"
+                                    }
+                                ]
+                            }
+                        ],
+                        "jgnPrems": [
+                            {
+                                "jgnFactId": "#vf.7:p0",
+                                "jgnFactMult": "!",
+                                "jgnFactName": "!KU",
+                                "jgnFactShow": "!KU( <ca_fields.1, ca_sig.1> )",
+                                "jgnFactTag": "KUFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnFunct": "pair",
+                                        "jgnParams": [
+                                            {
+                                                "jgnConst": "ca_fields.1"
+                                            },
+                                            {
+                                                "jgnConst": "ca_sig.1"
+                                            }
+                                        ],
+                                        "jgnShow": "pair(ca_fields.1,ca_sig.1)"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "jgnType": "isIntruderRule"
+                },
+                {
+                    "jgnId": "#vk.5",
+                    "jgnLabel": "!KU( pkID )",
+                    "jgnMetadata": {
+                        "jgnActs": [
+                            {
+                                "jgnFactId": "action",
+                                "jgnFactMult": "!",
+                                "jgnFactName": "!KU",
+                                "jgnFactShow": "!KU( pkID )",
+                                "jgnFactTag": "KUFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "pkID"
+                                    }
+                                ]
+                            }
+                        ],
+                        "jgnConcs": [],
+                        "jgnPrems": []
+                    },
+                    "jgnType": "unsolvedActionAtom"
+                },
+                {
+                    "jgnId": "#vk.9",
+                    "jgnLabel": "!KU( sn )",
+                    "jgnMetadata": {
+                        "jgnActs": [
+                            {
+                                "jgnFactId": "action",
+                                "jgnFactMult": "!",
+                                "jgnFactName": "!KU",
+                                "jgnFactShow": "!KU( sn )",
+                                "jgnFactTag": "KUFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "sn"
+                                    }
+                                ]
+                            }
+                        ],
+                        "jgnConcs": [],
+                        "jgnPrems": []
+                    },
+                    "jgnType": "unsolvedActionAtom"
+                },
+                {
+                    "jgnId": "#vk.14",
+                    "jgnLabel": "!KU( ca_fields )",
+                    "jgnMetadata": {
+                        "jgnActs": [
+                            {
+                                "jgnFactId": "action",
+                                "jgnFactMult": "!",
+                                "jgnFactName": "!KU",
+                                "jgnFactShow": "!KU( ca_fields )",
+                                "jgnFactTag": "KUFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "ca_fields"
+                                    }
+                                ]
+                            }
+                        ],
+                        "jgnConcs": [],
+                        "jgnPrems": []
+                    },
+                    "jgnType": "unsolvedActionAtom"
+                },
+                {
+                    "jgnId": "#vk.15",
+                    "jgnLabel": "!KU( ca_sig )",
+                    "jgnMetadata": {
+                        "jgnActs": [
+                            {
+                                "jgnFactId": "action",
+                                "jgnFactMult": "!",
+                                "jgnFactName": "!KU",
+                                "jgnFactShow": "!KU( ca_sig )",
+                                "jgnFactTag": "KUFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "ca_sig"
+                                    }
+                                ]
+                            }
+                        ],
+                        "jgnConcs": [],
+                        "jgnPrems": []
+                    },
+                    "jgnType": "unsolvedActionAtom"
+                },
+                {
+                    "jgnId": "#vk.18",
+                    "jgnLabel": "!KU( ca_fields.1 )",
+                    "jgnMetadata": {
+                        "jgnActs": [
+                            {
+                                "jgnFactId": "action",
+                                "jgnFactMult": "!",
+                                "jgnFactName": "!KU",
+                                "jgnFactShow": "!KU( ca_fields.1 )",
+                                "jgnFactTag": "KUFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "ca_fields.1"
+                                    }
+                                ]
+                            }
+                        ],
+                        "jgnConcs": [],
+                        "jgnPrems": []
+                    },
+                    "jgnType": "unsolvedActionAtom"
+                },
+                {
+                    "jgnId": "#vk.19",
+                    "jgnLabel": "!KU( ca_sig.1 )",
+                    "jgnMetadata": {
+                        "jgnActs": [
+                            {
+                                "jgnFactId": "action",
+                                "jgnFactMult": "!",
+                                "jgnFactName": "!KU",
+                                "jgnFactShow": "!KU( ca_sig.1 )",
+                                "jgnFactTag": "KUFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "ca_sig.1"
+                                    }
+                                ]
+                            }
+                        ],
+                        "jgnConcs": [],
+                        "jgnPrems": []
+                    },
+                    "jgnType": "unsolvedActionAtom"
+                }
+            ],
+            "jgType": "Tamarin prover constraint system"
+        }
+    ]
+}

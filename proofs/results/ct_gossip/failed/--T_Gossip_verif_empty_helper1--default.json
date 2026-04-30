@@ -2,9 +2,9 @@
   "task_id": "--T_Gossip_verif_empty_helper1--default",
   "error_description": "The task exceeded its memory limit. Review the memory limit setting for this task.",
   "wrapper_measures": {
-    "time": 162.53103971481323,
-    "avg_memory": 4672.39186238354,
-    "peak_memory": 10694.0625
+    "time": 399.8445255756378,
+    "avg_memory": 5118.300604140424,
+    "peak_memory": 10486.234375
   },
   "return_code": -2,
   "last_stderr_lines": [

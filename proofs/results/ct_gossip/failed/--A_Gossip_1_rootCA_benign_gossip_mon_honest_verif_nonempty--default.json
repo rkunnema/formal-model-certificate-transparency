@@ -1,0 +1,13 @@
+{
+  "task_id": "--A_Gossip_1_rootCA_benign_gossip_mon_honest_verif_nonempty--default",
+  "error_description": "The task timed out. Review the timeout setting for this task.",
+  "wrapper_measures": {
+    "time": 300.83274817466736,
+    "avg_memory": 5098.627341119527,
+    "peak_memory": 9748.64453125
+  },
+  "return_code": -1,
+  "last_stderr_lines": [
+    "Process timed out"
+  ]
+}

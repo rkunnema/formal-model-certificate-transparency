@@ -1,0 +1,439 @@
+{
+    "graphs": [
+        {
+            "jgAbbrevs": [],
+            "jgClusters": [],
+            "jgDirected": true,
+            "jgEdges": [
+                {
+                    "jgeRelation": "PersistentFact",
+                    "jgeSource": "#vr:c3",
+                    "jgeTarget": "#t:p0"
+                }
+            ],
+            "jgLabel": "trace_ct_SL2-AS0-CL0-A1-C1-NB_san_compromiseRootCA-Root_CA_Init",
+            "jgNodes": [
+                {
+                    "jgnId": "#t",
+                    "jgnLabel": "compromiseRootCA",
+                    "jgnMetadata": {
+                        "jgnActs": [
+                            {
+                                "jgnFactId": "action",
+                                "jgnFactMult": "",
+                                "jgnFactName": "CompromiseRootCA",
+                                "jgnFactShow": "CompromiseRootCA( $CA )",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "$CA"
+                                    }
+                                ]
+                            },
+                            {
+                                "jgnFactId": "action",
+                                "jgnFactMult": "",
+                                "jgnFactName": "Compromise",
+                                "jgnFactShow": "Compromise( )",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": []
+                            },
+                            {
+                                "jgnFactId": "action",
+                                "jgnFactMult": "",
+                                "jgnFactName": "Corrupted",
+                                "jgnFactShow": "Corrupted( $CA )",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "$CA"
+                                    }
+                                ]
+                            },
+                            {
+                                "jgnFactId": "action",
+                                "jgnFactMult": "",
+                                "jgnFactName": "San_compromiseRootCA",
+                                "jgnFactShow": "San_compromiseRootCA( )",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": []
+                            },
+                            {
+                                "jgnFactId": "action",
+                                "jgnFactMult": "",
+                                "jgnFactName": "Time",
+                                "jgnFactShow": "Time( $now )",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "$now"
+                                    }
+                                ]
+                            }
+                        ],
+                        "jgnConcs": [
+                            {
+                                "jgnFactId": "#t:c0",
+                                "jgnFactMult": "",
+                                "jgnFactName": "Out",
+                                "jgnFactShow": "Out( ~skCA )",
+                                "jgnFactTag": "OutFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "~skCA"
+                                    }
+                                ]
+                            }
+                        ],
+                        "jgnPrems": [
+                            {
+                                "jgnFactId": "#t:p0",
+                                "jgnFactMult": "!",
+                                "jgnFactName": "!Root_CA_s0",
+                                "jgnFactShow": "!Root_CA_s0( $CA, ~skCA, pk(~skCA) )",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "$CA"
+                                    },
+                                    {
+                                        "jgnConst": "~skCA"
+                                    },
+                                    {
+                                        "jgnFunct": "pk",
+                                        "jgnParams": [
+                                            {
+                                                "jgnConst": "~skCA"
+                                            }
+                                        ],
+                                        "jgnShow": "pk(~skCA)"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "jgnType": "isProtocolRule"
+                },
+                {
+                    "jgnId": "#vr",
+                    "jgnLabel": "Root_CA_Init",
+                    "jgnMetadata": {
+                        "jgnActs": [
+                            {
+                                "jgnFactId": "action",
+                                "jgnFactMult": "",
+                                "jgnFactName": "CA_Registered",
+                                "jgnFactShow": "CA_Registered( $CA, ~skCA, pk(~skCA) )",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "$CA"
+                                    },
+                                    {
+                                        "jgnConst": "~skCA"
+                                    },
+                                    {
+                                        "jgnFunct": "pk",
+                                        "jgnParams": [
+                                            {
+                                                "jgnConst": "~skCA"
+                                            }
+                                        ],
+                                        "jgnShow": "pk(~skCA)"
+                                    }
+                                ]
+                            },
+                            {
+                                "jgnFactId": "action",
+                                "jgnFactMult": "",
+                                "jgnFactName": "Root_CA_Init",
+                                "jgnFactShow": "Root_CA_Init( $CA )",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "$CA"
+                                    }
+                                ]
+                            },
+                            {
+                                "jgnFactId": "action",
+                                "jgnFactMult": "",
+                                "jgnFactName": "Time",
+                                "jgnFactShow": "Time( $now.1 )",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "$now.1"
+                                    }
+                                ]
+                            },
+                            {
+                                "jgnFactId": "action",
+                                "jgnFactMult": "",
+                                "jgnFactName": "San_Root_CA_Init",
+                                "jgnFactShow": "San_Root_CA_Init( )",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": []
+                            }
+                        ],
+                        "jgnConcs": [
+                            {
+                                "jgnFactId": "#vr:c0",
+                                "jgnFactMult": "",
+                                "jgnFactName": "Out",
+                                "jgnFactShow": "Out( <$CA, $CA, pk(~skCA), 'selfCert', ~sn, $now.1, $j> )",
+                                "jgnFactTag": "OutFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnFunct": "pair",
+                                        "jgnParams": [
+                                            {
+                                                "jgnConst": "$CA"
+                                            },
+                                            {
+                                                "jgnFunct": "pair",
+                                                "jgnParams": [
+                                                    {
+                                                        "jgnConst": "$CA"
+                                                    },
+                                                    {
+                                                        "jgnFunct": "pair",
+                                                        "jgnParams": [
+                                                            {
+                                                                "jgnFunct": "pk",
+                                                                "jgnParams": [
+                                                                    {
+                                                                        "jgnConst": "~skCA"
+                                                                    }
+                                                                ],
+                                                                "jgnShow": "pk(~skCA)"
+                                                            },
+                                                            {
+                                                                "jgnFunct": "pair",
+                                                                "jgnParams": [
+                                                                    {
+                                                                        "jgnConst": "'selfCert'"
+                                                                    },
+                                                                    {
+                                                                        "jgnFunct": "pair",
+                                                                        "jgnParams": [
+                                                                            {
+                                                                                "jgnConst": "~sn"
+                                                                            },
+                                                                            {
+                                                                                "jgnFunct": "pair",
+                                                                                "jgnParams": [
+                                                                                    {
+                                                                                        "jgnConst": "$now.1"
+                                                                                    },
+                                                                                    {
+                                                                                        "jgnConst": "$j"
+                                                                                    }
+                                                                                ],
+                                                                                "jgnShow": "pair($now.1,$j)"
+                                                                            }
+                                                                        ],
+                                                                        "jgnShow": "pair(~sn,pair($now.1,$j))"
+                                                                    }
+                                                                ],
+                                                                "jgnShow": "pair('selfCert',pair(~sn,pair($now.1,$j)))"
+                                                            }
+                                                        ],
+                                                        "jgnShow": "pair(pk(~skCA),pair('selfCert',pair(~sn,pair($now.1,$j))))"
+                                                    }
+                                                ],
+                                                "jgnShow": "pair($CA,pair(pk(~skCA),pair('selfCert',pair(~sn,pair($now.1,$j)))))"
+                                            }
+                                        ],
+                                        "jgnShow": "pair($CA,pair($CA,pair(pk(~skCA),pair('selfCert',pair(~sn,pair($now.1,$j))))))"
+                                    }
+                                ]
+                            },
+                            {
+                                "jgnFactId": "#vr:c1",
+                                "jgnFactMult": "",
+                                "jgnFactName": "Out",
+                                "jgnFactShow": "Out( sign(<$CA, $CA, pk(~skCA), 'selfCert', ~sn, $now.1, $j>, ~skCA))",
+                                "jgnFactTag": "OutFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnFunct": "sign",
+                                        "jgnParams": [
+                                            {
+                                                "jgnFunct": "pair",
+                                                "jgnParams": [
+                                                    {
+                                                        "jgnConst": "$CA"
+                                                    },
+                                                    {
+                                                        "jgnFunct": "pair",
+                                                        "jgnParams": [
+                                                            {
+                                                                "jgnConst": "$CA"
+                                                            },
+                                                            {
+                                                                "jgnFunct": "pair",
+                                                                "jgnParams": [
+                                                                    {
+                                                                        "jgnFunct": "pk",
+                                                                        "jgnParams": [
+                                                                            {
+                                                                                "jgnConst": "~skCA"
+                                                                            }
+                                                                        ],
+                                                                        "jgnShow": "pk(~skCA)"
+                                                                    },
+                                                                    {
+                                                                        "jgnFunct": "pair",
+                                                                        "jgnParams": [
+                                                                            {
+                                                                                "jgnConst": "'selfCert'"
+                                                                            },
+                                                                            {
+                                                                                "jgnFunct": "pair",
+                                                                                "jgnParams": [
+                                                                                    {
+                                                                                        "jgnConst": "~sn"
+                                                                                    },
+                                                                                    {
+                                                                                        "jgnFunct": "pair",
+                                                                                        "jgnParams": [
+                                                                                            {
+                                                                                                "jgnConst": "$now.1"
+                                                                                            },
+                                                                                            {
+                                                                                                "jgnConst": "$j"
+                                                                                            }
+                                                                                        ],
+                                                                                        "jgnShow": "pair($now.1,$j)"
+                                                                                    }
+                                                                                ],
+                                                                                "jgnShow": "pair(~sn,pair($now.1,$j))"
+                                                                            }
+                                                                        ],
+                                                                        "jgnShow": "pair('selfCert',pair(~sn,pair($now.1,$j)))"
+                                                                    }
+                                                                ],
+                                                                "jgnShow": "pair(pk(~skCA),pair('selfCert',pair(~sn,pair($now.1,$j))))"
+                                                            }
+                                                        ],
+                                                        "jgnShow": "pair($CA,pair(pk(~skCA),pair('selfCert',pair(~sn,pair($now.1,$j)))))"
+                                                    }
+                                                ],
+                                                "jgnShow": "pair($CA,pair($CA,pair(pk(~skCA),pair('selfCert',pair(~sn,pair($now.1,$j))))))"
+                                            },
+                                            {
+                                                "jgnConst": "~skCA"
+                                            }
+                                        ],
+                                        "jgnShow": "sign(pair($CA,pair($CA,pair(pk(~skCA),pair('selfCert',pair(~sn,pair($now.1,$j)))))),~skCA)"
+                                    }
+                                ]
+                            },
+                            {
+                                "jgnFactId": "#vr:c2",
+                                "jgnFactMult": "",
+                                "jgnFactName": "Out",
+                                "jgnFactShow": "Out( <$CA, pk(~skCA)> )",
+                                "jgnFactTag": "OutFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnFunct": "pair",
+                                        "jgnParams": [
+                                            {
+                                                "jgnConst": "$CA"
+                                            },
+                                            {
+                                                "jgnFunct": "pk",
+                                                "jgnParams": [
+                                                    {
+                                                        "jgnConst": "~skCA"
+                                                    }
+                                                ],
+                                                "jgnShow": "pk(~skCA)"
+                                            }
+                                        ],
+                                        "jgnShow": "pair($CA,pk(~skCA))"
+                                    }
+                                ]
+                            },
+                            {
+                                "jgnFactId": "#vr:c3",
+                                "jgnFactMult": "!",
+                                "jgnFactName": "!Root_CA_s0",
+                                "jgnFactShow": "!Root_CA_s0( $CA, ~skCA, pk(~skCA) )",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "$CA"
+                                    },
+                                    {
+                                        "jgnConst": "~skCA"
+                                    },
+                                    {
+                                        "jgnFunct": "pk",
+                                        "jgnParams": [
+                                            {
+                                                "jgnConst": "~skCA"
+                                            }
+                                        ],
+                                        "jgnShow": "pk(~skCA)"
+                                    }
+                                ]
+                            },
+                            {
+                                "jgnFactId": "#vr:c4",
+                                "jgnFactMult": "!",
+                                "jgnFactName": "!Root_CA",
+                                "jgnFactShow": "!Root_CA( $CA, pk(~skCA) )",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "$CA"
+                                    },
+                                    {
+                                        "jgnFunct": "pk",
+                                        "jgnParams": [
+                                            {
+                                                "jgnConst": "~skCA"
+                                            }
+                                        ],
+                                        "jgnShow": "pk(~skCA)"
+                                    }
+                                ]
+                            }
+                        ],
+                        "jgnPrems": [
+                            {
+                                "jgnFactId": "#vr:p0",
+                                "jgnFactMult": "",
+                                "jgnFactName": "Fr",
+                                "jgnFactShow": "Fr( ~skCA )",
+                                "jgnFactTag": "FreshFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "~skCA"
+                                    }
+                                ]
+                            },
+                            {
+                                "jgnFactId": "#vr:p1",
+                                "jgnFactMult": "",
+                                "jgnFactName": "Fr",
+                                "jgnFactShow": "Fr( ~sn )",
+                                "jgnFactTag": "FreshFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "~sn"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "jgnType": "isProtocolRule"
+                }
+            ],
+            "jgType": "Tamarin prover constraint system"
+        }
+    ]
+}

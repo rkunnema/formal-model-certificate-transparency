@@ -1,0 +1,13 @@
+{
+  "task_id": "--san_monitorVerifiesAppendOnly_Gossiped--default",
+  "error_description": "The task exceeded its memory limit. Review the memory limit setting for this task.",
+  "wrapper_measures": {
+    "time": 213.64597988128662,
+    "avg_memory": 3709.5254274764147,
+    "peak_memory": 10398.45703125
+  },
+  "return_code": -2,
+  "last_stderr_lines": [
+    "Process exceeded memory limit"
+  ]
+}

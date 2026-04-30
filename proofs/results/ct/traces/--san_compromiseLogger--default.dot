@@ -1,0 +1,10 @@
+digraph "trace_ct_SL2-AS0-CL0-A1-C1-NB_san_compromiseLogger-Logger_Init" {
+nodesep="0.3";
+ranksep="0.3";
+node[fontsize="8",fontname="Helvetica",width="0.3",height="0.2"];
+edge[fontsize="8",fontname="Helvetica"];
+n4[shape="record",label="{{<n0> !Logger_s( $L, ~skL, pk(~skL) )}|{<n1> #t : compromiseLogger[CompromiseLogger( $L ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CompromiseLoggerUniq( \<$L, ~skL, pk(~skL)\> ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Compromise( ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Corrupted( $L ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;San_compromiseLogger( ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Time( $now )]\l}|{<n2> Out( ~skL )|<n3> !Corrupted_Logger( $L, ~skL, pk(~skL) )}}",fillcolor="#d40808",style="filled",fontcolor="white",role="Undefined"];
+n9[shape="record",label="{{<n5> Fr( ~skL )}|{<n6> #vr : Logger_Init[Logger_Registered( $L ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Time( $now.1 ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;San_Logger_Init( )]\l}|{<n7> !Logger_s( $L, ~skL, pk(~skL) )|<n8> !Logger( $L, pk(~skL) )}}",fillcolor="#08a358",style="filled",fontcolor="white",role="Undefined"];
+n9:n7 -> n4:n0[style="bold",weight="10.0",color="gray50"];
+
+}

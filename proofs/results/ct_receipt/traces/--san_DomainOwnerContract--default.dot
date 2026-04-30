@@ -1,0 +1,14 @@
+digraph "trace_ct_receipt_SL2-AS0-CL0-A1-C1-NB_san_DomainOwnerContract-monitorTrackSubject" {
+nodesep="0.3";
+ranksep="0.3";
+node[fontsize="8",fontname="Helvetica",width="0.3",height="0.2"];
+edge[fontsize="8",fontname="Helvetica"];
+n6[shape="record",label="{{<n0> !TrackSubject( $M, $idServer )|<n1> Fr( ~skM )}|{<n2> #t : DomainOwnerContract[Time( $now ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;San_DomainOwnerContract( )]\l}|{<n3> !TrackSubject_Contract( $M,\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$idServer\l)\l|<n4> !MonitorKey_s( $M, pk(~skM),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;~skM\l)\l|<n5> !MonitorKey( $M,\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pk(~skM)\l)\l}}",fillcolor="#fac800",style="filled",fontcolor="black",role="Undefined"];
+n11[shape="record",label="{{<n7> !Monitor( $M )|<n8> !DomainOwner( $idServer, pk(~sk) )}|{<n9> #vr : monitorTrackSubject[Time( $now.1 ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;San_monitorTrackSubject( )]\l}|{<n10> !TrackSubject( $M, $idServer )}}",fillcolor="#fac800",style="filled",fontcolor="black",role="Undefined"];
+n14[shape="record",label="{{<n12> #vr.1 : Monitor_Init[Monitor_Registered( $M ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Time( $now.2 ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;San_Monitor_Init( )]\l}|{<n13> !Monitor( $M )}}",fillcolor="#badb99",style="filled",fontcolor="black",role="Undefined"];
+n19[shape="record",label="{{<n15> Fr( ~sk )}|{<n16> #vr.2 : Domain_Owner_Init[Time( $now.3 ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;San_Domain_Owner_Init( )]\l}|{<n17> !DomainOwner( $idServer, pk(~sk) )|<n18> Out( pk(~sk) )}}",fillcolor="#c6c6c6",style="filled",fontcolor="black",role="Undefined"];
+n11:n10 -> n6:n0[style="bold",weight="10.0",color="gray50"];
+n14:n13 -> n11:n7[style="bold",weight="10.0",color="gray50"];
+n19:n17 -> n11:n8[style="bold",weight="10.0",color="gray50"];
+
+}

@@ -1,0 +1,8 @@
+digraph "trace_sct_audit_SL2-AS0-CL0-A1-C1-NB_san_Domain_Owner_Init" {
+nodesep="0.3";
+ranksep="0.3";
+node[fontsize="8",fontname="Helvetica",width="0.3",height="0.2"];
+edge[fontsize="8",fontname="Helvetica"];
+n4[shape="record",label="{{<n0> Fr( ~sk )}|{<n1> #t : Domain_Owner_Init[Time( $now ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;San_Domain_Owner_Init( )]\l}|{<n2> !DomainOwner( $idServer, pk(~sk) )|<n3> Out( pk(~sk) )}}",fillcolor="#c6c6c6",style="filled",fontcolor="black",role="Undefined"];
+
+}

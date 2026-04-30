@@ -1,0 +1,1690 @@
+{
+    "graphs": [
+        {
+            "jgAbbrevs": [],
+            "jgClusters": [],
+            "jgDirected": true,
+            "jgEdges": [
+                {
+                    "jgeRelation": "default",
+                    "jgeSource": "#vf:c0",
+                    "jgeTarget": "#t:p0"
+                },
+                {
+                    "jgeRelation": "PersistentFact",
+                    "jgeSource": "#vr:c4",
+                    "jgeTarget": "#t:p4"
+                },
+                {
+                    "jgeRelation": "default",
+                    "jgeSource": "#vf.1:c0",
+                    "jgeTarget": "#t:p1"
+                },
+                {
+                    "jgeRelation": "default",
+                    "jgeSource": "#vf.2:c0",
+                    "jgeTarget": "#t:p2"
+                },
+                {
+                    "jgeRelation": "default",
+                    "jgeSource": "#vf.3:c0",
+                    "jgeTarget": "#t:p3"
+                },
+                {
+                    "jgeRelation": "LessAtoms",
+                    "jgeSource": "#vk.7",
+                    "jgeTarget": "#vf"
+                },
+                {
+                    "jgeRelation": "LessAtoms",
+                    "jgeSource": "#vk.11",
+                    "jgeTarget": "#vf"
+                },
+                {
+                    "jgeRelation": "LessAtoms",
+                    "jgeSource": "#vk.15",
+                    "jgeTarget": "#vf.1"
+                },
+                {
+                    "jgeRelation": "LessAtoms",
+                    "jgeSource": "#vk.18",
+                    "jgeTarget": "#vf.2"
+                },
+                {
+                    "jgeRelation": "LessAtoms",
+                    "jgeSource": "#vk.22",
+                    "jgeTarget": "#vf.2"
+                },
+                {
+                    "jgeRelation": "LessAtoms",
+                    "jgeSource": "#vk.26",
+                    "jgeTarget": "#vf.3"
+                }
+            ],
+            "jgLabel": "trace_sct_audit_SL2-AS0-CL0-A1-C1-NB_san_ChainValidator_Invalid-case_1-Root_CA_Init-split_case_1",
+            "jgNodes": [
+                {
+                    "jgnId": "#t",
+                    "jgnLabel": "ChainValidator_Invalid",
+                    "jgnMetadata": {
+                        "jgnActs": [
+                            {
+                                "jgnFactId": "action",
+                                "jgnFactMult": "",
+                                "jgnFactName": "ChainCheck",
+                                "jgnFactShow": "ChainCheck( <<<$CA, $subj, ke, 'pre-cert', sn, $i, $j>, cert_sig>, <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, ca_sig>)",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnFunct": "pair",
+                                        "jgnParams": [
+                                            {
+                                                "jgnFunct": "pair",
+                                                "jgnParams": [
+                                                    {
+                                                        "jgnFunct": "pair",
+                                                        "jgnParams": [
+                                                            {
+                                                                "jgnConst": "$CA"
+                                                            },
+                                                            {
+                                                                "jgnFunct": "pair",
+                                                                "jgnParams": [
+                                                                    {
+                                                                        "jgnConst": "$subj"
+                                                                    },
+                                                                    {
+                                                                        "jgnFunct": "pair",
+                                                                        "jgnParams": [
+                                                                            {
+                                                                                "jgnConst": "ke"
+                                                                            },
+                                                                            {
+                                                                                "jgnFunct": "pair",
+                                                                                "jgnParams": [
+                                                                                    {
+                                                                                        "jgnConst": "'pre-cert'"
+                                                                                    },
+                                                                                    {
+                                                                                        "jgnFunct": "pair",
+                                                                                        "jgnParams": [
+                                                                                            {
+                                                                                                "jgnConst": "sn"
+                                                                                            },
+                                                                                            {
+                                                                                                "jgnFunct": "pair",
+                                                                                                "jgnParams": [
+                                                                                                    {
+                                                                                                        "jgnConst": "$i"
+                                                                                                    },
+                                                                                                    {
+                                                                                                        "jgnConst": "$j"
+                                                                                                    }
+                                                                                                ],
+                                                                                                "jgnShow": "pair($i,$j)"
+                                                                                            }
+                                                                                        ],
+                                                                                        "jgnShow": "pair(sn,pair($i,$j))"
+                                                                                    }
+                                                                                ],
+                                                                                "jgnShow": "pair('pre-cert',pair(sn,pair($i,$j)))"
+                                                                            }
+                                                                        ],
+                                                                        "jgnShow": "pair(ke,pair('pre-cert',pair(sn,pair($i,$j))))"
+                                                                    }
+                                                                ],
+                                                                "jgnShow": "pair($subj,pair(ke,pair('pre-cert',pair(sn,pair($i,$j)))))"
+                                                            }
+                                                        ],
+                                                        "jgnShow": "pair($CA,pair($subj,pair(ke,pair('pre-cert',pair(sn,pair($i,$j))))))"
+                                                    },
+                                                    {
+                                                        "jgnConst": "cert_sig"
+                                                    }
+                                                ],
+                                                "jgnShow": "pair(pair($CA,pair($subj,pair(ke,pair('pre-cert',pair(sn,pair($i,$j)))))),cert_sig)"
+                                            },
+                                            {
+                                                "jgnFunct": "pair",
+                                                "jgnParams": [
+                                                    {
+                                                        "jgnFunct": "pair",
+                                                        "jgnParams": [
+                                                            {
+                                                                "jgnConst": "$rootCA"
+                                                            },
+                                                            {
+                                                                "jgnFunct": "pair",
+                                                                "jgnParams": [
+                                                                    {
+                                                                        "jgnConst": "$CA"
+                                                                    },
+                                                                    {
+                                                                        "jgnFunct": "pair",
+                                                                        "jgnParams": [
+                                                                            {
+                                                                                "jgnConst": "pkCA"
+                                                                            },
+                                                                            {
+                                                                                "jgnFunct": "pair",
+                                                                                "jgnParams": [
+                                                                                    {
+                                                                                        "jgnConst": "'pubKey-CA'"
+                                                                                    },
+                                                                                    {
+                                                                                        "jgnFunct": "pair",
+                                                                                        "jgnParams": [
+                                                                                            {
+                                                                                                "jgnConst": "snCA"
+                                                                                            },
+                                                                                            {
+                                                                                                "jgnFunct": "pair",
+                                                                                                "jgnParams": [
+                                                                                                    {
+                                                                                                        "jgnConst": "$i0"
+                                                                                                    },
+                                                                                                    {
+                                                                                                        "jgnConst": "$j0"
+                                                                                                    }
+                                                                                                ],
+                                                                                                "jgnShow": "pair($i0,$j0)"
+                                                                                            }
+                                                                                        ],
+                                                                                        "jgnShow": "pair(snCA,pair($i0,$j0))"
+                                                                                    }
+                                                                                ],
+                                                                                "jgnShow": "pair('pubKey-CA',pair(snCA,pair($i0,$j0)))"
+                                                                            }
+                                                                        ],
+                                                                        "jgnShow": "pair(pkCA,pair('pubKey-CA',pair(snCA,pair($i0,$j0))))"
+                                                                    }
+                                                                ],
+                                                                "jgnShow": "pair($CA,pair(pkCA,pair('pubKey-CA',pair(snCA,pair($i0,$j0)))))"
+                                                            }
+                                                        ],
+                                                        "jgnShow": "pair($rootCA,pair($CA,pair(pkCA,pair('pubKey-CA',pair(snCA,pair($i0,$j0))))))"
+                                                    },
+                                                    {
+                                                        "jgnConst": "ca_sig"
+                                                    }
+                                                ],
+                                                "jgnShow": "pair(pair($rootCA,pair($CA,pair(pkCA,pair('pubKey-CA',pair(snCA,pair($i0,$j0)))))),ca_sig)"
+                                            }
+                                        ],
+                                        "jgnShow": "pair(pair(pair($CA,pair($subj,pair(ke,pair('pre-cert',pair(sn,pair($i,$j)))))),cert_sig),pair(pair($rootCA,pair($CA,pair(pkCA,pair('pubKey-CA',pair(snCA,pair($i0,$j0)))))),ca_sig))"
+                                    }
+                                ]
+                            },
+                            {
+                                "jgnFactId": "action",
+                                "jgnFactMult": "",
+                                "jgnFactName": "ChainInvalid",
+                                "jgnFactShow": "ChainInvalid( < <<$CA, $subj, ke, 'pre-cert', sn, $i, $j>, cert_sig>, <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, ca_sig>)",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnFunct": "pair",
+                                        "jgnParams": [
+                                            {
+                                                "jgnFunct": "pair",
+                                                "jgnParams": [
+                                                    {
+                                                        "jgnFunct": "pair",
+                                                        "jgnParams": [
+                                                            {
+                                                                "jgnConst": "$CA"
+                                                            },
+                                                            {
+                                                                "jgnFunct": "pair",
+                                                                "jgnParams": [
+                                                                    {
+                                                                        "jgnConst": "$subj"
+                                                                    },
+                                                                    {
+                                                                        "jgnFunct": "pair",
+                                                                        "jgnParams": [
+                                                                            {
+                                                                                "jgnConst": "ke"
+                                                                            },
+                                                                            {
+                                                                                "jgnFunct": "pair",
+                                                                                "jgnParams": [
+                                                                                    {
+                                                                                        "jgnConst": "'pre-cert'"
+                                                                                    },
+                                                                                    {
+                                                                                        "jgnFunct": "pair",
+                                                                                        "jgnParams": [
+                                                                                            {
+                                                                                                "jgnConst": "sn"
+                                                                                            },
+                                                                                            {
+                                                                                                "jgnFunct": "pair",
+                                                                                                "jgnParams": [
+                                                                                                    {
+                                                                                                        "jgnConst": "$i"
+                                                                                                    },
+                                                                                                    {
+                                                                                                        "jgnConst": "$j"
+                                                                                                    }
+                                                                                                ],
+                                                                                                "jgnShow": "pair($i,$j)"
+                                                                                            }
+                                                                                        ],
+                                                                                        "jgnShow": "pair(sn,pair($i,$j))"
+                                                                                    }
+                                                                                ],
+                                                                                "jgnShow": "pair('pre-cert',pair(sn,pair($i,$j)))"
+                                                                            }
+                                                                        ],
+                                                                        "jgnShow": "pair(ke,pair('pre-cert',pair(sn,pair($i,$j))))"
+                                                                    }
+                                                                ],
+                                                                "jgnShow": "pair($subj,pair(ke,pair('pre-cert',pair(sn,pair($i,$j)))))"
+                                                            }
+                                                        ],
+                                                        "jgnShow": "pair($CA,pair($subj,pair(ke,pair('pre-cert',pair(sn,pair($i,$j))))))"
+                                                    },
+                                                    {
+                                                        "jgnConst": "cert_sig"
+                                                    }
+                                                ],
+                                                "jgnShow": "pair(pair($CA,pair($subj,pair(ke,pair('pre-cert',pair(sn,pair($i,$j)))))),cert_sig)"
+                                            },
+                                            {
+                                                "jgnFunct": "pair",
+                                                "jgnParams": [
+                                                    {
+                                                        "jgnFunct": "pair",
+                                                        "jgnParams": [
+                                                            {
+                                                                "jgnConst": "$rootCA"
+                                                            },
+                                                            {
+                                                                "jgnFunct": "pair",
+                                                                "jgnParams": [
+                                                                    {
+                                                                        "jgnConst": "$CA"
+                                                                    },
+                                                                    {
+                                                                        "jgnFunct": "pair",
+                                                                        "jgnParams": [
+                                                                            {
+                                                                                "jgnConst": "pkCA"
+                                                                            },
+                                                                            {
+                                                                                "jgnFunct": "pair",
+                                                                                "jgnParams": [
+                                                                                    {
+                                                                                        "jgnConst": "'pubKey-CA'"
+                                                                                    },
+                                                                                    {
+                                                                                        "jgnFunct": "pair",
+                                                                                        "jgnParams": [
+                                                                                            {
+                                                                                                "jgnConst": "snCA"
+                                                                                            },
+                                                                                            {
+                                                                                                "jgnFunct": "pair",
+                                                                                                "jgnParams": [
+                                                                                                    {
+                                                                                                        "jgnConst": "$i0"
+                                                                                                    },
+                                                                                                    {
+                                                                                                        "jgnConst": "$j0"
+                                                                                                    }
+                                                                                                ],
+                                                                                                "jgnShow": "pair($i0,$j0)"
+                                                                                            }
+                                                                                        ],
+                                                                                        "jgnShow": "pair(snCA,pair($i0,$j0))"
+                                                                                    }
+                                                                                ],
+                                                                                "jgnShow": "pair('pubKey-CA',pair(snCA,pair($i0,$j0)))"
+                                                                            }
+                                                                        ],
+                                                                        "jgnShow": "pair(pkCA,pair('pubKey-CA',pair(snCA,pair($i0,$j0))))"
+                                                                    }
+                                                                ],
+                                                                "jgnShow": "pair($CA,pair(pkCA,pair('pubKey-CA',pair(snCA,pair($i0,$j0)))))"
+                                                            }
+                                                        ],
+                                                        "jgnShow": "pair($rootCA,pair($CA,pair(pkCA,pair('pubKey-CA',pair(snCA,pair($i0,$j0))))))"
+                                                    },
+                                                    {
+                                                        "jgnConst": "ca_sig"
+                                                    }
+                                                ],
+                                                "jgnShow": "pair(pair($rootCA,pair($CA,pair(pkCA,pair('pubKey-CA',pair(snCA,pair($i0,$j0)))))),ca_sig)"
+                                            }
+                                        ],
+                                        "jgnShow": "pair(pair(pair($CA,pair($subj,pair(ke,pair('pre-cert',pair(sn,pair($i,$j)))))),cert_sig),pair(pair($rootCA,pair($CA,pair(pkCA,pair('pubKey-CA',pair(snCA,pair($i0,$j0)))))),ca_sig))"
+                                    }
+                                ]
+                            },
+                            {
+                                "jgnFactId": "action",
+                                "jgnFactMult": "",
+                                "jgnFactName": "San_ChainValidator_Invalid",
+                                "jgnFactShow": "San_ChainValidator_Invalid( )",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": []
+                            },
+                            {
+                                "jgnFactId": "action",
+                                "jgnFactMult": "",
+                                "jgnFactName": "Restr_ChainValidator_Invalid_1",
+                                "jgnFactShow": "Restr_ChainValidator_Invalid_1( verify(cert_sig, <$CA, $subj, ke, 'pre-cert', sn, $i, $j>, pkCA), verify(ca_sig, <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, pk(~skCA)))",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnFunct": "verify",
+                                        "jgnParams": [
+                                            {
+                                                "jgnConst": "cert_sig"
+                                            },
+                                            {
+                                                "jgnFunct": "pair",
+                                                "jgnParams": [
+                                                    {
+                                                        "jgnConst": "$CA"
+                                                    },
+                                                    {
+                                                        "jgnFunct": "pair",
+                                                        "jgnParams": [
+                                                            {
+                                                                "jgnConst": "$subj"
+                                                            },
+                                                            {
+                                                                "jgnFunct": "pair",
+                                                                "jgnParams": [
+                                                                    {
+                                                                        "jgnConst": "ke"
+                                                                    },
+                                                                    {
+                                                                        "jgnFunct": "pair",
+                                                                        "jgnParams": [
+                                                                            {
+                                                                                "jgnConst": "'pre-cert'"
+                                                                            },
+                                                                            {
+                                                                                "jgnFunct": "pair",
+                                                                                "jgnParams": [
+                                                                                    {
+                                                                                        "jgnConst": "sn"
+                                                                                    },
+                                                                                    {
+                                                                                        "jgnFunct": "pair",
+                                                                                        "jgnParams": [
+                                                                                            {
+                                                                                                "jgnConst": "$i"
+                                                                                            },
+                                                                                            {
+                                                                                                "jgnConst": "$j"
+                                                                                            }
+                                                                                        ],
+                                                                                        "jgnShow": "pair($i,$j)"
+                                                                                    }
+                                                                                ],
+                                                                                "jgnShow": "pair(sn,pair($i,$j))"
+                                                                            }
+                                                                        ],
+                                                                        "jgnShow": "pair('pre-cert',pair(sn,pair($i,$j)))"
+                                                                    }
+                                                                ],
+                                                                "jgnShow": "pair(ke,pair('pre-cert',pair(sn,pair($i,$j))))"
+                                                            }
+                                                        ],
+                                                        "jgnShow": "pair($subj,pair(ke,pair('pre-cert',pair(sn,pair($i,$j)))))"
+                                                    }
+                                                ],
+                                                "jgnShow": "pair($CA,pair($subj,pair(ke,pair('pre-cert',pair(sn,pair($i,$j))))))"
+                                            },
+                                            {
+                                                "jgnConst": "pkCA"
+                                            }
+                                        ],
+                                        "jgnShow": "verify(cert_sig,pair($CA,pair($subj,pair(ke,pair('pre-cert',pair(sn,pair($i,$j)))))),pkCA)"
+                                    },
+                                    {
+                                        "jgnFunct": "verify",
+                                        "jgnParams": [
+                                            {
+                                                "jgnConst": "ca_sig"
+                                            },
+                                            {
+                                                "jgnFunct": "pair",
+                                                "jgnParams": [
+                                                    {
+                                                        "jgnConst": "$rootCA"
+                                                    },
+                                                    {
+                                                        "jgnFunct": "pair",
+                                                        "jgnParams": [
+                                                            {
+                                                                "jgnConst": "$CA"
+                                                            },
+                                                            {
+                                                                "jgnFunct": "pair",
+                                                                "jgnParams": [
+                                                                    {
+                                                                        "jgnConst": "pkCA"
+                                                                    },
+                                                                    {
+                                                                        "jgnFunct": "pair",
+                                                                        "jgnParams": [
+                                                                            {
+                                                                                "jgnConst": "'pubKey-CA'"
+                                                                            },
+                                                                            {
+                                                                                "jgnFunct": "pair",
+                                                                                "jgnParams": [
+                                                                                    {
+                                                                                        "jgnConst": "snCA"
+                                                                                    },
+                                                                                    {
+                                                                                        "jgnFunct": "pair",
+                                                                                        "jgnParams": [
+                                                                                            {
+                                                                                                "jgnConst": "$i0"
+                                                                                            },
+                                                                                            {
+                                                                                                "jgnConst": "$j0"
+                                                                                            }
+                                                                                        ],
+                                                                                        "jgnShow": "pair($i0,$j0)"
+                                                                                    }
+                                                                                ],
+                                                                                "jgnShow": "pair(snCA,pair($i0,$j0))"
+                                                                            }
+                                                                        ],
+                                                                        "jgnShow": "pair('pubKey-CA',pair(snCA,pair($i0,$j0)))"
+                                                                    }
+                                                                ],
+                                                                "jgnShow": "pair(pkCA,pair('pubKey-CA',pair(snCA,pair($i0,$j0))))"
+                                                            }
+                                                        ],
+                                                        "jgnShow": "pair($CA,pair(pkCA,pair('pubKey-CA',pair(snCA,pair($i0,$j0)))))"
+                                                    }
+                                                ],
+                                                "jgnShow": "pair($rootCA,pair($CA,pair(pkCA,pair('pubKey-CA',pair(snCA,pair($i0,$j0))))))"
+                                            },
+                                            {
+                                                "jgnFunct": "pk",
+                                                "jgnParams": [
+                                                    {
+                                                        "jgnConst": "~skCA"
+                                                    }
+                                                ],
+                                                "jgnShow": "pk(~skCA)"
+                                            }
+                                        ],
+                                        "jgnShow": "verify(ca_sig,pair($rootCA,pair($CA,pair(pkCA,pair('pubKey-CA',pair(snCA,pair($i0,$j0)))))),pk(~skCA))"
+                                    }
+                                ]
+                            }
+                        ],
+                        "jgnConcs": [],
+                        "jgnPrems": [
+                            {
+                                "jgnFactId": "#t:p0",
+                                "jgnFactMult": "",
+                                "jgnFactName": "In",
+                                "jgnFactShow": "In( <$CA, $subj, ke, 'pre-cert', sn, $i, $j> )",
+                                "jgnFactTag": "InFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnFunct": "pair",
+                                        "jgnParams": [
+                                            {
+                                                "jgnConst": "$CA"
+                                            },
+                                            {
+                                                "jgnFunct": "pair",
+                                                "jgnParams": [
+                                                    {
+                                                        "jgnConst": "$subj"
+                                                    },
+                                                    {
+                                                        "jgnFunct": "pair",
+                                                        "jgnParams": [
+                                                            {
+                                                                "jgnConst": "ke"
+                                                            },
+                                                            {
+                                                                "jgnFunct": "pair",
+                                                                "jgnParams": [
+                                                                    {
+                                                                        "jgnConst": "'pre-cert'"
+                                                                    },
+                                                                    {
+                                                                        "jgnFunct": "pair",
+                                                                        "jgnParams": [
+                                                                            {
+                                                                                "jgnConst": "sn"
+                                                                            },
+                                                                            {
+                                                                                "jgnFunct": "pair",
+                                                                                "jgnParams": [
+                                                                                    {
+                                                                                        "jgnConst": "$i"
+                                                                                    },
+                                                                                    {
+                                                                                        "jgnConst": "$j"
+                                                                                    }
+                                                                                ],
+                                                                                "jgnShow": "pair($i,$j)"
+                                                                            }
+                                                                        ],
+                                                                        "jgnShow": "pair(sn,pair($i,$j))"
+                                                                    }
+                                                                ],
+                                                                "jgnShow": "pair('pre-cert',pair(sn,pair($i,$j)))"
+                                                            }
+                                                        ],
+                                                        "jgnShow": "pair(ke,pair('pre-cert',pair(sn,pair($i,$j))))"
+                                                    }
+                                                ],
+                                                "jgnShow": "pair($subj,pair(ke,pair('pre-cert',pair(sn,pair($i,$j)))))"
+                                            }
+                                        ],
+                                        "jgnShow": "pair($CA,pair($subj,pair(ke,pair('pre-cert',pair(sn,pair($i,$j))))))"
+                                    }
+                                ]
+                            },
+                            {
+                                "jgnFactId": "#t:p1",
+                                "jgnFactMult": "",
+                                "jgnFactName": "In",
+                                "jgnFactShow": "In( cert_sig )",
+                                "jgnFactTag": "InFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "cert_sig"
+                                    }
+                                ]
+                            },
+                            {
+                                "jgnFactId": "#t:p2",
+                                "jgnFactMult": "",
+                                "jgnFactName": "In",
+                                "jgnFactShow": "In( <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0> )",
+                                "jgnFactTag": "InFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnFunct": "pair",
+                                        "jgnParams": [
+                                            {
+                                                "jgnConst": "$rootCA"
+                                            },
+                                            {
+                                                "jgnFunct": "pair",
+                                                "jgnParams": [
+                                                    {
+                                                        "jgnConst": "$CA"
+                                                    },
+                                                    {
+                                                        "jgnFunct": "pair",
+                                                        "jgnParams": [
+                                                            {
+                                                                "jgnConst": "pkCA"
+                                                            },
+                                                            {
+                                                                "jgnFunct": "pair",
+                                                                "jgnParams": [
+                                                                    {
+                                                                        "jgnConst": "'pubKey-CA'"
+                                                                    },
+                                                                    {
+                                                                        "jgnFunct": "pair",
+                                                                        "jgnParams": [
+                                                                            {
+                                                                                "jgnConst": "snCA"
+                                                                            },
+                                                                            {
+                                                                                "jgnFunct": "pair",
+                                                                                "jgnParams": [
+                                                                                    {
+                                                                                        "jgnConst": "$i0"
+                                                                                    },
+                                                                                    {
+                                                                                        "jgnConst": "$j0"
+                                                                                    }
+                                                                                ],
+                                                                                "jgnShow": "pair($i0,$j0)"
+                                                                            }
+                                                                        ],
+                                                                        "jgnShow": "pair(snCA,pair($i0,$j0))"
+                                                                    }
+                                                                ],
+                                                                "jgnShow": "pair('pubKey-CA',pair(snCA,pair($i0,$j0)))"
+                                                            }
+                                                        ],
+                                                        "jgnShow": "pair(pkCA,pair('pubKey-CA',pair(snCA,pair($i0,$j0))))"
+                                                    }
+                                                ],
+                                                "jgnShow": "pair($CA,pair(pkCA,pair('pubKey-CA',pair(snCA,pair($i0,$j0)))))"
+                                            }
+                                        ],
+                                        "jgnShow": "pair($rootCA,pair($CA,pair(pkCA,pair('pubKey-CA',pair(snCA,pair($i0,$j0))))))"
+                                    }
+                                ]
+                            },
+                            {
+                                "jgnFactId": "#t:p3",
+                                "jgnFactMult": "",
+                                "jgnFactName": "In",
+                                "jgnFactShow": "In( ca_sig )",
+                                "jgnFactTag": "InFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "ca_sig"
+                                    }
+                                ]
+                            },
+                            {
+                                "jgnFactId": "#t:p4",
+                                "jgnFactMult": "!",
+                                "jgnFactName": "!Root_CA",
+                                "jgnFactShow": "!Root_CA( $rootCA, pk(~skCA) )",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "$rootCA"
+                                    },
+                                    {
+                                        "jgnFunct": "pk",
+                                        "jgnParams": [
+                                            {
+                                                "jgnConst": "~skCA"
+                                            }
+                                        ],
+                                        "jgnShow": "pk(~skCA)"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "jgnType": "isProtocolRule"
+                },
+                {
+                    "jgnId": "#vf",
+                    "jgnLabel": "Send",
+                    "jgnMetadata": {
+                        "jgnActs": [
+                            {
+                                "jgnFactId": "action",
+                                "jgnFactMult": "",
+                                "jgnFactName": "K",
+                                "jgnFactShow": "K( <$CA, $subj, ke, 'pre-cert', sn, $i, $j> )",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnFunct": "pair",
+                                        "jgnParams": [
+                                            {
+                                                "jgnConst": "$CA"
+                                            },
+                                            {
+                                                "jgnFunct": "pair",
+                                                "jgnParams": [
+                                                    {
+                                                        "jgnConst": "$subj"
+                                                    },
+                                                    {
+                                                        "jgnFunct": "pair",
+                                                        "jgnParams": [
+                                                            {
+                                                                "jgnConst": "ke"
+                                                            },
+                                                            {
+                                                                "jgnFunct": "pair",
+                                                                "jgnParams": [
+                                                                    {
+                                                                        "jgnConst": "'pre-cert'"
+                                                                    },
+                                                                    {
+                                                                        "jgnFunct": "pair",
+                                                                        "jgnParams": [
+                                                                            {
+                                                                                "jgnConst": "sn"
+                                                                            },
+                                                                            {
+                                                                                "jgnFunct": "pair",
+                                                                                "jgnParams": [
+                                                                                    {
+                                                                                        "jgnConst": "$i"
+                                                                                    },
+                                                                                    {
+                                                                                        "jgnConst": "$j"
+                                                                                    }
+                                                                                ],
+                                                                                "jgnShow": "pair($i,$j)"
+                                                                            }
+                                                                        ],
+                                                                        "jgnShow": "pair(sn,pair($i,$j))"
+                                                                    }
+                                                                ],
+                                                                "jgnShow": "pair('pre-cert',pair(sn,pair($i,$j)))"
+                                                            }
+                                                        ],
+                                                        "jgnShow": "pair(ke,pair('pre-cert',pair(sn,pair($i,$j))))"
+                                                    }
+                                                ],
+                                                "jgnShow": "pair($subj,pair(ke,pair('pre-cert',pair(sn,pair($i,$j)))))"
+                                            }
+                                        ],
+                                        "jgnShow": "pair($CA,pair($subj,pair(ke,pair('pre-cert',pair(sn,pair($i,$j))))))"
+                                    }
+                                ]
+                            }
+                        ],
+                        "jgnConcs": [
+                            {
+                                "jgnFactId": "#vf:c0",
+                                "jgnFactMult": "",
+                                "jgnFactName": "In",
+                                "jgnFactShow": "In( <$CA, $subj, ke, 'pre-cert', sn, $i, $j> )",
+                                "jgnFactTag": "InFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnFunct": "pair",
+                                        "jgnParams": [
+                                            {
+                                                "jgnConst": "$CA"
+                                            },
+                                            {
+                                                "jgnFunct": "pair",
+                                                "jgnParams": [
+                                                    {
+                                                        "jgnConst": "$subj"
+                                                    },
+                                                    {
+                                                        "jgnFunct": "pair",
+                                                        "jgnParams": [
+                                                            {
+                                                                "jgnConst": "ke"
+                                                            },
+                                                            {
+                                                                "jgnFunct": "pair",
+                                                                "jgnParams": [
+                                                                    {
+                                                                        "jgnConst": "'pre-cert'"
+                                                                    },
+                                                                    {
+                                                                        "jgnFunct": "pair",
+                                                                        "jgnParams": [
+                                                                            {
+                                                                                "jgnConst": "sn"
+                                                                            },
+                                                                            {
+                                                                                "jgnFunct": "pair",
+                                                                                "jgnParams": [
+                                                                                    {
+                                                                                        "jgnConst": "$i"
+                                                                                    },
+                                                                                    {
+                                                                                        "jgnConst": "$j"
+                                                                                    }
+                                                                                ],
+                                                                                "jgnShow": "pair($i,$j)"
+                                                                            }
+                                                                        ],
+                                                                        "jgnShow": "pair(sn,pair($i,$j))"
+                                                                    }
+                                                                ],
+                                                                "jgnShow": "pair('pre-cert',pair(sn,pair($i,$j)))"
+                                                            }
+                                                        ],
+                                                        "jgnShow": "pair(ke,pair('pre-cert',pair(sn,pair($i,$j))))"
+                                                    }
+                                                ],
+                                                "jgnShow": "pair($subj,pair(ke,pair('pre-cert',pair(sn,pair($i,$j)))))"
+                                            }
+                                        ],
+                                        "jgnShow": "pair($CA,pair($subj,pair(ke,pair('pre-cert',pair(sn,pair($i,$j))))))"
+                                    }
+                                ]
+                            }
+                        ],
+                        "jgnPrems": [
+                            {
+                                "jgnFactId": "#vf:p0",
+                                "jgnFactMult": "!",
+                                "jgnFactName": "!KU",
+                                "jgnFactShow": "!KU( <$CA, $subj, ke, 'pre-cert', sn, $i, $j> )",
+                                "jgnFactTag": "KUFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnFunct": "pair",
+                                        "jgnParams": [
+                                            {
+                                                "jgnConst": "$CA"
+                                            },
+                                            {
+                                                "jgnFunct": "pair",
+                                                "jgnParams": [
+                                                    {
+                                                        "jgnConst": "$subj"
+                                                    },
+                                                    {
+                                                        "jgnFunct": "pair",
+                                                        "jgnParams": [
+                                                            {
+                                                                "jgnConst": "ke"
+                                                            },
+                                                            {
+                                                                "jgnFunct": "pair",
+                                                                "jgnParams": [
+                                                                    {
+                                                                        "jgnConst": "'pre-cert'"
+                                                                    },
+                                                                    {
+                                                                        "jgnFunct": "pair",
+                                                                        "jgnParams": [
+                                                                            {
+                                                                                "jgnConst": "sn"
+                                                                            },
+                                                                            {
+                                                                                "jgnFunct": "pair",
+                                                                                "jgnParams": [
+                                                                                    {
+                                                                                        "jgnConst": "$i"
+                                                                                    },
+                                                                                    {
+                                                                                        "jgnConst": "$j"
+                                                                                    }
+                                                                                ],
+                                                                                "jgnShow": "pair($i,$j)"
+                                                                            }
+                                                                        ],
+                                                                        "jgnShow": "pair(sn,pair($i,$j))"
+                                                                    }
+                                                                ],
+                                                                "jgnShow": "pair('pre-cert',pair(sn,pair($i,$j)))"
+                                                            }
+                                                        ],
+                                                        "jgnShow": "pair(ke,pair('pre-cert',pair(sn,pair($i,$j))))"
+                                                    }
+                                                ],
+                                                "jgnShow": "pair($subj,pair(ke,pair('pre-cert',pair(sn,pair($i,$j)))))"
+                                            }
+                                        ],
+                                        "jgnShow": "pair($CA,pair($subj,pair(ke,pair('pre-cert',pair(sn,pair($i,$j))))))"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "jgnType": "isIntruderRule"
+                },
+                {
+                    "jgnId": "#vr",
+                    "jgnLabel": "Root_CA_Init",
+                    "jgnMetadata": {
+                        "jgnActs": [
+                            {
+                                "jgnFactId": "action",
+                                "jgnFactMult": "",
+                                "jgnFactName": "CA_Registered",
+                                "jgnFactShow": "CA_Registered( $rootCA, ~skCA, pk(~skCA) )",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "$rootCA"
+                                    },
+                                    {
+                                        "jgnConst": "~skCA"
+                                    },
+                                    {
+                                        "jgnFunct": "pk",
+                                        "jgnParams": [
+                                            {
+                                                "jgnConst": "~skCA"
+                                            }
+                                        ],
+                                        "jgnShow": "pk(~skCA)"
+                                    }
+                                ]
+                            },
+                            {
+                                "jgnFactId": "action",
+                                "jgnFactMult": "",
+                                "jgnFactName": "Root_CA_Init",
+                                "jgnFactShow": "Root_CA_Init( $rootCA )",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "$rootCA"
+                                    }
+                                ]
+                            },
+                            {
+                                "jgnFactId": "action",
+                                "jgnFactMult": "",
+                                "jgnFactName": "Time",
+                                "jgnFactShow": "Time( $now )",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "$now"
+                                    }
+                                ]
+                            },
+                            {
+                                "jgnFactId": "action",
+                                "jgnFactMult": "",
+                                "jgnFactName": "San_Root_CA_Init",
+                                "jgnFactShow": "San_Root_CA_Init( )",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": []
+                            }
+                        ],
+                        "jgnConcs": [
+                            {
+                                "jgnFactId": "#vr:c0",
+                                "jgnFactMult": "",
+                                "jgnFactName": "Out",
+                                "jgnFactShow": "Out( <$rootCA, $rootCA, pk(~skCA), 'selfCert', ~sn.1, $now, $j.1> )",
+                                "jgnFactTag": "OutFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnFunct": "pair",
+                                        "jgnParams": [
+                                            {
+                                                "jgnConst": "$rootCA"
+                                            },
+                                            {
+                                                "jgnFunct": "pair",
+                                                "jgnParams": [
+                                                    {
+                                                        "jgnConst": "$rootCA"
+                                                    },
+                                                    {
+                                                        "jgnFunct": "pair",
+                                                        "jgnParams": [
+                                                            {
+                                                                "jgnFunct": "pk",
+                                                                "jgnParams": [
+                                                                    {
+                                                                        "jgnConst": "~skCA"
+                                                                    }
+                                                                ],
+                                                                "jgnShow": "pk(~skCA)"
+                                                            },
+                                                            {
+                                                                "jgnFunct": "pair",
+                                                                "jgnParams": [
+                                                                    {
+                                                                        "jgnConst": "'selfCert'"
+                                                                    },
+                                                                    {
+                                                                        "jgnFunct": "pair",
+                                                                        "jgnParams": [
+                                                                            {
+                                                                                "jgnConst": "~sn.1"
+                                                                            },
+                                                                            {
+                                                                                "jgnFunct": "pair",
+                                                                                "jgnParams": [
+                                                                                    {
+                                                                                        "jgnConst": "$now"
+                                                                                    },
+                                                                                    {
+                                                                                        "jgnConst": "$j.1"
+                                                                                    }
+                                                                                ],
+                                                                                "jgnShow": "pair($now,$j.1)"
+                                                                            }
+                                                                        ],
+                                                                        "jgnShow": "pair(~sn.1,pair($now,$j.1))"
+                                                                    }
+                                                                ],
+                                                                "jgnShow": "pair('selfCert',pair(~sn.1,pair($now,$j.1)))"
+                                                            }
+                                                        ],
+                                                        "jgnShow": "pair(pk(~skCA),pair('selfCert',pair(~sn.1,pair($now,$j.1))))"
+                                                    }
+                                                ],
+                                                "jgnShow": "pair($rootCA,pair(pk(~skCA),pair('selfCert',pair(~sn.1,pair($now,$j.1)))))"
+                                            }
+                                        ],
+                                        "jgnShow": "pair($rootCA,pair($rootCA,pair(pk(~skCA),pair('selfCert',pair(~sn.1,pair($now,$j.1))))))"
+                                    }
+                                ]
+                            },
+                            {
+                                "jgnFactId": "#vr:c1",
+                                "jgnFactMult": "",
+                                "jgnFactName": "Out",
+                                "jgnFactShow": "Out( sign(<$rootCA, $rootCA, pk(~skCA), 'selfCert', ~sn.1, $now, $j.1>, ~skCA))",
+                                "jgnFactTag": "OutFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnFunct": "sign",
+                                        "jgnParams": [
+                                            {
+                                                "jgnFunct": "pair",
+                                                "jgnParams": [
+                                                    {
+                                                        "jgnConst": "$rootCA"
+                                                    },
+                                                    {
+                                                        "jgnFunct": "pair",
+                                                        "jgnParams": [
+                                                            {
+                                                                "jgnConst": "$rootCA"
+                                                            },
+                                                            {
+                                                                "jgnFunct": "pair",
+                                                                "jgnParams": [
+                                                                    {
+                                                                        "jgnFunct": "pk",
+                                                                        "jgnParams": [
+                                                                            {
+                                                                                "jgnConst": "~skCA"
+                                                                            }
+                                                                        ],
+                                                                        "jgnShow": "pk(~skCA)"
+                                                                    },
+                                                                    {
+                                                                        "jgnFunct": "pair",
+                                                                        "jgnParams": [
+                                                                            {
+                                                                                "jgnConst": "'selfCert'"
+                                                                            },
+                                                                            {
+                                                                                "jgnFunct": "pair",
+                                                                                "jgnParams": [
+                                                                                    {
+                                                                                        "jgnConst": "~sn.1"
+                                                                                    },
+                                                                                    {
+                                                                                        "jgnFunct": "pair",
+                                                                                        "jgnParams": [
+                                                                                            {
+                                                                                                "jgnConst": "$now"
+                                                                                            },
+                                                                                            {
+                                                                                                "jgnConst": "$j.1"
+                                                                                            }
+                                                                                        ],
+                                                                                        "jgnShow": "pair($now,$j.1)"
+                                                                                    }
+                                                                                ],
+                                                                                "jgnShow": "pair(~sn.1,pair($now,$j.1))"
+                                                                            }
+                                                                        ],
+                                                                        "jgnShow": "pair('selfCert',pair(~sn.1,pair($now,$j.1)))"
+                                                                    }
+                                                                ],
+                                                                "jgnShow": "pair(pk(~skCA),pair('selfCert',pair(~sn.1,pair($now,$j.1))))"
+                                                            }
+                                                        ],
+                                                        "jgnShow": "pair($rootCA,pair(pk(~skCA),pair('selfCert',pair(~sn.1,pair($now,$j.1)))))"
+                                                    }
+                                                ],
+                                                "jgnShow": "pair($rootCA,pair($rootCA,pair(pk(~skCA),pair('selfCert',pair(~sn.1,pair($now,$j.1))))))"
+                                            },
+                                            {
+                                                "jgnConst": "~skCA"
+                                            }
+                                        ],
+                                        "jgnShow": "sign(pair($rootCA,pair($rootCA,pair(pk(~skCA),pair('selfCert',pair(~sn.1,pair($now,$j.1)))))),~skCA)"
+                                    }
+                                ]
+                            },
+                            {
+                                "jgnFactId": "#vr:c2",
+                                "jgnFactMult": "",
+                                "jgnFactName": "Out",
+                                "jgnFactShow": "Out( <$rootCA, pk(~skCA)> )",
+                                "jgnFactTag": "OutFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnFunct": "pair",
+                                        "jgnParams": [
+                                            {
+                                                "jgnConst": "$rootCA"
+                                            },
+                                            {
+                                                "jgnFunct": "pk",
+                                                "jgnParams": [
+                                                    {
+                                                        "jgnConst": "~skCA"
+                                                    }
+                                                ],
+                                                "jgnShow": "pk(~skCA)"
+                                            }
+                                        ],
+                                        "jgnShow": "pair($rootCA,pk(~skCA))"
+                                    }
+                                ]
+                            },
+                            {
+                                "jgnFactId": "#vr:c3",
+                                "jgnFactMult": "!",
+                                "jgnFactName": "!Root_CA_s0",
+                                "jgnFactShow": "!Root_CA_s0( $rootCA, ~skCA, pk(~skCA) )",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "$rootCA"
+                                    },
+                                    {
+                                        "jgnConst": "~skCA"
+                                    },
+                                    {
+                                        "jgnFunct": "pk",
+                                        "jgnParams": [
+                                            {
+                                                "jgnConst": "~skCA"
+                                            }
+                                        ],
+                                        "jgnShow": "pk(~skCA)"
+                                    }
+                                ]
+                            },
+                            {
+                                "jgnFactId": "#vr:c4",
+                                "jgnFactMult": "!",
+                                "jgnFactName": "!Root_CA",
+                                "jgnFactShow": "!Root_CA( $rootCA, pk(~skCA) )",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "$rootCA"
+                                    },
+                                    {
+                                        "jgnFunct": "pk",
+                                        "jgnParams": [
+                                            {
+                                                "jgnConst": "~skCA"
+                                            }
+                                        ],
+                                        "jgnShow": "pk(~skCA)"
+                                    }
+                                ]
+                            }
+                        ],
+                        "jgnPrems": [
+                            {
+                                "jgnFactId": "#vr:p0",
+                                "jgnFactMult": "",
+                                "jgnFactName": "Fr",
+                                "jgnFactShow": "Fr( ~skCA )",
+                                "jgnFactTag": "FreshFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "~skCA"
+                                    }
+                                ]
+                            },
+                            {
+                                "jgnFactId": "#vr:p1",
+                                "jgnFactMult": "",
+                                "jgnFactName": "Fr",
+                                "jgnFactShow": "Fr( ~sn.1 )",
+                                "jgnFactTag": "FreshFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "~sn.1"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "jgnType": "isProtocolRule"
+                },
+                {
+                    "jgnId": "#vf.1",
+                    "jgnLabel": "Send",
+                    "jgnMetadata": {
+                        "jgnActs": [
+                            {
+                                "jgnFactId": "action",
+                                "jgnFactMult": "",
+                                "jgnFactName": "K",
+                                "jgnFactShow": "K( cert_sig )",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "cert_sig"
+                                    }
+                                ]
+                            }
+                        ],
+                        "jgnConcs": [
+                            {
+                                "jgnFactId": "#vf.1:c0",
+                                "jgnFactMult": "",
+                                "jgnFactName": "In",
+                                "jgnFactShow": "In( cert_sig )",
+                                "jgnFactTag": "InFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "cert_sig"
+                                    }
+                                ]
+                            }
+                        ],
+                        "jgnPrems": [
+                            {
+                                "jgnFactId": "#vf.1:p0",
+                                "jgnFactMult": "!",
+                                "jgnFactName": "!KU",
+                                "jgnFactShow": "!KU( cert_sig )",
+                                "jgnFactTag": "KUFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "cert_sig"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "jgnType": "isIntruderRule"
+                },
+                {
+                    "jgnId": "#vf.2",
+                    "jgnLabel": "Send",
+                    "jgnMetadata": {
+                        "jgnActs": [
+                            {
+                                "jgnFactId": "action",
+                                "jgnFactMult": "",
+                                "jgnFactName": "K",
+                                "jgnFactShow": "K( <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0> )",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnFunct": "pair",
+                                        "jgnParams": [
+                                            {
+                                                "jgnConst": "$rootCA"
+                                            },
+                                            {
+                                                "jgnFunct": "pair",
+                                                "jgnParams": [
+                                                    {
+                                                        "jgnConst": "$CA"
+                                                    },
+                                                    {
+                                                        "jgnFunct": "pair",
+                                                        "jgnParams": [
+                                                            {
+                                                                "jgnConst": "pkCA"
+                                                            },
+                                                            {
+                                                                "jgnFunct": "pair",
+                                                                "jgnParams": [
+                                                                    {
+                                                                        "jgnConst": "'pubKey-CA'"
+                                                                    },
+                                                                    {
+                                                                        "jgnFunct": "pair",
+                                                                        "jgnParams": [
+                                                                            {
+                                                                                "jgnConst": "snCA"
+                                                                            },
+                                                                            {
+                                                                                "jgnFunct": "pair",
+                                                                                "jgnParams": [
+                                                                                    {
+                                                                                        "jgnConst": "$i0"
+                                                                                    },
+                                                                                    {
+                                                                                        "jgnConst": "$j0"
+                                                                                    }
+                                                                                ],
+                                                                                "jgnShow": "pair($i0,$j0)"
+                                                                            }
+                                                                        ],
+                                                                        "jgnShow": "pair(snCA,pair($i0,$j0))"
+                                                                    }
+                                                                ],
+                                                                "jgnShow": "pair('pubKey-CA',pair(snCA,pair($i0,$j0)))"
+                                                            }
+                                                        ],
+                                                        "jgnShow": "pair(pkCA,pair('pubKey-CA',pair(snCA,pair($i0,$j0))))"
+                                                    }
+                                                ],
+                                                "jgnShow": "pair($CA,pair(pkCA,pair('pubKey-CA',pair(snCA,pair($i0,$j0)))))"
+                                            }
+                                        ],
+                                        "jgnShow": "pair($rootCA,pair($CA,pair(pkCA,pair('pubKey-CA',pair(snCA,pair($i0,$j0))))))"
+                                    }
+                                ]
+                            }
+                        ],
+                        "jgnConcs": [
+                            {
+                                "jgnFactId": "#vf.2:c0",
+                                "jgnFactMult": "",
+                                "jgnFactName": "In",
+                                "jgnFactShow": "In( <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0> )",
+                                "jgnFactTag": "InFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnFunct": "pair",
+                                        "jgnParams": [
+                                            {
+                                                "jgnConst": "$rootCA"
+                                            },
+                                            {
+                                                "jgnFunct": "pair",
+                                                "jgnParams": [
+                                                    {
+                                                        "jgnConst": "$CA"
+                                                    },
+                                                    {
+                                                        "jgnFunct": "pair",
+                                                        "jgnParams": [
+                                                            {
+                                                                "jgnConst": "pkCA"
+                                                            },
+                                                            {
+                                                                "jgnFunct": "pair",
+                                                                "jgnParams": [
+                                                                    {
+                                                                        "jgnConst": "'pubKey-CA'"
+                                                                    },
+                                                                    {
+                                                                        "jgnFunct": "pair",
+                                                                        "jgnParams": [
+                                                                            {
+                                                                                "jgnConst": "snCA"
+                                                                            },
+                                                                            {
+                                                                                "jgnFunct": "pair",
+                                                                                "jgnParams": [
+                                                                                    {
+                                                                                        "jgnConst": "$i0"
+                                                                                    },
+                                                                                    {
+                                                                                        "jgnConst": "$j0"
+                                                                                    }
+                                                                                ],
+                                                                                "jgnShow": "pair($i0,$j0)"
+                                                                            }
+                                                                        ],
+                                                                        "jgnShow": "pair(snCA,pair($i0,$j0))"
+                                                                    }
+                                                                ],
+                                                                "jgnShow": "pair('pubKey-CA',pair(snCA,pair($i0,$j0)))"
+                                                            }
+                                                        ],
+                                                        "jgnShow": "pair(pkCA,pair('pubKey-CA',pair(snCA,pair($i0,$j0))))"
+                                                    }
+                                                ],
+                                                "jgnShow": "pair($CA,pair(pkCA,pair('pubKey-CA',pair(snCA,pair($i0,$j0)))))"
+                                            }
+                                        ],
+                                        "jgnShow": "pair($rootCA,pair($CA,pair(pkCA,pair('pubKey-CA',pair(snCA,pair($i0,$j0))))))"
+                                    }
+                                ]
+                            }
+                        ],
+                        "jgnPrems": [
+                            {
+                                "jgnFactId": "#vf.2:p0",
+                                "jgnFactMult": "!",
+                                "jgnFactName": "!KU",
+                                "jgnFactShow": "!KU( <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0> )",
+                                "jgnFactTag": "KUFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnFunct": "pair",
+                                        "jgnParams": [
+                                            {
+                                                "jgnConst": "$rootCA"
+                                            },
+                                            {
+                                                "jgnFunct": "pair",
+                                                "jgnParams": [
+                                                    {
+                                                        "jgnConst": "$CA"
+                                                    },
+                                                    {
+                                                        "jgnFunct": "pair",
+                                                        "jgnParams": [
+                                                            {
+                                                                "jgnConst": "pkCA"
+                                                            },
+                                                            {
+                                                                "jgnFunct": "pair",
+                                                                "jgnParams": [
+                                                                    {
+                                                                        "jgnConst": "'pubKey-CA'"
+                                                                    },
+                                                                    {
+                                                                        "jgnFunct": "pair",
+                                                                        "jgnParams": [
+                                                                            {
+                                                                                "jgnConst": "snCA"
+                                                                            },
+                                                                            {
+                                                                                "jgnFunct": "pair",
+                                                                                "jgnParams": [
+                                                                                    {
+                                                                                        "jgnConst": "$i0"
+                                                                                    },
+                                                                                    {
+                                                                                        "jgnConst": "$j0"
+                                                                                    }
+                                                                                ],
+                                                                                "jgnShow": "pair($i0,$j0)"
+                                                                            }
+                                                                        ],
+                                                                        "jgnShow": "pair(snCA,pair($i0,$j0))"
+                                                                    }
+                                                                ],
+                                                                "jgnShow": "pair('pubKey-CA',pair(snCA,pair($i0,$j0)))"
+                                                            }
+                                                        ],
+                                                        "jgnShow": "pair(pkCA,pair('pubKey-CA',pair(snCA,pair($i0,$j0))))"
+                                                    }
+                                                ],
+                                                "jgnShow": "pair($CA,pair(pkCA,pair('pubKey-CA',pair(snCA,pair($i0,$j0)))))"
+                                            }
+                                        ],
+                                        "jgnShow": "pair($rootCA,pair($CA,pair(pkCA,pair('pubKey-CA',pair(snCA,pair($i0,$j0))))))"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "jgnType": "isIntruderRule"
+                },
+                {
+                    "jgnId": "#vf.3",
+                    "jgnLabel": "Send",
+                    "jgnMetadata": {
+                        "jgnActs": [
+                            {
+                                "jgnFactId": "action",
+                                "jgnFactMult": "",
+                                "jgnFactName": "K",
+                                "jgnFactShow": "K( ca_sig )",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "ca_sig"
+                                    }
+                                ]
+                            }
+                        ],
+                        "jgnConcs": [
+                            {
+                                "jgnFactId": "#vf.3:c0",
+                                "jgnFactMult": "",
+                                "jgnFactName": "In",
+                                "jgnFactShow": "In( ca_sig )",
+                                "jgnFactTag": "InFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "ca_sig"
+                                    }
+                                ]
+                            }
+                        ],
+                        "jgnPrems": [
+                            {
+                                "jgnFactId": "#vf.3:p0",
+                                "jgnFactMult": "!",
+                                "jgnFactName": "!KU",
+                                "jgnFactShow": "!KU( ca_sig )",
+                                "jgnFactTag": "KUFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "ca_sig"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "jgnType": "isIntruderRule"
+                },
+                {
+                    "jgnId": "#vk.7",
+                    "jgnLabel": "!KU( ke )",
+                    "jgnMetadata": {
+                        "jgnActs": [
+                            {
+                                "jgnFactId": "action",
+                                "jgnFactMult": "!",
+                                "jgnFactName": "!KU",
+                                "jgnFactShow": "!KU( ke )",
+                                "jgnFactTag": "KUFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "ke"
+                                    }
+                                ]
+                            }
+                        ],
+                        "jgnConcs": [],
+                        "jgnPrems": []
+                    },
+                    "jgnType": "unsolvedActionAtom"
+                },
+                {
+                    "jgnId": "#vk.11",
+                    "jgnLabel": "!KU( sn )",
+                    "jgnMetadata": {
+                        "jgnActs": [
+                            {
+                                "jgnFactId": "action",
+                                "jgnFactMult": "!",
+                                "jgnFactName": "!KU",
+                                "jgnFactShow": "!KU( sn )",
+                                "jgnFactTag": "KUFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "sn"
+                                    }
+                                ]
+                            }
+                        ],
+                        "jgnConcs": [],
+                        "jgnPrems": []
+                    },
+                    "jgnType": "unsolvedActionAtom"
+                },
+                {
+                    "jgnId": "#vk.15",
+                    "jgnLabel": "!KU( cert_sig )",
+                    "jgnMetadata": {
+                        "jgnActs": [
+                            {
+                                "jgnFactId": "action",
+                                "jgnFactMult": "!",
+                                "jgnFactName": "!KU",
+                                "jgnFactShow": "!KU( cert_sig )",
+                                "jgnFactTag": "KUFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "cert_sig"
+                                    }
+                                ]
+                            }
+                        ],
+                        "jgnConcs": [],
+                        "jgnPrems": []
+                    },
+                    "jgnType": "unsolvedActionAtom"
+                },
+                {
+                    "jgnId": "#vk.18",
+                    "jgnLabel": "!KU( pkCA )",
+                    "jgnMetadata": {
+                        "jgnActs": [
+                            {
+                                "jgnFactId": "action",
+                                "jgnFactMult": "!",
+                                "jgnFactName": "!KU",
+                                "jgnFactShow": "!KU( pkCA )",
+                                "jgnFactTag": "KUFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "pkCA"
+                                    }
+                                ]
+                            }
+                        ],
+                        "jgnConcs": [],
+                        "jgnPrems": []
+                    },
+                    "jgnType": "unsolvedActionAtom"
+                },
+                {
+                    "jgnId": "#vk.22",
+                    "jgnLabel": "!KU( snCA )",
+                    "jgnMetadata": {
+                        "jgnActs": [
+                            {
+                                "jgnFactId": "action",
+                                "jgnFactMult": "!",
+                                "jgnFactName": "!KU",
+                                "jgnFactShow": "!KU( snCA )",
+                                "jgnFactTag": "KUFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "snCA"
+                                    }
+                                ]
+                            }
+                        ],
+                        "jgnConcs": [],
+                        "jgnPrems": []
+                    },
+                    "jgnType": "unsolvedActionAtom"
+                },
+                {
+                    "jgnId": "#vk.26",
+                    "jgnLabel": "!KU( ca_sig )",
+                    "jgnMetadata": {
+                        "jgnActs": [
+                            {
+                                "jgnFactId": "action",
+                                "jgnFactMult": "!",
+                                "jgnFactName": "!KU",
+                                "jgnFactShow": "!KU( ca_sig )",
+                                "jgnFactTag": "KUFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "ca_sig"
+                                    }
+                                ]
+                            }
+                        ],
+                        "jgnConcs": [],
+                        "jgnPrems": []
+                    },
+                    "jgnType": "unsolvedActionAtom"
+                }
+            ],
+            "jgType": "Tamarin prover constraint system"
+        }
+    ]
+}

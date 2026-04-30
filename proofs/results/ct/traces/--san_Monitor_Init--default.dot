@@ -1,0 +1,8 @@
+digraph "trace_ct_SL2-AS0-CL0-A1-C1-NB_san_Monitor_Init" {
+nodesep="0.3";
+ranksep="0.3";
+node[fontsize="8",fontname="Helvetica",width="0.3",height="0.2"];
+edge[fontsize="8",fontname="Helvetica"];
+n2[shape="record",label="{{<n0> #t : Monitor_Init[Monitor_Registered( $M ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Time( $now ),\l&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;San_Monitor_Init( )]\l}|{<n1> !Monitor( $M )}}",fillcolor="#d5d897",style="filled",fontcolor="black",role="Undefined"];
+
+}
