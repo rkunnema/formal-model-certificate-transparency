@@ -1484,7 +1484,7 @@ In this variant, the monitor performs an audit where it got the SCT externally (
 Result: autoprovable
 The monitor knows about the certificate thanks to the audited certificate. If after the given timestamp the certificate is still not included, that allows easy blaming as done as part of the SCTAuditTransparencyCheck.
 */
-lemma T_Audit:
+<span class="keyword">lemma</span> <a name="lem:T_Audit"></a><span class="lemma.identifier">T_Audit</span><span class="punctuation">:</span>
     audit_inclusionViol accounts for
     &#34;All CA fields rootCA ca_fields L1 L2 L #t1 #t2.
         BrowserAcceptsChain(CA, fields, rootCA, ca_fields, L1, L2)@t1
@@ -1535,7 +1535,7 @@ lemma T_Audit:
 /*
 CTAudit Scenario 1: Monitor receives a certificate via auditing (shared by some client) and checks authenticity on it. Then further distinguishes between the cases where the CA is documented or not (wrt the root CA) and blames accordingly (as before).
 */
-lemma A_CTAudit_1:
+<span class="keyword">lemma</span> <a name="lem:A_CTAudit_1"></a><span class="lemma.identifier">A_CTAudit_1</span><span class="punctuation">:</span>
     ca_rogue_audit_mon_honest, root_ca_rogue_audit_mon_honest accounts for
     &#34;All CA fields rootCA ca_fields L1 L2 M #t0 #t1. 
         SCTAuditCheck(M, fields, ca_fields)@t0
@@ -1563,7 +1563,7 @@ lemma A_CTAudit_1:
 /* CTAudit Scenario 2: 
 
 This version allows the monitor to sleep. It is a counterexample to the previous one. */
-lemma A_CTAudit_2:
+<span class="keyword">lemma</span> <a name="lem:A_CTAudit_2"></a><span class="lemma.identifier">A_CTAudit_2</span><span class="punctuation">:</span>
     ca_rogue_audit, root_ca_rogue_audit accounts for
     &#34;All CA fields rootCA ca_fields L1 L2 M #t0 #t1. 
         SCTAuditCheck(M, fields, ca_fields)@t0
