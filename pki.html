@@ -47,7 +47,7 @@ equations:
 /** Specification **/
 
 /* Register a root CA that will later sign other intermediate CA certificates. */
-<span class="keyword">rule</span> <a name="rule:Root_CA_Init"></a><span class="rule.identifier">Root_CA_Init</span> [color= #620c97]<a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">rule</span> <a name="rule:Root_CA_Init"></a><span class="rule.identifier">Root_CA_Init</span> [color= #620c97]<span class="punctuation">:</span>
     let 
         fields = &lt;$CA, $CA, pk(~skCA), &#39;selfCert&#39;, ~sn, $now, $j&gt;
         self_sig = sign(fields, ~skCA)
@@ -68,7 +68,7 @@ equations:
 /* Register a CA that will later sign other certificates. This CA is assumed to be non-root and has its own certificate signed by a root CA.
 Intermediate CAs created by this rule are defined as legitimate and they are documented by their root CA. See later discussions for checks that require the !CA_Documentation fact.
 */
-<span class="keyword">rule</span> <a name="rule:Intermediate_CA_Init"></a><span class="rule.identifier">Intermediate_CA_Init</span> [color= #c871ff]<a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">rule</span> <a name="rule:Intermediate_CA_Init"></a><span class="rule.identifier">Intermediate_CA_Init</span> [color= #c871ff]<span class="punctuation">:</span>
     let 
         fields = &lt;$rootCA, $CA, pk(~skCA), &#39;pubKey-CA&#39;, ~sn, $now, $j&gt;
         self_sig = sign(fields, skRootCA)
@@ -87,7 +87,7 @@ Intermediate CAs created by this rule are defined as legitimate and they are doc
         !CA_s0($CA, ~skCA, pk(~skCA), fields, self_sig), !CA_Documentation($rootCA, $CA, fields, self_sig) ]
 
 /* The domain owner represents the party on the web, running a server with some DNS name / Common Name (CN) with a key pair that needs certification by some CA. It is treated like a web server that needs a certificate in order to hand it out to visiting clients; performing a key exchange subsequently. */
-<span class="keyword">rule</span> <a name="rule:Domain_Owner_Init"></a><span class="rule.identifier">Domain_Owner_Init</span> [color= #c6c6c6]<a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">rule</span> <a name="rule:Domain_Owner_Init"></a><span class="rule.identifier">Domain_Owner_Init</span> [color= #c6c6c6]<span class="punctuation">:</span>
     let
         pubK = pk(~sk)
     in
@@ -113,7 +113,7 @@ CA &#34;checks&#34; (e.g. domain ownership challenge as in Let&#39;s Encrypt) id
 The DomainOwner fact serves as a proof of identity, so we assume that invoking this always happens on DO&#39;s behalf. 
 Rogue certificates are not issued using this fact but instead by the network attacker using the CA&#39;s key (requires CA corruption).
 */
-<span class="keyword">rule</span> <a name="rule:PubKeyCertify"></a><span class="rule.identifier">PubKeyCertify</span> [color= #c871ff]<a name="lem::"></a><span class="lemma.identifier">:</span> 
+<span class="keyword">rule</span> <a name="rule:PubKeyCertify"></a><span class="rule.identifier">PubKeyCertify</span> [color= #c871ff]<span class="punctuation">:</span> 
     let
         fields = &lt;$CA, $id, pkID, &#39;pubKey&#39;, ~sn, $now, $j&gt;
         fields_sig = sign(fields, skCA)
@@ -130,7 +130,7 @@ Rogue certificates are not issued using this fact but instead by the network att
     [ Out(fields), Out(fields_sig), Certificate_Store($CA, cert), Out(ca_fields), Out(ca_sig) ]
 
 //NOTE: rule is inlined, please keep &#34;check&#34; comments and linebreaks
-<span class="keyword">rule</span> <a name="rule:ClientValidate"></a><span class="rule.identifier">ClientValidate</span> [color= #f2ce03]<a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">rule</span> <a name="rule:ClientValidate"></a><span class="rule.identifier">ClientValidate</span> [color= #f2ce03]<span class="punctuation">:</span>
 let
     ca_fields = &lt;$rootCA,$CA,pkCA,&#39;pubKey-CA&#39;,
                  snCA,$i0,$j0&gt;
@@ -160,7 +160,8 @@ rule ConsultDocumentation_Success:
         ca_fields = &lt;$rootCA, $CA, pkCA, &#39;pubKey-CA&#39;, sn, $i, $j&gt;
         ca_cert = &lt;ca_fields, ca_sig&gt;
     in
-    [ In(ca_fields), In(ca_sig), !Root_CA($rootCA, pkRCA), !CA_Documentation($rootCA, $CA, ca_fields, ca_sig) /* proof of legitimacy handed out earlier when using the honest issuing process */ ]
+    [ In(ca_fields), In(ca_sig), !Root_CA($rootCA, pkRCA), !CA_Documentation($rootCA, $CA, ca_fields, ca_sig) // proof of legitimacy handed out earlier when using the honest issuing process
+     ]
     --[
         Eq(verify(ca_sig, ca_fields, pkRCA), true()), // signed by root CA
         Asserts($rootCA, &#39;I signed this intermediate CA.&#39;, $CA, &lt;ca_fields&gt;),
@@ -171,7 +172,7 @@ rule ConsultDocumentation_Success:
     ]-&gt;
     [ CCADBConsulted($rootCA, ca_fields) ]
 
-<span class="keyword">rule</span> <a name="rule:ConsultDocumentation_Fails"></a><span class="rule.identifier">ConsultDocumentation_Fails</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">rule</span> <a name="rule:ConsultDocumentation_Fails"></a><span class="rule.identifier">ConsultDocumentation_Fails</span><span class="punctuation">:</span>
     let
         ca_fields = &lt;$rootCA, $CA, pkCA, &#39;pubKey-CA&#39;, sn, $i, $j&gt;
         ca_cert = &lt;ca_fields, ca_sig&gt;
@@ -203,7 +204,7 @@ ExternalAuditorCheck(). Contributed evidence
 - CCADB: to determine whether a CA certificate is documented or not
 - Network: a fully signed certificate (we discuss that this is a strong assumption since it does not address where the certificate is found which is a lot more relevant in practice and ultimatively led to the development of CT logs)
 */
-<span class="keyword">rule</span> <a name="rule:external_check_true"></a><span class="rule.identifier">external_check_true</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">rule</span> <a name="rule:external_check_true"></a><span class="rule.identifier">external_check_true</span><span class="punctuation">:</span>
     let
         fields = &lt;$CA, $id, pkID, &#39;pubKey&#39;, sn, $i, $j&gt;
         ca_fields = &lt;$rootCA, $CA, pkCA, &#39;pubKey-CA&#39;, snCA, $i0, $j0&gt;
@@ -223,7 +224,7 @@ ExternalAuditorCheck(). Contributed evidence
     ]-&gt;
     [ ] 
 
-<span class="keyword">rule</span> <a name="rule:external_check_false"></a><span class="rule.identifier">external_check_false</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">rule</span> <a name="rule:external_check_false"></a><span class="rule.identifier">external_check_false</span><span class="punctuation">:</span>
     let
         fields = &lt;$CA, $id, pkID, &#39;pubKey&#39;, sn, $i, $j&gt;
         ca_fields = &lt;$rootCA, $CA, pkCA, &#39;pubKey-CA&#39;, snCA, $i0, $j0&gt;
@@ -276,7 +277,7 @@ ExternalAuditorCheck(). Contributed evidence
 /* ----------- Compromise Rules ----------- */
 
 /* CA key leakage */
-<span class="keyword">rule</span> <a name="rule:compromiseCA"></a><span class="rule.identifier">compromiseCA</span> [color= #d40808 ]<a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">rule</span> <a name="rule:compromiseCA"></a><span class="rule.identifier">compromiseCA</span> [color= #d40808 ]<span class="punctuation">:</span>
     [!CA_s0($CA, ~skCA, pk(~skCA), ca_fields, CA_sig)] 
     --[ 
         CompromiseCA($CA), 
@@ -289,7 +290,7 @@ ExternalAuditorCheck(). Contributed evidence
     [ Out(~skCA) ] 
 
 /* Root CA key leakage */
-<span class="keyword">rule</span> <a name="rule:compromiseRootCA"></a><span class="rule.identifier">compromiseRootCA</span> [color= #d40808 ]<a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">rule</span> <a name="rule:compromiseRootCA"></a><span class="rule.identifier">compromiseRootCA</span> [color= #d40808 ]<span class="punctuation">:</span>
     [ !Root_CA_s0($CA, skCA, pkCA) ] 
     --[ 
         CompromiseRootCA($CA), 
@@ -307,76 +308,76 @@ ExternalAuditorCheck(). Contributed evidence
 Sanity lemmas: These lemmas are not security properties but rather sanity checks that the model is correctly set up. They check that the main events of the protocol can actually happen without any compromise. Exception are rules that are only triggered by a compromise, for which we allow the compromise event to happen.
 */
 
-<span class="keyword">lemma</span> <span class="punctuation">san_Root_CA_Init</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">lemma</span> <a name="lem:san_Root_CA_Init"></a><span class="lemma.identifier">san_Root_CA_Init</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_Root_CA_Init()@t
 	&amp; not (Ex #t. Compromise()@t)
 &#34;
 
-<span class="keyword">lemma</span> <span class="punctuation">san_Intermediate_CA_Init</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">lemma</span> <a name="lem:san_Intermediate_CA_Init"></a><span class="lemma.identifier">san_Intermediate_CA_Init</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_Intermediate_CA_Init()@t
 	&amp; not (Ex #t. Compromise()@t)
 &#34;
 
-<span class="keyword">lemma</span> <span class="punctuation">san_Domain_Owner_Init</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">lemma</span> <a name="lem:san_Domain_Owner_Init"></a><span class="lemma.identifier">san_Domain_Owner_Init</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_Domain_Owner_Init()@t
 	&amp; not (Ex #t. Compromise()@t)
 &#34;
 
-<span class="keyword">lemma</span> <span class="punctuation">san_PubKeyCertify</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">lemma</span> <a name="lem:san_PubKeyCertify"></a><span class="lemma.identifier">san_PubKeyCertify</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_PubKeyCertify()@t
 	&amp; not (Ex #t. Compromise()@t)
 &#34;
 
-<span class="keyword">lemma</span> <span class="punctuation">san_ClientValidate</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">lemma</span> <a name="lem:san_ClientValidate"></a><span class="lemma.identifier">san_ClientValidate</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t ca fields rootCA ca_fields. 
         BrowserAcceptsChain(ca,fields,rootCA,ca_fields)@t
 	&amp; not (Ex #t. Compromise()@t)
 &#34;
 
-<span class="keyword">lemma</span> <span class="punctuation">san_ConsultDocumentation_Success</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">lemma</span> <a name="lem:san_ConsultDocumentation_Success"></a><span class="lemma.identifier">san_ConsultDocumentation_Success</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_ConsultDocumentation_Success()@t
 	&amp; not (Ex #t. Compromise()@t)
 &#34;
 
-<span class="keyword">lemma</span> <span class="punctuation">san_ConsultDocumentation_Fails</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">lemma</span> <a name="lem:san_ConsultDocumentation_Fails"></a><span class="lemma.identifier">san_ConsultDocumentation_Fails</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_ConsultDocumentation_Fails()@t
 	&amp; (All #t. Compromise()@t ==&gt; (Ex rootCA. CompromiseRootCA(rootCA)@t))
 &#34;
 
-<span class="keyword">lemma</span> <span class="punctuation">san_external_check_true</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">lemma</span> <a name="lem:san_external_check_true"></a><span class="lemma.identifier">san_external_check_true</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_external_check_true()@t
 	&amp; not (Ex #t. Compromise()@t)
 &#34;
 
-<span class="keyword">lemma</span> <span class="punctuation">san_external_check_false</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">lemma</span> <a name="lem:san_external_check_false"></a><span class="lemma.identifier">san_external_check_false</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_external_check_false()@t
 	&amp; (All #t. Compromise()@t ==&gt; (Ex CA. CompromiseCA(CA)@t))
 &#34;
 
-<span class="keyword">lemma</span> <span class="punctuation">san_compromiseCA</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">lemma</span> <a name="lem:san_compromiseCA"></a><span class="lemma.identifier">san_compromiseCA</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_compromiseCA()@t
 &#34;
 
-<span class="keyword">lemma</span> <span class="punctuation">san_compromiseRootCA</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">lemma</span> <a name="lem:san_compromiseRootCA"></a><span class="lemma.identifier">san_compromiseRootCA</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_compromiseRootCA()@t
@@ -386,19 +387,19 @@ Sanity lemmas: These lemmas are not security properties but rather sanity checks
 
 /* Authenticity */
 
-<span class="keyword">lemma</span> <span class="punctuation">CA_auth_w_compromise</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">lemma</span> <a name="lem:CA_auth_w_compromise"></a><span class="lemma.identifier">CA_auth_w_compromise</span><span class="punctuation">:</span>
     exists-trace
     &#34;(Ex rootCA ca_fields CA fields #t. BrowserAcceptsChain(CA, fields, rootCA, ca_fields)@t 
     &amp; not (Ex #t1. CAAsserts(CA, fields)@t1))&#34;
 
 // Counterexample to authenticity
-<span class="keyword">lemma</span> <span class="punctuation">authenticity</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">lemma</span> <a name="lem:authenticity"></a><span class="lemma.identifier">authenticity</span><span class="punctuation">:</span>
     exists-trace
     &#34;Ex rootCA ca_fields CA fields #j.
         BrowserAcceptsChain(CA, fields, rootCA, ca_fields)@j 
         &amp; not (Ex #i. GroundTruth(CA, fields)@i &amp; #i &lt; #j)&#34;
 
-<span class="keyword">lemma</span> <span class="punctuation">cert_auth</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">lemma</span> <a name="lem:cert_auth"></a><span class="lemma.identifier">cert_auth</span><span class="punctuation">:</span>
     &#34;All rootCA ca_fields CA fields #t. BrowserAcceptsChain(CA, fields, rootCA, ca_fields)@t ==&gt; 
                 /* If client accepted cert signed by CA */
           (Ex #t1. CAAsserts(CA, fields)@t1) 
@@ -409,15 +410,10 @@ Sanity lemmas: These lemmas are not security properties but rather sanity checks
             /* or the root CA is compromised */
     &#34;
 
-/* ======================================
-       End2End Accountable Authenticity
-   ====================================== */
-
-/* --- Accountable Authenticity with external validator --- */
 
 // auth is violated but intermediate CA cert is not documented. Thus only root CA is blamed
-test CAfalseAsserts_rootBlamed: 
-  &#34;Ex CA fields ca_fields #t0 #t1 #t2. /* rootCA free */
+<span class="keyword">test</span> <a name="test:CAfalseAsserts_rootBlamed"></a><span class="test.identifier">CAfalseAsserts_rootBlamed</span><span class="punctuation">:</span> 
+  &#34;Ex CA fields ca_fields #t0 #t1 #t2.
     Asserts(&#39;external auditor&#39;, &#39;That intermediary CA signed the following incorrect statement and the validation chain says the following about that CA.&#39;, CA, &lt;fields, ca_fields&gt;)@t0
     // assessment finds the certificate incorrect... 
     &amp; Asserts(&#39;CCADB&#39;, &#39;No root CA signed this CA.&#39;, CA, &lt;ca_fields, rootCA&gt;)@t1
@@ -426,7 +422,7 @@ test CAfalseAsserts_rootBlamed:
     &#34;
 
 // intermediate CA is documented, rootCA is not blamed but intermediate is
-test CAfalseAsserts_rootNotBlamed:
+<span class="keyword">test</span> <a name="test:CAfalseAsserts_rootNotBlamed"></a><span class="test.identifier">CAfalseAsserts_rootNotBlamed</span><span class="punctuation">:</span>
   &#34;Ex rootCA fields ca_fields #t0 #t1 #t2. /* CA free */
     /* externally we found that the assertion encoded in the certificate is untrue ... */
     Asserts(&#39;external auditor&#39;, &#39;That intermediary CA signed the following incorrect statement and the validation chain says the following about that CA.&#39;, CA, &lt;fields, ca_fields&gt;)@t0 // CA is blamed

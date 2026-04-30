@@ -1,11 +1,11 @@
 {
   "task_id": "--transparency_w_MMD_honest_log--default",
   "warnings": [],
-  "tamarin_timing": 20.24,
+  "tamarin_timing": 10.21,
   "wrapper_measures": {
-    "time": 20.419727325439453,
-    "avg_memory": 168.42652529761904,
-    "peak_memory": 247.69140625
+    "time": 10.379295825958252,
+    "avg_memory": 184.58522727272728,
+    "peak_memory": 271.765625
   },
   "output_spthy": "results/ct/proofs/--transparency_w_MMD_honest_log--default.spthy",
   "verified_lemma": {

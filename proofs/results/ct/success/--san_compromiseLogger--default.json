@@ -1,11 +1,11 @@
 {
   "task_id": "--san_compromiseLogger--default",
   "warnings": [],
-  "tamarin_timing": 15.4,
+  "tamarin_timing": 7.8,
   "wrapper_measures": {
-    "time": 15.622216939926147,
-    "avg_memory": 144.94360351562503,
-    "peak_memory": 233.97265625
+    "time": 7.9624903202056885,
+    "avg_memory": 155.748046875,
+    "peak_memory": 182.96875
   },
   "output_spthy": "results/ct/proofs/--san_compromiseLogger--default.spthy",
   "verified_lemma": {

@@ -53,7 +53,7 @@ equations:
 /** Specification **/
 
 /* Register a root CA that will later sign other intermediate CA certificates. */
-<span class="keyword">rule</span> <a name="rule:Root_CA_Init"></a><span class="rule.identifier">Root_CA_Init</span> [color= #620c97]<a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">rule</span> <a name="rule:Root_CA_Init"></a><span class="rule.identifier">Root_CA_Init</span> [color= #620c97]<span class="punctuation">:</span>
     let 
         fields = &lt;$CA, $CA, pk(~skCA), &#39;selfCert&#39;, ~sn, $now, $j&gt;
         self_sig = sign(fields, ~skCA)
@@ -74,7 +74,7 @@ equations:
 /* Register a CA that will later sign other certificates. This CA is assumed to be non-root and has its own certificate signed by a root CA.
 Intermediate CAs created by this rule are defined as legitimate and they are documented by their root CA. See later discussions for checks that require the !CA_Documentation fact.
 */
-<span class="keyword">rule</span> <a name="rule:Intermediate_CA_Init"></a><span class="rule.identifier">Intermediate_CA_Init</span> [color= #c871ff]<a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">rule</span> <a name="rule:Intermediate_CA_Init"></a><span class="rule.identifier">Intermediate_CA_Init</span> [color= #c871ff]<span class="punctuation">:</span>
     let 
         fields = &lt;$rootCA, $CA, pk(~skCA), &#39;pubKey-CA&#39;, ~sn, $now, $j&gt;
         self_sig = sign(fields, skRootCA)
@@ -93,7 +93,7 @@ Intermediate CAs created by this rule are defined as legitimate and they are doc
         !CA_s0($CA, ~skCA, pk(~skCA), fields, self_sig), !CA_Documentation($rootCA, $CA, fields, self_sig) ]
 
 /* The domain owner represents the party on the web, running a server with some domain / Common Name (CN) with a key pair that needs certification by some CA. It is equivalent to a HTTPS server that needs a certificate in order to hand it out to visiting clients; performing a key exchange subsequently. */
-<span class="keyword">rule</span> <a name="rule:Domain_Owner_Init"></a><span class="rule.identifier">Domain_Owner_Init</span> [color= #c6c6c6]<a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">rule</span> <a name="rule:Domain_Owner_Init"></a><span class="rule.identifier">Domain_Owner_Init</span> [color= #c6c6c6]<span class="punctuation">:</span>
     let
         pubK = pk(~sk)
     in
@@ -107,7 +107,7 @@ Intermediate CAs created by this rule are defined as legitimate and they are doc
 
 
 /* Initialize a Monitor. A Monitor will later oversee the loggers. Monitoring is either conducted by the domain owner themselves or outsourced to a dedicated entity. */
-<span class="keyword">rule</span> <a name="rule:Monitor_Init"></a><span class="rule.identifier">Monitor_Init</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">rule</span> <a name="rule:Monitor_Init"></a><span class="rule.identifier">Monitor_Init</span><span class="punctuation">:</span>
     [  ]
     --[ 
         Monitor_Registered($M),
@@ -118,7 +118,7 @@ Intermediate CAs created by this rule are defined as legitimate and they are doc
     [ !Monitor($M) ]
 
 /* Monitor can choose a logger and start the monitoring process of it. Only these known loggers will later be considered when exploring new certificates. */
-<span class="keyword">rule</span> <a name="rule:StartMonitoring"></a><span class="rule.identifier">StartMonitoring</span> [color= #ffdc4e]<a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">rule</span> <a name="rule:StartMonitoring"></a><span class="rule.identifier">StartMonitoring</span> [color= #ffdc4e]<span class="punctuation">:</span>
     [ !Monitor($M), !Logger($L, pkL) ]
     --[ 
         Time($now),
@@ -129,7 +129,7 @@ Intermediate CAs created by this rule are defined as legitimate and they are doc
 /* This rule can trigger if the logger violates the append-only property and the monitor checks for it. 
 see restriction for &#39;AppendOnlyViolation&#39;
 In CT, usually this check is not necessary to run by the monitor as they explore all entries and do not rely on STHs that much */ 
-<span class="keyword">rule</span> <a name="rule:monitorFindsAppendOnlyViolation"></a><span class="rule.identifier">monitorFindsAppendOnlyViolation</span> [color= #e65208]<a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">rule</span> <a name="rule:monitorFindsAppendOnlyViolation"></a><span class="rule.identifier">monitorFindsAppendOnlyViolation</span> [color= #e65208]<span class="punctuation">:</span>
     [ !LoggerDict($M, $L), !TLS_L_to_M($L, $M, $snapshot, sth, session, $time) ]
     --[
         AppendOnlyViolation($M, $L, sth, session),
@@ -139,7 +139,7 @@ In CT, usually this check is not necessary to run by the monitor as they explore
     ]-&gt;
     [ ]
 
-<span class="keyword">rule</span> <a name="rule:monitorVerifiesAppendOnly"></a><span class="rule.identifier">monitorVerifiesAppendOnly</span> [color= #e65208]<a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">rule</span> <a name="rule:monitorVerifiesAppendOnly"></a><span class="rule.identifier">monitorVerifiesAppendOnly</span> [color= #e65208]<span class="punctuation">:</span>
     [ !LoggerDict($M, $L), !TLS_L_to_M($L, $M, $snapshot, sth, session, $time) ]
     --[
         AppendOnlyVerified($M, $L, sth, session),
@@ -150,7 +150,7 @@ In CT, usually this check is not necessary to run by the monitor as they explore
     [ ]
 
 /* A Monitor receives a subject that it should track which means that if a certificate with this subject is contained in a log, it will compare it to the known truth. */
-<span class="keyword">rule</span> <a name="rule:monitorTrackSubject"></a><span class="rule.identifier">monitorTrackSubject</span> [color= #fac800]<a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">rule</span> <a name="rule:monitorTrackSubject"></a><span class="rule.identifier">monitorTrackSubject</span> [color= #fac800]<span class="punctuation">:</span>
     [ !Monitor($M), !DomainOwner(su, pubK) ]
     --[ 
         Time($now), 
@@ -167,7 +167,7 @@ In CT, usually this check is not necessary to run by the monitor as they explore
 /******** CT Monitor Log Exploration ********/
 
 /* We use these rules to axiomatically assert later in inclusion proof whether a chain on the log is valid or not */
-<span class="keyword">rule</span> <a name="rule:ChainValidator_Valid"></a><span class="rule.identifier">ChainValidator_Valid</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">rule</span> <a name="rule:ChainValidator_Valid"></a><span class="rule.identifier">ChainValidator_Valid</span><span class="punctuation">:</span>
     let
         ca_fields = &lt;$rootCA, $CA, pkCA, &#39;pubKey-CA&#39;, snCA, $i0, $j0&gt;
         cert_fields = &lt;$CA, $subj, ke, &#39;pre-cert&#39;, sn, $i, $j&gt;
@@ -184,7 +184,7 @@ In CT, usually this check is not necessary to run by the monitor as they explore
     ]-&gt;
     [ ]
 
-<span class="keyword">rule</span> <a name="rule:ChainValidator_Invalid"></a><span class="rule.identifier">ChainValidator_Invalid</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">rule</span> <a name="rule:ChainValidator_Invalid"></a><span class="rule.identifier">ChainValidator_Invalid</span><span class="punctuation">:</span>
     let
         ca_fields = &lt;$rootCA, $CA, pkCA, &#39;pubKey-CA&#39;, snCA, $i0, $j0&gt;
         cert_fields = &lt;$CA, $subj, ke, &#39;pre-cert&#39;, sn, $i, $j&gt;
@@ -271,7 +271,7 @@ predicate: NoChainVisible(Logger, fields, log_id, #time, sth_time) &lt;=&gt;
 
 
 
-<span class="keyword">rule</span> <a name="rule:monitorFindsRogueCertificate"></a><span class="rule.identifier">monitorFindsRogueCertificate</span> [color= #f3d664]<a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">rule</span> <a name="rule:monitorFindsRogueCertificate"></a><span class="rule.identifier">monitorFindsRogueCertificate</span> [color= #f3d664]<span class="punctuation">:</span>
     let
         ca_fields = &lt;$rootCA, $CA, pkCA, &#39;pubKey-CA&#39;, snCA, $i0, $j0&gt;
         pub_fields = &lt;$CA, $subj, ke, &#39;pubKey&#39;, sn, $i, $j, sct1, sct2&gt;
@@ -290,7 +290,7 @@ predicate: NoChainVisible(Logger, fields, log_id, #time, sth_time) &lt;=&gt;
     ]-&gt;
     [ MonitorFoundCert($M, $L, fields, $CA, ca_fields, $time, session)  ]
 
-<span class="keyword">rule</span> <a name="rule:monitorCanFindCertificate"></a><span class="rule.identifier">monitorCanFindCertificate</span> [color= #f3d664]<a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">rule</span> <a name="rule:monitorCanFindCertificate"></a><span class="rule.identifier">monitorCanFindCertificate</span> [color= #f3d664]<span class="punctuation">:</span>
     let
         ca_fields = &lt;$rootCA, $CA, pkCA, &#39;pubKey-CA&#39;, snCA, $i0, $j0&gt;
         pub_fields = &lt;$CA, $subj, ke, &#39;pubKey&#39;, sn, $i, $j, sct1, sct2&gt;
@@ -309,7 +309,7 @@ predicate: NoChainVisible(Logger, fields, log_id, #time, sth_time) &lt;=&gt;
     ]-&gt;
     [ MonitorFoundCert($M, $L, fields, $CA, ca_fields, $time, session) ]
 
-<span class="keyword">rule</span> <a name="rule:monitorCannotFindCertificate"></a><span class="rule.identifier">monitorCannotFindCertificate</span> [color= #f3d664]<a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">rule</span> <a name="rule:monitorCannotFindCertificate"></a><span class="rule.identifier">monitorCannotFindCertificate</span> [color= #f3d664]<span class="punctuation">:</span>
     let
         ca_fields = &lt;$rootCA, $CA, pkCA, &#39;pubKey-CA&#39;, snCA, $i0, $j0&gt;
         fields = &lt;$CA, $subj, ke, &#39;pubKey&#39;, sn, $i, $j&gt;
@@ -325,7 +325,7 @@ predicate: NoChainVisible(Logger, fields, log_id, #time, sth_time) &lt;=&gt;
     ]-&gt;
     [ MonitorCouldNotFindCert($M, fields, $L, $CA, ca_fields, $time, session)   ]
 
-<span class="keyword">rule</span> <a name="rule:monitorFindsRogueCertificate_Sleep"></a><span class="rule.identifier">monitorFindsRogueCertificate_Sleep</span> [color= #af2828]<a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">rule</span> <a name="rule:monitorFindsRogueCertificate_Sleep"></a><span class="rule.identifier">monitorFindsRogueCertificate_Sleep</span> [color= #af2828]<span class="punctuation">:</span>
     let
         ca_fields = &lt;$rootCA, $CA, pkCA, &#39;pubKey-CA&#39;, snCA, $i0, $j0&gt;
         fields = &lt;$CA, $subj, ke, &#39;pubKey&#39;, sn, $i, $j&gt;
@@ -353,7 +353,7 @@ The SCT is then used together with the certificate to determine whether the cert
     3. The monitor is itself malicious and sleeps on the rogue certificate instead of informing the domain owner.
 */
 
-<span class="keyword">rule</span> <a name="rule:monitorAudit_CA_Viol"></a><span class="rule.identifier">monitorAudit_CA_Viol</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">rule</span> <a name="rule:monitorAudit_CA_Viol"></a><span class="rule.identifier">monitorAudit_CA_Viol</span><span class="punctuation">:</span>
     let
 
         pub_fields = &lt;$CA, $id, pkID, &#39;pubKey&#39;, sn, $i, $j, sct1, sct2&gt;
@@ -379,7 +379,7 @@ The SCT is then used together with the certificate to determine whether the cert
     ]-&gt;
     [ CraftReceipt($M, chain), MAudit_SCT($M, $L, fields, ca_fields, $sct) ]
 
-<span class="keyword">rule</span> <a name="rule:monitorAudit_no_viol"></a><span class="rule.identifier">monitorAudit_no_viol</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">rule</span> <a name="rule:monitorAudit_no_viol"></a><span class="rule.identifier">monitorAudit_no_viol</span><span class="punctuation">:</span>
     let
         pub_fields = &lt;$CA, $id, pkID, &#39;pubKey&#39;, sn, $i, $j, sct1, sct2&gt;
         fields = &lt;$CA, $id, pkID, &#39;pubKey&#39;, sn, $i, $j&gt;
@@ -433,7 +433,7 @@ rule monitorAudit_Sleep [color= #af2828]:
 
 /* Initialize a Logger role. It will later be used to give out SCTs and STHs to others. The CT standard does not further define how authenticity of the loggers keys is ensured, e.g. Wrotniak&#39;s model uses self-signed certificates here.
 In general it is senseful to treat loggers like root CAs which we also just trust in this model. In practice, root CA keys are hardcoded in browser, the same holds for loggers. For this reason we also refrain from adding self-signed certificates here. */
-<span class="keyword">rule</span> <a name="rule:Logger_Init"></a><span class="rule.identifier">Logger_Init</span> [color= #08a358]<a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">rule</span> <a name="rule:Logger_Init"></a><span class="rule.identifier">Logger_Init</span> [color= #08a358]<span class="punctuation">:</span>
     [ Fr(~skL)  ]
     --[ 
         Logger_Registered($L),
@@ -444,7 +444,7 @@ In general it is senseful to treat loggers like root CAs which we also just trus
     [ !Logger_s($L, ~skL, pk(~skL)), !Logger($L, pk(~skL)) ]
 
 /* We use this rule to start a new log for a Logger. In the honest case, we assume that this only happens once. We distinguish between a &#39;log&#39; and a &#39;logger&#39;. A logger maintains 1 or more logs. &#39;logs&#39; contain the entries and can be inspected. Honest loggers maintain exactly one log, not more. */
-<span class="keyword">rule</span> <a name="rule:Start_Log"></a><span class="rule.identifier">Start_Log</span> [color= #08a358]<a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">rule</span> <a name="rule:Start_Log"></a><span class="rule.identifier">Start_Log</span> [color= #08a358]<span class="punctuation">:</span>
     [ !Logger_s($L, ~skL, pk(~skL)) ]
     --[ 
         StartedLog($L, $log_id), 
@@ -464,7 +464,7 @@ In general it is senseful to treat loggers like root CAs which we also just trus
     &#34;All L log_id #t1 #t2. StartedLog(L, log_id)@t1 &amp; StartedLog(L, log_id)@t2 ==&gt; #t1 = #t2&#34;
 
 /* ...for the dishonest case, this might happen more often, can be seen in the trace then as additional rogue start. */
-<span class="keyword">rule</span> <a name="rule:Start_Log_malicious"></a><span class="rule.identifier">Start_Log_malicious</span> [color= #d83b0b]<a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">rule</span> <a name="rule:Start_Log_malicious"></a><span class="rule.identifier">Start_Log_malicious</span> [color= #d83b0b]<span class="punctuation">:</span>
     [ !Corrupted_Logger($L, ~skL, pk(~skL)) ]
     --[ StartedLog($L, $log_id),
         Time($now),
@@ -476,7 +476,7 @@ In general it is senseful to treat loggers like root CAs which we also just trus
 pre-certificate is added to log along with the chain (signer of the precert, and certificate of the intermediate and rootCA). Includes whether the certificate is actually signed by the CA and whether it is still valid (relevant). Loggers are obliged to only add log entries of valid certificate chains for auditing purposes.
 - does NOT include: any checks whether the certificate should be issued, loggers rely on monitors to do that work
 */
-<span class="keyword">rule</span> <a name="rule:add_preC_to_log"></a><span class="rule.identifier">add_preC_to_log</span> [color= #08a358]<a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">rule</span> <a name="rule:add_preC_to_log"></a><span class="rule.identifier">add_preC_to_log</span> [color= #08a358]<span class="punctuation">:</span>
     let
         preC_fields = &lt;$CA, $id, pkID, &#39;pre-cert&#39;, sn, $i, $j&gt; 
         ca_fields = &lt;$rootCA, $CA, pkCA, &#39;pubKey-CA&#39;, snCA, $i0, $j0&gt;
@@ -510,7 +510,7 @@ pre-certificate is added to log along with the chain (signer of the precert, and
 
 
 /* adds an arbitrary certificate to the log with $log_id; considered dishonest. Here we leave out checks and verification of the chain */
-<span class="keyword">rule</span> <a name="rule:forge_log_view"></a><span class="rule.identifier">forge_log_view</span> [color= #d40808]<a name="lem::"></a><span class="lemma.identifier">:</span> 
+<span class="keyword">rule</span> <a name="rule:forge_log_view"></a><span class="rule.identifier">forge_log_view</span> [color= #d40808]<span class="punctuation">:</span> 
     let
         preC_fields = &lt;$CA, $id, pkID, &#39;pre-cert&#39;, sn, $i, $j&gt; 
         fields = &lt;$CA, $id, pkID, &#39;pubKey&#39;, sn, $i, $j&gt;
@@ -539,7 +539,7 @@ CA &#34;checks&#34; identity and then creates a pre certificate to hand out to l
 The DomainOwner fact serves as a proof of identity, so we assume that invoking this always happens on DO&#39;s behalf. 
 Rogue certificates are not issued using this fact but instead by the network attacker using the CA&#39;s key (requires CA corruption).
 */
-<span class="keyword">rule</span> <a name="rule:PreCertify"></a><span class="rule.identifier">PreCertify</span> [color= #c871ff]<a name="lem::"></a><span class="lemma.identifier">:</span> 
+<span class="keyword">rule</span> <a name="rule:PreCertify"></a><span class="rule.identifier">PreCertify</span> [color= #c871ff]<span class="punctuation">:</span> 
     let
         preC_fields = &lt;$CA, $id, pkID, &#39;pre-cert&#39;, ~sn, $now, $j&gt;
         preC_sig = sign(preC_fields, skCA)
@@ -558,7 +558,7 @@ Rogue certificates are not issued using this fact but instead by the network att
 /*
 This rule is invoked by the CA again. It takes the issued pre-certificate and generates a corresponding &#39;pubKey&#39; certificate, after two loggers claimed that they have added the certificate to its logs (given the two SCTs)
 */
-<span class="keyword">rule</span> <a name="rule:PubKeyCertify"></a><span class="rule.identifier">PubKeyCertify</span> [color= #c871ff]<a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">rule</span> <a name="rule:PubKeyCertify"></a><span class="rule.identifier">PubKeyCertify</span> [color= #c871ff]<span class="punctuation">:</span>
     let 
     preC_fields = &lt;$CA, $id, pkID, &#39;pre-cert&#39;, sn, $i, $j&gt;
 
@@ -593,7 +593,7 @@ This rule is invoked by the CA again. It takes the issued pre-certificate and ge
     [ Out(pub_fields), Out(pub_sig) /* outgoing pubKey cert */ ]
     
 /* Used in SCT Auditing Model, client received a certificate chain with incorporated SCTs and forwards them via a secure channel to the monitor. We leave out signature checks here and move them to the monitor to leave out implicit assumptions about the content that is delivered to the monitor via auditing */
-<span class="keyword">rule</span> <a name="rule:ClientInitiatesAuditing"></a><span class="rule.identifier">ClientInitiatesAuditing</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">rule</span> <a name="rule:ClientInitiatesAuditing"></a><span class="rule.identifier">ClientInitiatesAuditing</span><span class="punctuation">:</span>
     let
         chain = &lt;&lt;pub_fields, pub_sig&gt;, &lt;ca_fields, ca_sig&gt;&gt;
     in
@@ -612,7 +612,7 @@ A client receives a certificate and now validates it. This includes:
 
 verifying always includes validity checks of the timepoints in the certificate, i.e., whether the certificate is still valid at the current time.
 */
-<span class="keyword">rule</span> <a name="rule:ClientValidate"></a><span class="rule.identifier">ClientValidate</span> [color= #f2ce03]<a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">rule</span> <a name="rule:ClientValidate"></a><span class="rule.identifier">ClientValidate</span> [color= #f2ce03]<span class="punctuation">:</span>
     let
         ca_fields = &lt;$rootCA, $CA, pkCA, &#39;pubKey-CA&#39;, snCA, $i0, $j0&gt;
         sct1_fields = &lt;$L1, &#39;SCT&#39;, $sct1, &lt;$CA, $id, pkID, sn, $i, $j&gt;&gt;
@@ -667,7 +667,7 @@ rule MonitorStoresSnapshot:
     ]-&gt;
     [  ]
 
-<span class="keyword">rule</span> <a name="rule:ClientStoresSnapshot"></a><span class="rule.identifier">ClientStoresSnapshot</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">rule</span> <a name="rule:ClientStoresSnapshot"></a><span class="rule.identifier">ClientStoresSnapshot</span><span class="punctuation">:</span>
     [ !Logger($L, pkL), !TLS_L_to_C($L, $C, $snapshot, sth, session) ]
     --[ 
         SnapshotStored($C, $L, session, sth),
@@ -681,7 +681,7 @@ rule MonitorStoresSnapshot:
 (1) conflicting view for given snapshots (given and one in the past) ==&gt; append-only violated (here)
 (2) a given SCT is not contained in the log (inclusion proof failed, rule below)
 */
-<span class="keyword">rule</span> <a name="rule:ClientFindsAppendOnlyViolation"></a><span class="rule.identifier">ClientFindsAppendOnlyViolation</span> [color= #e65208]<a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">rule</span> <a name="rule:ClientFindsAppendOnlyViolation"></a><span class="rule.identifier">ClientFindsAppendOnlyViolation</span> [color= #e65208]<span class="punctuation">:</span>
     [ !Logger($L, pkL), !TLS_L_to_C($L, $C, $snapshot, sth, session) ]
     --[
         ClientFindsAppendOnlyViolation($L),
@@ -739,7 +739,7 @@ predicate: EntryVisible(Logger, fields, ca_cert, chain, log_id, #time, sth_time)
             )&#34;
 
 /* Positive outcome of the append-only check: All old snapshots the client has do not contradict themselves */
-<span class="keyword">rule</span> <a name="rule:ClientVerifiesAppendOnly"></a><span class="rule.identifier">ClientVerifiesAppendOnly</span> [color= #c1ff3c]<a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">rule</span> <a name="rule:ClientVerifiesAppendOnly"></a><span class="rule.identifier">ClientVerifiesAppendOnly</span> [color= #c1ff3c]<span class="punctuation">:</span>
     [ !TLS_L_to_C($L, $C, $snapshot, sth, session), !Logger($L, pkL), In($idUser) ]
     --[
         AppendOnlyVerified($idUser, $L, sth, session),
@@ -781,7 +781,7 @@ predicate: EntryVisible(Logger, fields, ca_cert, chain, log_id, #time, sth_time)
     )&#34;
 
 /* Monitor requests a current snapshot of the log */
-<span class="keyword">rule</span> <a name="rule:ProofFetching_M"></a><span class="rule.identifier">ProofFetching_M</span> [color= #10bcc5]<a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">rule</span> <a name="rule:ProofFetching_M"></a><span class="rule.identifier">ProofFetching_M</span> [color= #10bcc5]<span class="punctuation">:</span>
     [ Fr(~session), !Monitor($M), /* Identity who fetches */ !Logger($L, pkL) ] 
     --[ 
         FetchLogSnapshot($M, $L, ~session),
@@ -792,7 +792,7 @@ predicate: EntryVisible(Logger, fields, ca_cert, chain, log_id, #time, sth_time)
     [ TLS_M_to_L($M, $L, ~session, $now) ]
 
 /* A client requests a current view of the log */
-<span class="keyword">rule</span> <a name="rule:ProofFetching_C"></a><span class="rule.identifier">ProofFetching_C</span> [color= #10bcc5]<a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">rule</span> <a name="rule:ProofFetching_C"></a><span class="rule.identifier">ProofFetching_C</span> [color= #10bcc5]<span class="punctuation">:</span>
     [ Fr(~session), In($C), /* could be fetched by anyone */ !Logger($L, pkL) ] 
     --[ 
         FetchLogSnapshot($C, $L, ~session),
@@ -803,7 +803,7 @@ predicate: EntryVisible(Logger, fields, ca_cert, chain, log_id, #time, sth_time)
     [ TLS_C_to_L($C, $L, ~session) ]
 
 /* some protocol participant requests a current view (role not specified) */
-<span class="keyword">rule</span> <a name="rule:ProofFetching_P"></a><span class="rule.identifier">ProofFetching_P</span> [color= #10bcc5]<a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">rule</span> <a name="rule:ProofFetching_P"></a><span class="rule.identifier">ProofFetching_P</span> [color= #10bcc5]<span class="punctuation">:</span>
     [ Fr(~session), In($P), /* could be fetched by anyone */ !Logger($L, pkL) ] 
     --[ 
         FetchLogSnapshot($P, $L, ~session),
@@ -818,7 +818,7 @@ Logger issues a new snapshot of its maintained log.
 This exact snapshot is relatively abstract, as the log operations are too. We assume that this generates an honest STH which is verifiable, depending on the context it also represents all entries that a monitor can explore then. 
 It is crucial for the outcome of these later checks when a certain snapshot has been created. If it was early in an execution, there might not be any entries yet contained. When going through the lemmas later, you will observe that a party can partly control this by restricting when to request to snapshot.
 */
-<span class="keyword">rule</span> <a name="rule:LoggerSnapshot_M"></a><span class="rule.identifier">LoggerSnapshot_M</span> [color= #22d6d6]<a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">rule</span> <a name="rule:LoggerSnapshot_M"></a><span class="rule.identifier">LoggerSnapshot_M</span> [color= #22d6d6]<span class="punctuation">:</span>
     [ !Logger_s($L, skL, pk(skL)), Fr(~sth) /* abstract representation of the STH */, TLS_M_to_L($M, $L, session, $time) ]
     --[ 
         LoggerPresentsView($L, $M, $log_id, $now, ~sth, session),
@@ -829,7 +829,7 @@ It is crucial for the outcome of these later checks when a certain snapshot has 
     ]-&gt;
     [ !TLS_L_to_M($L, $M, $snapshot, ~sth, session, $time) ]
 
-<span class="keyword">rule</span> <a name="rule:LoggerSnapshot_C"></a><span class="rule.identifier">LoggerSnapshot_C</span> [color= #22d6d6]<a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">rule</span> <a name="rule:LoggerSnapshot_C"></a><span class="rule.identifier">LoggerSnapshot_C</span> [color= #22d6d6]<span class="punctuation">:</span>
     [ !Logger_s($L, skL, pk(skL)), Fr(~sth) /* abstract representation of the STH/sth */, TLS_C_to_L($C, $L, session) ]
     --[ 
         LoggerPresentsView($L, $C, $log_id, $now, ~sth, session),
@@ -841,7 +841,7 @@ It is crucial for the outcome of these later checks when a certain snapshot has 
     [ !TLS_L_to_C($L, $C, $snapshot, ~sth, session)
     ]
 
-<span class="keyword">rule</span> <a name="rule:LoggerSnapshot_P"></a><span class="rule.identifier">LoggerSnapshot_P</span> [color= #22d6d6]<a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">rule</span> <a name="rule:LoggerSnapshot_P"></a><span class="rule.identifier">LoggerSnapshot_P</span> [color= #22d6d6]<span class="punctuation">:</span>
     [ !Logger_s($L, skL, pk(skL)), Fr(~sth) /* abstract representation of the STH/sth */, TLS_P_to_L($P, $L, session, $time) ]
     --[ 
         LoggerPresentsView($L, $P, $log_id, $now, ~sth, session),
@@ -858,7 +858,7 @@ It is crucial for the outcome of these later checks when a certain snapshot has 
     &#34;All L idR log_id time sth session #t1. LoggerPresentsView(L, idR, log_id, time, sth, session)@t1 ==&gt; (Ex #t0. StartedLog(L, log_id)@t0 &amp; #t0 &lt; #t1)&#34;
 
 
-<span class="keyword">rule</span> <a name="rule:ParticipantFindsInclusionViolation"></a><span class="rule.identifier">ParticipantFindsInclusionViolation</span> [color= #e65208]<a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">rule</span> <a name="rule:ParticipantFindsInclusionViolation"></a><span class="rule.identifier">ParticipantFindsInclusionViolation</span> [color= #e65208]<span class="punctuation">:</span>
     let
         fields = &lt;$CA, $id, pkID, &#39;pubKey&#39;, sn, $i, $j&gt;
         ca_cert = &lt;ca_fields, ca_sig&gt;
@@ -884,7 +884,7 @@ It is crucial for the outcome of these later checks when a certain snapshot has 
             /* ...and the entry is not visible in that view */
         )&#34;
 
-<span class="keyword">rule</span> <a name="rule:ParticipantVerifiesInclusion"></a><span class="rule.identifier">ParticipantVerifiesInclusion</span> [color= #c1ff3c]<a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">rule</span> <a name="rule:ParticipantVerifiesInclusion"></a><span class="rule.identifier">ParticipantVerifiesInclusion</span> [color= #c1ff3c]<span class="punctuation">:</span>
     let
         fields = &lt;$CA, $id, pkID, &#39;pubKey&#39;, sn, $i, $j&gt;
     in
@@ -913,7 +913,7 @@ It is crucial for the outcome of these later checks when a certain snapshot has 
 /* ------- Root CA Documentation Checks (modelled externally, but every participant has access to the DB that contains them -&gt; everyone can run these)
 ------- */
 
-<span class="keyword">rule</span> <a name="rule:ConsultDocumentation_Success"></a><span class="rule.identifier">ConsultDocumentation_Success</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">rule</span> <a name="rule:ConsultDocumentation_Success"></a><span class="rule.identifier">ConsultDocumentation_Success</span><span class="punctuation">:</span>
     let
         ca_fields = &lt;$rootCA, $CA, pkCA, &#39;pubKey-CA&#39;, sn, $i, $j&gt;
         ca_cert = &lt;ca_fields, ca_sig&gt;
@@ -929,7 +929,7 @@ It is crucial for the outcome of these later checks when a certain snapshot has 
     ]-&gt;
     [ CCADBConsulted($rootCA, ca_fields) ]
 
-<span class="keyword">rule</span> <a name="rule:ConsultDocumentation_Fails"></a><span class="rule.identifier">ConsultDocumentation_Fails</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">rule</span> <a name="rule:ConsultDocumentation_Fails"></a><span class="rule.identifier">ConsultDocumentation_Fails</span><span class="punctuation">:</span>
     let
         ca_fields = &lt;$rootCA, $CA, pkCA, &#39;pubKey-CA&#39;, sn, $i, $j&gt;
         ca_cert = &lt;ca_fields, ca_sig&gt;
@@ -970,7 +970,7 @@ SCTAuditTransparencyCheck(). Contributed evidence.
 - Monitor (designated auditor), (and client): received a certificate chain with incorporated SCTs from a client
 - Participant: Inclusion proof (respecting MMD) after 
 */
-<span class="keyword">rule</span> <a name="rule:SCTAuditTransparencyCheck_Success"></a><span class="rule.identifier">SCTAuditTransparencyCheck_Success</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">rule</span> <a name="rule:SCTAuditTransparencyCheck_Success"></a><span class="rule.identifier">SCTAuditTransparencyCheck_Success</span><span class="punctuation">:</span>
     let
         ca_fields = &lt;$rootCA, $CA, pkCA, &#39;pubKey-CA&#39;, snCA, $i0, $j0&gt;
     in
@@ -984,7 +984,7 @@ SCTAuditTransparencyCheck(). Contributed evidence.
     ]-&gt;
     [  ]
     
-<span class="keyword">rule</span> <a name="rule:SCTAuditTransparencyCheck_Failed"></a><span class="rule.identifier">SCTAuditTransparencyCheck_Failed</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">rule</span> <a name="rule:SCTAuditTransparencyCheck_Failed"></a><span class="rule.identifier">SCTAuditTransparencyCheck_Failed</span><span class="punctuation">:</span>
     let
         ca_fields = &lt;$rootCA, $CA, pkCA, &#39;pubKey-CA&#39;, snCA, $i0, $j0&gt;
     in
@@ -1002,7 +1002,7 @@ SCTAuditTransparencyCheck(). Contributed evidence.
 - Monitor (designated auditor), (and client): received a certificate chain with incorporated SCTs from a client
 - CCADB Result of consulting the database for the legitimacy of the CA
 */
-<span class="keyword">rule</span> <a name="rule:SCTAuditCheck"></a><span class="rule.identifier">SCTAuditCheck</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">rule</span> <a name="rule:SCTAuditCheck"></a><span class="rule.identifier">SCTAuditCheck</span><span class="punctuation">:</span>
     [ MAudit_SCT($M, $L, fields, ca_fields, $sct),
       CCADBConsulted($rootCA, ca_fields) ]
     --[ 
@@ -1071,7 +1071,7 @@ SCTAuditTransparencyCheck(). Contributed evidence.
 /* ----------- Compromise Rules ----------- */
 
 /* CA key leakage */
-<span class="keyword">rule</span> <a name="rule:compromiseCA"></a><span class="rule.identifier">compromiseCA</span> [color= #d40808 ]<a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">rule</span> <a name="rule:compromiseCA"></a><span class="rule.identifier">compromiseCA</span> [color= #d40808 ]<span class="punctuation">:</span>
     [!CA_s0($CA, ~skCA, pk(~skCA), ca_fields, CA_sig)] 
     --[ 
         CompromiseCA($CA), 
@@ -1084,7 +1084,7 @@ SCTAuditTransparencyCheck(). Contributed evidence.
     [ Out(~skCA) ] 
 
 /* Root CA key leakage */
-<span class="keyword">rule</span> <a name="rule:compromiseRootCA"></a><span class="rule.identifier">compromiseRootCA</span> [color= #d40808 ]<a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">rule</span> <a name="rule:compromiseRootCA"></a><span class="rule.identifier">compromiseRootCA</span> [color= #d40808 ]<span class="punctuation">:</span>
     [ !Root_CA_s0($CA, skCA, pkCA) ] 
     --[ 
         CompromiseRootCA($CA), 
@@ -1097,7 +1097,7 @@ SCTAuditTransparencyCheck(). Contributed evidence.
     [ Out(skCA) ]
 
 /* Logger key leakage. !Corrupted_Logger is later additionally used to perform rogue log modifications. */
-<span class="keyword">rule</span> <a name="rule:compromiseLogger"></a><span class="rule.identifier">compromiseLogger</span> [color= #d40808 ]<a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">rule</span> <a name="rule:compromiseLogger"></a><span class="rule.identifier">compromiseLogger</span> [color= #d40808 ]<span class="punctuation">:</span>
     [ !Logger_s($L, ~skL, pk(~skL)) ] 
     --[ 
         CompromiseLogger($L), 
@@ -1111,7 +1111,7 @@ SCTAuditTransparencyCheck(). Contributed evidence.
     [ Out(~skL), !Corrupted_Logger($L, ~skL, pk(~skL)) ] 
 
 /* !St_bad_Monitors can sleep when performing checks */
-<span class="keyword">rule</span> <a name="rule:compromiseMonitor"></a><span class="rule.identifier">compromiseMonitor</span> [color= #d40808 ]<a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">rule</span> <a name="rule:compromiseMonitor"></a><span class="rule.identifier">compromiseMonitor</span> [color= #d40808 ]<span class="punctuation">:</span>
     [ !Monitor($M) ] 
     --[ 
         Compromise(),
@@ -1125,98 +1125,98 @@ SCTAuditTransparencyCheck(). Contributed evidence.
 
 /* BEGIN LEMMAS */
 
-<span class="keyword">lemma</span> <span class="punctuation">san_Root_CA_Init</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">lemma</span> <a name="lem:san_Root_CA_Init"></a><span class="lemma.identifier">san_Root_CA_Init</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_Root_CA_Init()@t
 	&amp; not (Ex #t. Compromise()@t)
 &#34;
 
-<span class="keyword">lemma</span> <span class="punctuation">san_Intermediate_CA_Init</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">lemma</span> <a name="lem:san_Intermediate_CA_Init"></a><span class="lemma.identifier">san_Intermediate_CA_Init</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_Intermediate_CA_Init()@t
 	&amp; not (Ex #t. Compromise()@t)
 &#34;
 
-<span class="keyword">lemma</span> <span class="punctuation">san_Domain_Owner_Init</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">lemma</span> <a name="lem:san_Domain_Owner_Init"></a><span class="lemma.identifier">san_Domain_Owner_Init</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_Domain_Owner_Init()@t
 	&amp; not (Ex #t. Compromise()@t)
 &#34;
 
-<span class="keyword">lemma</span> <span class="punctuation">san_Monitor_Init</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">lemma</span> <a name="lem:san_Monitor_Init"></a><span class="lemma.identifier">san_Monitor_Init</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_Monitor_Init()@t
 	&amp; not (Ex #t. Compromise()@t)
 &#34;
 
-<span class="keyword">lemma</span> <span class="punctuation">san_StartMonitoring</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">lemma</span> <a name="lem:san_StartMonitoring"></a><span class="lemma.identifier">san_StartMonitoring</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_StartMonitoring()@t
 	&amp; not (Ex #t. Compromise()@t)
 &#34;
 
-<span class="keyword">lemma</span> <span class="punctuation">san_monitorFindsAppendOnlyViolation</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">lemma</span> <a name="lem:san_monitorFindsAppendOnlyViolation"></a><span class="lemma.identifier">san_monitorFindsAppendOnlyViolation</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_monitorFindsAppendOnlyViolation()@t
     &amp; (All #t. Compromise()@t ==&gt; (Ex L. CompromiseLogger(L)@t)) // only logger corruptions allowed
 &#34;
 
-<span class="keyword">lemma</span> <span class="punctuation">san_monitorVerifiesAppendOnly</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">lemma</span> <a name="lem:san_monitorVerifiesAppendOnly"></a><span class="lemma.identifier">san_monitorVerifiesAppendOnly</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_monitorVerifiesAppendOnly()@t
 	&amp; not (Ex #t. Compromise()@t)
 &#34;
 
-<span class="keyword">lemma</span> <span class="punctuation">san_monitorTrackSubject</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">lemma</span> <a name="lem:san_monitorTrackSubject"></a><span class="lemma.identifier">san_monitorTrackSubject</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_monitorTrackSubject()@t
 	&amp; not (Ex #t. Compromise()@t)
 &#34;
 
-<span class="keyword">lemma</span> <span class="punctuation">san_ChainValidator_Valid</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">lemma</span> <a name="lem:san_ChainValidator_Valid"></a><span class="lemma.identifier">san_ChainValidator_Valid</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_ChainValidator_Valid()@t
 	&amp; not (Ex #t. Compromise()@t)
 &#34;
 
-<span class="keyword">lemma</span> <span class="punctuation">san_ChainValidator_Invalid</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">lemma</span> <a name="lem:san_ChainValidator_Invalid"></a><span class="lemma.identifier">san_ChainValidator_Invalid</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_ChainValidator_Invalid()@t
 	&amp; not (Ex #t. Compromise()@t)
 &#34;
 
-<span class="keyword">lemma</span> <span class="punctuation">san_monitorFindsRogueCertificate</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">lemma</span> <a name="lem:san_monitorFindsRogueCertificate"></a><span class="lemma.identifier">san_monitorFindsRogueCertificate</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_monitorFindsRogueCertificate()@t
 	&amp; (All #t. Compromise()@t ==&gt; (Ex CA. CompromiseCA(CA)@t)) // only CA corruptions allowed
 &#34;
 
-<span class="keyword">lemma</span> <span class="punctuation">san_monitorCanFindCertificate</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">lemma</span> <a name="lem:san_monitorCanFindCertificate"></a><span class="lemma.identifier">san_monitorCanFindCertificate</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_monitorCanFindCertificate()@t
 	&amp; not (Ex #t. Compromise()@t)
 &#34;
 
-<span class="keyword">lemma</span> <span class="punctuation">san_monitorCannotFindCertificate</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">lemma</span> <a name="lem:san_monitorCannotFindCertificate"></a><span class="lemma.identifier">san_monitorCannotFindCertificate</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_monitorCannotFindCertificate()@t
 	&amp; not (Ex #t. Compromise()@t)
 &#34;
 
-<span class="keyword">lemma</span> <span class="punctuation">san_monitorFindsRogueCertificate_Sleep</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">lemma</span> <a name="lem:san_monitorFindsRogueCertificate_Sleep"></a><span class="lemma.identifier">san_monitorFindsRogueCertificate_Sleep</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_monitorFindsRogueCertificate_Sleep()@t
@@ -1224,21 +1224,21 @@ SCTAuditTransparencyCheck(). Contributed evidence.
     | (Ex CA. CompromiseCA(CA)@t)) // only monitor and CA corruptions allowed
 &#34;
 
-<span class="keyword">lemma</span> <span class="punctuation">san_monitorAudit_CA_Viol</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">lemma</span> <a name="lem:san_monitorAudit_CA_Viol"></a><span class="lemma.identifier">san_monitorAudit_CA_Viol</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_monitorAudit_CA_Viol()@t
 	&amp; (All #t. Compromise()@t ==&gt; (Ex CA. CompromiseCA(CA)@t)) // only CA corruptions allowed
 &#34;
 
-<span class="keyword">lemma</span> <span class="punctuation">san_monitorAudit_no_viol</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">lemma</span> <a name="lem:san_monitorAudit_no_viol"></a><span class="lemma.identifier">san_monitorAudit_no_viol</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_monitorAudit_no_viol()@t
 	&amp; not (Ex #t. Compromise()@t)
 &#34;
 
-<span class="keyword">lemma</span> <span class="punctuation">san_monitorAudit_Sleep</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">lemma</span> <a name="lem:san_monitorAudit_Sleep"></a><span class="lemma.identifier">san_monitorAudit_Sleep</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_monitorAudit_Sleep()@t
@@ -1247,192 +1247,192 @@ SCTAuditTransparencyCheck(). Contributed evidence.
             | (Ex CA. CompromiseCA(CA)@t)) // only monitor or CA corruptions allowed
 &#34;
 
-<span class="keyword">lemma</span> <span class="punctuation">san_Logger_Init</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">lemma</span> <a name="lem:san_Logger_Init"></a><span class="lemma.identifier">san_Logger_Init</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_Logger_Init()@t
 	&amp; not (Ex #t. Compromise()@t)
 &#34;
 
-<span class="keyword">lemma</span> <span class="punctuation">san_Start_Log</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">lemma</span> <a name="lem:san_Start_Log"></a><span class="lemma.identifier">san_Start_Log</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_Start_Log()@t
 	&amp; not (Ex #t. Compromise()@t)
 &#34;
 
-<span class="keyword">lemma</span> <span class="punctuation">san_Start_Log_malicious</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">lemma</span> <a name="lem:san_Start_Log_malicious"></a><span class="lemma.identifier">san_Start_Log_malicious</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_Start_Log_malicious()@t
 	&amp; (All #t. Compromise()@t ==&gt; (Ex L. CompromiseLogger(L)@t)) // only logger corruptions allowed
 &#34;
 
-<span class="keyword">lemma</span> <span class="punctuation">san_add_preC_to_log</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">lemma</span> <a name="lem:san_add_preC_to_log"></a><span class="lemma.identifier">san_add_preC_to_log</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_add_preC_to_log()@t
 	&amp; not (Ex #t. Compromise()@t)
 &#34;
 
-<span class="keyword">lemma</span> <span class="punctuation">san_forge_log_view</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">lemma</span> <a name="lem:san_forge_log_view"></a><span class="lemma.identifier">san_forge_log_view</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_forge_log_view()@t
 	&amp; (All #t. Compromise()@t ==&gt; (Ex L. CompromiseLogger(L)@t)) // only logger corruptions allowed
 &#34;
 
-<span class="keyword">lemma</span> <span class="punctuation">san_PreCertify</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">lemma</span> <a name="lem:san_PreCertify"></a><span class="lemma.identifier">san_PreCertify</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_PreCertify()@t
 	&amp; not (Ex #t. Compromise()@t)
 &#34;
 
-<span class="keyword">lemma</span> <span class="punctuation">san_PubKeyCertify</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">lemma</span> <a name="lem:san_PubKeyCertify"></a><span class="lemma.identifier">san_PubKeyCertify</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_PubKeyCertify()@t
 	&amp; not (Ex #t. Compromise()@t)
 &#34;
 
-<span class="keyword">lemma</span> <span class="punctuation">san_ClientInitiatesAuditing</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">lemma</span> <a name="lem:san_ClientInitiatesAuditing"></a><span class="lemma.identifier">san_ClientInitiatesAuditing</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_ClientInitiatesAuditing()@t
 	&amp; not (Ex #t. Compromise()@t)
 &#34;
 
-<span class="keyword">lemma</span> <span class="punctuation">san_ClientValidate</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">lemma</span> <a name="lem:san_ClientValidate"></a><span class="lemma.identifier">san_ClientValidate</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_ClientValidate()@t
 	&amp; not (Ex #t. Compromise()@t)
 &#34;
 
-<span class="keyword">lemma</span> <span class="punctuation">san_MonitorStoresSnapshot</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">lemma</span> <a name="lem:san_MonitorStoresSnapshot"></a><span class="lemma.identifier">san_MonitorStoresSnapshot</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_MonitorStoresSnapshot()@t
 	&amp; not (Ex #t. Compromise()@t)
 &#34;
 
-<span class="keyword">lemma</span> <span class="punctuation">san_ClientStoresSnapshot</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">lemma</span> <a name="lem:san_ClientStoresSnapshot"></a><span class="lemma.identifier">san_ClientStoresSnapshot</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_ClientStoresSnapshot()@t
 	&amp; not (Ex #t. Compromise()@t)
 &#34;
 
-<span class="keyword">lemma</span> <span class="punctuation">san_ClientFindsAppendOnlyViolation</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">lemma</span> <a name="lem:san_ClientFindsAppendOnlyViolation"></a><span class="lemma.identifier">san_ClientFindsAppendOnlyViolation</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_ClientFindsAppendOnlyViolation()@t
 	&amp; (All #t. Compromise()@t ==&gt; (Ex L. CompromiseLogger(L)@t)) // only logger corruptions allowed
 &#34;
 
-<span class="keyword">lemma</span> <span class="punctuation">san_ClientVerifiesAppendOnly</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">lemma</span> <a name="lem:san_ClientVerifiesAppendOnly"></a><span class="lemma.identifier">san_ClientVerifiesAppendOnly</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_ClientVerifiesAppendOnly()@t
 	&amp; not (Ex #t. Compromise()@t)
 &#34;
 
-<span class="keyword">lemma</span> <span class="punctuation">san_ProofFetching_M</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">lemma</span> <a name="lem:san_ProofFetching_M"></a><span class="lemma.identifier">san_ProofFetching_M</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_ProofFetching_M()@t
 	&amp; not (Ex #t. Compromise()@t)
 &#34;
 
-<span class="keyword">lemma</span> <span class="punctuation">san_ProofFetching_C</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">lemma</span> <a name="lem:san_ProofFetching_C"></a><span class="lemma.identifier">san_ProofFetching_C</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_ProofFetching_C()@t
 	&amp; not (Ex #t. Compromise()@t)
 &#34;
 
-<span class="keyword">lemma</span> <span class="punctuation">san_LoggerSnapshot_M</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">lemma</span> <a name="lem:san_LoggerSnapshot_M"></a><span class="lemma.identifier">san_LoggerSnapshot_M</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_LoggerSnapshot_M()@t
 	&amp; not (Ex #t. Compromise()@t)
 &#34;
 
-<span class="keyword">lemma</span> <span class="punctuation">san_LoggerSnapshot_C</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">lemma</span> <a name="lem:san_LoggerSnapshot_C"></a><span class="lemma.identifier">san_LoggerSnapshot_C</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_LoggerSnapshot_C()@t
 	&amp; not (Ex #t. Compromise()@t)
 &#34;
 
-<span class="keyword">lemma</span> <span class="punctuation">san_ParticipantFindsInclusionViolation</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">lemma</span> <a name="lem:san_ParticipantFindsInclusionViolation"></a><span class="lemma.identifier">san_ParticipantFindsInclusionViolation</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_ParticipantFindsInclusionViolation()@t
 	&amp; not (Ex #t. Compromise()@t) // violation is possible if MMD is not respected
 &#34;
 
-<span class="keyword">lemma</span> <span class="punctuation">san_ParticipantVerifiesInclusion</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">lemma</span> <a name="lem:san_ParticipantVerifiesInclusion"></a><span class="lemma.identifier">san_ParticipantVerifiesInclusion</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_ParticipantVerifiesInclusion()@t
 	&amp; not (Ex #t. Compromise()@t)
 &#34;
 
-<span class="keyword">lemma</span> <span class="punctuation">san_ConsultDocumentation_Success</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">lemma</span> <a name="lem:san_ConsultDocumentation_Success"></a><span class="lemma.identifier">san_ConsultDocumentation_Success</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_ConsultDocumentation_Success()@t
 	&amp; not (Ex #t. Compromise()@t)
 &#34;
 
-<span class="keyword">lemma</span> <span class="punctuation">san_ConsultDocumentation_Fails</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">lemma</span> <a name="lem:san_ConsultDocumentation_Fails"></a><span class="lemma.identifier">san_ConsultDocumentation_Fails</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_ConsultDocumentation_Fails()@t
 	&amp; (All #t. Compromise()@t ==&gt; (Ex rootCA. CompromiseRootCA(rootCA)@t))
 &#34;
 
-<span class="keyword">lemma</span> <span class="punctuation">san_SCTAuditTransparencyCheck_Success</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">lemma</span> <a name="lem:san_SCTAuditTransparencyCheck_Success"></a><span class="lemma.identifier">san_SCTAuditTransparencyCheck_Success</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_SCTAuditTransparencyCheck_Success()@t
 	&amp; not (Ex #t. Compromise()@t)
 &#34;
 
-<span class="keyword">lemma</span> <span class="punctuation">san_SCTAuditTransparencyCheck_Failed</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">lemma</span> <a name="lem:san_SCTAuditTransparencyCheck_Failed"></a><span class="lemma.identifier">san_SCTAuditTransparencyCheck_Failed</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_SCTAuditTransparencyCheck_Failed()@t
 	&amp; (All #t. Compromise()@t ==&gt; (Ex L. CompromiseLogger(L)@t)) // only logger corruptions allowed
 &#34;
 
-<span class="keyword">lemma</span> <span class="punctuation">san_SCTAuditCheck</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">lemma</span> <a name="lem:san_SCTAuditCheck"></a><span class="lemma.identifier">san_SCTAuditCheck</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
     San_SCTAuditCheck()@t
 &#34;
 
-<span class="keyword">lemma</span> <span class="punctuation">san_compromiseCA</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">lemma</span> <a name="lem:san_compromiseCA"></a><span class="lemma.identifier">san_compromiseCA</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_compromiseCA()@t
 &#34;
 
-<span class="keyword">lemma</span> <span class="punctuation">san_compromiseRootCA</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">lemma</span> <a name="lem:san_compromiseRootCA"></a><span class="lemma.identifier">san_compromiseRootCA</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_compromiseRootCA()@t
 &#34;
 
-<span class="keyword">lemma</span> <span class="punctuation">san_compromiseLogger</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">lemma</span> <a name="lem:san_compromiseLogger"></a><span class="lemma.identifier">san_compromiseLogger</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_compromiseLogger()@t
 &#34;
 
-<span class="keyword">lemma</span> <span class="punctuation">san_compromiseMonitor</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">lemma</span> <a name="lem:san_compromiseMonitor"></a><span class="lemma.identifier">san_compromiseMonitor</span><span class="punctuation">:</span>
  exists-trace 
 &#34;Ex #t. 
 	San_compromiseMonitor()@t
@@ -1441,7 +1441,7 @@ SCTAuditTransparencyCheck(). Contributed evidence.
 /* Authenticity */
 
 // counterexample to authenticity
-<span class="keyword">lemma</span> <span class="punctuation">authenticity</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">lemma</span> <a name="lem:authenticity"></a><span class="lemma.identifier">authenticity</span><span class="punctuation">:</span>
     exists-trace
     &#34;Ex L1 L2 rootCA ca_fields CA fields #j.
         BrowserAcceptsChain(CA, fields, rootCA, ca_fields, L1, L2)@j 
@@ -1456,7 +1456,7 @@ SCTAuditTransparencyCheck(). Contributed evidence.
 The auditing mechanism alone does not enhance transparency but we will see below that the audited material can be used to enhance accountable transparency
 */
 /* falsified */
-<span class="keyword">lemma</span> <span class="punctuation">transparency_SCT_Auditing</span><a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">lemma</span> <a name="lem:transparency_SCT_Auditing"></a><span class="lemma.identifier">transparency_SCT_Auditing</span><span class="punctuation">:</span>
     &#34;All CA fields rootCA ca_fields L1 L2 L #t1 #t2.
         BrowserAcceptsChain(CA, fields, rootCA, ca_fields, L1, L2)@t1
         &amp; ((L = L1) | (L = L2))
@@ -1475,7 +1475,7 @@ The auditing mechanism alone does not enhance transparency but we will see below
 /*
 In this variant, the monitor performs an audit where it got the SCT externally (e.g., from a client). Then, it fetches a log view and runs the usual inclusion check. If the monitor cannot find the certificate, the logger is blamed.
 */
-test audit_inclusionViol:
+<span class="keyword">test</span> <a name="test:audit_inclusionViol"></a><span class="test.identifier">audit_inclusionViol</span><span class="punctuation">:</span>
 &#34;Ex M fields session #t #t1.
   Asserts(M,&#39;This loggers log currently does not include these fields.&#39;,L,&lt;fields,session&gt;)@t
 &amp; SCTAuditTransparencyCheckSession(L,fields,session)@t1&#34;
@@ -1502,7 +1502,7 @@ lemma T_Audit:
 
 /***** Accountable Authenticity (CT) *****/
 
-<span class="keyword">lemma</span> <span class="punctuation">A_uniq1_helper</span> [reuse]<a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">lemma</span> <a name="lem:A_uniq1_helper"></a><span class="lemma.identifier">A_uniq1_helper</span> [reuse]<span class="punctuation">:</span>
     &#34;All CA M rootCA fields ca_fields #t1 #t2.
         Asserts( M, &#39;This CA has the following fields and it failed the SCT audit for the following fields.&#39;, CA, &lt;fields, ca_fields&gt;)@t1 
         &amp; Asserts( rootCA, &#39;I signed this intermediate CA.&#39;, CA, ca_fields)@t2
@@ -1510,7 +1510,7 @@ lemma T_Audit:
         (Ex #i. Corrupted( CA ) @ #i)
     &#34;
 
-<span class="keyword">lemma</span> <span class="punctuation">A_uniq2_helper</span> [reuse]<a name="lem::"></a><span class="lemma.identifier">:</span>
+<span class="keyword">lemma</span> <a name="lem:A_uniq2_helper"></a><span class="lemma.identifier">A_uniq2_helper</span> [reuse]<span class="punctuation">:</span>
     &#34;All rootCA CA ca_fields #t.
     Asserts(&#39;CCADB&#39;, &#39;No root CA signed this CA.&#39;, CA, &lt;ca_fields,rootCA&gt;)@t
     ==&gt; (Ex #t. Corrupted(rootCA)@t)&#34;
@@ -1519,14 +1519,14 @@ lemma T_Audit:
 /***** Accountable Authenticity (CT + SCT Auditing) *****/
 
 
-test ca_rogue_audit_mon_honest:
+<span class="keyword">test</span> <a name="test:ca_rogue_audit_mon_honest"></a><span class="test.identifier">ca_rogue_audit_mon_honest</span><span class="punctuation">:</span>
     &#34;Ex M ca_fields fields rootCA #t #t0 #t1.
         SCTAuditCheck(M, fields, ca_fields)@t
         &amp; Asserts(M, &#39;This CA has the following fields and it failed the SCT audit for the following fields.&#39;, CA, &lt;fields, ca_fields&gt;)@t0
         &amp; Asserts(rootCA, &#39;I signed this intermediate CA.&#39;, CA, &lt;ca_fields&gt;)@t1
         &amp; not (Ex #t. Corrupted(M)@t) &#34;
 
-test root_ca_rogue_audit_mon_honest:
+<span class="keyword">test</span> <a name="test:root_ca_rogue_audit_mon_honest"></a><span class="test.identifier">root_ca_rogue_audit_mon_honest</span><span class="punctuation">:</span>
     &#34;Ex M ca_fields fields CA #t #t0 #t1. 
         SCTAuditCheck(M, fields, ca_fields)@t
         &amp; Asserts(M, &#39;This CA has the following fields and it failed the SCT audit for the following fields.&#39;, CA, &lt;fields, ca_fields&gt;)@t0
@@ -1546,14 +1546,14 @@ lemma A_CTAudit_1:
                 (Ex CA #t. GroundTruth(CA, fields)@t)&#34;
 
 
-test ca_rogue_audit:
+<span class="keyword">test</span> <a name="test:ca_rogue_audit"></a><span class="test.identifier">ca_rogue_audit</span><span class="punctuation">:</span>
  &#34;Ex M ca_fields fields rootCA #t #t0 #t1.
   SCTAuditCheck(M, fields, ca_fields)@t
   &amp; Asserts(M, &#39;This CA has the following fields and it failed the SCT audit for the following fields.&#39;, CA, &lt;fields, ca_fields&gt;)@t0
   &amp; Asserts(rootCA, &#39;I signed this intermediate CA.&#39;, CA, &lt;ca_fields&gt;)@t1
  &#34;
 
-test root_ca_rogue_audit:
+<span class="keyword">test</span> <a name="test:root_ca_rogue_audit"></a><span class="test.identifier">root_ca_rogue_audit</span><span class="punctuation">:</span>
  &#34;Ex M ca_fields fields CA #t #t0 #t1. 
   SCTAuditCheck(M, fields, ca_fields)@t
   &amp; Asserts(M, &#39;This CA has the following fields and it failed the SCT audit for the following fields.&#39;, CA, &lt;fields, ca_fields&gt;)@t0

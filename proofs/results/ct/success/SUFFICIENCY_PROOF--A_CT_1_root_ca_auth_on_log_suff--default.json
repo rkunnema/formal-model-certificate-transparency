@@ -1,11 +1,11 @@
 {
   "task_id": "SUFFICIENCY_PROOF--A_CT_1_root_ca_auth_on_log_suff--default",
   "warnings": [],
-  "tamarin_timing": 43.22,
+  "tamarin_timing": 22.95,
   "wrapper_measures": {
-    "time": 43.43839716911316,
-    "avg_memory": 309.2566315406977,
-    "peak_memory": 507.125
+    "time": 23.1185200214386,
+    "avg_memory": 303.2995923913043,
+    "peak_memory": 477.59375
   },
   "output_spthy": "results/ct/proofs/SUFFICIENCY_PROOF--A_CT_1_root_ca_auth_on_log_suff--default.spthy",
   "verified_lemma": {

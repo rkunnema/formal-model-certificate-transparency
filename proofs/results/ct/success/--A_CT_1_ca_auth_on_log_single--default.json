@@ -1,11 +1,11 @@
 {
   "task_id": "--A_CT_1_ca_auth_on_log_single--default",
   "warnings": [],
-  "tamarin_timing": 184.54,
+  "tamarin_timing": 103.15,
   "wrapper_measures": {
-    "time": 184.89813208580017,
-    "avg_memory": 1805.1162696379781,
-    "peak_memory": 3588.85546875
+    "time": 103.36669898033142,
+    "avg_memory": 1798.7228458737868,
+    "peak_memory": 3655.78125
   },
   "output_spthy": "results/ct/proofs/--A_CT_1_ca_auth_on_log_single--default.spthy",
   "verified_lemma": {

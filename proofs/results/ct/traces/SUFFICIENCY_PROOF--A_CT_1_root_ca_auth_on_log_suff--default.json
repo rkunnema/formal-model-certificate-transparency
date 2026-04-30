@@ -1465,7 +1465,7 @@
                 },
                 {
                     "jgeRelation": "PersistentFact",
-                    "jgeSource": "#vr:c2",
+                    "jgeSource": "#vr:c0",
                     "jgeTarget": "#t0:p0"
                 },
                 {
@@ -5219,6 +5219,288 @@
                             {
                                 "jgnFactId": "action",
                                 "jgnFactMult": "",
+                                "jgnFactName": "BrowserAcceptsChainTimes",
+                                "jgnFactShow": "BrowserAcceptsChainTimes( $CA, <$CA, $id, pkID, 'pubKey', sn, $i, $j>, $rootCA, <$rootCA, $CA, pk(~skCA), 'pubKey-CA', snCA, $i0, $j0>, $L, $sct1)",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "$CA"
+                                    },
+                                    {
+                                        "jgnFunct": "pair",
+                                        "jgnParams": [
+                                            {
+                                                "jgnConst": "$CA"
+                                            },
+                                            {
+                                                "jgnFunct": "pair",
+                                                "jgnParams": [
+                                                    {
+                                                        "jgnConst": "$id"
+                                                    },
+                                                    {
+                                                        "jgnFunct": "pair",
+                                                        "jgnParams": [
+                                                            {
+                                                                "jgnConst": "pkID"
+                                                            },
+                                                            {
+                                                                "jgnFunct": "pair",
+                                                                "jgnParams": [
+                                                                    {
+                                                                        "jgnConst": "'pubKey'"
+                                                                    },
+                                                                    {
+                                                                        "jgnFunct": "pair",
+                                                                        "jgnParams": [
+                                                                            {
+                                                                                "jgnConst": "sn"
+                                                                            },
+                                                                            {
+                                                                                "jgnFunct": "pair",
+                                                                                "jgnParams": [
+                                                                                    {
+                                                                                        "jgnConst": "$i"
+                                                                                    },
+                                                                                    {
+                                                                                        "jgnConst": "$j"
+                                                                                    }
+                                                                                ],
+                                                                                "jgnShow": "pair($i,$j)"
+                                                                            }
+                                                                        ],
+                                                                        "jgnShow": "pair(sn,pair($i,$j))"
+                                                                    }
+                                                                ],
+                                                                "jgnShow": "pair('pubKey',pair(sn,pair($i,$j)))"
+                                                            }
+                                                        ],
+                                                        "jgnShow": "pair(pkID,pair('pubKey',pair(sn,pair($i,$j))))"
+                                                    }
+                                                ],
+                                                "jgnShow": "pair($id,pair(pkID,pair('pubKey',pair(sn,pair($i,$j)))))"
+                                            }
+                                        ],
+                                        "jgnShow": "pair($CA,pair($id,pair(pkID,pair('pubKey',pair(sn,pair($i,$j))))))"
+                                    },
+                                    {
+                                        "jgnConst": "$rootCA"
+                                    },
+                                    {
+                                        "jgnFunct": "pair",
+                                        "jgnParams": [
+                                            {
+                                                "jgnConst": "$rootCA"
+                                            },
+                                            {
+                                                "jgnFunct": "pair",
+                                                "jgnParams": [
+                                                    {
+                                                        "jgnConst": "$CA"
+                                                    },
+                                                    {
+                                                        "jgnFunct": "pair",
+                                                        "jgnParams": [
+                                                            {
+                                                                "jgnFunct": "pk",
+                                                                "jgnParams": [
+                                                                    {
+                                                                        "jgnConst": "~skCA"
+                                                                    }
+                                                                ],
+                                                                "jgnShow": "pk(~skCA)"
+                                                            },
+                                                            {
+                                                                "jgnFunct": "pair",
+                                                                "jgnParams": [
+                                                                    {
+                                                                        "jgnConst": "'pubKey-CA'"
+                                                                    },
+                                                                    {
+                                                                        "jgnFunct": "pair",
+                                                                        "jgnParams": [
+                                                                            {
+                                                                                "jgnConst": "snCA"
+                                                                            },
+                                                                            {
+                                                                                "jgnFunct": "pair",
+                                                                                "jgnParams": [
+                                                                                    {
+                                                                                        "jgnConst": "$i0"
+                                                                                    },
+                                                                                    {
+                                                                                        "jgnConst": "$j0"
+                                                                                    }
+                                                                                ],
+                                                                                "jgnShow": "pair($i0,$j0)"
+                                                                            }
+                                                                        ],
+                                                                        "jgnShow": "pair(snCA,pair($i0,$j0))"
+                                                                    }
+                                                                ],
+                                                                "jgnShow": "pair('pubKey-CA',pair(snCA,pair($i0,$j0)))"
+                                                            }
+                                                        ],
+                                                        "jgnShow": "pair(pk(~skCA),pair('pubKey-CA',pair(snCA,pair($i0,$j0))))"
+                                                    }
+                                                ],
+                                                "jgnShow": "pair($CA,pair(pk(~skCA),pair('pubKey-CA',pair(snCA,pair($i0,$j0)))))"
+                                            }
+                                        ],
+                                        "jgnShow": "pair($rootCA,pair($CA,pair(pk(~skCA),pair('pubKey-CA',pair(snCA,pair($i0,$j0))))))"
+                                    },
+                                    {
+                                        "jgnConst": "$L"
+                                    },
+                                    {
+                                        "jgnConst": "$sct1"
+                                    }
+                                ]
+                            },
+                            {
+                                "jgnFactId": "action",
+                                "jgnFactMult": "",
+                                "jgnFactName": "BrowserAcceptsChainTimes",
+                                "jgnFactShow": "BrowserAcceptsChainTimes( $CA, <$CA, $id, pkID, 'pubKey', sn, $i, $j>, $rootCA, <$rootCA, $CA, pk(~skCA), 'pubKey-CA', snCA, $i0, $j0>, $L2, $sct2)",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "$CA"
+                                    },
+                                    {
+                                        "jgnFunct": "pair",
+                                        "jgnParams": [
+                                            {
+                                                "jgnConst": "$CA"
+                                            },
+                                            {
+                                                "jgnFunct": "pair",
+                                                "jgnParams": [
+                                                    {
+                                                        "jgnConst": "$id"
+                                                    },
+                                                    {
+                                                        "jgnFunct": "pair",
+                                                        "jgnParams": [
+                                                            {
+                                                                "jgnConst": "pkID"
+                                                            },
+                                                            {
+                                                                "jgnFunct": "pair",
+                                                                "jgnParams": [
+                                                                    {
+                                                                        "jgnConst": "'pubKey'"
+                                                                    },
+                                                                    {
+                                                                        "jgnFunct": "pair",
+                                                                        "jgnParams": [
+                                                                            {
+                                                                                "jgnConst": "sn"
+                                                                            },
+                                                                            {
+                                                                                "jgnFunct": "pair",
+                                                                                "jgnParams": [
+                                                                                    {
+                                                                                        "jgnConst": "$i"
+                                                                                    },
+                                                                                    {
+                                                                                        "jgnConst": "$j"
+                                                                                    }
+                                                                                ],
+                                                                                "jgnShow": "pair($i,$j)"
+                                                                            }
+                                                                        ],
+                                                                        "jgnShow": "pair(sn,pair($i,$j))"
+                                                                    }
+                                                                ],
+                                                                "jgnShow": "pair('pubKey',pair(sn,pair($i,$j)))"
+                                                            }
+                                                        ],
+                                                        "jgnShow": "pair(pkID,pair('pubKey',pair(sn,pair($i,$j))))"
+                                                    }
+                                                ],
+                                                "jgnShow": "pair($id,pair(pkID,pair('pubKey',pair(sn,pair($i,$j)))))"
+                                            }
+                                        ],
+                                        "jgnShow": "pair($CA,pair($id,pair(pkID,pair('pubKey',pair(sn,pair($i,$j))))))"
+                                    },
+                                    {
+                                        "jgnConst": "$rootCA"
+                                    },
+                                    {
+                                        "jgnFunct": "pair",
+                                        "jgnParams": [
+                                            {
+                                                "jgnConst": "$rootCA"
+                                            },
+                                            {
+                                                "jgnFunct": "pair",
+                                                "jgnParams": [
+                                                    {
+                                                        "jgnConst": "$CA"
+                                                    },
+                                                    {
+                                                        "jgnFunct": "pair",
+                                                        "jgnParams": [
+                                                            {
+                                                                "jgnFunct": "pk",
+                                                                "jgnParams": [
+                                                                    {
+                                                                        "jgnConst": "~skCA"
+                                                                    }
+                                                                ],
+                                                                "jgnShow": "pk(~skCA)"
+                                                            },
+                                                            {
+                                                                "jgnFunct": "pair",
+                                                                "jgnParams": [
+                                                                    {
+                                                                        "jgnConst": "'pubKey-CA'"
+                                                                    },
+                                                                    {
+                                                                        "jgnFunct": "pair",
+                                                                        "jgnParams": [
+                                                                            {
+                                                                                "jgnConst": "snCA"
+                                                                            },
+                                                                            {
+                                                                                "jgnFunct": "pair",
+                                                                                "jgnParams": [
+                                                                                    {
+                                                                                        "jgnConst": "$i0"
+                                                                                    },
+                                                                                    {
+                                                                                        "jgnConst": "$j0"
+                                                                                    }
+                                                                                ],
+                                                                                "jgnShow": "pair($i0,$j0)"
+                                                                            }
+                                                                        ],
+                                                                        "jgnShow": "pair(snCA,pair($i0,$j0))"
+                                                                    }
+                                                                ],
+                                                                "jgnShow": "pair('pubKey-CA',pair(snCA,pair($i0,$j0)))"
+                                                            }
+                                                        ],
+                                                        "jgnShow": "pair(pk(~skCA),pair('pubKey-CA',pair(snCA,pair($i0,$j0))))"
+                                                    }
+                                                ],
+                                                "jgnShow": "pair($CA,pair(pk(~skCA),pair('pubKey-CA',pair(snCA,pair($i0,$j0)))))"
+                                            }
+                                        ],
+                                        "jgnShow": "pair($rootCA,pair($CA,pair(pk(~skCA),pair('pubKey-CA',pair(snCA,pair($i0,$j0))))))"
+                                    },
+                                    {
+                                        "jgnConst": "$L2"
+                                    },
+                                    {
+                                        "jgnConst": "$sct2"
+                                    }
+                                ]
+                            },
+                            {
+                                "jgnFactId": "action",
+                                "jgnFactMult": "",
                                 "jgnFactName": "Eq",
                                 "jgnFactShow": "Eq( true, true )",
                                 "jgnFactTag": "ProtoFact",
@@ -5362,438 +5644,6 @@
                             {
                                 "jgnFactId": "#vr:c0",
                                 "jgnFactMult": "!",
-                                "jgnFactName": "!Check",
-                                "jgnFactShow": "!Check( pk(~skL), <$CA, $id, pkID, 'pubKey', sn, $i, $j>, <<$rootCA, $CA, pk(~skCA), 'pubKey-CA', snCA, $i0, $j0>, sign(<$rootCA, $CA, pk(~skCA), 'pubKey-CA', snCA, $i0, $j0>, ~skCA) >)",
-                                "jgnFactTag": "ProtoFact",
-                                "jgnFactTerms": [
-                                    {
-                                        "jgnFunct": "pk",
-                                        "jgnParams": [
-                                            {
-                                                "jgnConst": "~skL"
-                                            }
-                                        ],
-                                        "jgnShow": "pk(~skL)"
-                                    },
-                                    {
-                                        "jgnFunct": "pair",
-                                        "jgnParams": [
-                                            {
-                                                "jgnConst": "$CA"
-                                            },
-                                            {
-                                                "jgnFunct": "pair",
-                                                "jgnParams": [
-                                                    {
-                                                        "jgnConst": "$id"
-                                                    },
-                                                    {
-                                                        "jgnFunct": "pair",
-                                                        "jgnParams": [
-                                                            {
-                                                                "jgnConst": "pkID"
-                                                            },
-                                                            {
-                                                                "jgnFunct": "pair",
-                                                                "jgnParams": [
-                                                                    {
-                                                                        "jgnConst": "'pubKey'"
-                                                                    },
-                                                                    {
-                                                                        "jgnFunct": "pair",
-                                                                        "jgnParams": [
-                                                                            {
-                                                                                "jgnConst": "sn"
-                                                                            },
-                                                                            {
-                                                                                "jgnFunct": "pair",
-                                                                                "jgnParams": [
-                                                                                    {
-                                                                                        "jgnConst": "$i"
-                                                                                    },
-                                                                                    {
-                                                                                        "jgnConst": "$j"
-                                                                                    }
-                                                                                ],
-                                                                                "jgnShow": "pair($i,$j)"
-                                                                            }
-                                                                        ],
-                                                                        "jgnShow": "pair(sn,pair($i,$j))"
-                                                                    }
-                                                                ],
-                                                                "jgnShow": "pair('pubKey',pair(sn,pair($i,$j)))"
-                                                            }
-                                                        ],
-                                                        "jgnShow": "pair(pkID,pair('pubKey',pair(sn,pair($i,$j))))"
-                                                    }
-                                                ],
-                                                "jgnShow": "pair($id,pair(pkID,pair('pubKey',pair(sn,pair($i,$j)))))"
-                                            }
-                                        ],
-                                        "jgnShow": "pair($CA,pair($id,pair(pkID,pair('pubKey',pair(sn,pair($i,$j))))))"
-                                    },
-                                    {
-                                        "jgnFunct": "pair",
-                                        "jgnParams": [
-                                            {
-                                                "jgnFunct": "pair",
-                                                "jgnParams": [
-                                                    {
-                                                        "jgnConst": "$rootCA"
-                                                    },
-                                                    {
-                                                        "jgnFunct": "pair",
-                                                        "jgnParams": [
-                                                            {
-                                                                "jgnConst": "$CA"
-                                                            },
-                                                            {
-                                                                "jgnFunct": "pair",
-                                                                "jgnParams": [
-                                                                    {
-                                                                        "jgnFunct": "pk",
-                                                                        "jgnParams": [
-                                                                            {
-                                                                                "jgnConst": "~skCA"
-                                                                            }
-                                                                        ],
-                                                                        "jgnShow": "pk(~skCA)"
-                                                                    },
-                                                                    {
-                                                                        "jgnFunct": "pair",
-                                                                        "jgnParams": [
-                                                                            {
-                                                                                "jgnConst": "'pubKey-CA'"
-                                                                            },
-                                                                            {
-                                                                                "jgnFunct": "pair",
-                                                                                "jgnParams": [
-                                                                                    {
-                                                                                        "jgnConst": "snCA"
-                                                                                    },
-                                                                                    {
-                                                                                        "jgnFunct": "pair",
-                                                                                        "jgnParams": [
-                                                                                            {
-                                                                                                "jgnConst": "$i0"
-                                                                                            },
-                                                                                            {
-                                                                                                "jgnConst": "$j0"
-                                                                                            }
-                                                                                        ],
-                                                                                        "jgnShow": "pair($i0,$j0)"
-                                                                                    }
-                                                                                ],
-                                                                                "jgnShow": "pair(snCA,pair($i0,$j0))"
-                                                                            }
-                                                                        ],
-                                                                        "jgnShow": "pair('pubKey-CA',pair(snCA,pair($i0,$j0)))"
-                                                                    }
-                                                                ],
-                                                                "jgnShow": "pair(pk(~skCA),pair('pubKey-CA',pair(snCA,pair($i0,$j0))))"
-                                                            }
-                                                        ],
-                                                        "jgnShow": "pair($CA,pair(pk(~skCA),pair('pubKey-CA',pair(snCA,pair($i0,$j0)))))"
-                                                    }
-                                                ],
-                                                "jgnShow": "pair($rootCA,pair($CA,pair(pk(~skCA),pair('pubKey-CA',pair(snCA,pair($i0,$j0))))))"
-                                            },
-                                            {
-                                                "jgnFunct": "sign",
-                                                "jgnParams": [
-                                                    {
-                                                        "jgnFunct": "pair",
-                                                        "jgnParams": [
-                                                            {
-                                                                "jgnConst": "$rootCA"
-                                                            },
-                                                            {
-                                                                "jgnFunct": "pair",
-                                                                "jgnParams": [
-                                                                    {
-                                                                        "jgnConst": "$CA"
-                                                                    },
-                                                                    {
-                                                                        "jgnFunct": "pair",
-                                                                        "jgnParams": [
-                                                                            {
-                                                                                "jgnFunct": "pk",
-                                                                                "jgnParams": [
-                                                                                    {
-                                                                                        "jgnConst": "~skCA"
-                                                                                    }
-                                                                                ],
-                                                                                "jgnShow": "pk(~skCA)"
-                                                                            },
-                                                                            {
-                                                                                "jgnFunct": "pair",
-                                                                                "jgnParams": [
-                                                                                    {
-                                                                                        "jgnConst": "'pubKey-CA'"
-                                                                                    },
-                                                                                    {
-                                                                                        "jgnFunct": "pair",
-                                                                                        "jgnParams": [
-                                                                                            {
-                                                                                                "jgnConst": "snCA"
-                                                                                            },
-                                                                                            {
-                                                                                                "jgnFunct": "pair",
-                                                                                                "jgnParams": [
-                                                                                                    {
-                                                                                                        "jgnConst": "$i0"
-                                                                                                    },
-                                                                                                    {
-                                                                                                        "jgnConst": "$j0"
-                                                                                                    }
-                                                                                                ],
-                                                                                                "jgnShow": "pair($i0,$j0)"
-                                                                                            }
-                                                                                        ],
-                                                                                        "jgnShow": "pair(snCA,pair($i0,$j0))"
-                                                                                    }
-                                                                                ],
-                                                                                "jgnShow": "pair('pubKey-CA',pair(snCA,pair($i0,$j0)))"
-                                                                            }
-                                                                        ],
-                                                                        "jgnShow": "pair(pk(~skCA),pair('pubKey-CA',pair(snCA,pair($i0,$j0))))"
-                                                                    }
-                                                                ],
-                                                                "jgnShow": "pair($CA,pair(pk(~skCA),pair('pubKey-CA',pair(snCA,pair($i0,$j0)))))"
-                                                            }
-                                                        ],
-                                                        "jgnShow": "pair($rootCA,pair($CA,pair(pk(~skCA),pair('pubKey-CA',pair(snCA,pair($i0,$j0))))))"
-                                                    },
-                                                    {
-                                                        "jgnConst": "~skCA"
-                                                    }
-                                                ],
-                                                "jgnShow": "sign(pair($rootCA,pair($CA,pair(pk(~skCA),pair('pubKey-CA',pair(snCA,pair($i0,$j0)))))),~skCA)"
-                                            }
-                                        ],
-                                        "jgnShow": "pair(pair($rootCA,pair($CA,pair(pk(~skCA),pair('pubKey-CA',pair(snCA,pair($i0,$j0)))))),sign(pair($rootCA,pair($CA,pair(pk(~skCA),pair('pubKey-CA',pair(snCA,pair($i0,$j0)))))),~skCA))"
-                                    }
-                                ]
-                            },
-                            {
-                                "jgnFactId": "#vr:c1",
-                                "jgnFactMult": "!",
-                                "jgnFactName": "!Check",
-                                "jgnFactShow": "!Check( pk(~skL.1), <$CA, $id, pkID, 'pubKey', sn, $i, $j>, <<$rootCA, $CA, pk(~skCA), 'pubKey-CA', snCA, $i0, $j0>, sign(<$rootCA, $CA, pk(~skCA), 'pubKey-CA', snCA, $i0, $j0>, ~skCA) >)",
-                                "jgnFactTag": "ProtoFact",
-                                "jgnFactTerms": [
-                                    {
-                                        "jgnFunct": "pk",
-                                        "jgnParams": [
-                                            {
-                                                "jgnConst": "~skL.1"
-                                            }
-                                        ],
-                                        "jgnShow": "pk(~skL.1)"
-                                    },
-                                    {
-                                        "jgnFunct": "pair",
-                                        "jgnParams": [
-                                            {
-                                                "jgnConst": "$CA"
-                                            },
-                                            {
-                                                "jgnFunct": "pair",
-                                                "jgnParams": [
-                                                    {
-                                                        "jgnConst": "$id"
-                                                    },
-                                                    {
-                                                        "jgnFunct": "pair",
-                                                        "jgnParams": [
-                                                            {
-                                                                "jgnConst": "pkID"
-                                                            },
-                                                            {
-                                                                "jgnFunct": "pair",
-                                                                "jgnParams": [
-                                                                    {
-                                                                        "jgnConst": "'pubKey'"
-                                                                    },
-                                                                    {
-                                                                        "jgnFunct": "pair",
-                                                                        "jgnParams": [
-                                                                            {
-                                                                                "jgnConst": "sn"
-                                                                            },
-                                                                            {
-                                                                                "jgnFunct": "pair",
-                                                                                "jgnParams": [
-                                                                                    {
-                                                                                        "jgnConst": "$i"
-                                                                                    },
-                                                                                    {
-                                                                                        "jgnConst": "$j"
-                                                                                    }
-                                                                                ],
-                                                                                "jgnShow": "pair($i,$j)"
-                                                                            }
-                                                                        ],
-                                                                        "jgnShow": "pair(sn,pair($i,$j))"
-                                                                    }
-                                                                ],
-                                                                "jgnShow": "pair('pubKey',pair(sn,pair($i,$j)))"
-                                                            }
-                                                        ],
-                                                        "jgnShow": "pair(pkID,pair('pubKey',pair(sn,pair($i,$j))))"
-                                                    }
-                                                ],
-                                                "jgnShow": "pair($id,pair(pkID,pair('pubKey',pair(sn,pair($i,$j)))))"
-                                            }
-                                        ],
-                                        "jgnShow": "pair($CA,pair($id,pair(pkID,pair('pubKey',pair(sn,pair($i,$j))))))"
-                                    },
-                                    {
-                                        "jgnFunct": "pair",
-                                        "jgnParams": [
-                                            {
-                                                "jgnFunct": "pair",
-                                                "jgnParams": [
-                                                    {
-                                                        "jgnConst": "$rootCA"
-                                                    },
-                                                    {
-                                                        "jgnFunct": "pair",
-                                                        "jgnParams": [
-                                                            {
-                                                                "jgnConst": "$CA"
-                                                            },
-                                                            {
-                                                                "jgnFunct": "pair",
-                                                                "jgnParams": [
-                                                                    {
-                                                                        "jgnFunct": "pk",
-                                                                        "jgnParams": [
-                                                                            {
-                                                                                "jgnConst": "~skCA"
-                                                                            }
-                                                                        ],
-                                                                        "jgnShow": "pk(~skCA)"
-                                                                    },
-                                                                    {
-                                                                        "jgnFunct": "pair",
-                                                                        "jgnParams": [
-                                                                            {
-                                                                                "jgnConst": "'pubKey-CA'"
-                                                                            },
-                                                                            {
-                                                                                "jgnFunct": "pair",
-                                                                                "jgnParams": [
-                                                                                    {
-                                                                                        "jgnConst": "snCA"
-                                                                                    },
-                                                                                    {
-                                                                                        "jgnFunct": "pair",
-                                                                                        "jgnParams": [
-                                                                                            {
-                                                                                                "jgnConst": "$i0"
-                                                                                            },
-                                                                                            {
-                                                                                                "jgnConst": "$j0"
-                                                                                            }
-                                                                                        ],
-                                                                                        "jgnShow": "pair($i0,$j0)"
-                                                                                    }
-                                                                                ],
-                                                                                "jgnShow": "pair(snCA,pair($i0,$j0))"
-                                                                            }
-                                                                        ],
-                                                                        "jgnShow": "pair('pubKey-CA',pair(snCA,pair($i0,$j0)))"
-                                                                    }
-                                                                ],
-                                                                "jgnShow": "pair(pk(~skCA),pair('pubKey-CA',pair(snCA,pair($i0,$j0))))"
-                                                            }
-                                                        ],
-                                                        "jgnShow": "pair($CA,pair(pk(~skCA),pair('pubKey-CA',pair(snCA,pair($i0,$j0)))))"
-                                                    }
-                                                ],
-                                                "jgnShow": "pair($rootCA,pair($CA,pair(pk(~skCA),pair('pubKey-CA',pair(snCA,pair($i0,$j0))))))"
-                                            },
-                                            {
-                                                "jgnFunct": "sign",
-                                                "jgnParams": [
-                                                    {
-                                                        "jgnFunct": "pair",
-                                                        "jgnParams": [
-                                                            {
-                                                                "jgnConst": "$rootCA"
-                                                            },
-                                                            {
-                                                                "jgnFunct": "pair",
-                                                                "jgnParams": [
-                                                                    {
-                                                                        "jgnConst": "$CA"
-                                                                    },
-                                                                    {
-                                                                        "jgnFunct": "pair",
-                                                                        "jgnParams": [
-                                                                            {
-                                                                                "jgnFunct": "pk",
-                                                                                "jgnParams": [
-                                                                                    {
-                                                                                        "jgnConst": "~skCA"
-                                                                                    }
-                                                                                ],
-                                                                                "jgnShow": "pk(~skCA)"
-                                                                            },
-                                                                            {
-                                                                                "jgnFunct": "pair",
-                                                                                "jgnParams": [
-                                                                                    {
-                                                                                        "jgnConst": "'pubKey-CA'"
-                                                                                    },
-                                                                                    {
-                                                                                        "jgnFunct": "pair",
-                                                                                        "jgnParams": [
-                                                                                            {
-                                                                                                "jgnConst": "snCA"
-                                                                                            },
-                                                                                            {
-                                                                                                "jgnFunct": "pair",
-                                                                                                "jgnParams": [
-                                                                                                    {
-                                                                                                        "jgnConst": "$i0"
-                                                                                                    },
-                                                                                                    {
-                                                                                                        "jgnConst": "$j0"
-                                                                                                    }
-                                                                                                ],
-                                                                                                "jgnShow": "pair($i0,$j0)"
-                                                                                            }
-                                                                                        ],
-                                                                                        "jgnShow": "pair(snCA,pair($i0,$j0))"
-                                                                                    }
-                                                                                ],
-                                                                                "jgnShow": "pair('pubKey-CA',pair(snCA,pair($i0,$j0)))"
-                                                                            }
-                                                                        ],
-                                                                        "jgnShow": "pair(pk(~skCA),pair('pubKey-CA',pair(snCA,pair($i0,$j0))))"
-                                                                    }
-                                                                ],
-                                                                "jgnShow": "pair($CA,pair(pk(~skCA),pair('pubKey-CA',pair(snCA,pair($i0,$j0)))))"
-                                                            }
-                                                        ],
-                                                        "jgnShow": "pair($rootCA,pair($CA,pair(pk(~skCA),pair('pubKey-CA',pair(snCA,pair($i0,$j0))))))"
-                                                    },
-                                                    {
-                                                        "jgnConst": "~skCA"
-                                                    }
-                                                ],
-                                                "jgnShow": "sign(pair($rootCA,pair($CA,pair(pk(~skCA),pair('pubKey-CA',pair(snCA,pair($i0,$j0)))))),~skCA)"
-                                            }
-                                        ],
-                                        "jgnShow": "pair(pair($rootCA,pair($CA,pair(pk(~skCA),pair('pubKey-CA',pair(snCA,pair($i0,$j0)))))),sign(pair($rootCA,pair($CA,pair(pk(~skCA),pair('pubKey-CA',pair(snCA,pair($i0,$j0)))))),~skCA))"
-                                    }
-                                ]
-                            },
-                            {
-                                "jgnFactId": "#vr:c2",
-                                "jgnFactMult": "!",
                                 "jgnFactName": "!BAccept_State",
                                 "jgnFactShow": "!BAccept_State( $CA, <$CA, $id, pkID, 'pubKey', sn, $i, $j>, <$rootCA, $CA, pk(~skCA), 'pubKey-CA', snCA, $i0, $j0>, $L, $sct1, $L2, $sct2)",
                                 "jgnFactTag": "ProtoFact",
@@ -5929,276 +5779,6 @@
                                     },
                                     {
                                         "jgnConst": "$L2"
-                                    },
-                                    {
-                                        "jgnConst": "$sct2"
-                                    }
-                                ]
-                            },
-                            {
-                                "jgnFactId": "#vr:c3",
-                                "jgnFactMult": "!",
-                                "jgnFactName": "!BAccept_SCT",
-                                "jgnFactShow": "!BAccept_SCT( $L, <$CA, $id, pkID, 'pubKey', sn, $i, $j>, <$rootCA, $CA, pk(~skCA), 'pubKey-CA', snCA, $i0, $j0>, $sct1)",
-                                "jgnFactTag": "ProtoFact",
-                                "jgnFactTerms": [
-                                    {
-                                        "jgnConst": "$L"
-                                    },
-                                    {
-                                        "jgnFunct": "pair",
-                                        "jgnParams": [
-                                            {
-                                                "jgnConst": "$CA"
-                                            },
-                                            {
-                                                "jgnFunct": "pair",
-                                                "jgnParams": [
-                                                    {
-                                                        "jgnConst": "$id"
-                                                    },
-                                                    {
-                                                        "jgnFunct": "pair",
-                                                        "jgnParams": [
-                                                            {
-                                                                "jgnConst": "pkID"
-                                                            },
-                                                            {
-                                                                "jgnFunct": "pair",
-                                                                "jgnParams": [
-                                                                    {
-                                                                        "jgnConst": "'pubKey'"
-                                                                    },
-                                                                    {
-                                                                        "jgnFunct": "pair",
-                                                                        "jgnParams": [
-                                                                            {
-                                                                                "jgnConst": "sn"
-                                                                            },
-                                                                            {
-                                                                                "jgnFunct": "pair",
-                                                                                "jgnParams": [
-                                                                                    {
-                                                                                        "jgnConst": "$i"
-                                                                                    },
-                                                                                    {
-                                                                                        "jgnConst": "$j"
-                                                                                    }
-                                                                                ],
-                                                                                "jgnShow": "pair($i,$j)"
-                                                                            }
-                                                                        ],
-                                                                        "jgnShow": "pair(sn,pair($i,$j))"
-                                                                    }
-                                                                ],
-                                                                "jgnShow": "pair('pubKey',pair(sn,pair($i,$j)))"
-                                                            }
-                                                        ],
-                                                        "jgnShow": "pair(pkID,pair('pubKey',pair(sn,pair($i,$j))))"
-                                                    }
-                                                ],
-                                                "jgnShow": "pair($id,pair(pkID,pair('pubKey',pair(sn,pair($i,$j)))))"
-                                            }
-                                        ],
-                                        "jgnShow": "pair($CA,pair($id,pair(pkID,pair('pubKey',pair(sn,pair($i,$j))))))"
-                                    },
-                                    {
-                                        "jgnFunct": "pair",
-                                        "jgnParams": [
-                                            {
-                                                "jgnConst": "$rootCA"
-                                            },
-                                            {
-                                                "jgnFunct": "pair",
-                                                "jgnParams": [
-                                                    {
-                                                        "jgnConst": "$CA"
-                                                    },
-                                                    {
-                                                        "jgnFunct": "pair",
-                                                        "jgnParams": [
-                                                            {
-                                                                "jgnFunct": "pk",
-                                                                "jgnParams": [
-                                                                    {
-                                                                        "jgnConst": "~skCA"
-                                                                    }
-                                                                ],
-                                                                "jgnShow": "pk(~skCA)"
-                                                            },
-                                                            {
-                                                                "jgnFunct": "pair",
-                                                                "jgnParams": [
-                                                                    {
-                                                                        "jgnConst": "'pubKey-CA'"
-                                                                    },
-                                                                    {
-                                                                        "jgnFunct": "pair",
-                                                                        "jgnParams": [
-                                                                            {
-                                                                                "jgnConst": "snCA"
-                                                                            },
-                                                                            {
-                                                                                "jgnFunct": "pair",
-                                                                                "jgnParams": [
-                                                                                    {
-                                                                                        "jgnConst": "$i0"
-                                                                                    },
-                                                                                    {
-                                                                                        "jgnConst": "$j0"
-                                                                                    }
-                                                                                ],
-                                                                                "jgnShow": "pair($i0,$j0)"
-                                                                            }
-                                                                        ],
-                                                                        "jgnShow": "pair(snCA,pair($i0,$j0))"
-                                                                    }
-                                                                ],
-                                                                "jgnShow": "pair('pubKey-CA',pair(snCA,pair($i0,$j0)))"
-                                                            }
-                                                        ],
-                                                        "jgnShow": "pair(pk(~skCA),pair('pubKey-CA',pair(snCA,pair($i0,$j0))))"
-                                                    }
-                                                ],
-                                                "jgnShow": "pair($CA,pair(pk(~skCA),pair('pubKey-CA',pair(snCA,pair($i0,$j0)))))"
-                                            }
-                                        ],
-                                        "jgnShow": "pair($rootCA,pair($CA,pair(pk(~skCA),pair('pubKey-CA',pair(snCA,pair($i0,$j0))))))"
-                                    },
-                                    {
-                                        "jgnConst": "$sct1"
-                                    }
-                                ]
-                            },
-                            {
-                                "jgnFactId": "#vr:c4",
-                                "jgnFactMult": "!",
-                                "jgnFactName": "!BAccept_SCT",
-                                "jgnFactShow": "!BAccept_SCT( $L2, <$CA, $id, pkID, 'pubKey', sn, $i, $j>, <$rootCA, $CA, pk(~skCA), 'pubKey-CA', snCA, $i0, $j0>, $sct2)",
-                                "jgnFactTag": "ProtoFact",
-                                "jgnFactTerms": [
-                                    {
-                                        "jgnConst": "$L2"
-                                    },
-                                    {
-                                        "jgnFunct": "pair",
-                                        "jgnParams": [
-                                            {
-                                                "jgnConst": "$CA"
-                                            },
-                                            {
-                                                "jgnFunct": "pair",
-                                                "jgnParams": [
-                                                    {
-                                                        "jgnConst": "$id"
-                                                    },
-                                                    {
-                                                        "jgnFunct": "pair",
-                                                        "jgnParams": [
-                                                            {
-                                                                "jgnConst": "pkID"
-                                                            },
-                                                            {
-                                                                "jgnFunct": "pair",
-                                                                "jgnParams": [
-                                                                    {
-                                                                        "jgnConst": "'pubKey'"
-                                                                    },
-                                                                    {
-                                                                        "jgnFunct": "pair",
-                                                                        "jgnParams": [
-                                                                            {
-                                                                                "jgnConst": "sn"
-                                                                            },
-                                                                            {
-                                                                                "jgnFunct": "pair",
-                                                                                "jgnParams": [
-                                                                                    {
-                                                                                        "jgnConst": "$i"
-                                                                                    },
-                                                                                    {
-                                                                                        "jgnConst": "$j"
-                                                                                    }
-                                                                                ],
-                                                                                "jgnShow": "pair($i,$j)"
-                                                                            }
-                                                                        ],
-                                                                        "jgnShow": "pair(sn,pair($i,$j))"
-                                                                    }
-                                                                ],
-                                                                "jgnShow": "pair('pubKey',pair(sn,pair($i,$j)))"
-                                                            }
-                                                        ],
-                                                        "jgnShow": "pair(pkID,pair('pubKey',pair(sn,pair($i,$j))))"
-                                                    }
-                                                ],
-                                                "jgnShow": "pair($id,pair(pkID,pair('pubKey',pair(sn,pair($i,$j)))))"
-                                            }
-                                        ],
-                                        "jgnShow": "pair($CA,pair($id,pair(pkID,pair('pubKey',pair(sn,pair($i,$j))))))"
-                                    },
-                                    {
-                                        "jgnFunct": "pair",
-                                        "jgnParams": [
-                                            {
-                                                "jgnConst": "$rootCA"
-                                            },
-                                            {
-                                                "jgnFunct": "pair",
-                                                "jgnParams": [
-                                                    {
-                                                        "jgnConst": "$CA"
-                                                    },
-                                                    {
-                                                        "jgnFunct": "pair",
-                                                        "jgnParams": [
-                                                            {
-                                                                "jgnFunct": "pk",
-                                                                "jgnParams": [
-                                                                    {
-                                                                        "jgnConst": "~skCA"
-                                                                    }
-                                                                ],
-                                                                "jgnShow": "pk(~skCA)"
-                                                            },
-                                                            {
-                                                                "jgnFunct": "pair",
-                                                                "jgnParams": [
-                                                                    {
-                                                                        "jgnConst": "'pubKey-CA'"
-                                                                    },
-                                                                    {
-                                                                        "jgnFunct": "pair",
-                                                                        "jgnParams": [
-                                                                            {
-                                                                                "jgnConst": "snCA"
-                                                                            },
-                                                                            {
-                                                                                "jgnFunct": "pair",
-                                                                                "jgnParams": [
-                                                                                    {
-                                                                                        "jgnConst": "$i0"
-                                                                                    },
-                                                                                    {
-                                                                                        "jgnConst": "$j0"
-                                                                                    }
-                                                                                ],
-                                                                                "jgnShow": "pair($i0,$j0)"
-                                                                            }
-                                                                        ],
-                                                                        "jgnShow": "pair(snCA,pair($i0,$j0))"
-                                                                    }
-                                                                ],
-                                                                "jgnShow": "pair('pubKey-CA',pair(snCA,pair($i0,$j0)))"
-                                                            }
-                                                        ],
-                                                        "jgnShow": "pair(pk(~skCA),pair('pubKey-CA',pair(snCA,pair($i0,$j0))))"
-                                                    }
-                                                ],
-                                                "jgnShow": "pair($CA,pair(pk(~skCA),pair('pubKey-CA',pair(snCA,pair($i0,$j0)))))"
-                                            }
-                                        ],
-                                        "jgnShow": "pair($rootCA,pair($CA,pair(pk(~skCA),pair('pubKey-CA',pair(snCA,pair($i0,$j0))))))"
                                     },
                                     {
                                         "jgnConst": "$sct2"
@@ -14907,6 +14487,27 @@
                                     },
                                     {
                                         "jgnConst": "~session"
+                                    }
+                                ]
+                            },
+                            {
+                                "jgnFactId": "action",
+                                "jgnFactMult": "",
+                                "jgnFactName": "FetchLogSnapshotTime",
+                                "jgnFactShow": "FetchLogSnapshotTime( $M, $L, ~session, $time_of_proof_fetch )",
+                                "jgnFactTag": "ProtoFact",
+                                "jgnFactTerms": [
+                                    {
+                                        "jgnConst": "$M"
+                                    },
+                                    {
+                                        "jgnConst": "$L"
+                                    },
+                                    {
+                                        "jgnConst": "~session"
+                                    },
+                                    {
+                                        "jgnConst": "$time_of_proof_fetch"
                                     }
                                 ]
                             },

@@ -823,7 +823,7 @@ rule clientGossipsToMonitor:
         Time($now), 
         San_clientGossipsToMonitor() 
     ]-> 
-    [ !TLS_C_to_M($C, $M, $snapshot, sth, session), ClientGossiped($C, $M, $L, session, $time, fields, chain) ]
+    [ !TLS_C_to_M($C, $M, $snapshot, sth, session), ClientGossiped($C, $M, $L, session, $time, fields, ca_fields, chain) ]
 
     /* --- Gossip AppendOnly Checks --- */
     /* In addition to using gossiped snapshots to explore new entries with the help of another fetched snapshot, a different question immediately arises for the monitor: do these snapshots contradict each other? For this, the monitor can use append-only proofs between these two snapshots. The following rules here formalize this and are similar to the append-only proof that we have used in CT with the limitation to just these two snapshots and not restricting anymore that the older snapshot has been stored before. */
@@ -955,7 +955,7 @@ STHGossipTransparencyCheck(). Contributed evidence:
 */
 rule GossipTransparencyCheck_Success:
     [ 
-    ClientGossiped($C, $M, $L, gossiped_session, $gossiped_proof_time, fields, chain),
+    ClientGossiped($C, $M, $L, gossiped_session, $gossiped_proof_time, fields, ca_fields, chain),
     AppendOnlyChecked($M, gossiped_session, session), /* then gossiped this proof to the monitor (proof, session) but without fields. Monitor checks for append only (may or may not hold), if it does not monitor emitted an assert blaming the logger */
     MonitorFoundCert($M, $L, fields, $CA, ca_fields, $time_of_proof_fetch, session) // TODO: replace with inclusion proof? i guess so <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 ]
@@ -974,7 +974,7 @@ rule GossipTransparencyCheck_Failed:
         chain = <<cert_fields, cert_sig>, <ca_fields, ca_sig>>
     in
     [ 
-    ClientGossiped($C, $M, $L, gossiped_session, $gossiped_proof_time, fields, chain),
+    ClientGossiped($C, $M, $L, gossiped_session, $gossiped_proof_time, fields, ca_fields, chain),
     AppendOnlyChecked($M, gossiped_session, session), /* then gossiped this proof to the monitor (proof, session) but without fields. Monitor checks for append only (may or may not hold), if it does not monitor emitted an assert blaming the logger */
     MonitorCouldNotFindCert($M, fields, $L, $CA, ca_fields, $time_of_proof_fetch, session),
     !Root_CA($rootCA, pkRootCA)
@@ -1004,7 +1004,7 @@ rule GossipingCheck:
         chain = <<cert_fields, cert_sig>, <ca_fields, ca_sig>>
     in
     [ 
-    ClientGossiped($C, $M, $L, gossiped_session, $gossiped_proof_time, fields, chain),
+    ClientGossiped($C, $M, $L, gossiped_session, $gossiped_proof_time, fields, ca_fields, chain),
     AppendOnlyChecked($M, gossiped_session, session), /* then gossiped this proof to the monitor (proof, session) but without fields. Monitor checks for append only (may or may not hold), if it does not monitor emitted an assert blaming the logger */
     MonitorInspected($M, $L, fields, $CA, ca_fields, $time_of_proof_fetch, session),
     CCADBConsulted($rootCA, ca_fields),
@@ -1694,14 +1694,17 @@ restriction appendOnlyCheck_Gossip_once:
 restriction ScanLog_once:
         "All #t1 #t2. MonitorScanLog()@t1 & MonitorScanLog()@t2 ==> (#t1 = #t2)"
 
-restriction no_rogue_addition:
-    "not (Ex #t. San_forge_log_view() @ #t)"
+restriction one_rogue_addition:
+    "All #t1 #t2. San_forge_log_view()@t1 & San_forge_log_view()@t2 ==> (#t1 = #t2)"
 
 restriction all_monitors_honest:
     "not (Ex M #t. CompromiseMonitor(M) @ #t)"
 
 restriction CCADBConsulted_once:
     "All rootCA1 rootCA2 ca_fields1 ca_fields2 #t1 #t2. ExternalCheckCCADB(rootCA1, ca_fields1)@t1 & ExternalCheckCCADB(rootCA2, ca_fields2)@t2 ==> (#t1 = #t2)"
+
+restriction clientGossips_once:
+    "All #t1 #t2. San_clientGossipsToMonitor()@t1 & San_clientGossipsToMonitor()@t2 ==> (#t1 = #t2)"
 
 #endif
 

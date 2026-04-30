@@ -12,23 +12,20 @@
 - `sct_audit.spthy`: CT + SCT Auditing
 - `ct_receipt.spthy`: CT + SCT Auditing + receipts
 - `ct_gossip.spthy`: CT + STH gossiping
-- `acc_oracle` TODO T do we still use that?
+- `acc_oracle`: oracle to select goals during proof search
 
 ### Use with batch-tamarin
 
 `batch-tamarin` (see below) needs the accountability lemmas to be translated
 before running. These files are generated from the above models by
-clicking "Download" in interactive mode after loading.
+clicking "Download" in interactive mode after loading. We provide them in the
+proofs directory, so there is no need to do that, but you can compare.
 
-TODO T: 
-
-- `ct_lemmas_pregen.spthy`
-- `pki_lemma_pregen.spthy`
-- `ct_lemmas_pregen_receipt.spthy` (generated from `ct.sphy` with `--defines=RECEIPT` see below.)
+Nix users: we provide a nix flake for full reproducibility, see below.
 
 ### Results
 
-- `proofs` We saved important proofs in case reproducibility environment should fail.
+- `proofs` We saved important proofs in case reproducibility environment should fail. It contains .json files that define the proof runs.
 - `results` batch-tamarin generates this and puts results in HTML format here 
 
 ### Reproducibility:
@@ -39,14 +36,6 @@ TODO T:
 ## Usage:
 
 Use `tamarin-prover --prove={lemmaname}` to prove most lemmas. This can take a while and you need some memory.
-
-The models for revocation (in the appendix) or the addition of receipts to the
-SCT auditing model are disable by default and can be activated with the
-following flags to tamarin.
-
-- `--defines=REVOCATION` for (simplified: perfect, without delay) revocation model 
-- `--defines=RECEIPT` for realistic monitor blaming by combining domain owner and logger knowledge
-- `--defines=SUFFICIENCY` to automate `exists-trace` proofs of the sufficiency component of accountability lemmas.
 
 The configuration files for `batch-tamarin` (see Reproducibility, below)
 already encode which flags and additional options (some lemmas need an oracle
@@ -72,15 +61,12 @@ checking version: 2.7.1. OK. checking installation: OK.
 Generated from: Tamarin version 1.10.0 Maude version 2.7.1 Git revision: UNKNOWN, branch: UNKNOWN Compiled at: 2024-10-30 14:56:23.355649243 UTC
 ```
 
-3. Note that: 
+3. Note that some accountability lemmas might fail, because there are
+   counter-examples. (Tamarin's exists-trace directive is not available for
+accountability lemmas.) These are marked as such in the model. 
 
-    - Lemmas `A_RevokeGossip_1_monitor_blames_log_gossip_root_CA_single`
-         and `A_RevokeGossip_1_monitor_blames_log_gossip_intm_CA_single` will FAIL,
-        but they consitute other conditions for an accountability lemma that
-has an attack (hence there is a provable counter-example against another trace
-lemma generated from the same accountability lemma). Hence this lemma does not need to be proved.
+4. Some lemmas (exists-trace lemmas) are not provable by Tamarin in reasonable time and with small memory. They are listed separately in the configuration files of `batch-tamarin` and will run with the `--defines=SUFFICIENCY_PROOF` flag. This adds restrictions to the model asserting that some actions do not happen or happen only a limited time to avoid infinite loops. Note that we can only use this to show that a trace exists (for counter-examples or sufficiency proofs in accountability), but not to verify that all traces have a certain property.
 
-    - Sufficiency lemmas from accountability needs `--defines=SUFFICIENCY_PROOF`, see above.
 
 ## Reproducibility
 

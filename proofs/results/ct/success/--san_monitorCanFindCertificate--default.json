@@ -1,11 +1,11 @@
 {
   "task_id": "--san_monitorCanFindCertificate--default",
   "warnings": [],
-  "tamarin_timing": 19.92,
+  "tamarin_timing": 10.75,
   "wrapper_measures": {
-    "time": 20.10064387321472,
-    "avg_memory": 176.93867187499998,
-    "peak_memory": 303.35546875
+    "time": 10.920705080032349,
+    "avg_memory": 195.25284090909088,
+    "peak_memory": 335.8125
   },
   "output_spthy": "results/ct/proofs/--san_monitorCanFindCertificate--default.spthy",
   "verified_lemma": {

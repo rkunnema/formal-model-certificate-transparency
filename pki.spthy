@@ -152,7 +152,8 @@ rule ConsultDocumentation_Success:
         ca_fields = <$rootCA, $CA, pkCA, 'pubKey-CA', sn, $i, $j>
         ca_cert = <ca_fields, ca_sig>
     in
-    [ In(ca_fields), In(ca_sig), !Root_CA($rootCA, pkRCA), !CA_Documentation($rootCA, $CA, ca_fields, ca_sig) /* proof of legitimacy handed out earlier when using the honest issuing process */ ]
+    [ In(ca_fields), In(ca_sig), !Root_CA($rootCA, pkRCA), !CA_Documentation($rootCA, $CA, ca_fields, ca_sig) // proof of legitimacy handed out earlier when using the honest issuing process
+     ]
     --[
         Eq(verify(ca_sig, ca_fields, pkRCA), true()), // signed by root CA
         Asserts($rootCA, 'I signed this intermediate CA.', $CA, <ca_fields>),
@@ -401,15 +402,10 @@ lemma cert_auth:
             /* or the root CA is compromised */
     "
 
-/* ======================================
-       End2End Accountable Authenticity
-   ====================================== */
-
-/* --- Accountable Authenticity with external validator --- */
 
 // auth is violated but intermediate CA cert is not documented. Thus only root CA is blamed
 test CAfalseAsserts_rootBlamed: 
-  "Ex CA fields ca_fields #t0 #t1 #t2. /* rootCA free */
+  "Ex CA fields ca_fields #t0 #t1 #t2.
     Asserts('external auditor', 'That intermediary CA signed the following incorrect statement and the validation chain says the following about that CA.', CA, <fields, ca_fields>)@t0
     // assessment finds the certificate incorrect... 
     & Asserts('CCADB', 'No root CA signed this CA.', CA, <ca_fields, rootCA>)@t1

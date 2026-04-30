@@ -1,11 +1,11 @@
 {
   "task_id": "--A_CT_2_root_ca_rogue_honest_mon_single--default",
   "warnings": [],
-  "tamarin_timing": 77.92,
+  "tamarin_timing": 45.45,
   "wrapper_measures": {
-    "time": 78.18334603309631,
-    "avg_memory": 650.6447315705129,
-    "peak_memory": 1296.94921875
+    "time": 45.620816707611084,
+    "avg_memory": 672.5540081521739,
+    "peak_memory": 1266.9375
   },
   "output_spthy": "results/ct/proofs/--A_CT_2_root_ca_rogue_honest_mon_single--default.spthy",
   "verified_lemma": {

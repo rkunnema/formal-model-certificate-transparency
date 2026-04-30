@@ -30,14 +30,14 @@
 
         batch-tamarin = python.pkgs.buildPythonPackage rec {
           pname = "batch-tamarin";
-          version = "1.1.0";
+          version = "1.1.2";
           format = "pyproject";
 
           src = pkgs.fetchFromGitHub {
             owner = "tamarin-prover";
             repo = "batch-tamarin";
             rev = "v${version}";
-            hash = "sha256-wmfCoY2z7b/wnlqeb1Vc9eHzeWYS+v+n9mWxXzrkJzM=";
+            hash = "sha256-1BQ+e8GlBcqNRB/RZvK/UKhsGgsaDlMekeMHfvUHmtY";
           };
 
           nativeBuildInputs = with python.pkgs; [ setuptools wheel build ];

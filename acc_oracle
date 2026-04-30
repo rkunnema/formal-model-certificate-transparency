@@ -42,41 +42,45 @@ for line in lines:
             continue
 
     elif lemma == "A_Gossip_2_verif_empty":
-        if "( ~skCA" in line:
+        if "CompromiseMonitor(" in line:
             l = [num] + l
-        elif "!CA_s0( $L" in line:
+        elif "CompromiseLogger(" in line:
             l = [num] + l
-        elif "!Monitor( $L" in line:
+        elif "MonitorObservesEntry(" in line:
             l = [num] + l
-        elif "Corrupted(" in line:
+        elif "CCADBConsulted(" in line:
             l = [num] + l
-        elif "!Root_CA_s0( $L" in line:
+        elif "MonitorInspected(" in line:
             l = [num] + l
-        elif "!CA_s0( $rootCA" in line:
-            l = [num] + l
-        elif "!Logger_s( $rootCA" in line:
-            l = [num] + l
-        elif "CompromiseLogger" in line:
-            l = [num] + l
-        elif "CompromiseMonitor" in line:
-            l = [num] + l
-        elif "!Corrupted_Logger" in line:
+        elif "!St_bad_Monitor(" in line:
             l = [num] + l
         else:
             continue
 
     elif lemma == "A_Gossip_2_rootCA_rogue_gossip_log_honest_verif_nonempty":
-        if "(∃ #t. (CompromiseLogger( L ) @ #t))  ∥ (∃ #t. (CompromiseMonitor( M ) @ #t))  ∥ (∃ CA #t. (GroundTruth( CA, fields ) @ #t))" in line:
+        if "CompromiseMonitor" in line:
+            l = [num] + l
+        elif "CompromiseLogger" in line:
             l = [num] + l
         elif "'Blame this CA.'" in line:
+            l = [num] + l
+        elif "MonitorObservesEntry(" in line:
+            l = [num] + l
+        elif "ClientGossiped( $C" in line:
             l = [num] + l
         else:
             continue
 
     elif lemma == "A_Gossip_2_rootCA_benign_gossip_log_honest_verif_nonempty":
-        if "(∃ #t. (CompromiseLogger( L ) @ #t))  ∥ (∃ #t. (CompromiseMonitor( M ) @ #t))  ∥ (∃ CA #t. (GroundTruth( CA, fields ) @ #t))" in line:
+        if "CompromiseMonitor" in line:
+            l = [num] + l
+        elif "CompromiseLogger" in line:
             l = [num] + l
         elif "'Blame this CA.'" in line:
+            l = [num] + l
+        elif "MonitorObservesEntry(" in line:
+            l = [num] + l
+        elif "ClientGossiped( $C" in line:
             l = [num] + l
         else:
             continue

@@ -1,11 +1,11 @@
 {
   "task_id": "--san_ClientInitiatesAuditing--default",
   "warnings": [],
-  "tamarin_timing": 12.32,
+  "tamarin_timing": 7.3,
   "wrapper_measures": {
-    "time": 12.545138359069824,
-    "avg_memory": 130.99368990384616,
-    "peak_memory": 146.1875
+    "time": 7.464893341064453,
+    "avg_memory": 155.81054687499997,
+    "peak_memory": 183.21875
   },
   "output_spthy": "results/ct/proofs/--san_ClientInitiatesAuditing--default.spthy",
   "verified_lemma": {

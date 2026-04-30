@@ -1,11 +1,11 @@
 {
   "task_id": "--san_MonitorCheck_NotFound--default",
   "warnings": [],
-  "tamarin_timing": 40.87,
+  "tamarin_timing": 22.12,
   "wrapper_measures": {
-    "time": 41.078678607940674,
-    "avg_memory": 298.32469512195115,
-    "peak_memory": 558.8203125
+    "time": 22.28125,
+    "avg_memory": 315.0490056818182,
+    "peak_memory": 579.375
   },
   "output_spthy": "results/ct/proofs/--san_MonitorCheck_NotFound--default.spthy",
   "verified_lemma": {
