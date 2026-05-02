@@ -1,11 +1,11 @@
 {
   "task_id": "--cert_sct_auth--default",
   "warnings": [],
-  "tamarin_timing": 8.05,
+  "tamarin_timing": 13.33,
   "wrapper_measures": {
-    "time": 8.228368759155273,
-    "avg_memory": 168.46874999999997,
-    "peak_memory": 264.671875
+    "time": 13.451156377792358,
+    "avg_memory": 143.24358258928572,
+    "peak_memory": 239.9765625
   },
   "output_spthy": "results/ct/proofs/--cert_sct_auth--default.spthy",
   "verified_lemma": {

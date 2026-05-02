@@ -1,11 +1,11 @@
 {
   "task_id": "--san_Domain_Owner_Init--default",
   "warnings": [],
-  "tamarin_timing": 18.41,
+  "tamarin_timing": 17.89,
   "wrapper_measures": {
-    "time": 18.592792987823486,
-    "avg_memory": 136.64740953947367,
-    "peak_memory": 149.453125
+    "time": 18.007314205169678,
+    "avg_memory": 135.35633680555554,
+    "peak_memory": 149.703125
   },
   "output_spthy": "results/sct_audit/proofs/--san_Domain_Owner_Init--default.spthy",
   "verified_lemma": {

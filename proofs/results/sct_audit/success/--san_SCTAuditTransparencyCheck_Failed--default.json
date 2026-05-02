@@ -1,11 +1,11 @@
 {
   "task_id": "--san_SCTAuditTransparencyCheck_Failed--default",
   "warnings": [],
-  "tamarin_timing": 61.89,
+  "tamarin_timing": 61.8,
   "wrapper_measures": {
-    "time": 62.082162618637085,
-    "avg_memory": 408.419669858871,
-    "peak_memory": 761.50390625
+    "time": 61.9618604183197,
+    "avg_memory": 408.1165574596774,
+    "peak_memory": 720.0
   },
   "output_spthy": "results/sct_audit/proofs/--san_SCTAuditTransparencyCheck_Failed--default.spthy",
   "verified_lemma": {

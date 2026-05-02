@@ -1,11 +1,11 @@
 {
   "task_id": "--T_CT_1_client_inclusionViol_inj--default",
   "warnings": [],
-  "tamarin_timing": 7.69,
+  "tamarin_timing": 11.26,
   "wrapper_measures": {
-    "time": 7.856500864028931,
-    "avg_memory": 155.33984375,
-    "peak_memory": 182.4375
+    "time": 11.387322902679443,
+    "avg_memory": 133.36295572916666,
+    "peak_memory": 151.3671875
   },
   "output_spthy": "results/ct/proofs/--T_CT_1_client_inclusionViol_inj--default.spthy",
   "verified_lemma": {

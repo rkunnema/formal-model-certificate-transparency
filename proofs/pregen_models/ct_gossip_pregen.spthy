@@ -197,6 +197,21 @@ rule ChainValidator_Invalid:
     ]->
     [ ]
 
+/* We deem append-only violated if entries disappear independent of whether they were valid submissions. According to the standard, there are only valid chains allowed on the log, thus this only covers more potential misbehavior of the log. We use these predicates for properties of the Merkle Tree, thus only using the fields directly, and ignoring the chain for now. */
+predicate: EntryMissing(Logger, fields, log_id, #time, sth_time) <=>
+    not (Ex ca_cert different_time chain #t. 
+            LoggerComputesAddLog(Logger, log_id, fields, ca_cert, chain, different_time)@t
+            & not (sth_time = different_time) /* or there has never been a visible addition to the log */
+            & #t < #time
+        )
+    
+predicate: EntryVisible(Logger, fields, ca_cert, chain, log_id, #time, sth_time) <=> 
+    (Ex different_time #t.
+        LoggerComputesAddLog(Logger, log_id, fields, ca_cert, chain, different_time)@t /* there has been an addition to log_id with the fields prior to #time */
+        & not(sth_time = different_time) /* ...that addition was visible */
+        & #t < #time
+        )
+
 
 /* 
 The following rules cover monitor exploration via the log to find potentially rogue certificates. When looking for a certificate, there are different outcomes that are encoded in different rules here:
@@ -237,15 +252,16 @@ predicate: NoChainVisible(Logger, fields, log_id, #time, sth_time) <=>
         ))
 
 
-/* Good case: Monitor was able to find the entry on the log. Note how we turn back to the whole chain here: Monitor exploration also covers the supplemental information a log offers. On the monitor side we also check the validity of this chain */
+/* Good case: Monitor was able to find the entry on the log. Note how we turn back to the whole chain here: Monitor exploration also covers the supplemental information a log offers. On the monitor side we also check the validity of this chain
+ */
 restriction logExplorationSucceeds:
-    "All M L fields ca_cert sth session #t5. 
-    MonitorObservesEntry(M, L, fields, ca_cert, sth, session)@t5
+    "All M L fields ca_cert chain sth session #t5. 
+    MonitorObservesEntry(M, L, fields, ca_cert, chain, sth, session)@t5
     ==> (Ex log_id time #t2. 
         LoggerPresentsView(L, M, log_id, time, sth, session)@t2 
             /* Logger handed out an STH to the recipient... */
         & #t2 < #t5 /* ...prior to the check */
-        & ChainVisible(L, fields, ca_cert, log_id, #t2, time) 
+        & EntryVisible(L, fields, ca_cert, chain, log_id, #t2, time) // for Gossiping this is new with "chain" but otherwise the same as before (note that EntryVisible does not change this lookup semantically it just binds the chain)
             /* ...and the entry is visible in that view */
         )"
 
@@ -269,11 +285,11 @@ rule monitorFindsRogueCertificate [color= #f3d664]:
         pub_fields = <$CA, $subj, ke, 'pubKey', sn, $i, $j, sct1, sct2>
         fields = <$CA, $subj, ke, 'pubKey', sn, $i, $j>
     in
-    [ !LoggerDict($M, $L), !TrackSubject($M, su), In(pub_fields), In(cert_sig), In(ca_fields), In(ca_sig), !TLS_L_to_M($L, $M, $snapshot, sth, session, $time), !Root_CA($rootCA, pkRootCA) ]
+    [ !LoggerDict($M, $L), !TrackSubject($M, su), In(pub_fields), In(cert_sig), In(ca_fields), In(ca_sig), In(preC_fields), In(preC_sig), !TLS_L_to_M($L, $M, $snapshot, sth, session, $time), !Root_CA($rootCA, pkRootCA) ]
     --[ 
         Eq(verify(cert_sig, pub_fields, pkCA), true()),
         Eq(verify(ca_sig, ca_fields, pkRootCA), true()),
-        MonitorObservesEntry($M, $L, fields, <ca_fields, ca_sig>, sth, session), /* see restriction */
+        MonitorObservesEntry($M, $L, fields, <ca_fields, ca_sig>, <<preC_fields, preC_sig>, <ca_fields, ca_sig>>, sth, session), /* see restriction */
         RogueCert($CA, fields), /* see restriction */
         Asserts($M, 'Blame this CA.', $CA, <fields, ca_fields>),
         MonitorScanLog(),
@@ -289,11 +305,11 @@ rule monitorCanFindCertificate [color= #f3d664]:
         pub_fields = <$CA, $subj, ke, 'pubKey', sn, $i, $j, sct1, sct2>
         fields = <$CA, $subj, ke, 'pubKey', sn, $i, $j>
     in
-    [ !LoggerDict($M, $L), !TrackSubject($M, $subj), In(pub_fields), In(cert_sig), In(ca_fields), In(ca_sig), !TLS_L_to_M($L, $M, $snapshot, sth, session, $time), !Root_CA($rootCA, pkRootCA) ]
+    [ !LoggerDict($M, $L), !TrackSubject($M, $subj), In(pub_fields), In(cert_sig), In(ca_fields), In(ca_sig), In(preC_fields), In(preC_sig), !TLS_L_to_M($L, $M, $snapshot, sth, session, $time), !Root_CA($rootCA, pkRootCA) ]
     --[
         Eq(verify(cert_sig, pub_fields, pkCA), true()),
         Eq(verify(ca_sig, ca_fields, pkRootCA), true()),
-        MonitorObservesEntry($M, $L, fields, <ca_fields, ca_sig>, sth, session), /* see restriction */
+        MonitorObservesEntry($M, $L, fields, <ca_fields, ca_sig>, <<preC_fields, preC_sig>, <ca_fields, ca_sig>>, sth, session), /* see restriction */
         BenignCert($iss, fields), /* cert is found benign, see restriction */
         Asserts($M, 'Do not blame this CA.', $CA, <fields, ca_fields>),
         MonitorScanLog(),
@@ -326,11 +342,11 @@ rule monitorFindsRogueCertificate_Sleep [color= #af2828]:
         fields = <$CA, $subj, ke, 'pubKey', sn, $i, $j>
         pub_fields = <$CA, $subj, ke, 'pubKey', sn, $i, $j, sct1, sct2>
     in
-    [ !LoggerDict($M, $L), !St_bad_Monitor($M), !TrackSubject($M, su), In(pub_fields), In(cert_sig), In(ca_fields), In(ca_sig), !TLS_L_to_M($L, $M, $snapshot, sth, session, $time), !Root_CA($rootCA, pkRootCA) ]
+    [ !LoggerDict($M, $L), !St_bad_Monitor($M), !TrackSubject($M, su), In(pub_fields), In(cert_sig), In(ca_fields), In(ca_sig), In(preC_fields), In(preC_sig), !TLS_L_to_M($L, $M, $snapshot, sth, session, $time), !Root_CA($rootCA, pkRootCA) ]
     --[
         Eq(verify(cert_sig, pub_fields, pkCA), true()),
         Eq(verify(ca_sig, ca_fields, pkRootCA), true()), /* only if it is a correctly signed and rogue cert, sleeping is considered a violation (+ we cannot check for other cases) */
-        MonitorObservesEntry($M, $L, fields, <ca_fields, ca_sig>, sth, session), /* see restriction */
+        MonitorObservesEntry($M, $L, fields, <ca_fields, ca_sig>, <<preC_fields, preC_sig>, <ca_fields, ca_sig>>, sth, session), /* see restriction */
         RogueCert($CA, fields), /* see restriction */
         MonitorScanLog(),
 
@@ -587,21 +603,6 @@ rule ClientFindsAppendOnlyViolation [color= #e65208]:
     ]->
     []
 
-/* We deem append-only violated if entries disappear independent of whether they were valid submissions. According to the standard, there are only valid chains allowed on the log, thus this only covers more potential misbehavior of the log. We use these predicates for properties of the Merkle Tree, thus only using the fields directly, and ignoring the chain for now. */
-predicate: EntryMissing(Logger, fields, log_id, #time, sth_time) <=>
-    not (Ex ca_cert different_time chain #t. 
-            LoggerComputesAddLog(Logger, log_id, fields, ca_cert, chain, different_time)@t
-            & not (sth_time = different_time) /* or there has never been a visible addition to the log */
-            & #t < #time
-        )
-    
-predicate: EntryVisible(Logger, fields, ca_cert, chain, log_id, #time, sth_time) <=> 
-    (Ex different_time #t.
-        LoggerComputesAddLog(Logger, log_id, fields, ca_cert, chain, different_time)@t /* there has been an addition to log_id with the fields prior to #time */
-        & not(sth_time = different_time) /* ...that addition was visible */
-        & #t < #time
-        )
-
 /* the monitor or client can observe a violation of the append-only property:
 
 - if the log gets manipulated 'between' two STH requests, the signatures will not match anymore and the logger will exactly find that 
@@ -757,7 +758,7 @@ rule ParticipantFindsInclusionViolation [color= #e65208]:
     let
         fields = <$CA, $id, pkID, 'pubKey', sn, $i, $j>
     in
-    [ !TLS_L_to_P($L, $P, $snapshot, sth, session, $time), !Logger($L, pkL),In(fields), In(ca_cert), /* entry to check for */ !Monitor($M) ]
+    [ !TLS_L_to_P($L, $P, $snapshot, sth, session, $time), !Logger($L, pkL),In(fields), In(ca_cert), /* entry to check for */ ]
     --[
         Asserts($P, 'This loggers log currently does not include these fields.', $L, <fields, session>),
         InclusionProofFails($P, $L, fields, ca_cert, sth, session), /* entry is not contained in the snapshot, see restriction */
@@ -765,7 +766,7 @@ rule ParticipantFindsInclusionViolation [color= #e65208]:
         Time($now),
         San_ParticipantFindsInclusionViolation()
     ]->
-    [ InclusionFailed($P, $L, fields, $time, session) ]
+    [ InclusionFailed($P, $L, fields, ca_cert, $time, session) ]
 
 restriction inclusionProofFails:
     "All IdFetcher L fields ca_cert sth session #t1. 
@@ -804,6 +805,36 @@ restriction inclusionProofWorks:
             /* and the entry is visible in that view */
         )"
 
+/* For Gossiping: Monitor variants of the inclusion proofs */
+
+rule MonitorFindsInclusionViolation [color= #e65208]:
+    let
+        fields = <$CA, $id, pkID, 'pubKey', sn, $i, $j>
+    in
+    [ !TLS_L_to_M($L, $M, $snapshot, sth, session, $time), !Logger($L, pkL),In(fields), In(ca_cert), /* entry to check for */ !Monitor($M) ]
+    --[
+        Asserts($M, 'This loggers log currently does not include these fields.', $L, <fields, session>),
+        InclusionProofFails($M, $L, fields, ca_cert, sth, session), /* entry is not contained in the snapshot, see restriction */
+        
+        Time($now),
+        San_MonitorFindsInclusionViolation()
+    ]->
+    [ MonitorInclusionFailed($M, $L, fields, ca_cert, $time, session) ]
+
+rule MonitorVerifiesInclusion [color= #c1ff3c]:
+    let
+        fields = <$CA, $id, pkID, 'pubKey', sn, $i, $j>
+    in
+    [ !TLS_L_to_M($L, $M, $snapshot, sth, session, $time), !Logger($L, pkL),In(fields), In(ca_cert), In(chain), /* entry to check for */ ]
+    --[
+        InclusionProofSucceeds($M, $L, fields, ca_cert, chain, sth, session), /* entry is contained in the snapshot, see restriction */
+        Asserts($M, 'This loggers log currently includes these fields.', $L, <fields, session>),
+        
+        Time($now),
+        San_MonitorVerifiesInclusion()
+    ]->
+    [ MonitorInclusionVerified($M, $L, fields, $time, session, chain) ]
+
 /* ---------- STH Gossiping ---------- */
 
 /*
@@ -817,13 +848,14 @@ We limit ourselves to gossip between the client and monitor.
 */
 
 rule clientGossipsToMonitor:
-    [ !TLS_L_to_P($L, $C, $snapshot, sth, session, $time), InclusionVerified($C, $L, fields, $gossiped_proof_time, gossiped_session, chain), /* client on their own verified that L contains fields */
+    [ !TLS_L_to_P($L, $C, $snapshot, sth, session, $time), InclusionVerified($C, $L, fields, $time, session, chain), /* client on their own verified that L contains fields */
     !BAccept_SCT($L, fields, ca_fields) /* gossip produced after the client ran into a certificate it checked for */ ]
     --[ 
         Time($now), 
-        San_clientGossipsToMonitor() 
+        San_clientGossipsToMonitor(),
+        ClientGossips($C, $L, fields, $time, session, chain) 
     ]-> 
-    [ !TLS_C_to_M($C, $M, $snapshot, sth, session), ClientGossiped($C, $M, $L, session, $time, fields, chain) ]
+    [ !TLS_C_to_M($C, $M, $snapshot, sth, session), ClientGossiped($C, $M, $L, session, $time, fields, ca_fields, chain) ]
 
     /* --- Gossip AppendOnly Checks --- */
     /* In addition to using gossiped snapshots to explore new entries with the help of another fetched snapshot, a different question immediately arises for the monitor: do these snapshots contradict each other? For this, the monitor can use append-only proofs between these two snapshots. The following rules here formalize this and are similar to the append-only proof that we have used in CT with the limitation to just these two snapshots and not restricting anymore that the older snapshot has been stored before. */
@@ -954,10 +986,14 @@ STHGossipTransparencyCheck(). Contributed evidence:
 - Monitor: The monitor checks append only between both and does an own inclusion proof
 */
 rule GossipTransparencyCheck_Success:
+    let
+        ca_fields = <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
+        chain = <<cert_fields, cert_sig>, <ca_fields, ca_sig>>
+    in
     [ 
-    ClientGossiped($C, $M, $L, gossiped_session, $gossiped_proof_time, fields, chain),
-    AppendOnlyChecked($M, gossiped_session, session), /* then gossiped this proof to the monitor (proof, session) but without fields. Monitor checks for append only (may or may not hold), if it does not monitor emitted an assert blaming the logger */
-    MonitorFoundCert($M, $L, fields, $CA, ca_fields, $time_of_proof_fetch, session) // TODO: replace with inclusion proof? i guess so <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+    ClientGossiped($C, $M, $L, gossiped_session, $gossiped_proof_time, fields, ca_fields, chain),
+    AppendOnlyChecked($M, gossiped_session, session), // then gossiped this proof to the monitor (proof, session) but without fields. Monitor checks for append only (may or may not hold), if it does not monitor emitted an assert blaming the logger
+    MonitorInclusionVerified($M, $L, fields, $time_of_proof_fetch, session, chain)
 ]
     --[
         STHGossipTransparencyCheck($M, $L, fields, $CA, ca_fields, session, gossiped_session),
@@ -970,18 +1006,14 @@ rule GossipTransparencyCheck_Success:
 rule GossipTransparencyCheck_Failed:
     let
         ca_fields = <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>
-        fields = <$CA, $subj, ke, 'pubKey', sn, $i, $j>
         chain = <<cert_fields, cert_sig>, <ca_fields, ca_sig>>
     in
     [ 
-    ClientGossiped($C, $M, $L, gossiped_session, $gossiped_proof_time, fields, chain),
-    AppendOnlyChecked($M, gossiped_session, session), /* then gossiped this proof to the monitor (proof, session) but without fields. Monitor checks for append only (may or may not hold), if it does not monitor emitted an assert blaming the logger */
-    MonitorCouldNotFindCert($M, fields, $L, $CA, ca_fields, $time_of_proof_fetch, session),
-    !Root_CA($rootCA, pkRootCA)
+    ClientGossiped($C, $M, $L, gossiped_session, $gossiped_proof_time, fields, ca_fields, chain),
+    AppendOnlyChecked($M, gossiped_session, session), // then gossiped this proof to the monitor (proof, session) but without fields. Monitor checks for append only (may or may not hold), if it does not monitor emitted an assert blaming the logger
+    MonitorInclusionFailed($M, $L, fields, <ca_fields, ca_sig>, $time_of_proof_fetch, session) 
 ]
     --[
-        Eq(verify(cert_sig, cert_fields, pkCA), true()),
-        Eq(verify(ca_sig, ca_fields, pkRootCA), true()), /* We only consider valid chains found by the client (if the monitor finds the cert this already implies that the chain is valid) */
         ProofFetchAfterGossip($gossiped_proof_time, $time_of_proof_fetch),
         STHGossipTransparencyCheck($M, $L, fields, $CA, ca_fields, session, gossiped_session),
         CTGossipTransparencyCheck_NotFound($M, $L, fields, $CA, ca_fields, session, gossiped_session),
@@ -1004,19 +1036,19 @@ rule GossipingCheck:
         chain = <<cert_fields, cert_sig>, <ca_fields, ca_sig>>
     in
     [ 
-    ClientGossiped($C, $M, $L, gossiped_session, $gossiped_proof_time, fields, chain),
-    AppendOnlyChecked($M, gossiped_session, session), /* then gossiped this proof to the monitor (proof, session) but without fields. Monitor checks for append only (may or may not hold), if it does not monitor emitted an assert blaming the logger */
+    ClientGossiped($C, $M, $L, gossiped_session, $gossiped_proof_time, fields, ca_fields, chain),
+    AppendOnlyChecked($M, gossiped_session, session), // then gossiped this proof to the monitor (proof, session) but without fields. Monitor checks for append only (may or may not hold), if it does not monitor emitted an assert blaming the logger 
     MonitorInspected($M, $L, fields, $CA, ca_fields, $time_of_proof_fetch, session),
     CCADBConsulted($rootCA, ca_fields),
     !Root_CA($rootCA, pkRootCA)
 ]
     --[
         Eq(verify(cert_sig, cert_fields, pkCA), true()),
-        Eq(verify(ca_sig, ca_fields, pkRootCA), true()), /* We only consider valid chains (if the monitor finds the cert this already implies that the chain is valid) */
+        Eq(verify(ca_sig, ca_fields, pkRootCA), true()), // We only consider valid chains (if the monitor finds the cert this already implies that the chain is valid)
         ProofFetchAfterGossip($proof, $time_of_proof_fetch),
         STHGossipCheck($M, $L, fields, $CA, ca_fields, session, gossiped_session),
 
-        San_GossipingCheck_Found(),
+        San_GossipingCheck()
     ]->
     [ ]
 
@@ -1365,6 +1397,20 @@ lemma san_ParticipantVerifiesInclusion:
          (¬(∃ #t.1. Compromise( ) @ #t.1))"
 
 
+lemma san_MonitorFindsInclusionViolation:
+  exists-trace
+  "∃ #t.
+         (San_MonitorFindsInclusionViolation( ) @ #t) ∧
+         (¬(∃ #t.1. Compromise( ) @ #t.1))"
+
+
+lemma san_MonitorVerifiesInclusion:
+  exists-trace
+  "∃ #t.
+         (San_MonitorVerifiesInclusion( ) @ #t) ∧
+         (¬(∃ #t.1. Compromise( ) @ #t.1))"
+
+
 lemma san_clientGossipsToMonitor:
   exists-trace
   "∃ #t.
@@ -1380,7 +1426,7 @@ lemma san_monitorFindsAppendOnlyViolation_Gossiped:
            (Compromise( ) @ #t.1) ⇒ (∃ L. CompromiseLogger( L ) @ #t.1))"
 
 
-lemma san_monitorVerifiesAppendOnly_Gossiped:
+lemma suff_san_monitorVerifiesAppendOnly_Gossiped:
   exists-trace
   "∃ #t.
          (San_monitorVerifiesAppendOnly_Gossiped( ) @ #t) ∧
@@ -1403,14 +1449,14 @@ lemma san_ConsultDocumentation_Fails:
            (∃ rootCA. CompromiseRootCA( rootCA ) @ #t.1))"
 
 
-lemma suff_san_GossipTransparencyCheck_Success:
+lemma suff_san_GossipTransparencyCheck_Success [heuristic=o "acc_oracle"]:
   exists-trace
   "∃ #t.
          (San_GossipTransparencyCheck_Success( ) @ #t) ∧
          (¬(∃ #t1. Compromise( ) @ #t1))"
 
 
-lemma suff_san_GossipTransparencyCheck_Failed:
+lemma suff_san_GossipTransparencyCheck_Failed [heuristic=o "acc_oracle"]:
   exists-trace
   "∃ #t.
          (San_GossipTransparencyCheck_Failed( ) @ #t) ∧
@@ -1418,10 +1464,10 @@ lemma suff_san_GossipTransparencyCheck_Failed:
            (Compromise( ) @ #t1) ⇒ (∃ L. CompromiseLogger( L ) @ #t1))"
 
 
-lemma suff_san_GossipingCheck_Found:
+lemma suff_san_GossipingCheck [heuristic=o "acc_oracle"]:
   exists-trace
   "∃ #t.
-         (San_GossipingCheck_Found( ) @ #t) ∧
+         (San_GossipingCheck( ) @ #t) ∧
          (¬(∃ #t1. Compromise( ) @ #t1))"
 
 
@@ -1449,7 +1495,7 @@ lemma authenticity:
          (¬(∃ #i. (GroundTruth( CA, fields ) @ #i) ∧ (#i < #j)))"
 
 
-lemma transparency_Gossip:
+lemma transparency_Gossip [heuristic=o "acc_oracle"]:
   all-traces
   "∀ M L L1 L2 CA rootCA fields ca_fields session
           gossiped_session #t0 #t1.
@@ -1465,7 +1511,8 @@ lemma transparency_Gossip:
           ) @ #t1)"
 
 
-lemma T_Gossip_verif_empty_helper1 [reuse]:
+lemma T_Gossip_verif_empty_helper1 [reuse,
+                                    heuristic=o "acc_oracle"]:
   all-traces
   "∀ M L fields CA ca_fields gossiped_session session #t.
          ((STHGossipTransparencyCheck( M, L, fields, CA, ca_fields, session,
@@ -1482,7 +1529,8 @@ lemma T_Gossip_verif_empty_helper1 [reuse]:
 
 
 lemma T_Gossip_verif_empty_helper2 [reuse,
-                                    hide_lemma=T_Gossip_verif_empty_helper1]:
+                                    hide_lemma=T_Gossip_verif_empty_helper1,
+                                    heuristic=o "acc_oracle"]:
   all-traces
   "∀ M L fields CA ca_fields gossiped_session session #t.
          (CTGossipTransparencyCheck_NotFound( M, L, fields, CA, ca_fields,
@@ -1541,7 +1589,7 @@ lemma A_uniq2_helper [reuse]:
          (∃ #t.1. Corrupted( rootCA ) @ #t.1)"
 
 
-lemma A_Gossip_helper [reuse]:
+lemma A_Gossip_helper [reuse, heuristic=o "acc_oracle"]:
   all-traces
   "∀ M L fields CA ca_fields session gossiped_session #t.
          (((STHGossipCheck( M, L, fields, CA, ca_fields, session,
@@ -1549,9 +1597,9 @@ lemma A_Gossip_helper [reuse]:
             ) @ #t) ∧
            (¬(∃ #t.1. CompromiseMonitor( M ) @ #t.1))) ∧
           (¬(∃ #t.1. CompromiseLogger( L ) @ #t.1))) ⇒
-         (∃ ca_sig sth #t0.
+         (∃ ca_sig sth chain #t0.
            (MonitorObservesEntry( M, L, fields, <ca_fields, ca_sig>,
-                                  sth, session
+                                  chain, sth, session
             ) @ #t0) ∧
            (#t0 < #t))"
 
@@ -1566,7 +1614,8 @@ lemma A_Gossip_1_nonempty_helper1 [reuse]:
              (GroundTruth( CA.1, fields ) @ #t0) ∧ (#t0 < #t1)))"
 
 
-lemma T_Gossip_gossip_appendOnly_viol_suff [heuristic=o "acc_oracle"]:
+lemma T_Gossip_gossip_appendOnly_viol_suff [heuristic=o "acc_oracle",
+                                            hide_lemma=A_Gossip_helper]:
   exists-trace
   "∃ L M fields CA ca_fields session gossiped_session #t #t1.
          (((CTGossipTransparencyCheck_NotFound( M, L, fields, CA, ca_fields,
@@ -1589,7 +1638,8 @@ lemma T_Gossip_gossip_appendOnly_viol_suff [heuristic=o "acc_oracle"]:
          (∀ a #i. (Corrupted( a ) @ #i) ⇒ (a = L))"
 
 
-lemma T_Gossip_verif_empty [heuristic=o "acc_oracle"]:
+lemma T_Gossip_verif_empty [heuristic=o "acc_oracle",
+                            hide_lemma=A_Gossip_helper]:
   all-traces
   "(¬(∃ L M fields CA ca_fields session gossiped_session #t #t1.
             (CTGossipTransparencyCheck_NotFound( M, L, fields, CA, ca_fields,
@@ -1613,7 +1663,8 @@ lemma T_Gossip_verif_empty [heuristic=o "acc_oracle"]:
            ) @ #t1))"
 
 
-lemma T_Gossip_gossip_appendOnly_viol_verif_nonempty [heuristic=o "acc_oracle"]:
+lemma T_Gossip_gossip_appendOnly_viol_verif_nonempty [heuristic=o "acc_oracle",
+                                                      hide_lemma=A_Gossip_helper]:
   all-traces
   "∀ L M fields CA ca_fields session gossiped_session #t #t1.
          ((CTGossipTransparencyCheck_NotFound( M, L, fields, CA, ca_fields,
@@ -1638,7 +1689,8 @@ lemma T_Gossip_gossip_appendOnly_viol_verif_nonempty [heuristic=o "acc_oracle"]:
               ) @ #t1.1)))"
 
 
-lemma T_Gossip_gossip_appendOnly_viol_min [heuristic=o "acc_oracle"]:
+lemma T_Gossip_gossip_appendOnly_viol_min [heuristic=o "acc_oracle",
+                                           hide_lemma=A_Gossip_helper]:
   all-traces
   "∀ L M fields CA ca_fields session gossiped_session #t #t1.
          ((CTGossipTransparencyCheck_NotFound( M, L, fields, CA, ca_fields,
@@ -1660,7 +1712,8 @@ lemma T_Gossip_gossip_appendOnly_viol_min [heuristic=o "acc_oracle"]:
              ((L.1 = L) ∧ (¬(L = L.1)))))"
 
 
-lemma T_Gossip_gossip_appendOnly_viol_uniq [heuristic=o "acc_oracle"]:
+lemma T_Gossip_gossip_appendOnly_viol_uniq [heuristic=o "acc_oracle",
+                                            hide_lemma=A_Gossip_helper]:
   all-traces
   "∀ L M fields CA ca_fields session gossiped_session #t #t1.
          ((CTGossipTransparencyCheck_NotFound( M, L, fields, CA, ca_fields,
@@ -1673,11 +1726,13 @@ lemma T_Gossip_gossip_appendOnly_viol_uniq [heuristic=o "acc_oracle"]:
          (∃ #i. Corrupted( L ) @ #i)"
 
 
-lemma T_Gossip_gossip_appendOnly_viol_inj [heuristic=o "acc_oracle"]:
+lemma T_Gossip_gossip_appendOnly_viol_inj [heuristic=o "acc_oracle",
+                                           hide_lemma=A_Gossip_helper]:
   all-traces "⊤"
 
 
-lemma T_Gossip_gossip_appendOnly_viol_single [heuristic=o "acc_oracle"]:
+lemma T_Gossip_gossip_appendOnly_viol_single [heuristic=o "acc_oracle",
+                                              hide_lemma=A_Gossip_helper]:
   exists-trace
   "∃ L M fields CA ca_fields session gossiped_session #t #t1.
          ((CTGossipTransparencyCheck_NotFound( M, L, fields, CA, ca_fields,
@@ -1701,7 +1756,8 @@ lemma T_Gossip_gossip_appendOnly_viol_single [heuristic=o "acc_oracle"]:
 
 lemma A_Gossip_0_rootCA_rogue_gossip_suff [heuristic=o "acc_oracle",
                                            hide_lemma=T_Gossip_verif_empty_helper1,
-                                           hide_lemma=T_Gossip_verif_empty_helper2]:
+                                           hide_lemma=T_Gossip_verif_empty_helper2,
+                                           hide_lemma=A_Gossip_helper]:
   exists-trace
   "∃ rootCA M L fields CA ca_fields session gossiped_session #t
           #t1 #t2.
@@ -1742,7 +1798,8 @@ lemma A_Gossip_0_rootCA_rogue_gossip_suff [heuristic=o "acc_oracle",
 
 lemma A_Gossip_0_rootCA_benign_gossip_suff [heuristic=o "acc_oracle",
                                             hide_lemma=T_Gossip_verif_empty_helper1,
-                                            hide_lemma=T_Gossip_verif_empty_helper2]:
+                                            hide_lemma=T_Gossip_verif_empty_helper2,
+                                            hide_lemma=A_Gossip_helper]:
   exists-trace
   "∃ CA M L fields rootCA ca_fields session gossiped_session #t
           #t1 #t2.
@@ -1783,7 +1840,8 @@ lemma A_Gossip_0_rootCA_benign_gossip_suff [heuristic=o "acc_oracle",
 
 lemma A_Gossip_0_verif_empty [heuristic=o "acc_oracle",
                               hide_lemma=T_Gossip_verif_empty_helper1,
-                              hide_lemma=T_Gossip_verif_empty_helper2]:
+                              hide_lemma=T_Gossip_verif_empty_helper2,
+                              hide_lemma=A_Gossip_helper]:
   all-traces
   "(¬((∃ rootCA M L fields CA ca_fields session gossiped_session
               #t #t1 #t2.
@@ -1820,7 +1878,8 @@ lemma A_Gossip_0_verif_empty [heuristic=o "acc_oracle",
 
 lemma A_Gossip_0_rootCA_rogue_gossip_verif_nonempty [heuristic=o "acc_oracle",
                                                      hide_lemma=T_Gossip_verif_empty_helper1,
-                                                     hide_lemma=T_Gossip_verif_empty_helper2]:
+                                                     hide_lemma=T_Gossip_verif_empty_helper2,
+                                                     hide_lemma=A_Gossip_helper]:
   all-traces
   "∀ rootCA M L fields CA ca_fields session gossiped_session #t
           #t1 #t2.
@@ -1846,7 +1905,8 @@ lemma A_Gossip_0_rootCA_rogue_gossip_verif_nonempty [heuristic=o "acc_oracle",
 
 lemma A_Gossip_0_rootCA_benign_gossip_verif_nonempty [heuristic=o "acc_oracle",
                                                       hide_lemma=T_Gossip_verif_empty_helper1,
-                                                      hide_lemma=T_Gossip_verif_empty_helper2]:
+                                                      hide_lemma=T_Gossip_verif_empty_helper2,
+                                                      hide_lemma=A_Gossip_helper]:
   all-traces
   "∀ CA M L fields rootCA ca_fields session gossiped_session #t
           #t1 #t2.
@@ -1872,7 +1932,8 @@ lemma A_Gossip_0_rootCA_benign_gossip_verif_nonempty [heuristic=o "acc_oracle",
 
 lemma A_Gossip_0_rootCA_rogue_gossip_min [heuristic=o "acc_oracle",
                                           hide_lemma=T_Gossip_verif_empty_helper1,
-                                          hide_lemma=T_Gossip_verif_empty_helper2]:
+                                          hide_lemma=T_Gossip_verif_empty_helper2,
+                                          hide_lemma=A_Gossip_helper]:
   all-traces
   "∀ rootCA M L fields CA ca_fields session gossiped_session #t
           #t1 #t2.
@@ -1913,7 +1974,8 @@ lemma A_Gossip_0_rootCA_rogue_gossip_min [heuristic=o "acc_oracle",
 
 lemma A_Gossip_0_rootCA_benign_gossip_min [heuristic=o "acc_oracle",
                                            hide_lemma=T_Gossip_verif_empty_helper1,
-                                           hide_lemma=T_Gossip_verif_empty_helper2]:
+                                           hide_lemma=T_Gossip_verif_empty_helper2,
+                                           hide_lemma=A_Gossip_helper]:
   all-traces
   "∀ CA M L fields rootCA ca_fields session gossiped_session #t
           #t1 #t2.
@@ -1954,7 +2016,8 @@ lemma A_Gossip_0_rootCA_benign_gossip_min [heuristic=o "acc_oracle",
 
 lemma A_Gossip_0_rootCA_rogue_gossip_uniq [heuristic=o "acc_oracle",
                                            hide_lemma=T_Gossip_verif_empty_helper1,
-                                           hide_lemma=T_Gossip_verif_empty_helper2]:
+                                           hide_lemma=T_Gossip_verif_empty_helper2,
+                                           hide_lemma=A_Gossip_helper]:
   all-traces
   "∀ rootCA M L fields CA ca_fields session gossiped_session #t
           #t1 #t2.
@@ -1972,7 +2035,8 @@ lemma A_Gossip_0_rootCA_rogue_gossip_uniq [heuristic=o "acc_oracle",
 
 lemma A_Gossip_0_rootCA_benign_gossip_uniq [heuristic=o "acc_oracle",
                                             hide_lemma=T_Gossip_verif_empty_helper1,
-                                            hide_lemma=T_Gossip_verif_empty_helper2]:
+                                            hide_lemma=T_Gossip_verif_empty_helper2,
+                                            hide_lemma=A_Gossip_helper]:
   all-traces
   "∀ CA M L fields rootCA ca_fields session gossiped_session #t
           #t1 #t2.
@@ -1990,19 +2054,22 @@ lemma A_Gossip_0_rootCA_benign_gossip_uniq [heuristic=o "acc_oracle",
 
 lemma A_Gossip_0_rootCA_rogue_gossip_inj [heuristic=o "acc_oracle",
                                           hide_lemma=T_Gossip_verif_empty_helper1,
-                                          hide_lemma=T_Gossip_verif_empty_helper2]:
+                                          hide_lemma=T_Gossip_verif_empty_helper2,
+                                          hide_lemma=A_Gossip_helper]:
   all-traces "⊤"
 
 
 lemma A_Gossip_0_rootCA_benign_gossip_inj [heuristic=o "acc_oracle",
                                            hide_lemma=T_Gossip_verif_empty_helper1,
-                                           hide_lemma=T_Gossip_verif_empty_helper2]:
+                                           hide_lemma=T_Gossip_verif_empty_helper2,
+                                           hide_lemma=A_Gossip_helper]:
   all-traces "⊤"
 
 
 lemma A_Gossip_0_rootCA_rogue_gossip_single [heuristic=o "acc_oracle",
                                              hide_lemma=T_Gossip_verif_empty_helper1,
-                                             hide_lemma=T_Gossip_verif_empty_helper2]:
+                                             hide_lemma=T_Gossip_verif_empty_helper2,
+                                             hide_lemma=A_Gossip_helper]:
   exists-trace
   "∃ rootCA M L fields CA ca_fields session gossiped_session #t
           #t1 #t2.
@@ -2042,7 +2109,8 @@ lemma A_Gossip_0_rootCA_rogue_gossip_single [heuristic=o "acc_oracle",
 
 lemma A_Gossip_0_rootCA_benign_gossip_single [heuristic=o "acc_oracle",
                                               hide_lemma=T_Gossip_verif_empty_helper1,
-                                              hide_lemma=T_Gossip_verif_empty_helper2]:
+                                              hide_lemma=T_Gossip_verif_empty_helper2,
+                                              hide_lemma=A_Gossip_helper]:
   exists-trace
   "∃ CA M L fields rootCA ca_fields session gossiped_session #t
           #t1 #t2.
@@ -2082,7 +2150,8 @@ lemma A_Gossip_0_rootCA_benign_gossip_single [heuristic=o "acc_oracle",
 
 lemma A_Gossip_1_rootCA_rogue_gossip_mon_honest_suff [heuristic=o "acc_oracle",
                                                       hide_lemma=T_Gossip_verif_empty_helper1,
-                                                      hide_lemma=T_Gossip_verif_empty_helper2]:
+                                                      hide_lemma=T_Gossip_verif_empty_helper2,
+                                                      hide_lemma=A_Gossip_helper]:
   exists-trace
   "∃ rootCA M L fields CA ca_fields session gossiped_session #t
           #t1 #t2.
@@ -2126,7 +2195,8 @@ lemma A_Gossip_1_rootCA_rogue_gossip_mon_honest_suff [heuristic=o "acc_oracle",
 
 lemma A_Gossip_1_rootCA_benign_gossip_mon_honest_suff [heuristic=o "acc_oracle",
                                                        hide_lemma=T_Gossip_verif_empty_helper1,
-                                                       hide_lemma=T_Gossip_verif_empty_helper2]:
+                                                       hide_lemma=T_Gossip_verif_empty_helper2,
+                                                       hide_lemma=A_Gossip_helper]:
   exists-trace
   "∃ CA M L fields rootCA ca_fields session gossiped_session #t
           #t1 #t2.
@@ -2170,7 +2240,8 @@ lemma A_Gossip_1_rootCA_benign_gossip_mon_honest_suff [heuristic=o "acc_oracle",
 
 lemma A_Gossip_1_verif_empty [heuristic=o "acc_oracle",
                               hide_lemma=T_Gossip_verif_empty_helper1,
-                              hide_lemma=T_Gossip_verif_empty_helper2]:
+                              hide_lemma=T_Gossip_verif_empty_helper2,
+                              hide_lemma=A_Gossip_helper]:
   all-traces
   "(¬((∃ rootCA M L fields CA ca_fields session gossiped_session
               #t #t1 #t2.
@@ -2210,7 +2281,8 @@ lemma A_Gossip_1_verif_empty [heuristic=o "acc_oracle",
 
 lemma A_Gossip_1_rootCA_rogue_gossip_mon_honest_verif_nonempty [heuristic=o "acc_oracle",
                                                                 hide_lemma=T_Gossip_verif_empty_helper1,
-                                                                hide_lemma=T_Gossip_verif_empty_helper2]:
+                                                                hide_lemma=T_Gossip_verif_empty_helper2,
+                                                                hide_lemma=A_Gossip_helper]:
   all-traces
   "∀ rootCA M L fields CA ca_fields session gossiped_session #t
           #t1 #t2.
@@ -2238,7 +2310,8 @@ lemma A_Gossip_1_rootCA_rogue_gossip_mon_honest_verif_nonempty [heuristic=o "acc
 
 lemma A_Gossip_1_rootCA_benign_gossip_mon_honest_verif_nonempty [heuristic=o "acc_oracle",
                                                                  hide_lemma=T_Gossip_verif_empty_helper1,
-                                                                 hide_lemma=T_Gossip_verif_empty_helper2]:
+                                                                 hide_lemma=T_Gossip_verif_empty_helper2,
+                                                                 hide_lemma=A_Gossip_helper]:
   all-traces
   "∀ CA M L fields rootCA ca_fields session gossiped_session #t
           #t1 #t2.
@@ -2266,7 +2339,8 @@ lemma A_Gossip_1_rootCA_benign_gossip_mon_honest_verif_nonempty [heuristic=o "ac
 
 lemma A_Gossip_1_rootCA_rogue_gossip_mon_honest_min [heuristic=o "acc_oracle",
                                                      hide_lemma=T_Gossip_verif_empty_helper1,
-                                                     hide_lemma=T_Gossip_verif_empty_helper2]:
+                                                     hide_lemma=T_Gossip_verif_empty_helper2,
+                                                     hide_lemma=A_Gossip_helper]:
   all-traces
   "∀ rootCA M L fields CA ca_fields session gossiped_session #t
           #t1 #t2.
@@ -2310,7 +2384,8 @@ lemma A_Gossip_1_rootCA_rogue_gossip_mon_honest_min [heuristic=o "acc_oracle",
 
 lemma A_Gossip_1_rootCA_benign_gossip_mon_honest_min [heuristic=o "acc_oracle",
                                                       hide_lemma=T_Gossip_verif_empty_helper1,
-                                                      hide_lemma=T_Gossip_verif_empty_helper2]:
+                                                      hide_lemma=T_Gossip_verif_empty_helper2,
+                                                      hide_lemma=A_Gossip_helper]:
   all-traces
   "∀ CA M L fields rootCA ca_fields session gossiped_session #t
           #t1 #t2.
@@ -2354,7 +2429,8 @@ lemma A_Gossip_1_rootCA_benign_gossip_mon_honest_min [heuristic=o "acc_oracle",
 
 lemma A_Gossip_1_rootCA_rogue_gossip_mon_honest_uniq [heuristic=o "acc_oracle",
                                                       hide_lemma=T_Gossip_verif_empty_helper1,
-                                                      hide_lemma=T_Gossip_verif_empty_helper2]:
+                                                      hide_lemma=T_Gossip_verif_empty_helper2,
+                                                      hide_lemma=A_Gossip_helper]:
   all-traces
   "∀ rootCA M L fields CA ca_fields session gossiped_session #t
           #t1 #t2.
@@ -2373,7 +2449,8 @@ lemma A_Gossip_1_rootCA_rogue_gossip_mon_honest_uniq [heuristic=o "acc_oracle",
 
 lemma A_Gossip_1_rootCA_benign_gossip_mon_honest_uniq [heuristic=o "acc_oracle",
                                                        hide_lemma=T_Gossip_verif_empty_helper1,
-                                                       hide_lemma=T_Gossip_verif_empty_helper2]:
+                                                       hide_lemma=T_Gossip_verif_empty_helper2,
+                                                       hide_lemma=A_Gossip_helper]:
   all-traces
   "∀ CA M L fields rootCA ca_fields session gossiped_session #t
           #t1 #t2.
@@ -2392,19 +2469,22 @@ lemma A_Gossip_1_rootCA_benign_gossip_mon_honest_uniq [heuristic=o "acc_oracle",
 
 lemma A_Gossip_1_rootCA_rogue_gossip_mon_honest_inj [heuristic=o "acc_oracle",
                                                      hide_lemma=T_Gossip_verif_empty_helper1,
-                                                     hide_lemma=T_Gossip_verif_empty_helper2]:
+                                                     hide_lemma=T_Gossip_verif_empty_helper2,
+                                                     hide_lemma=A_Gossip_helper]:
   all-traces "⊤"
 
 
 lemma A_Gossip_1_rootCA_benign_gossip_mon_honest_inj [heuristic=o "acc_oracle",
                                                       hide_lemma=T_Gossip_verif_empty_helper1,
-                                                      hide_lemma=T_Gossip_verif_empty_helper2]:
+                                                      hide_lemma=T_Gossip_verif_empty_helper2,
+                                                      hide_lemma=A_Gossip_helper]:
   all-traces "⊤"
 
 
 lemma A_Gossip_1_rootCA_rogue_gossip_mon_honest_single [heuristic=o "acc_oracle",
                                                         hide_lemma=T_Gossip_verif_empty_helper1,
-                                                        hide_lemma=T_Gossip_verif_empty_helper2]:
+                                                        hide_lemma=T_Gossip_verif_empty_helper2,
+                                                        hide_lemma=A_Gossip_helper]:
   exists-trace
   "∃ rootCA M L fields CA ca_fields session gossiped_session #t
           #t1 #t2.
@@ -2447,7 +2527,8 @@ lemma A_Gossip_1_rootCA_rogue_gossip_mon_honest_single [heuristic=o "acc_oracle"
 
 lemma A_Gossip_1_rootCA_benign_gossip_mon_honest_single [heuristic=o "acc_oracle",
                                                          hide_lemma=T_Gossip_verif_empty_helper1,
-                                                         hide_lemma=T_Gossip_verif_empty_helper2]:
+                                                         hide_lemma=T_Gossip_verif_empty_helper2,
+                                                         hide_lemma=A_Gossip_helper]:
   exists-trace
   "∃ CA M L fields rootCA ca_fields session gossiped_session #t
           #t1 #t2.
@@ -2923,6 +3004,7 @@ lemma A_Gossip_2_rootCA_benign_gossip_log_honest_single [heuristic=o "acc_oracle
              (¬(∃ #t.2. CompromiseMonitor( M.1 ) @ #t.2))))"
 
 
+
 /* END LEMMAS */
 
 // ==============================================================================
@@ -2943,13 +3025,23 @@ restriction Certified_once:
     "All CA1 fields1 fields2 CA2 #t1 #t2. CAAsserts(CA1, fields1)@t1 & CAAsserts(CA2, fields2)@t2 ==> (#t1 = #t2)"
 
 restriction ChainAccept_once:
-    "All L11 L21 rootCA1 ca_fields1 CA1 fields1 #t1 L12 L22 rootCA2 ca_fields2 CA2 fields2 #t2. BrowserAcceptsChain( CA1, fields1, rootCA1,ca_fields1, L11, L21 )@t1 & BrowserAcceptsChain( CA2, fields2, rootCA2, ca_fields2,  L12, L22 )@t2 ==> (#t1 = #t2)"
+    "All #t1 #t2. San_ClientValidate()@t1 & San_ClientValidate()@t2 ==> (#t1 = #t2)"
 
-restriction add_to_log_number_restriction:
-    "All L log_id1 chain1 log_id2 fields1 fields2 chain2 ca_cert1 ca_cert2 time1 time2 #t1 #t2. LoggerComputesAddLog(L, log_id1, fields1, ca_cert1, chain1, time1)@t1 & LoggerComputesAddLog(L, log_id2, fields2, ca_cert2, chain2, time2)@t2 ==> (#t1 = #t2)"
+restriction addlog_tochecked_once:
+    "All L C fields time session chain lid1 lid2 fields1 fields2 ca_cert1 ca_cert2 chain1 chain2 time1 time2 #t1 #t2 #t3. 
+    ClientGossips(C, L, fields, time, session, chain)@t1
+    & LoggerComputesAddLog(L, lid1, fields1, ca_cert1, chain1, time1)@t2 
+    & LoggerComputesAddLog(L, lid2, fields2, ca_cert2, chain2, time2)@t3
+     ==> (#t2 = #t3)"
 
-restriction time_once:
-    "All i #t1 #t2. Time(i)@t1 & Time(i)@t2 ==> (#t1 = #t2)"
+restriction addlog_other_once:
+    "All L L1 L2 C fields time session chain lid1 lid2 fields1 fields2 ca_cert1 ca_cert2 chain1 chain2 time1 time2 #t1 #t2 #t3. 
+    ClientGossips(C, L, fields, time, session, chain)@t1
+    & LoggerComputesAddLog(L1, lid1, fields1, ca_cert1, chain1, time1)@t2 
+    & LoggerComputesAddLog(L2, lid2, fields2, ca_cert2, chain2, time2)@t3
+    & not(L1 = L)
+    & not(L2 = L)
+     ==> (#t2 = #t3)"
 
 restriction monitorFindsRogueCertificate_once:
     "All #t1 #t2. San_monitorFindsRogueCertificate()@t1 & San_monitorFindsRogueCertificate()@t2 ==> (#t1 = #t2)"
@@ -2973,18 +3065,117 @@ restriction appendOnlyCheck_Gossip_once:
     ==> (#t1 = #t2)"
 
 restriction ScanLog_once:
-        "All #t1 #t2. MonitorScanLog()@t1 & MonitorScanLog()@t2 ==> (#t1 = #t2)"
+    "All #t1 #t2. MonitorScanLog()@t1 & MonitorScanLog()@t2 ==> (#t1 = #t2)"
 
 restriction no_rogue_addition:
-    "not (Ex #t. San_forge_log_view() @ #t)"
+    "not (Ex #t1. San_forge_log_view()@t1)"
 
-restriction all_monitors_honest:
-    "not (Ex M #t. CompromiseMonitor(M) @ #t)"
+restriction start_log_malicious_once:
+    "All #t1 #t2. San_Start_Log_malicious()@t1 & San_Start_Log_malicious()@t2 ==> (#t1 = #t2)"
 
-restriction CCADBConsulted_once:
-    "All rootCA1 rootCA2 ca_fields1 ca_fields2 #t1 #t2. ExternalCheckCCADB(rootCA1, ca_fields1)@t1 & ExternalCheckCCADB(rootCA2, ca_fields2)@t2 ==> (#t1 = #t2)"
+restriction loggerpresentsview_twice:
+    "All L M id lid1 time1 sth1 gossiped_session session lid2 time2 sth2 #t1 #t2 #t3. 
+    LoggerPresentsView(L, id, lid1, time1, sth1, gossiped_session)@t1 
+    & LoggerPresentsView(L, M, lid2, time2, sth2, session)@t2 
+    & MonitorReceivesGossip(M, L, gossiped_session, session)@t3
+    ==> (All L3 M3 lid3 time3 sth3 session3 #t3. 
+        LoggerPresentsView(L3, M3, lid3, time3, sth3, session3)@t3 
+        ==> ((#t1 = #t3) | (#t2 = #t3)))"
+
+restriction LoggerPresentsToM_once:
+    "All #t1 #t2. San_LoggerSnapshot_M()@t1 & San_LoggerSnapshot_M()@t2 ==> (#t1 = #t2)"
+
+restriction LoggerPresentsToP_once:
+    "All #t1 #t2. San_LoggerSnapshot_P()@t1 & San_LoggerSnapshot_P()@t2 ==> (#t1 = #t2)"
+
+restriction LoggerPresentsToC_none:
+    "not (Ex #t1. San_LoggerSnapshot_C()@t1)"
+
+restriction clientGossips_once:
+    "All #t1 #t2. San_clientGossipsToMonitor()@t1 & San_clientGossipsToMonitor()@t2 ==> (#t1 = #t2)"
 
 #endif
+
+/* Configuration of manual instrumented proofs (see README):
+
+restriction CA_Registr_once:
+    "All rootCA1 #t1 rootCA2 #t2. Root_CA_Init(rootCA1)@t1 & Root_CA_Init(rootCA2)@t2 ==> (#t1 = #t2)"
+
+restriction NonRoot_CA_Registr_once:
+    "All CA1 #t1 CA2 #t2. NonRoot_CA_Init(CA1)@t1 & NonRoot_CA_Init(CA2)@t2 ==> (#t1 = #t2)"
+
+restriction PreCertified_once:
+    "All CA1 preC1 CA2 preC2 #t1 #t2. PreCertified(CA1, preC1)@t1 & PreCertified(CA2, preC2)@t2 ==> (#t1 = #t2)"
+
+restriction Certified_once:
+    "All CA1 fields1 fields2 CA2 #t1 #t2. CAAsserts(CA1, fields1)@t1 & CAAsserts(CA2, fields2)@t2 ==> (#t1 = #t2)"
+
+restriction ChainAccept_once:
+    "All #t1 #t2. San_ClientValidate()@t1 & San_ClientValidate()@t2 ==> (#t1 = #t2)"
+
+restriction addlog_tochecked_once:
+    "All L C fields time session chain lid1 lid2 fields1 fields2 ca_cert1 ca_cert2 chain1 chain2 time1 time2 #t1 #t2 #t3. 
+    ClientGossips(C, L, fields, time, session, chain)@t1
+    & LoggerComputesAddLog(L, lid1, fields1, ca_cert1, chain1, time1)@t2 
+    & LoggerComputesAddLog(L, lid2, fields2, ca_cert2, chain2, time2)@t3
+     ==> (#t2 = #t3)"
+
+restriction addlog_other_once:
+    "All L L1 L2 C fields time session chain lid1 lid2 fields1 fields2 ca_cert1 ca_cert2 chain1 chain2 time1 time2 #t1 #t2 #t3. 
+    ClientGossips(C, L, fields, time, session, chain)@t1
+    & LoggerComputesAddLog(L1, lid1, fields1, ca_cert1, chain1, time1)@t2 
+    & LoggerComputesAddLog(L2, lid2, fields2, ca_cert2, chain2, time2)@t3
+    & not(L1 = L)
+    & not(L2 = L)
+     ==> (#t2 = #t3)"
+
+restriction monitorFindsRogueCertificate_once:
+    "All #t1 #t2. San_monitorFindsRogueCertificate()@t1 & San_monitorFindsRogueCertificate()@t2 ==> (#t1 = #t2)"
+
+restriction CTGossipCheck_once:
+    "All M L fields CA ca_fields session gossiped_session #t1 #t2. 
+    STHGossipCheck(M, L, fields, CA, ca_fields, session, gossiped_session)@t1 
+    & STHGossipCheck(M, L, fields, CA, ca_fields, session, gossiped_session)@t2 
+    ==> (#t1 = #t2)"
+
+restriction CTGossipTransparencyCheck_once:
+    "All M L fields CA ca_fields session gossiped_session #t1 #t2. 
+    STHGossipTransparencyCheck(M, L, fields, CA, ca_fields, session, gossiped_session)@t1 
+    & STHGossipTransparencyCheck(M, L, fields, CA, ca_fields, session, gossiped_session)@t2 
+    ==> (#t1 = #t2)"
+
+restriction appendOnlyCheck_Gossip_once:
+    "All M1 L1 gossiped_session1 session1 M2 L2 gossiped_session2 session2 #t1 #t2.
+    MonitorReceivesGossip(M1, L1, gossiped_session1, session1)@t1
+    & MonitorReceivesGossip(M2, L2, gossiped_session2, session2)@t2
+    ==> (#t1 = #t2)"
+
+restriction ScanLog_once:
+    "All #t1 #t2. MonitorScanLog()@t1 & MonitorScanLog()@t2 ==> (#t1 = #t2)"
+
+restriction no_rogue_addition:
+    "not (Ex #t1. San_forge_log_view()@t1)"
+
+restriction LoggerPresentsToM_once:
+    "All #t1 #t2. San_LoggerSnapshot_M()@t1 & San_LoggerSnapshot_M()@t2 ==> (#t1 = #t2)"
+
+restriction LoggerPresentsToP_once:
+    "All #t1 #t2. San_LoggerSnapshot_P()@t1 & San_LoggerSnapshot_P()@t2 ==> (#t1 = #t2)"
+
+restriction LoggerPresentsToC_none:
+    "not (Ex #t1. San_LoggerSnapshot_C()@t1)"
+
+restriction clientGossips_once:
+    "All #t1 #t2. San_clientGossipsToMonitor()@t1 & San_clientGossipsToMonitor()@t2 ==> (#t1 = #t2)"
+
+restriction monitorInspects_alwaysRogue:
+    "All #t1. MonitorScanLog()@t1 ==> (Ex M CA fields ca_fields. Asserts(M, 'Blame this CA.', CA, <fields, ca_fields>)@t1)"
+
+restriction appendOnlyHolds:
+    "All M L gossiped_session session #t1.
+    MonitorReceivesGossip(M, L, gossiped_session, session)@t1 ==> MonitorReceivesGossip_Verified(M, L, gossiped_session, session)@t1"
+
+*/
 
 // ==============================================================================
 

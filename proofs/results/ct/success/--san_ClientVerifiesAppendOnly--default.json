@@ -1,11 +1,11 @@
 {
   "task_id": "--san_ClientVerifiesAppendOnly--default",
   "warnings": [],
-  "tamarin_timing": 16.25,
+  "tamarin_timing": 27.77,
   "wrapper_measures": {
-    "time": 16.419091939926147,
-    "avg_memory": 314.96507352941177,
-    "peak_memory": 634.75
+    "time": 27.90424633026123,
+    "avg_memory": 292.76102120535705,
+    "peak_memory": 618.8203125
   },
   "output_spthy": "results/ct/proofs/--san_ClientVerifiesAppendOnly--default.spthy",
   "verified_lemma": {

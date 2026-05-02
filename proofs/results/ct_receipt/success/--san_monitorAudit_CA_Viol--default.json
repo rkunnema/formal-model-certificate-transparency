@@ -1,11 +1,11 @@
 {
   "task_id": "--san_monitorAudit_CA_Viol--default",
   "warnings": [],
-  "tamarin_timing": 34.33,
+  "tamarin_timing": 60.88,
   "wrapper_measures": {
-    "time": 34.51711678504944,
-    "avg_memory": 612.6982142857142,
-    "peak_memory": 1149.171875
+    "time": 61.093180656433105,
+    "avg_memory": 601.5170978483605,
+    "peak_memory": 1095.75
   },
   "output_spthy": "results/ct_receipt/proofs/--san_monitorAudit_CA_Viol--default.spthy",
   "verified_lemma": {

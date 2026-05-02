@@ -1,11 +1,11 @@
 {
   "task_id": "--san_compromiseMonitor--default",
   "warnings": [],
-  "tamarin_timing": 7.83,
+  "tamarin_timing": 12.97,
   "wrapper_measures": {
-    "time": 7.989715099334717,
-    "avg_memory": 155.984375,
-    "peak_memory": 183.28125
+    "time": 13.110462188720703,
+    "avg_memory": 137.55618990384613,
+    "peak_memory": 203.625
   },
   "output_spthy": "results/ct/proofs/--san_compromiseMonitor--default.spthy",
   "verified_lemma": {

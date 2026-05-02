@@ -1,11 +1,11 @@
 {
   "task_id": "--A_CTAudit_2_verif_empty--default",
   "warnings": [],
-  "tamarin_timing": 64.42,
+  "tamarin_timing": 64.01,
   "wrapper_measures": {
-    "time": 64.65673184394836,
-    "avg_memory": 749.3633413461539,
-    "peak_memory": 1663.87109375
+    "time": 64.19147491455078,
+    "avg_memory": 728.365234375,
+    "peak_memory": 1624.69921875
   },
   "output_spthy": "results/sct_audit/proofs/--A_CTAudit_2_verif_empty--default.spthy",
   "verified_lemma": {},

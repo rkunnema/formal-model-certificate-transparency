@@ -1,11 +1,11 @@
 {
   "task_id": "--san_monitorFindsRogueCertificate--default",
   "warnings": [],
-  "tamarin_timing": 24.78,
+  "tamarin_timing": 24.15,
   "wrapper_measures": {
-    "time": 24.988611221313477,
-    "avg_memory": 179.0190625,
-    "peak_memory": 367.9453125
+    "time": 24.306030988693237,
+    "avg_memory": 181.95281250000002,
+    "peak_memory": 376.42578125
   },
   "output_spthy": "results/sct_audit/proofs/--san_monitorFindsRogueCertificate--default.spthy",
   "verified_lemma": {

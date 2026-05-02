@@ -1,11 +1,11 @@
 {
   "task_id": "--san_forge_log_view--default",
   "warnings": [],
-  "tamarin_timing": 7.55,
+  "tamarin_timing": 13.04,
   "wrapper_measures": {
-    "time": 7.7036049365997314,
-    "avg_memory": 154.966796875,
-    "peak_memory": 183.09375
+    "time": 13.207125186920166,
+    "avg_memory": 145.44084821428572,
+    "peak_memory": 247.87890625
   },
   "output_spthy": "results/ct/proofs/--san_forge_log_view--default.spthy",
   "verified_lemma": {

@@ -1,11 +1,11 @@
 {
   "task_id": "--san_domainOwnerBlamesMonitor--default",
   "warnings": [],
-  "tamarin_timing": 461.83,
+  "tamarin_timing": 751.87,
   "wrapper_measures": {
-    "time": 462.05621218681335,
-    "avg_memory": 4046.9973958333317,
-    "peak_memory": 7065.546875
+    "time": 752.2597398757935,
+    "avg_memory": 4123.884907004025,
+    "peak_memory": 7353.38671875
   },
   "output_spthy": "results/ct_receipt/proofs/--san_domainOwnerBlamesMonitor--default.spthy",
   "verified_lemma": {

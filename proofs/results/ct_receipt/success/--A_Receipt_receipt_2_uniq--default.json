@@ -1,11 +1,11 @@
 {
   "task_id": "--A_Receipt_receipt_2_uniq--default",
   "warnings": [],
-  "tamarin_timing": 15.65,
+  "tamarin_timing": 22.9,
   "wrapper_measures": {
-    "time": 15.833492040634155,
-    "avg_memory": 170.7822265625,
-    "peak_memory": 190.46875
+    "time": 23.035263061523438,
+    "avg_memory": 146.4293478260869,
+    "peak_memory": 159.43359375
   },
   "output_spthy": "results/ct_receipt/proofs/--A_Receipt_receipt_2_uniq--default.spthy",
   "verified_lemma": {

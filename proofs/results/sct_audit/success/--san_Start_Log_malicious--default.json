@@ -1,11 +1,11 @@
 {
   "task_id": "--san_Start_Log_malicious--default",
   "warnings": [],
-  "tamarin_timing": 22.85,
+  "tamarin_timing": 21.43,
   "wrapper_measures": {
-    "time": 23.07945203781128,
-    "avg_memory": 158.3780570652174,
-    "peak_memory": 351.7265625
+    "time": 21.569136142730713,
+    "avg_memory": 161.7776988636364,
+    "peak_memory": 342.9765625
   },
   "output_spthy": "results/sct_audit/proofs/--san_Start_Log_malicious--default.spthy",
   "verified_lemma": {

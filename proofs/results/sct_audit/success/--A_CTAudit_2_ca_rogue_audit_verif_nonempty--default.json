@@ -3,9 +3,9 @@
   "warnings": [],
   "tamarin_timing": 23.03,
   "wrapper_measures": {
-    "time": 23.215582132339478,
-    "avg_memory": 170.22927989130432,
-    "peak_memory": 387.2734375
+    "time": 23.167628526687622,
+    "avg_memory": 171.84561820652172,
+    "peak_memory": 384.87890625
   },
   "output_spthy": "results/sct_audit/proofs/--A_CTAudit_2_ca_rogue_audit_verif_nonempty--default.spthy",
   "verified_lemma": {

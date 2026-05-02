@@ -1,11 +1,11 @@
 {
   "task_id": "--authenticity--default",
   "warnings": [],
-  "tamarin_timing": 31.86,
+  "tamarin_timing": 56.6,
   "wrapper_measures": {
-    "time": 32.055750131607056,
-    "avg_memory": 552.7241210937501,
-    "peak_memory": 1128.65625
+    "time": 56.820188760757446,
+    "avg_memory": 575.3030427631579,
+    "peak_memory": 1120.73046875
   },
   "output_spthy": "results/ct_receipt/proofs/--authenticity--default.spthy",
   "verified_lemma": {

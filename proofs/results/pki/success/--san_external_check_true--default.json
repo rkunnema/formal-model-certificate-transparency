@@ -1,11 +1,11 @@
 {
   "task_id": "--san_external_check_true--default",
   "warnings": [],
-  "tamarin_timing": 2.43,
+  "tamarin_timing": 2.39,
   "wrapper_measures": {
-    "time": 2.615846633911133,
-    "avg_memory": 91.51822916666667,
-    "peak_memory": 151.35546875
+    "time": 2.511045217514038,
+    "avg_memory": 95.37369791666667,
+    "peak_memory": 156.7578125
   },
   "output_spthy": "results/pki/proofs/--san_external_check_true--default.spthy",
   "verified_lemma": {

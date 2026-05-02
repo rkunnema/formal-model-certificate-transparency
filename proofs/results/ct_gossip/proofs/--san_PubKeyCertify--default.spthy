@@ -399,6 +399,22 @@ rule (modulo E) ChainValidator_Invalid:
                       pkRootCA.59)
   */
 
+predicate: EntryMissing( Logger, fields, log_id, #time, sth_time )<=>¬(∃ ca_cert different_time chain #t.
+   ((LoggerComputesAddLog( Logger, log_id, fields, ca_cert, chain,
+                           different_time
+     ) @ #t) ∧
+    (¬(sth_time = different_time))) ∧
+   (#t < #time))
+
+predicate: EntryVisible( Logger, fields, ca_cert, chain, log_id, #time,
+              sth_time
+)<=>∃ different_time #t.
+ ((LoggerComputesAddLog( Logger, log_id, fields, ca_cert, chain,
+                         different_time
+   ) @ #t) ∧
+  (¬(sth_time = different_time))) ∧
+ (#t < #time)
+
 predicate: ChainVisible( Logger, fields, ca_cert, log_id, #time, sth_time )<=>∃ chain different_time #t.
  ((LoggerComputesAddLog( Logger, log_id, fields, ca_cert, chain,
                          different_time
@@ -428,12 +444,13 @@ predicate: NoChainVisible( Logger, fields, log_id, #time, sth_time )<=>(¬(∃ d
    (∃ #t2. ChainCheck( chain ) @ #t2)))
 
 restriction logExplorationSucceeds:
-  "∀ M L fields ca_cert sth session #t5.
-    (MonitorObservesEntry( M, L, fields, ca_cert, sth, session ) @ #t5) ⇒
+  "∀ M L fields ca_cert chain sth session #t5.
+    (MonitorObservesEntry( M, L, fields, ca_cert, chain, sth, session
+     ) @ #t5) ⇒
     (∃ log_id time #t2.
       ((LoggerPresentsView( L, M, log_id, time, sth, session ) @ #t2) ∧
        (#t2 < #t5)) ∧
-      (∃ chain different_time #t.
+      (∃ different_time #t.
         ((LoggerComputesAddLog( L, log_id, fields, ca_cert, chain, different_time
           ) @ #t) ∧
          (¬(time = different_time))) ∧
@@ -468,6 +485,7 @@ rule (modulo E) monitorFindsRogueCertificate[color=#f3d664]:
    !LoggerDict( $M, $L ), !TrackSubject( $M, su ),
    In( <$CA, $subj, ke, 'pubKey', sn, $i, $j, sct1, sct2> ), In( cert_sig ),
    In( <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0> ), In( ca_sig ),
+   In( preC_fields ), In( preC_sig ),
    !TLS_L_to_M( $L, $M, $snapshot, sth, session, $time ),
    !Root_CA( $rootCA, pkRootCA )
    ]
@@ -481,7 +499,10 @@ rule (modulo E) monitorFindsRogueCertificate[color=#f3d664]:
       true
   ),
   MonitorObservesEntry( $M, $L, <$CA, $subj, ke, 'pubKey', sn, $i, $j>,
-                        <<$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, ca_sig>, sth, session
+                        <<$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, ca_sig>,
+                        <<preC_fields, preC_sig>, 
+                         <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, ca_sig>,
+                        sth, session
   ),
   RogueCert( $CA, <$CA, $subj, ke, 'pubKey', sn, $i, $j> ),
   Asserts( $M, 'Blame this CA.', $CA,
@@ -505,13 +526,17 @@ rule (modulo E) monitorFindsRogueCertificate[color=#f3d664]:
      !LoggerDict( $M, $L ), !TrackSubject( $M, su ),
      In( <$CA, $subj, ke, 'pubKey', sn, $i, $j, sct1, sct2> ), In( cert_sig ),
      In( <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0> ), In( ca_sig ),
+     In( preC_fields ), In( preC_sig ),
      !TLS_L_to_M( $L, $M, $snapshot, sth, session, $time ),
      !Root_CA( $rootCA, pkRootCA )
      ]
     --[
     Eq( z, true ), Eq( z.1, true ),
     MonitorObservesEntry( $M, $L, <$CA, $subj, ke, 'pubKey', sn, $i, $j>,
-                          <<$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, ca_sig>, sth, session
+                          <<$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, ca_sig>,
+                          <<preC_fields, preC_sig>, 
+                           <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, ca_sig>,
+                          sth, session
     ),
     RogueCert( $CA, <$CA, $subj, ke, 'pubKey', sn, $i, $j> ),
     Asserts( $M, 'Blame this CA.', $CA,
@@ -529,116 +554,116 @@ rule (modulo E) monitorFindsRogueCertificate[color=#f3d664]:
      )
      ]
     variants (modulo AC)
-    1. $CA   = $CA.51
-       $i    = $i.54
-       $i0   = $i0.55
-       $j    = $j.56
-       $j0   = $j0.57
+    1. $CA   = $CA.55
+       $i    = $i.58
+       $i0   = $i0.59
+       $j    = $j.60
+       $j0   = $j0.61
        $rootCA
-             = $rootCA.59
-       $subj = $subj.61
+             = $rootCA.63
+       $subj = $subj.65
        ca_sig
-             = ca_sig.63
+             = ca_sig.67
        cert_sig
-             = cert_sig.64
-       ke    = ke.65
-       pkCA  = pkCA.66
+             = cert_sig.68
+       ke    = ke.69
+       pkCA  = pkCA.70
        pkRootCA
-             = pkRootCA.67
-       sct1  = sct1.68
-       sct2  = sct2.69
-       sn    = sn.71
-       snCA  = snCA.72
-       z     = verify(cert_sig.64,
-                      <$CA.51, $subj.61, ke.65, 'pubKey', sn.71, $i.54, $j.56, sct1.68, sct2.69
+             = pkRootCA.71
+       sct1  = sct1.74
+       sct2  = sct2.75
+       sn    = sn.77
+       snCA  = snCA.78
+       z     = verify(cert_sig.68,
+                      <$CA.55, $subj.65, ke.69, 'pubKey', sn.77, $i.58, $j.60, sct1.74, sct2.75
                       >,
-                      pkCA.66)
-       z.1   = verify(ca_sig.63,
-                      <$rootCA.59, $CA.51, pkCA.66, 'pubKey-CA', snCA.72, $i0.55, $j0.57>,
-                      pkRootCA.67)
+                      pkCA.70)
+       z.1   = verify(ca_sig.67,
+                      <$rootCA.63, $CA.55, pkCA.70, 'pubKey-CA', snCA.78, $i0.59, $j0.61>,
+                      pkRootCA.71)
     
-    2. $CA   = $CA.102
-       $i    = $i.105
-       $i0   = $i0.106
-       $j    = $j.107
-       $j0   = $j0.108
+    2. $CA   = $CA.108
+       $i    = $i.111
+       $i0   = $i0.112
+       $j    = $j.113
+       $j0   = $j0.114
        $rootCA
-             = $rootCA.110
-       $subj = $subj.112
+             = $rootCA.116
+       $subj = $subj.118
        ca_sig
-             = sign(<$rootCA.110, $CA.102, pkCA.117, 'pubKey-CA', snCA.123, $i0.106, 
-                     $j0.108>,
-                    x.202)
+             = sign(<$rootCA.116, $CA.108, pkCA.123, 'pubKey-CA', snCA.131, $i0.112, 
+                     $j0.114>,
+                    x.214)
        cert_sig
-             = cert_sig.115
-       ke    = ke.116
-       pkCA  = pkCA.117
+             = cert_sig.121
+       ke    = ke.122
+       pkCA  = pkCA.123
        pkRootCA
-             = pk(x.202)
-       sct1  = sct1.119
-       sct2  = sct2.120
-       sn    = sn.122
-       snCA  = snCA.123
-       z     = verify(cert_sig.115,
-                      <$CA.102, $subj.112, ke.116, 'pubKey', sn.122, $i.105, $j.107, sct1.119, 
-                       sct2.120>,
-                      pkCA.117)
+             = pk(x.214)
+       sct1  = sct1.127
+       sct2  = sct2.128
+       sn    = sn.130
+       snCA  = snCA.131
+       z     = verify(cert_sig.121,
+                      <$CA.108, $subj.118, ke.122, 'pubKey', sn.130, $i.111, $j.113, sct1.127, 
+                       sct2.128>,
+                      pkCA.123)
        z.1   = true
     
-    3. $CA   = $CA.102
-       $i    = $i.105
-       $i0   = $i0.106
-       $j    = $j.107
-       $j0   = $j0.108
+    3. $CA   = $CA.108
+       $i    = $i.111
+       $i0   = $i0.112
+       $j    = $j.113
+       $j0   = $j0.114
        $rootCA
-             = $rootCA.110
-       $subj = $subj.112
+             = $rootCA.116
+       $subj = $subj.118
        ca_sig
-             = sign(<$rootCA.110, $CA.102, pk(x.200), 'pubKey-CA', snCA.123, $i0.106, 
-                     $j0.108>,
-                    x.202)
+             = sign(<$rootCA.116, $CA.108, pk(x.212), 'pubKey-CA', snCA.131, $i0.112, 
+                     $j0.114>,
+                    x.214)
        cert_sig
-             = sign(<$CA.102, $subj.112, ke.116, 'pubKey', sn.122, $i.105, $j.107, 
-                     sct1.119, sct2.120>,
-                    x.200)
-       ke    = ke.116
-       pkCA  = pk(x.200)
+             = sign(<$CA.108, $subj.118, ke.122, 'pubKey', sn.130, $i.111, $j.113, 
+                     sct1.127, sct2.128>,
+                    x.212)
+       ke    = ke.122
+       pkCA  = pk(x.212)
        pkRootCA
-             = pk(x.202)
-       sct1  = sct1.119
-       sct2  = sct2.120
-       sn    = sn.122
-       snCA  = snCA.123
+             = pk(x.214)
+       sct1  = sct1.127
+       sct2  = sct2.128
+       sn    = sn.130
+       snCA  = snCA.131
        z     = true
        z.1   = true
     
-    4. $CA   = $CA.105
-       $i    = $i.108
-       $i0   = $i0.109
-       $j    = $j.110
-       $j0   = $j0.111
+    4. $CA   = $CA.111
+       $i    = $i.114
+       $i0   = $i0.115
+       $j    = $j.116
+       $j0   = $j0.117
        $rootCA
-             = $rootCA.113
-       $subj = $subj.115
+             = $rootCA.119
+       $subj = $subj.121
        ca_sig
-             = ca_sig.117
+             = ca_sig.123
        cert_sig
-             = sign(<$CA.105, $subj.115, ke.119, 'pubKey', sn.125, $i.108, $j.110, 
-                     sct1.122, sct2.123>,
-                    x.208)
-       ke    = ke.119
-       pkCA  = pk(x.208)
+             = sign(<$CA.111, $subj.121, ke.125, 'pubKey', sn.133, $i.114, $j.116, 
+                     sct1.130, sct2.131>,
+                    x.220)
+       ke    = ke.125
+       pkCA  = pk(x.220)
        pkRootCA
-             = pkRootCA.121
-       sct1  = sct1.122
-       sct2  = sct2.123
-       sn    = sn.125
-       snCA  = snCA.126
+             = pkRootCA.127
+       sct1  = sct1.130
+       sct2  = sct2.131
+       sn    = sn.133
+       snCA  = snCA.134
        z     = true
-       z.1   = verify(ca_sig.117,
-                      <$rootCA.113, $CA.105, pk(x.208), 'pubKey-CA', snCA.126, $i0.109, $j0.111
+       z.1   = verify(ca_sig.123,
+                      <$rootCA.119, $CA.111, pk(x.220), 'pubKey-CA', snCA.134, $i0.115, $j0.117
                       >,
-                      pkRootCA.121)
+                      pkRootCA.127)
   */
 
 rule (modulo E) monitorCanFindCertificate[color=#f3d664]:
@@ -646,6 +671,7 @@ rule (modulo E) monitorCanFindCertificate[color=#f3d664]:
    !LoggerDict( $M, $L ), !TrackSubject( $M, $subj ),
    In( <$CA, $subj, ke, 'pubKey', sn, $i, $j, sct1, sct2> ), In( cert_sig ),
    In( <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0> ), In( ca_sig ),
+   In( preC_fields ), In( preC_sig ),
    !TLS_L_to_M( $L, $M, $snapshot, sth, session, $time ),
    !Root_CA( $rootCA, pkRootCA )
    ]
@@ -659,7 +685,10 @@ rule (modulo E) monitorCanFindCertificate[color=#f3d664]:
       true
   ),
   MonitorObservesEntry( $M, $L, <$CA, $subj, ke, 'pubKey', sn, $i, $j>,
-                        <<$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, ca_sig>, sth, session
+                        <<$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, ca_sig>,
+                        <<preC_fields, preC_sig>, 
+                         <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, ca_sig>,
+                        sth, session
   ),
   BenignCert( $iss, <$CA, $subj, ke, 'pubKey', sn, $i, $j> ),
   Asserts( $M, 'Do not blame this CA.', $CA,
@@ -683,13 +712,17 @@ rule (modulo E) monitorCanFindCertificate[color=#f3d664]:
      !LoggerDict( $M, $L ), !TrackSubject( $M, $subj ),
      In( <$CA, $subj, ke, 'pubKey', sn, $i, $j, sct1, sct2> ), In( cert_sig ),
      In( <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0> ), In( ca_sig ),
+     In( preC_fields ), In( preC_sig ),
      !TLS_L_to_M( $L, $M, $snapshot, sth, session, $time ),
      !Root_CA( $rootCA, pkRootCA )
      ]
     --[
     Eq( z, true ), Eq( z.1, true ),
     MonitorObservesEntry( $M, $L, <$CA, $subj, ke, 'pubKey', sn, $i, $j>,
-                          <<$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, ca_sig>, sth, session
+                          <<$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, ca_sig>,
+                          <<preC_fields, preC_sig>, 
+                           <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, ca_sig>,
+                          sth, session
     ),
     BenignCert( $iss, <$CA, $subj, ke, 'pubKey', sn, $i, $j> ),
     Asserts( $M, 'Do not blame this CA.', $CA,
@@ -707,116 +740,116 @@ rule (modulo E) monitorCanFindCertificate[color=#f3d664]:
      )
      ]
     variants (modulo AC)
-    1. $CA   = $CA.52
-       $i    = $i.55
-       $i0   = $i0.56
-       $j    = $j.58
-       $j0   = $j0.59
+    1. $CA   = $CA.56
+       $i    = $i.59
+       $i0   = $i0.60
+       $j    = $j.62
+       $j0   = $j0.63
        $rootCA
-             = $rootCA.61
-       $subj = $subj.63
+             = $rootCA.65
+       $subj = $subj.67
        ca_sig
-             = ca_sig.65
+             = ca_sig.69
        cert_sig
-             = cert_sig.66
-       ke    = ke.67
-       pkCA  = pkCA.68
+             = cert_sig.70
+       ke    = ke.71
+       pkCA  = pkCA.72
        pkRootCA
-             = pkRootCA.69
-       sct1  = sct1.70
-       sct2  = sct2.71
-       sn    = sn.73
-       snCA  = snCA.74
-       z     = verify(cert_sig.66,
-                      <$CA.52, $subj.63, ke.67, 'pubKey', sn.73, $i.55, $j.58, sct1.70, sct2.71
+             = pkRootCA.73
+       sct1  = sct1.76
+       sct2  = sct2.77
+       sn    = sn.79
+       snCA  = snCA.80
+       z     = verify(cert_sig.70,
+                      <$CA.56, $subj.67, ke.71, 'pubKey', sn.79, $i.59, $j.62, sct1.76, sct2.77
                       >,
-                      pkCA.68)
-       z.1   = verify(ca_sig.65,
-                      <$rootCA.61, $CA.52, pkCA.68, 'pubKey-CA', snCA.74, $i0.56, $j0.59>,
-                      pkRootCA.69)
+                      pkCA.72)
+       z.1   = verify(ca_sig.69,
+                      <$rootCA.65, $CA.56, pkCA.72, 'pubKey-CA', snCA.80, $i0.60, $j0.63>,
+                      pkRootCA.73)
     
-    2. $CA   = $CA.103
-       $i    = $i.106
-       $i0   = $i0.107
-       $j    = $j.109
-       $j0   = $j0.110
+    2. $CA   = $CA.109
+       $i    = $i.112
+       $i0   = $i0.113
+       $j    = $j.115
+       $j0   = $j0.116
        $rootCA
-             = $rootCA.112
-       $subj = $subj.114
+             = $rootCA.118
+       $subj = $subj.120
        ca_sig
-             = sign(<$rootCA.112, $CA.103, pkCA.119, 'pubKey-CA', snCA.125, $i0.107, 
-                     $j0.110>,
-                    x.204)
+             = sign(<$rootCA.118, $CA.109, pkCA.125, 'pubKey-CA', snCA.133, $i0.113, 
+                     $j0.116>,
+                    x.216)
        cert_sig
-             = cert_sig.117
-       ke    = ke.118
-       pkCA  = pkCA.119
+             = cert_sig.123
+       ke    = ke.124
+       pkCA  = pkCA.125
        pkRootCA
-             = pk(x.204)
-       sct1  = sct1.121
-       sct2  = sct2.122
-       sn    = sn.124
-       snCA  = snCA.125
-       z     = verify(cert_sig.117,
-                      <$CA.103, $subj.114, ke.118, 'pubKey', sn.124, $i.106, $j.109, sct1.121, 
-                       sct2.122>,
-                      pkCA.119)
+             = pk(x.216)
+       sct1  = sct1.129
+       sct2  = sct2.130
+       sn    = sn.132
+       snCA  = snCA.133
+       z     = verify(cert_sig.123,
+                      <$CA.109, $subj.120, ke.124, 'pubKey', sn.132, $i.112, $j.115, sct1.129, 
+                       sct2.130>,
+                      pkCA.125)
        z.1   = true
     
-    3. $CA   = $CA.103
-       $i    = $i.106
-       $i0   = $i0.107
-       $j    = $j.109
-       $j0   = $j0.110
+    3. $CA   = $CA.109
+       $i    = $i.112
+       $i0   = $i0.113
+       $j    = $j.115
+       $j0   = $j0.116
        $rootCA
-             = $rootCA.112
-       $subj = $subj.114
+             = $rootCA.118
+       $subj = $subj.120
        ca_sig
-             = sign(<$rootCA.112, $CA.103, pk(x.202), 'pubKey-CA', snCA.125, $i0.107, 
-                     $j0.110>,
-                    x.204)
+             = sign(<$rootCA.118, $CA.109, pk(x.214), 'pubKey-CA', snCA.133, $i0.113, 
+                     $j0.116>,
+                    x.216)
        cert_sig
-             = sign(<$CA.103, $subj.114, ke.118, 'pubKey', sn.124, $i.106, $j.109, 
-                     sct1.121, sct2.122>,
-                    x.202)
-       ke    = ke.118
-       pkCA  = pk(x.202)
+             = sign(<$CA.109, $subj.120, ke.124, 'pubKey', sn.132, $i.112, $j.115, 
+                     sct1.129, sct2.130>,
+                    x.214)
+       ke    = ke.124
+       pkCA  = pk(x.214)
        pkRootCA
-             = pk(x.204)
-       sct1  = sct1.121
-       sct2  = sct2.122
-       sn    = sn.124
-       snCA  = snCA.125
+             = pk(x.216)
+       sct1  = sct1.129
+       sct2  = sct2.130
+       sn    = sn.132
+       snCA  = snCA.133
        z     = true
        z.1   = true
     
-    4. $CA   = $CA.106
-       $i    = $i.109
-       $i0   = $i0.110
-       $j    = $j.112
-       $j0   = $j0.113
+    4. $CA   = $CA.112
+       $i    = $i.115
+       $i0   = $i0.116
+       $j    = $j.118
+       $j0   = $j0.119
        $rootCA
-             = $rootCA.115
-       $subj = $subj.117
+             = $rootCA.121
+       $subj = $subj.123
        ca_sig
-             = ca_sig.119
+             = ca_sig.125
        cert_sig
-             = sign(<$CA.106, $subj.117, ke.121, 'pubKey', sn.127, $i.109, $j.112, 
-                     sct1.124, sct2.125>,
-                    x.210)
-       ke    = ke.121
-       pkCA  = pk(x.210)
+             = sign(<$CA.112, $subj.123, ke.127, 'pubKey', sn.135, $i.115, $j.118, 
+                     sct1.132, sct2.133>,
+                    x.222)
+       ke    = ke.127
+       pkCA  = pk(x.222)
        pkRootCA
-             = pkRootCA.123
-       sct1  = sct1.124
-       sct2  = sct2.125
-       sn    = sn.127
-       snCA  = snCA.128
+             = pkRootCA.129
+       sct1  = sct1.132
+       sct2  = sct2.133
+       sn    = sn.135
+       snCA  = snCA.136
        z     = true
-       z.1   = verify(ca_sig.119,
-                      <$rootCA.115, $CA.106, pk(x.210), 'pubKey-CA', snCA.128, $i0.110, $j0.113
+       z.1   = verify(ca_sig.125,
+                      <$rootCA.121, $CA.112, pk(x.222), 'pubKey-CA', snCA.136, $i0.116, $j0.119
                       >,
-                      pkRootCA.123)
+                      pkRootCA.129)
   */
 
 rule (modulo E) monitorCannotFindCertificate[color=#f3d664]:
@@ -853,6 +886,7 @@ rule (modulo E) monitorFindsRogueCertificate_Sleep[color=#af2828]:
    !LoggerDict( $M, $L ), !St_bad_Monitor( $M ), !TrackSubject( $M, su ),
    In( <$CA, $subj, ke, 'pubKey', sn, $i, $j, sct1, sct2> ), In( cert_sig ),
    In( <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0> ), In( ca_sig ),
+   In( preC_fields ), In( preC_sig ),
    !TLS_L_to_M( $L, $M, $snapshot, sth, session, $time ),
    !Root_CA( $rootCA, pkRootCA )
    ]
@@ -866,7 +900,10 @@ rule (modulo E) monitorFindsRogueCertificate_Sleep[color=#af2828]:
       true
   ),
   MonitorObservesEntry( $M, $L, <$CA, $subj, ke, 'pubKey', sn, $i, $j>,
-                        <<$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, ca_sig>, sth, session
+                        <<$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, ca_sig>,
+                        <<preC_fields, preC_sig>, 
+                         <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, ca_sig>,
+                        sth, session
   ),
   RogueCert( $CA, <$CA, $subj, ke, 'pubKey', sn, $i, $j> ),
   MonitorScanLog( ), Time( $now ),
@@ -887,13 +924,17 @@ rule (modulo E) monitorFindsRogueCertificate_Sleep[color=#af2828]:
      !LoggerDict( $M, $L ), !St_bad_Monitor( $M ), !TrackSubject( $M, su ),
      In( <$CA, $subj, ke, 'pubKey', sn, $i, $j, sct1, sct2> ), In( cert_sig ),
      In( <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0> ), In( ca_sig ),
+     In( preC_fields ), In( preC_sig ),
      !TLS_L_to_M( $L, $M, $snapshot, sth, session, $time ),
      !Root_CA( $rootCA, pkRootCA )
      ]
     --[
     Eq( z, true ), Eq( z.1, true ),
     MonitorObservesEntry( $M, $L, <$CA, $subj, ke, 'pubKey', sn, $i, $j>,
-                          <<$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, ca_sig>, sth, session
+                          <<$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, ca_sig>,
+                          <<preC_fields, preC_sig>, 
+                           <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, ca_sig>,
+                          sth, session
     ),
     RogueCert( $CA, <$CA, $subj, ke, 'pubKey', sn, $i, $j> ),
     MonitorScanLog( ), Time( $now ),
@@ -908,115 +949,115 @@ rule (modulo E) monitorFindsRogueCertificate_Sleep[color=#af2828]:
      )
      ]
     variants (modulo AC)
-    1. $CA   = $CA.51
-       $i    = $i.54
-       $i0   = $i0.55
-       $j    = $j.56
-       $j0   = $j0.57
+    1. $CA   = $CA.55
+       $i    = $i.58
+       $i0   = $i0.59
+       $j    = $j.60
+       $j0   = $j0.61
        $rootCA
-             = $rootCA.59
-       $subj = $subj.61
+             = $rootCA.63
+       $subj = $subj.65
        ca_sig
-             = ca_sig.63
+             = ca_sig.67
        cert_sig
-             = cert_sig.64
-       ke    = ke.65
-       pkCA  = pkCA.66
+             = cert_sig.68
+       ke    = ke.69
+       pkCA  = pkCA.70
        pkRootCA
-             = pkRootCA.67
-       sct1  = sct1.68
-       sct2  = sct2.69
-       sn    = sn.71
-       snCA  = snCA.72
-       z     = verify(cert_sig.64,
-                      <$CA.51, $subj.61, ke.65, 'pubKey', sn.71, $i.54, $j.56, sct1.68, sct2.69
+             = pkRootCA.71
+       sct1  = sct1.74
+       sct2  = sct2.75
+       sn    = sn.77
+       snCA  = snCA.78
+       z     = verify(cert_sig.68,
+                      <$CA.55, $subj.65, ke.69, 'pubKey', sn.77, $i.58, $j.60, sct1.74, sct2.75
                       >,
-                      pkCA.66)
-       z.1   = verify(ca_sig.63,
-                      <$rootCA.59, $CA.51, pkCA.66, 'pubKey-CA', snCA.72, $i0.55, $j0.57>,
-                      pkRootCA.67)
+                      pkCA.70)
+       z.1   = verify(ca_sig.67,
+                      <$rootCA.63, $CA.55, pkCA.70, 'pubKey-CA', snCA.78, $i0.59, $j0.61>,
+                      pkRootCA.71)
     
-    2. $CA   = $CA.72
-       $i    = $i.75
-       $i0   = $i0.76
-       $j    = $j.77
-       $j0   = $j0.78
+    2. $CA   = $CA.76
+       $i    = $i.79
+       $i0   = $i0.80
+       $j    = $j.81
+       $j0   = $j0.82
        $rootCA
-             = $rootCA.80
-       $subj = $subj.82
+             = $rootCA.84
+       $subj = $subj.86
        ca_sig
-             = sign(<$rootCA.80, $CA.72, pkCA.87, 'pubKey-CA', snCA.93, $i0.76, $j0.78
+             = sign(<$rootCA.84, $CA.76, pkCA.91, 'pubKey-CA', snCA.99, $i0.80, $j0.82
                     >,
-                    x.142)
+                    x.150)
        cert_sig
-             = cert_sig.85
-       ke    = ke.86
-       pkCA  = pkCA.87
+             = cert_sig.89
+       ke    = ke.90
+       pkCA  = pkCA.91
        pkRootCA
-             = pk(x.142)
-       sct1  = sct1.89
-       sct2  = sct2.90
-       sn    = sn.92
-       snCA  = snCA.93
-       z     = verify(cert_sig.85,
-                      <$CA.72, $subj.82, ke.86, 'pubKey', sn.92, $i.75, $j.77, sct1.89, sct2.90
+             = pk(x.150)
+       sct1  = sct1.95
+       sct2  = sct2.96
+       sn    = sn.98
+       snCA  = snCA.99
+       z     = verify(cert_sig.89,
+                      <$CA.76, $subj.86, ke.90, 'pubKey', sn.98, $i.79, $j.81, sct1.95, sct2.96
                       >,
-                      pkCA.87)
+                      pkCA.91)
        z.1   = true
     
-    3. $CA   = $CA.72
-       $i    = $i.75
-       $i0   = $i0.76
-       $j    = $j.77
-       $j0   = $j0.78
+    3. $CA   = $CA.76
+       $i    = $i.79
+       $i0   = $i0.80
+       $j    = $j.81
+       $j0   = $j0.82
        $rootCA
-             = $rootCA.80
-       $subj = $subj.82
+             = $rootCA.84
+       $subj = $subj.86
        ca_sig
-             = sign(<$rootCA.80, $CA.72, pk(x.140), 'pubKey-CA', snCA.93, $i0.76, 
-                     $j0.78>,
-                    x.142)
+             = sign(<$rootCA.84, $CA.76, pk(x.148), 'pubKey-CA', snCA.99, $i0.80, 
+                     $j0.82>,
+                    x.150)
        cert_sig
-             = sign(<$CA.72, $subj.82, ke.86, 'pubKey', sn.92, $i.75, $j.77, sct1.89, 
-                     sct2.90>,
-                    x.140)
-       ke    = ke.86
-       pkCA  = pk(x.140)
-       pkRootCA
-             = pk(x.142)
-       sct1  = sct1.89
-       sct2  = sct2.90
-       sn    = sn.92
-       snCA  = snCA.93
-       z     = true
-       z.1   = true
-    
-    4. $CA   = $CA.75
-       $i    = $i.78
-       $i0   = $i0.79
-       $j    = $j.80
-       $j0   = $j0.81
-       $rootCA
-             = $rootCA.83
-       $subj = $subj.85
-       ca_sig
-             = ca_sig.87
-       cert_sig
-             = sign(<$CA.75, $subj.85, ke.89, 'pubKey', sn.95, $i.78, $j.80, sct1.92, 
-                     sct2.93>,
+             = sign(<$CA.76, $subj.86, ke.90, 'pubKey', sn.98, $i.79, $j.81, sct1.95, 
+                     sct2.96>,
                     x.148)
-       ke    = ke.89
+       ke    = ke.90
        pkCA  = pk(x.148)
        pkRootCA
-             = pkRootCA.91
-       sct1  = sct1.92
-       sct2  = sct2.93
-       sn    = sn.95
-       snCA  = snCA.96
+             = pk(x.150)
+       sct1  = sct1.95
+       sct2  = sct2.96
+       sn    = sn.98
+       snCA  = snCA.99
        z     = true
-       z.1   = verify(ca_sig.87,
-                      <$rootCA.83, $CA.75, pk(x.148), 'pubKey-CA', snCA.96, $i0.79, $j0.81>,
-                      pkRootCA.91)
+       z.1   = true
+    
+    4. $CA   = $CA.79
+       $i    = $i.82
+       $i0   = $i0.83
+       $j    = $j.84
+       $j0   = $j0.85
+       $rootCA
+             = $rootCA.87
+       $subj = $subj.89
+       ca_sig
+             = ca_sig.91
+       cert_sig
+             = sign(<$CA.79, $subj.89, ke.93, 'pubKey', sn.101, $i.82, $j.84, 
+                     sct1.98, sct2.99>,
+                    x.156)
+       ke    = ke.93
+       pkCA  = pk(x.156)
+       pkRootCA
+             = pkRootCA.95
+       sct1  = sct1.98
+       sct2  = sct2.99
+       sn    = sn.101
+       snCA  = snCA.102
+       z     = true
+       z.1   = verify(ca_sig.91,
+                      <$rootCA.87, $CA.79, pk(x.156), 'pubKey-CA', snCA.102, $i0.83, $j0.85>,
+                      pkRootCA.95)
   */
 
 rule (modulo E) Logger_Init[color=#08a358]:
@@ -2451,22 +2492,6 @@ rule (modulo E) ClientFindsAppendOnlyViolation[color=#e65208]:
 
   /* has exactly the trivial AC variant */
 
-predicate: EntryMissing( Logger, fields, log_id, #time, sth_time )<=>¬(∃ ca_cert different_time chain #t.
-   ((LoggerComputesAddLog( Logger, log_id, fields, ca_cert, chain,
-                           different_time
-     ) @ #t) ∧
-    (¬(sth_time = different_time))) ∧
-   (#t < #time))
-
-predicate: EntryVisible( Logger, fields, ca_cert, chain, log_id, #time,
-              sth_time
-)<=>∃ different_time #t.
- ((LoggerComputesAddLog( Logger, log_id, fields, ca_cert, chain,
-                         different_time
-   ) @ #t) ∧
-  (¬(sth_time = different_time))) ∧
- (#t < #time)
-
 restriction AppendOnlyFails:
   "∀ sth session id L #t6.
     (AppendOnlyViolation( id, L, sth, session ) @ #t6) ⇒
@@ -2634,7 +2659,7 @@ rule (modulo E) ParticipantFindsInclusionViolation[color=#e65208]:
    [
    !TLS_L_to_P( $L, $P, $snapshot, sth, session, $time ),
    !Logger( $L, pkL ), In( <$CA, $id, pkID, 'pubKey', sn, $i, $j> ),
-   In( ca_cert ), !Monitor( $M )
+   In( ca_cert )
    ]
   --[
   Asserts( $P, 'This loggers log currently does not include these fields.',
@@ -2646,8 +2671,8 @@ rule (modulo E) ParticipantFindsInclusionViolation[color=#e65208]:
   Time( $now ), San_ParticipantFindsInclusionViolation( )
   ]->
    [
-   InclusionFailed( $P, $L, <$CA, $id, pkID, 'pubKey', sn, $i, $j>, $time,
-                    session
+   InclusionFailed( $P, $L, <$CA, $id, pkID, 'pubKey', sn, $i, $j>, ca_cert,
+                    $time, session
    )
    ]
 
@@ -2704,18 +2729,65 @@ restriction inclusionProofWorks:
          (¬(time = different_time))) ∧
         (#t < #t2)))"
 
+rule (modulo E) MonitorFindsInclusionViolation[color=#e65208]:
+   [
+   !TLS_L_to_M( $L, $M, $snapshot, sth, session, $time ),
+   !Logger( $L, pkL ), In( <$CA, $id, pkID, 'pubKey', sn, $i, $j> ),
+   In( ca_cert ), !Monitor( $M )
+   ]
+  --[
+  Asserts( $M, 'This loggers log currently does not include these fields.',
+           $L, <<$CA, $id, pkID, 'pubKey', sn, $i, $j>, session>
+  ),
+  InclusionProofFails( $M, $L, <$CA, $id, pkID, 'pubKey', sn, $i, $j>,
+                       ca_cert, sth, session
+  ),
+  Time( $now ), San_MonitorFindsInclusionViolation( )
+  ]->
+   [
+   MonitorInclusionFailed( $M, $L, <$CA, $id, pkID, 'pubKey', sn, $i, $j>,
+                           ca_cert, $time, session
+   )
+   ]
+
+  /* has exactly the trivial AC variant */
+
+rule (modulo E) MonitorVerifiesInclusion[color=#c1ff3c]:
+   [
+   !TLS_L_to_M( $L, $M, $snapshot, sth, session, $time ),
+   !Logger( $L, pkL ), In( <$CA, $id, pkID, 'pubKey', sn, $i, $j> ),
+   In( ca_cert ), In( chain )
+   ]
+  --[
+  InclusionProofSucceeds( $M, $L, <$CA, $id, pkID, 'pubKey', sn, $i, $j>,
+                          ca_cert, chain, sth, session
+  ),
+  Asserts( $M, 'This loggers log currently includes these fields.', $L,
+           <<$CA, $id, pkID, 'pubKey', sn, $i, $j>, session>
+  ),
+  Time( $now ), San_MonitorVerifiesInclusion( )
+  ]->
+   [
+   MonitorInclusionVerified( $M, $L, <$CA, $id, pkID, 'pubKey', sn, $i, $j>,
+                             $time, session, chain
+   )
+   ]
+
+  /* has exactly the trivial AC variant */
+
 rule (modulo E) clientGossipsToMonitor:
    [
    !TLS_L_to_P( $L, $C, $snapshot, sth, session, $time ),
-   InclusionVerified( $C, $L, fields, $gossiped_proof_time,
-                      gossiped_session, chain
-   ),
+   InclusionVerified( $C, $L, fields, $time, session, chain ),
    !BAccept_SCT( $L, fields, ca_fields )
    ]
-  --[ Time( $now ), San_clientGossipsToMonitor( ) ]->
+  --[
+  Time( $now ), San_clientGossipsToMonitor( ),
+  ClientGossips( $C, $L, fields, $time, session, chain )
+  ]->
    [
    !TLS_C_to_M( $C, $M, $snapshot, sth, session ),
-   ClientGossiped( $C, $M, $L, session, $time, fields, chain )
+   ClientGossiped( $C, $M, $L, session, $time, fields, ca_fields, chain )
    ]
 
   /* has exactly the trivial AC variant */
@@ -2995,19 +3067,24 @@ restriction externalCA_no_proof:
 rule (modulo E) GossipTransparencyCheck_Success:
    [
    ClientGossiped( $C, $M, $L, gossiped_session, $gossiped_proof_time,
-                   fields, chain
+                   fields, <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>,
+                   <<cert_fields, cert_sig>, 
+                    <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, ca_sig>
    ),
    AppendOnlyChecked( $M, gossiped_session, session ),
-   MonitorFoundCert( $M, $L, fields, $CA, ca_fields, $time_of_proof_fetch,
-                     session
+   MonitorInclusionVerified( $M, $L, fields, $time_of_proof_fetch, session,
+                             <<cert_fields, cert_sig>, 
+                              <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, ca_sig>
    )
    ]
   --[
-  STHGossipTransparencyCheck( $M, $L, fields, $CA, ca_fields, session,
+  STHGossipTransparencyCheck( $M, $L, fields, $CA,
+                              <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, session,
                               gossiped_session
   ),
-  CTGossipTransparencyCheckSuccess( $M, $L, fields, $CA, ca_fields,
-                                    session, gossiped_session
+  CTGossipTransparencyCheckSuccess( $M, $L, fields, $CA,
+                                    <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, session,
+                                    gossiped_session
   ),
   San_GossipTransparencyCheck_Success( )
   ]->
@@ -3018,31 +3095,23 @@ rule (modulo E) GossipTransparencyCheck_Success:
 rule (modulo E) GossipTransparencyCheck_Failed:
    [
    ClientGossiped( $C, $M, $L, gossiped_session, $gossiped_proof_time,
-                   <$CA, $subj, ke, 'pubKey', sn, $i, $j>,
+                   fields, <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>,
                    <<cert_fields, cert_sig>, 
                     <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, ca_sig>
    ),
    AppendOnlyChecked( $M, gossiped_session, session ),
-   MonitorCouldNotFindCert( $M, <$CA, $subj, ke, 'pubKey', sn, $i, $j>, $L,
-                            $CA, <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>,
-                            $time_of_proof_fetch, session
-   ),
-   !Root_CA( $rootCA, pkRootCA )
+   MonitorInclusionFailed( $M, $L, fields,
+                           <<$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, ca_sig>,
+                           $time_of_proof_fetch, session
+   )
    ]
   --[
-  Eq( verify(cert_sig, cert_fields, pkCA), true ),
-  Eq( verify(ca_sig, <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>,
-             pkRootCA),
-      true
-  ),
   ProofFetchAfterGossip( $gossiped_proof_time, $time_of_proof_fetch ),
-  STHGossipTransparencyCheck( $M, $L,
-                              <$CA, $subj, ke, 'pubKey', sn, $i, $j>, $CA,
+  STHGossipTransparencyCheck( $M, $L, fields, $CA,
                               <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, session,
                               gossiped_session
   ),
-  CTGossipTransparencyCheck_NotFound( $M, $L,
-                                      <$CA, $subj, ke, 'pubKey', sn, $i, $j>, $CA,
+  CTGossipTransparencyCheck_NotFound( $M, $L, fields, $CA,
                                       <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, session,
                                       gossiped_session
   ),
@@ -3050,123 +3119,13 @@ rule (modulo E) GossipTransparencyCheck_Failed:
   ]->
    [ ]
 
-  /*
-  rule (modulo AC) GossipTransparencyCheck_Failed:
-     [
-     ClientGossiped( $C, $M, $L, gossiped_session, $gossiped_proof_time,
-                     <$CA, $subj, ke, 'pubKey', sn, $i, $j>,
-                     <<cert_fields, cert_sig>, 
-                      <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, ca_sig>
-     ),
-     AppendOnlyChecked( $M, gossiped_session, session ),
-     MonitorCouldNotFindCert( $M, <$CA, $subj, ke, 'pubKey', sn, $i, $j>, $L,
-                              $CA, <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>,
-                              $time_of_proof_fetch, session
-     ),
-     !Root_CA( $rootCA, pkRootCA )
-     ]
-    --[
-    Eq( z, true ), Eq( z.1, true ),
-    ProofFetchAfterGossip( $gossiped_proof_time, $time_of_proof_fetch ),
-    STHGossipTransparencyCheck( $M, $L,
-                                <$CA, $subj, ke, 'pubKey', sn, $i, $j>, $CA,
-                                <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, session,
-                                gossiped_session
-    ),
-    CTGossipTransparencyCheck_NotFound( $M, $L,
-                                        <$CA, $subj, ke, 'pubKey', sn, $i, $j>, $CA,
-                                        <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, session,
-                                        gossiped_session
-    ),
-    San_GossipTransparencyCheck_Failed( )
-    ]->
-     [ ]
-    variants (modulo AC)
-    1. $CA   = $CA.48
-       $i0   = $i0.53
-       $j0   = $j0.55
-       $rootCA
-             = $rootCA.56
-       ca_sig
-             = ca_sig.59
-       cert_fields
-             = cert_fields.60
-       cert_sig
-             = cert_sig.61
-       pkCA  = pkCA.64
-       pkRootCA
-             = pkRootCA.65
-       snCA  = snCA.68
-       z     = verify(cert_sig.61, cert_fields.60, pkCA.64)
-       z.1   = verify(ca_sig.59,
-                      <$rootCA.56, $CA.48, pkCA.64, 'pubKey-CA', snCA.68, $i0.53, $j0.55>,
-                      pkRootCA.65)
-    
-    2. $CA   = $CA.54
-       $i0   = $i0.59
-       $j0   = $j0.61
-       $rootCA
-             = $rootCA.62
-       ca_sig
-             = ca_sig.65
-       cert_fields
-             = cert_fields.66
-       cert_sig
-             = sign(cert_fields.66, x.105)
-       pkCA  = pk(x.105)
-       pkRootCA
-             = pkRootCA.71
-       snCA  = snCA.74
-       z     = true
-       z.1   = verify(ca_sig.65,
-                      <$rootCA.62, $CA.54, pk(x.105), 'pubKey-CA', snCA.74, $i0.59, $j0.61>,
-                      pkRootCA.71)
-    
-    3. $CA   = $CA.66
-       $i0   = $i0.71
-       $j0   = $j0.73
-       $rootCA
-             = $rootCA.74
-       ca_sig
-             = sign(<$rootCA.74, $CA.66, pkCA.82, 'pubKey-CA', snCA.86, $i0.71, $j0.73
-                    >,
-                    x.129)
-       cert_fields
-             = cert_fields.78
-       cert_sig
-             = cert_sig.79
-       pkCA  = pkCA.82
-       pkRootCA
-             = pk(x.129)
-       snCA  = snCA.86
-       z     = verify(cert_sig.79, cert_fields.78, pkCA.82)
-       z.1   = true
-    
-    4. $CA   = $CA.66
-       $i0   = $i0.71
-       $j0   = $j0.73
-       $rootCA
-             = $rootCA.74
-       ca_sig
-             = sign(<$rootCA.74, $CA.66, pk(x.127), 'pubKey-CA', snCA.86, $i0.71, 
-                     $j0.73>,
-                    x.129)
-       cert_fields
-             = cert_fields.78
-       cert_sig
-             = sign(cert_fields.78, x.127)
-       pkCA  = pk(x.127)
-       pkRootCA
-             = pk(x.129)
-       snCA  = snCA.86
-       z     = true
-       z.1   = true
-  */
+  /* has exactly the trivial AC variant */
 
 rule (modulo E) GossipingCheck:
    [
    ClientGossiped( $C, $M, $L, gossiped_session, $gossiped_proof_time,
                    <$CA, $subj, ke, 'pubKey', sn, $i, $j>,
+                   <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>,
                    <<cert_fields, cert_sig>, 
                     <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, ca_sig>
    ),
@@ -3191,7 +3150,7 @@ rule (modulo E) GossipingCheck:
                   <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, session,
                   gossiped_session
   ),
-  San_GossipingCheck_Found( )
+  San_GossipingCheck( )
   ]->
    [ ]
 
@@ -3200,6 +3159,7 @@ rule (modulo E) GossipingCheck:
      [
      ClientGossiped( $C, $M, $L, gossiped_session, $gossiped_proof_time,
                      <$CA, $subj, ke, 'pubKey', sn, $i, $j>,
+                     <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>,
                      <<cert_fields, cert_sig>, 
                       <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, ca_sig>
      ),
@@ -3220,7 +3180,7 @@ rule (modulo E) GossipingCheck:
                     <$rootCA, $CA, pkCA, 'pubKey-CA', snCA, $i0, $j0>, session,
                     gossiped_session
     ),
-    San_GossipingCheck_Found( )
+    San_GossipingCheck( )
     ]->
      [ ]
     variants (modulo AC)
@@ -3857,6 +3817,34 @@ guarded formula characterizing all satisfying traces:
 */
 by sorry
 
+lemma san_MonitorFindsInclusionViolation:
+  exists-trace
+  "∃ #t.
+    (San_MonitorFindsInclusionViolation( ) @ #t) ∧
+    (¬(∃ #t.1. Compromise( ) @ #t.1))"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ #t.
+  (San_MonitorFindsInclusionViolation( ) @ #t)
+ ∧
+  ∀ #t.1. (Compromise( ) @ #t.1) ⇒ ⊥"
+*/
+by sorry
+
+lemma san_MonitorVerifiesInclusion:
+  exists-trace
+  "∃ #t.
+    (San_MonitorVerifiesInclusion( ) @ #t) ∧
+    (¬(∃ #t.1. Compromise( ) @ #t.1))"
+/*
+guarded formula characterizing all satisfying traces:
+"∃ #t.
+  (San_MonitorVerifiesInclusion( ) @ #t)
+ ∧
+  ∀ #t.1. (Compromise( ) @ #t.1) ⇒ ⊥"
+*/
+by sorry
+
 lemma san_clientGossipsToMonitor:
   exists-trace
   "∃ #t.
@@ -3884,7 +3872,7 @@ guarded formula characterizing all satisfying traces:
 */
 by sorry
 
-lemma san_monitorVerifiesAppendOnly_Gossiped:
+lemma suff_san_monitorVerifiesAppendOnly_Gossiped:
   exists-trace
   "∃ #t.
     (San_monitorVerifiesAppendOnly_Gossiped( ) @ #t) ∧
@@ -3928,7 +3916,7 @@ guarded formula characterizing all satisfying traces:
 */
 by sorry
 
-lemma suff_san_GossipTransparencyCheck_Success:
+lemma suff_san_GossipTransparencyCheck_Success [heuristic=o "acc_oracle"]:
   exists-trace
   "∃ #t.
     (San_GossipTransparencyCheck_Success( ) @ #t) ∧
@@ -3942,7 +3930,7 @@ guarded formula characterizing all satisfying traces:
 */
 by sorry
 
-lemma suff_san_GossipTransparencyCheck_Failed:
+lemma suff_san_GossipTransparencyCheck_Failed [heuristic=o "acc_oracle"]:
   exists-trace
   "∃ #t.
     (San_GossipTransparencyCheck_Failed( ) @ #t) ∧
@@ -3956,14 +3944,12 @@ guarded formula characterizing all satisfying traces:
 */
 by sorry
 
-lemma suff_san_GossipingCheck_Found:
+lemma suff_san_GossipingCheck [heuristic=o "acc_oracle"]:
   exists-trace
-  "∃ #t.
-    (San_GossipingCheck_Found( ) @ #t) ∧ (¬(∃ #t1. Compromise( ) @ #t1))"
+  "∃ #t. (San_GossipingCheck( ) @ #t) ∧ (¬(∃ #t1. Compromise( ) @ #t1))"
 /*
 guarded formula characterizing all satisfying traces:
-"∃ #t.
-  (San_GossipingCheck_Found( ) @ #t) ∧ ∀ #t1. (Compromise( ) @ #t1) ⇒ ⊥"
+"∃ #t. (San_GossipingCheck( ) @ #t) ∧ ∀ #t1. (Compromise( ) @ #t1) ⇒ ⊥"
 */
 by sorry
 
@@ -4013,7 +3999,7 @@ guarded formula characterizing all satisfying traces:
 */
 by sorry
 
-lemma transparency_Gossip:
+lemma transparency_Gossip [heuristic=o "acc_oracle"]:
   all-traces
   "∀ M L L1 L2 CA rootCA fields ca_fields session gossiped_session #t0 #t1.
     ((((BrowserAcceptsChain( CA, fields, rootCA, ca_fields, L1, L2 ) @ #t0) ∧
@@ -4041,7 +4027,7 @@ guarded formula characterizing all counter-examples:
 */
 by sorry
 
-lemma T_Gossip_verif_empty_helper1 [reuse]:
+lemma T_Gossip_verif_empty_helper1 [reuse, heuristic=o "acc_oracle"]:
   all-traces
   "∀ M L fields CA ca_fields gossiped_session session #t.
     ((STHGossipTransparencyCheck( M, L, fields, CA, ca_fields, session,
@@ -4076,7 +4062,7 @@ guarded formula characterizing all counter-examples:
 by sorry
 
 lemma T_Gossip_verif_empty_helper2 [reuse,
-                                    hide_lemma=T_Gossip_verif_empty_helper1]:
+                                    hide_lemma=T_Gossip_verif_empty_helper1, heuristic=o "acc_oracle"]:
   all-traces
   "∀ M L fields CA ca_fields gossiped_session session #t.
     (CTGossipTransparencyCheck_NotFound( M, L, fields, CA, ca_fields,
@@ -4184,15 +4170,16 @@ guarded formula characterizing all counter-examples:
 */
 by sorry
 
-lemma A_Gossip_helper [reuse]:
+lemma A_Gossip_helper [reuse, heuristic=o "acc_oracle"]:
   all-traces
   "∀ M L fields CA ca_fields session gossiped_session #t.
     (((STHGossipCheck( M, L, fields, CA, ca_fields, session, gossiped_session
        ) @ #t) ∧
       (¬(∃ #t.1. CompromiseMonitor( M ) @ #t.1))) ∧
      (¬(∃ #t.1. CompromiseLogger( L ) @ #t.1))) ⇒
-    (∃ ca_sig sth #t0.
-      (MonitorObservesEntry( M, L, fields, <ca_fields, ca_sig>, sth, session
+    (∃ ca_sig sth chain #t0.
+      (MonitorObservesEntry( M, L, fields, <ca_fields, ca_sig>, chain, sth,
+                             session
        ) @ #t0) ∧
       (#t0 < #t))"
 /*
@@ -4203,8 +4190,9 @@ guarded formula characterizing all counter-examples:
  ∧
   (∀ #t.1. (CompromiseMonitor( M ) @ #t.1) ⇒ ⊥) ∧
   (∀ #t.1. (CompromiseLogger( L ) @ #t.1) ⇒ ⊥) ∧
-  (∀ ca_sig sth #t0.
-    (MonitorObservesEntry( M, L, fields, <ca_fields, ca_sig>, sth, session
+  (∀ ca_sig sth chain #t0.
+    (MonitorObservesEntry( M, L, fields, <ca_fields, ca_sig>, chain, sth,
+                           session
      ) @ #t0)
    ⇒
     ¬(#t0 < #t))"
@@ -4225,7 +4213,8 @@ guarded formula characterizing all counter-examples:
 */
 by sorry
 
-lemma T_Gossip_gossip_appendOnly_viol_suff [heuristic=o "acc_oracle"]:
+lemma T_Gossip_gossip_appendOnly_viol_suff [heuristic=o "acc_oracle",
+                                            hide_lemma=A_Gossip_helper]:
   exists-trace
   "∃ L M fields CA ca_fields session gossiped_session #t #t1.
     (((CTGossipTransparencyCheck_NotFound( M, L, fields, CA, ca_fields,
@@ -4272,7 +4261,8 @@ guarded formula characterizing all satisfying traces:
 */
 by sorry
 
-lemma T_Gossip_verif_empty [heuristic=o "acc_oracle"]:
+lemma T_Gossip_verif_empty [heuristic=o "acc_oracle",
+                            hide_lemma=A_Gossip_helper]:
   all-traces
   "(¬(∃ L M fields CA ca_fields session gossiped_session #t #t1.
        (CTGossipTransparencyCheck_NotFound( M, L, fields, CA, ca_fields,
@@ -4318,7 +4308,8 @@ guarded formula characterizing all counter-examples:
 */
 by sorry
 
-lemma T_Gossip_gossip_appendOnly_viol_verif_nonempty [heuristic=o "acc_oracle"]:
+lemma T_Gossip_gossip_appendOnly_viol_verif_nonempty [heuristic=o "acc_oracle",
+                                                      hide_lemma=A_Gossip_helper]:
   all-traces
   "∀ L M fields CA ca_fields session gossiped_session #t #t1.
     ((CTGossipTransparencyCheck_NotFound( M, L, fields, CA, ca_fields,
@@ -4367,7 +4358,8 @@ guarded formula characterizing all counter-examples:
 */
 by sorry
 
-lemma T_Gossip_gossip_appendOnly_viol_min [heuristic=o "acc_oracle"]:
+lemma T_Gossip_gossip_appendOnly_viol_min [heuristic=o "acc_oracle",
+                                           hide_lemma=A_Gossip_helper]:
   all-traces
   "∀ L M fields CA ca_fields session gossiped_session #t #t1.
     ((CTGossipTransparencyCheck_NotFound( M, L, fields, CA, ca_fields,
@@ -4413,7 +4405,8 @@ guarded formula characterizing all counter-examples:
 */
 by sorry
 
-lemma T_Gossip_gossip_appendOnly_viol_uniq [heuristic=o "acc_oracle"]:
+lemma T_Gossip_gossip_appendOnly_viol_uniq [heuristic=o "acc_oracle",
+                                            hide_lemma=A_Gossip_helper]:
   all-traces
   "∀ L M fields CA ca_fields session gossiped_session #t #t1.
     ((CTGossipTransparencyCheck_NotFound( M, L, fields, CA, ca_fields,
@@ -4439,7 +4432,8 @@ guarded formula characterizing all counter-examples:
 */
 by sorry
 
-lemma T_Gossip_gossip_appendOnly_viol_inj [heuristic=o "acc_oracle"]:
+lemma T_Gossip_gossip_appendOnly_viol_inj [heuristic=o "acc_oracle",
+                                           hide_lemma=A_Gossip_helper]:
   all-traces "⊤"
 /*
 guarded formula characterizing all counter-examples:
@@ -4447,7 +4441,8 @@ guarded formula characterizing all counter-examples:
 */
 by sorry
 
-lemma T_Gossip_gossip_appendOnly_viol_single [heuristic=o "acc_oracle"]:
+lemma T_Gossip_gossip_appendOnly_viol_single [heuristic=o "acc_oracle",
+                                              hide_lemma=A_Gossip_helper]:
   exists-trace
   "∃ L M fields CA ca_fields session gossiped_session #t #t1.
     ((CTGossipTransparencyCheck_NotFound( M, L, fields, CA, ca_fields,
@@ -4494,7 +4489,8 @@ by sorry
 
 lemma A_Gossip_0_rootCA_rogue_gossip_suff [heuristic=o "acc_oracle",
                                            hide_lemma=T_Gossip_verif_empty_helper1,
-                                           hide_lemma=T_Gossip_verif_empty_helper2]:
+                                           hide_lemma=T_Gossip_verif_empty_helper2,
+                                           hide_lemma=A_Gossip_helper]:
   exists-trace
   "∃ rootCA M L fields CA ca_fields session gossiped_session #t #t1 #t2.
     ((((STHGossipCheck( M, L, fields, CA, ca_fields, session,
@@ -4562,7 +4558,8 @@ by sorry
 
 lemma A_Gossip_0_rootCA_benign_gossip_suff [heuristic=o "acc_oracle",
                                             hide_lemma=T_Gossip_verif_empty_helper1,
-                                            hide_lemma=T_Gossip_verif_empty_helper2]:
+                                            hide_lemma=T_Gossip_verif_empty_helper2,
+                                            hide_lemma=A_Gossip_helper]:
   exists-trace
   "∃ CA M L fields rootCA ca_fields session gossiped_session #t #t1 #t2.
     ((((STHGossipCheck( M, L, fields, CA, ca_fields, session,
@@ -4630,7 +4627,7 @@ by sorry
 
 lemma A_Gossip_0_verif_empty [heuristic=o "acc_oracle",
                               hide_lemma=T_Gossip_verif_empty_helper1,
-                              hide_lemma=T_Gossip_verif_empty_helper2]:
+                              hide_lemma=T_Gossip_verif_empty_helper2, hide_lemma=A_Gossip_helper]:
   all-traces
   "(¬((∃ rootCA M L fields CA ca_fields session gossiped_session #t #t1
          #t2.
@@ -4680,7 +4677,8 @@ by sorry
 
 lemma A_Gossip_0_rootCA_rogue_gossip_verif_nonempty [heuristic=o "acc_oracle",
                                                      hide_lemma=T_Gossip_verif_empty_helper1,
-                                                     hide_lemma=T_Gossip_verif_empty_helper2]:
+                                                     hide_lemma=T_Gossip_verif_empty_helper2,
+                                                     hide_lemma=A_Gossip_helper]:
   all-traces
   "∀ rootCA M L fields CA ca_fields session gossiped_session #t #t1 #t2.
     (((STHGossipCheck( M, L, fields, CA, ca_fields, session, gossiped_session
@@ -4721,7 +4719,8 @@ by sorry
 
 lemma A_Gossip_0_rootCA_benign_gossip_verif_nonempty [heuristic=o "acc_oracle",
                                                       hide_lemma=T_Gossip_verif_empty_helper1,
-                                                      hide_lemma=T_Gossip_verif_empty_helper2]:
+                                                      hide_lemma=T_Gossip_verif_empty_helper2,
+                                                      hide_lemma=A_Gossip_helper]:
   all-traces
   "∀ CA M L fields rootCA ca_fields session gossiped_session #t #t1 #t2.
     (((STHGossipCheck( M, L, fields, CA, ca_fields, session, gossiped_session
@@ -4762,7 +4761,8 @@ by sorry
 
 lemma A_Gossip_0_rootCA_rogue_gossip_min [heuristic=o "acc_oracle",
                                           hide_lemma=T_Gossip_verif_empty_helper1,
-                                          hide_lemma=T_Gossip_verif_empty_helper2]:
+                                          hide_lemma=T_Gossip_verif_empty_helper2,
+                                          hide_lemma=A_Gossip_helper]:
   all-traces
   "∀ rootCA M L fields CA ca_fields session gossiped_session #t #t1 #t2.
     (((STHGossipCheck( M, L, fields, CA, ca_fields, session, gossiped_session
@@ -4830,7 +4830,8 @@ by sorry
 
 lemma A_Gossip_0_rootCA_benign_gossip_min [heuristic=o "acc_oracle",
                                            hide_lemma=T_Gossip_verif_empty_helper1,
-                                           hide_lemma=T_Gossip_verif_empty_helper2]:
+                                           hide_lemma=T_Gossip_verif_empty_helper2,
+                                           hide_lemma=A_Gossip_helper]:
   all-traces
   "∀ CA M L fields rootCA ca_fields session gossiped_session #t #t1 #t2.
     (((STHGossipCheck( M, L, fields, CA, ca_fields, session, gossiped_session
@@ -4898,7 +4899,8 @@ by sorry
 
 lemma A_Gossip_0_rootCA_rogue_gossip_uniq [heuristic=o "acc_oracle",
                                            hide_lemma=T_Gossip_verif_empty_helper1,
-                                           hide_lemma=T_Gossip_verif_empty_helper2]:
+                                           hide_lemma=T_Gossip_verif_empty_helper2,
+                                           hide_lemma=A_Gossip_helper]:
   all-traces
   "∀ rootCA M L fields CA ca_fields session gossiped_session #t #t1 #t2.
     (((STHGossipCheck( M, L, fields, CA, ca_fields, session, gossiped_session
@@ -4922,7 +4924,8 @@ by sorry
 
 lemma A_Gossip_0_rootCA_benign_gossip_uniq [heuristic=o "acc_oracle",
                                             hide_lemma=T_Gossip_verif_empty_helper1,
-                                            hide_lemma=T_Gossip_verif_empty_helper2]:
+                                            hide_lemma=T_Gossip_verif_empty_helper2,
+                                            hide_lemma=A_Gossip_helper]:
   all-traces
   "∀ CA M L fields rootCA ca_fields session gossiped_session #t #t1 #t2.
     (((STHGossipCheck( M, L, fields, CA, ca_fields, session, gossiped_session
@@ -4946,7 +4949,8 @@ by sorry
 
 lemma A_Gossip_0_rootCA_rogue_gossip_inj [heuristic=o "acc_oracle",
                                           hide_lemma=T_Gossip_verif_empty_helper1,
-                                          hide_lemma=T_Gossip_verif_empty_helper2]:
+                                          hide_lemma=T_Gossip_verif_empty_helper2,
+                                          hide_lemma=A_Gossip_helper]:
   all-traces "⊤"
 /*
 guarded formula characterizing all counter-examples:
@@ -4956,7 +4960,8 @@ by sorry
 
 lemma A_Gossip_0_rootCA_benign_gossip_inj [heuristic=o "acc_oracle",
                                            hide_lemma=T_Gossip_verif_empty_helper1,
-                                           hide_lemma=T_Gossip_verif_empty_helper2]:
+                                           hide_lemma=T_Gossip_verif_empty_helper2,
+                                           hide_lemma=A_Gossip_helper]:
   all-traces "⊤"
 /*
 guarded formula characterizing all counter-examples:
@@ -4966,7 +4971,8 @@ by sorry
 
 lemma A_Gossip_0_rootCA_rogue_gossip_single [heuristic=o "acc_oracle",
                                              hide_lemma=T_Gossip_verif_empty_helper1,
-                                             hide_lemma=T_Gossip_verif_empty_helper2]:
+                                             hide_lemma=T_Gossip_verif_empty_helper2,
+                                             hide_lemma=A_Gossip_helper]:
   exists-trace
   "∃ rootCA M L fields CA ca_fields session gossiped_session #t #t1 #t2.
     ((((STHGossipCheck( M, L, fields, CA, ca_fields, session,
@@ -5032,7 +5038,8 @@ by sorry
 
 lemma A_Gossip_0_rootCA_benign_gossip_single [heuristic=o "acc_oracle",
                                               hide_lemma=T_Gossip_verif_empty_helper1,
-                                              hide_lemma=T_Gossip_verif_empty_helper2]:
+                                              hide_lemma=T_Gossip_verif_empty_helper2,
+                                              hide_lemma=A_Gossip_helper]:
   exists-trace
   "∃ CA M L fields rootCA ca_fields session gossiped_session #t #t1 #t2.
     ((((STHGossipCheck( M, L, fields, CA, ca_fields, session,
@@ -5098,7 +5105,8 @@ by sorry
 
 lemma A_Gossip_1_rootCA_rogue_gossip_mon_honest_suff [heuristic=o "acc_oracle",
                                                       hide_lemma=T_Gossip_verif_empty_helper1,
-                                                      hide_lemma=T_Gossip_verif_empty_helper2]:
+                                                      hide_lemma=T_Gossip_verif_empty_helper2,
+                                                      hide_lemma=A_Gossip_helper]:
   exists-trace
   "∃ rootCA M L fields CA ca_fields session gossiped_session #t #t1 #t2.
     (((((STHGossipCheck( M, L, fields, CA, ca_fields, session,
@@ -5170,7 +5178,8 @@ by sorry
 
 lemma A_Gossip_1_rootCA_benign_gossip_mon_honest_suff [heuristic=o "acc_oracle",
                                                        hide_lemma=T_Gossip_verif_empty_helper1,
-                                                       hide_lemma=T_Gossip_verif_empty_helper2]:
+                                                       hide_lemma=T_Gossip_verif_empty_helper2,
+                                                       hide_lemma=A_Gossip_helper]:
   exists-trace
   "∃ CA M L fields rootCA ca_fields session gossiped_session #t #t1 #t2.
     (((((STHGossipCheck( M, L, fields, CA, ca_fields, session,
@@ -5242,7 +5251,7 @@ by sorry
 
 lemma A_Gossip_1_verif_empty [heuristic=o "acc_oracle",
                               hide_lemma=T_Gossip_verif_empty_helper1,
-                              hide_lemma=T_Gossip_verif_empty_helper2]:
+                              hide_lemma=T_Gossip_verif_empty_helper2, hide_lemma=A_Gossip_helper]:
   all-traces
   "(¬((∃ rootCA M L fields CA ca_fields session gossiped_session #t #t1
          #t2.
@@ -5298,7 +5307,8 @@ by sorry
 
 lemma A_Gossip_1_rootCA_rogue_gossip_mon_honest_verif_nonempty [heuristic=o "acc_oracle",
                                                                 hide_lemma=T_Gossip_verif_empty_helper1,
-                                                                hide_lemma=T_Gossip_verif_empty_helper2]:
+                                                                hide_lemma=T_Gossip_verif_empty_helper2,
+                                                                hide_lemma=A_Gossip_helper]:
   all-traces
   "∀ rootCA M L fields CA ca_fields session gossiped_session #t #t1 #t2.
     ((((STHGossipCheck( M, L, fields, CA, ca_fields, session,
@@ -5344,7 +5354,8 @@ by sorry
 
 lemma A_Gossip_1_rootCA_benign_gossip_mon_honest_verif_nonempty [heuristic=o "acc_oracle",
                                                                  hide_lemma=T_Gossip_verif_empty_helper1,
-                                                                 hide_lemma=T_Gossip_verif_empty_helper2]:
+                                                                 hide_lemma=T_Gossip_verif_empty_helper2,
+                                                                 hide_lemma=A_Gossip_helper]:
   all-traces
   "∀ CA M L fields rootCA ca_fields session gossiped_session #t #t1 #t2.
     ((((STHGossipCheck( M, L, fields, CA, ca_fields, session,
@@ -5390,7 +5401,8 @@ by sorry
 
 lemma A_Gossip_1_rootCA_rogue_gossip_mon_honest_min [heuristic=o "acc_oracle",
                                                      hide_lemma=T_Gossip_verif_empty_helper1,
-                                                     hide_lemma=T_Gossip_verif_empty_helper2]:
+                                                     hide_lemma=T_Gossip_verif_empty_helper2,
+                                                     hide_lemma=A_Gossip_helper]:
   all-traces
   "∀ rootCA M L fields CA ca_fields session gossiped_session #t #t1 #t2.
     ((((STHGossipCheck( M, L, fields, CA, ca_fields, session,
@@ -5464,7 +5476,8 @@ by sorry
 
 lemma A_Gossip_1_rootCA_benign_gossip_mon_honest_min [heuristic=o "acc_oracle",
                                                       hide_lemma=T_Gossip_verif_empty_helper1,
-                                                      hide_lemma=T_Gossip_verif_empty_helper2]:
+                                                      hide_lemma=T_Gossip_verif_empty_helper2,
+                                                      hide_lemma=A_Gossip_helper]:
   all-traces
   "∀ CA M L fields rootCA ca_fields session gossiped_session #t #t1 #t2.
     ((((STHGossipCheck( M, L, fields, CA, ca_fields, session,
@@ -5537,7 +5550,8 @@ by sorry
 
 lemma A_Gossip_1_rootCA_rogue_gossip_mon_honest_uniq [heuristic=o "acc_oracle",
                                                       hide_lemma=T_Gossip_verif_empty_helper1,
-                                                      hide_lemma=T_Gossip_verif_empty_helper2]:
+                                                      hide_lemma=T_Gossip_verif_empty_helper2,
+                                                      hide_lemma=A_Gossip_helper]:
   all-traces
   "∀ rootCA M L fields CA ca_fields session gossiped_session #t #t1 #t2.
     ((((STHGossipCheck( M, L, fields, CA, ca_fields, session,
@@ -5564,7 +5578,8 @@ by sorry
 
 lemma A_Gossip_1_rootCA_benign_gossip_mon_honest_uniq [heuristic=o "acc_oracle",
                                                        hide_lemma=T_Gossip_verif_empty_helper1,
-                                                       hide_lemma=T_Gossip_verif_empty_helper2]:
+                                                       hide_lemma=T_Gossip_verif_empty_helper2,
+                                                       hide_lemma=A_Gossip_helper]:
   all-traces
   "∀ CA M L fields rootCA ca_fields session gossiped_session #t #t1 #t2.
     ((((STHGossipCheck( M, L, fields, CA, ca_fields, session,
@@ -5591,7 +5606,8 @@ by sorry
 
 lemma A_Gossip_1_rootCA_rogue_gossip_mon_honest_inj [heuristic=o "acc_oracle",
                                                      hide_lemma=T_Gossip_verif_empty_helper1,
-                                                     hide_lemma=T_Gossip_verif_empty_helper2]:
+                                                     hide_lemma=T_Gossip_verif_empty_helper2,
+                                                     hide_lemma=A_Gossip_helper]:
   all-traces "⊤"
 /*
 guarded formula characterizing all counter-examples:
@@ -5601,7 +5617,8 @@ by sorry
 
 lemma A_Gossip_1_rootCA_benign_gossip_mon_honest_inj [heuristic=o "acc_oracle",
                                                       hide_lemma=T_Gossip_verif_empty_helper1,
-                                                      hide_lemma=T_Gossip_verif_empty_helper2]:
+                                                      hide_lemma=T_Gossip_verif_empty_helper2,
+                                                      hide_lemma=A_Gossip_helper]:
   all-traces "⊤"
 /*
 guarded formula characterizing all counter-examples:
@@ -5611,7 +5628,8 @@ by sorry
 
 lemma A_Gossip_1_rootCA_rogue_gossip_mon_honest_single [heuristic=o "acc_oracle",
                                                         hide_lemma=T_Gossip_verif_empty_helper1,
-                                                        hide_lemma=T_Gossip_verif_empty_helper2]:
+                                                        hide_lemma=T_Gossip_verif_empty_helper2,
+                                                        hide_lemma=A_Gossip_helper]:
   exists-trace
   "∃ rootCA M L fields CA ca_fields session gossiped_session #t #t1 #t2.
     (((((STHGossipCheck( M, L, fields, CA, ca_fields, session,
@@ -5681,7 +5699,8 @@ by sorry
 
 lemma A_Gossip_1_rootCA_benign_gossip_mon_honest_single [heuristic=o "acc_oracle",
                                                          hide_lemma=T_Gossip_verif_empty_helper1,
-                                                         hide_lemma=T_Gossip_verif_empty_helper2]:
+                                                         hide_lemma=T_Gossip_verif_empty_helper2,
+                                                         hide_lemma=A_Gossip_helper]:
   exists-trace
   "∃ CA M L fields rootCA ca_fields session gossiped_session #t #t1 #t2.
     (((((STHGossipCheck( M, L, fields, CA, ca_fields, session,
@@ -6484,9 +6503,9 @@ by sorry
 /*
 Generated from:
 Tamarin version 1.10.0
-Maude version 2.7.1
+Maude version 3.4
 Git revision: UNKNOWN, branch: UNKNOWN
-Compiled at: 2024-10-30 14:56:23.355649243 UTC
+Compiled at: 2025-07-07 04:54:25.960893702 UTC
 */
 
 end

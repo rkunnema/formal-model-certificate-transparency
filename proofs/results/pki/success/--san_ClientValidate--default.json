@@ -1,11 +1,11 @@
 {
   "task_id": "--san_ClientValidate--default",
   "warnings": [],
-  "tamarin_timing": 2.71,
+  "tamarin_timing": 2.38,
   "wrapper_measures": {
-    "time": 2.8780508041381836,
-    "avg_memory": 95.25390625,
-    "peak_memory": 159.59375
+    "time": 2.4978549480438232,
+    "avg_memory": 97.19791666666666,
+    "peak_memory": 161.26953125
   },
   "output_spthy": "results/pki/proofs/--san_ClientValidate--default.spthy",
   "verified_lemma": {

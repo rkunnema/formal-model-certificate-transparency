@@ -1,11 +1,11 @@
 {
   "task_id": "--A_CTAudit_1_root_ca_rogue_audit_mon_honest_inj--default",
   "warnings": [],
-  "tamarin_timing": 18.7,
+  "tamarin_timing": 17.92,
   "wrapper_measures": {
-    "time": 18.872353076934814,
-    "avg_memory": 137.37109374999994,
-    "peak_memory": 150.08984375
+    "time": 18.060176134109497,
+    "avg_memory": 136.93750000000003,
+    "peak_memory": 151.66796875
   },
   "output_spthy": "results/sct_audit/proofs/--A_CTAudit_1_root_ca_rogue_audit_mon_honest_inj--default.spthy",
   "verified_lemma": {

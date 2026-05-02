@@ -1,16 +1,16 @@
 {
   "task_id": "--san_ParticipantFindsInclusionViolation--default",
   "warnings": [],
-  "tamarin_timing": 20.46,
+  "tamarin_timing": 22.79,
   "wrapper_measures": {
-    "time": 20.66985559463501,
-    "avg_memory": 183.47786458333331,
-    "peak_memory": 390.91796875
+    "time": 22.95685386657715,
+    "avg_memory": 178.19089673913044,
+    "peak_memory": 388.5546875
   },
   "output_spthy": "results/ct_gossip/proofs/--san_ParticipantFindsInclusionViolation--default.spthy",
   "verified_lemma": {
     "san_ParticipantFindsInclusionViolation": {
-      "steps": 8,
+      "steps": 7,
       "analysis_type": "exists-trace"
     }
   },
@@ -47,14 +47,16 @@
     "san_LoggerSnapshot_M",
     "san_LoggerSnapshot_C",
     "san_ParticipantVerifiesInclusion",
+    "san_MonitorFindsInclusionViolation",
+    "san_MonitorVerifiesInclusion",
     "san_clientGossipsToMonitor",
     "san_monitorFindsAppendOnlyViolation_Gossiped",
-    "san_monitorVerifiesAppendOnly_Gossiped",
+    "suff_san_monitorVerifiesAppendOnly_Gossiped",
     "san_ConsultDocumentation_Success",
     "san_ConsultDocumentation_Fails",
     "suff_san_GossipTransparencyCheck_Success",
     "suff_san_GossipTransparencyCheck_Failed",
-    "suff_san_GossipingCheck_Found",
+    "suff_san_GossipingCheck",
     "san_compromiseCA",
     "san_compromiseRootCA",
     "san_compromiseLogger",

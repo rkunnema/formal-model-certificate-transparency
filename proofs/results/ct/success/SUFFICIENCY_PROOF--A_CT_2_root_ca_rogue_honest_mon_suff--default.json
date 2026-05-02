@@ -1,11 +1,11 @@
 {
   "task_id": "SUFFICIENCY_PROOF--A_CT_2_root_ca_rogue_honest_mon_suff--default",
   "warnings": [],
-  "tamarin_timing": 25.52,
+  "tamarin_timing": 40.61,
   "wrapper_measures": {
-    "time": 25.684389114379883,
-    "avg_memory": 320.6808894230769,
-    "peak_memory": 553.296875
+    "time": 40.73837995529175,
+    "avg_memory": 310.7103658536586,
+    "peak_memory": 518.3125
   },
   "output_spthy": "results/ct/proofs/SUFFICIENCY_PROOF--A_CT_2_root_ca_rogue_honest_mon_suff--default.spthy",
   "verified_lemma": {

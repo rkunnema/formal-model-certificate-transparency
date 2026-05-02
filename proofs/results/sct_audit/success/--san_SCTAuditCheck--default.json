@@ -1,11 +1,11 @@
 {
   "task_id": "--san_SCTAuditCheck--default",
   "warnings": [],
-  "tamarin_timing": 40.71,
+  "tamarin_timing": 39.62,
   "wrapper_measures": {
-    "time": 40.96916174888611,
-    "avg_memory": 341.1390053353659,
-    "peak_memory": 707.2265625
+    "time": 39.765549659729004,
+    "avg_memory": 349.46259765625,
+    "peak_memory": 741.01171875
   },
   "output_spthy": "results/sct_audit/proofs/--san_SCTAuditCheck--default.spthy",
   "verified_lemma": {

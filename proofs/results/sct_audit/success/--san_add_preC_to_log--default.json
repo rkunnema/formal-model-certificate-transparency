@@ -1,11 +1,11 @@
 {
   "task_id": "--san_add_preC_to_log--default",
   "warnings": [],
-  "tamarin_timing": 24.26,
+  "tamarin_timing": 23.52,
   "wrapper_measures": {
-    "time": 24.497666597366333,
-    "avg_memory": 182.72375,
-    "peak_memory": 399.984375
+    "time": 23.65744972229004,
+    "avg_memory": 179.91617838541663,
+    "peak_memory": 396.30859375
   },
   "output_spthy": "results/sct_audit/proofs/--san_add_preC_to_log--default.spthy",
   "verified_lemma": {

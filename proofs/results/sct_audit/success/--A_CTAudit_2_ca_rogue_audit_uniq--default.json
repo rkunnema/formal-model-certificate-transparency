@@ -1,11 +1,11 @@
 {
   "task_id": "--A_CTAudit_2_ca_rogue_audit_uniq--default",
   "warnings": [],
-  "tamarin_timing": 19.86,
+  "tamarin_timing": 17.92,
   "wrapper_measures": {
-    "time": 20.07514238357544,
-    "avg_memory": 138.9638671875,
-    "peak_memory": 151.578125
+    "time": 18.0654559135437,
+    "avg_memory": 137.05881076388889,
+    "peak_memory": 150.65234375
   },
   "output_spthy": "results/sct_audit/proofs/--A_CTAudit_2_ca_rogue_audit_uniq--default.spthy",
   "verified_lemma": {

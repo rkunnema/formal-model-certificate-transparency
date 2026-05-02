@@ -1,11 +1,11 @@
 {
   "task_id": "SUFFICIENCY_PROOF--A_Receipt_receipt_1_single--default",
   "warnings": [],
-  "tamarin_timing": 86.83,
+  "tamarin_timing": 139.57,
   "wrapper_measures": {
-    "time": 87.02736806869507,
-    "avg_memory": 913.8491379310345,
-    "peak_memory": 1387.609375
+    "time": 139.79247403144836,
+    "avg_memory": 889.2675921762591,
+    "peak_memory": 1331.87109375
   },
   "output_spthy": "results/ct_receipt/proofs/SUFFICIENCY_PROOF--A_Receipt_receipt_1_single--default.spthy",
   "verified_lemma": {

@@ -1,11 +1,11 @@
 {
   "task_id": "--san_monitorVerifiesAppendOnly--default",
   "warnings": [],
-  "tamarin_timing": 35.16,
+  "tamarin_timing": 34.89,
   "wrapper_measures": {
-    "time": 35.34355330467224,
-    "avg_memory": 256.44051339285716,
-    "peak_memory": 483.921875
+    "time": 35.035826206207275,
+    "avg_memory": 257.54732142857154,
+    "peak_memory": 493.49609375
   },
   "output_spthy": "results/sct_audit/proofs/--san_monitorVerifiesAppendOnly--default.spthy",
   "verified_lemma": {

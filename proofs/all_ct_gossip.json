@@ -26,20 +26,6 @@
         {"name": "authenticity"}
       ]
     },
-    "transparency": {
-      "theory_file": "pregen_models/ct_gossip_pregen.spthy",
-			"tamarin_versions": ["default"],
-      "output_file_prefix": "",
-			"tamarin_options": ["--derivcheck-timeout=99999"],
-            "resources": {
-				"max_cores": 16,
-				"max_memory": 10,
-				"timeout": 60
-			},
-      "lemmas": [
-        {"name": "transparency_Gossip"}
-      ]
-    },
     "acc_authenticity": {
       "theory_file": "pregen_models/ct_gossip_pregen.spthy",
 			"tamarin_versions": ["default"],
@@ -48,7 +34,7 @@
             "resources": {
 				"max_cores": 16,
 				"max_memory": 10,
-				"timeout": 300
+				"timeout": 120
 			},
       "lemmas": [
         {"name": "A_Gossip_0_rootCA_rogue_gossip_verif_nonempty"},
@@ -86,7 +72,7 @@
             "resources": {
 				"max_cores": 16,
 				"max_memory": 10,
-				"timeout": 1200
+				"timeout": 60
 			},
       "lemmas": [
         {"name": "T_Gossip_verif_empty"},
@@ -104,14 +90,11 @@
             "resources": {
 				"max_cores": 16,
 				"max_memory": 10,
-				"timeout": 1800
+				"timeout": 180
 			},
       "lemmas": [
-        {"name": "T_Gossip_uniq_helper"},
-        {"name": "T_Gossip_verif_empty_helper1"},
-        {"name": "T_Gossip_verif_empty_helper2"},   
+        {"name": "T_Gossip_uniq_helper"}, 
         {"name": "T_Gossip_verif_empty_helper3"},       
-        {"name": "A_Gossip_helper"},
         {"name": "A_uniq1_helper"},
         {"name": "A_uniq2_helper"},
         {"name": "A_Gossip_1_nonempty_helper1"}
@@ -125,29 +108,43 @@
             "resources": {
 				"max_cores": 16,
 				"max_memory": 10,
-				"timeout": 7200
+				"timeout": 900
 			},
       "lemmas": [
         {"name": "T_Gossip_gossip_appendOnly_viol_suff"},
         {"name": "T_Gossip_gossip_appendOnly_viol_single"},
+        {"name": "A_Gossip_0_verif_empty"},
+        {"name": "A_Gossip_1_verif_empty"},
+        {"name": "suff_san_*"},
+        {"name": "transparency_Gossip"}
+      ]
+    },
+    "manual_interaction": {
+      "theory_file": "pregen_models/ct_gossip_pregen.spthy",
+			"tamarin_versions": ["default"],
+      "output_file_prefix": "seeREADME",
+			"tamarin_options": ["--derivcheck-timeout=99999", "--defines=SUFFICIENCY_PROOF"],
+            "resources": {
+				"max_cores": 16,
+				"max_memory": 10,
+				"timeout": 1
+			},
+      "lemmas": [
         {"name": "A_Gossip_0_rootCA_rogue_gossip_suff"},
         {"name": "A_Gossip_0_rootCA_benign_gossip_suff"},
         {"name": "A_Gossip_0_rootCA_rogue_gossip_single"},
         {"name": "A_Gossip_0_rootCA_benign_gossip_single"},
-        {"name": "A_Gossip_0_verif_empty"},
         {"name": "A_Gossip_1_rootCA_rogue_gossip_mon_honest_suff"},
         {"name": "A_Gossip_1_rootCA_benign_gossip_mon_honest_suff"},
         {"name": "A_Gossip_1_rootCA_rogue_gossip_mon_honest_single"},
         {"name": "A_Gossip_1_rootCA_benign_gossip_mon_honest_single"},
-        {"name": "A_Gossip_1_verif_empty"},
         {"name": "A_Gossip_2_rootCA_rogue_gossip_log_honest_suff"},
         {"name": "A_Gossip_2_rootCA_benign_gossip_log_honest_suff"},
         {"name": "A_Gossip_2_rootCA_rogue_gossip_log_honest_single"},
         {"name": "A_Gossip_2_rootCA_benign_gossip_log_honest_single"},
-        {"name": "suff_san_GossipTransparencyCheck_Success"},
-        {"name": "suff_san_GossipTransparencyCheck_Failed"},
-        {"name": "suff_san_GossipingCheck_Found"},
-        {"name": "transparency_Gossip"}
+        {"name": "T_Gossip_verif_empty_helper1"},
+        {"name": "T_Gossip_verif_empty_helper2"},
+        {"name": "A_Gossip_helper"}
       ]
     }
   }

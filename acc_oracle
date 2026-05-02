@@ -4,6 +4,9 @@ import re
 
 lines = sys.stdin.readlines()
 l = []
+h1 = []
+h2 = []
+h3 = []
 
 deprio = []
 
@@ -11,33 +14,132 @@ lemma = sys.argv[1]
 for line in lines:
     num = line.split(':')[0]
 
-    if lemma == "A_Gossip_1_rootCA_rogue_gossip_suff":
-        if "∀ different_time chain #t." in line:
-            l.append(num) # deprio
+    if (lemma == "A_Gossip_0_rootCA_rogue_gossip_suff") or (lemma == "A_Gossip_0_rootCA_benign_gossip_suff") or (lemma == "A_Gossip_0_rootCA_rogue_gossip_single") or (lemma == "A_Gossip_0_rootCA_benign_gossip_single") or (lemma == "A_Gossip_1_rootCA_rogue_gossip_mon_honest_suff") or (lemma == "A_Gossip_1_rootCA_benign_gossip_mon_honest_suff") or (lemma == "A_Gossip_1_rootCA_rogue_gossip_mon_honest_single") or (lemma == "A_Gossip_1_rootCA_benign_gossip_mon_honest_single") or (lemma == "A_Gossip_2_rootCA_rogue_gossip_log_honest_suff") or (lemma == "A_Gossip_2_rootCA_benign_gossip_log_honest_suff") or (lemma == "A_Gossip_2_rootCA_rogue_gossip_log_honest_single") or (lemma == "A_Gossip_2_rootCA_benign_gossip_log_honest_single"):
+        if "(∀ different_time #t.   (LoggerComputesAddLog(" in line:
+            deprio.append(num)
+        if (not "(∀ different_time #t.   (LoggerComputesAddLog(" in line) and ("LoggerComputesAddLog(" in line):
+            l = [num] + l
         else:
-            l = [num] + l # Note: this shuffles the order a bit from default, we could do this properly and only deprio as originally intended, but this tactic works well
+            l.append(num)
 
-    elif lemma == "A_Gossip_1_rootCA_benign_gossip_suff":
-        if "∀ different_time chain #t." in line:
-            l.append(num) # deprio
+    elif (lemma == "suff_san_GossipTransparencyCheck_Success") or (lemma == "suff_san_GossipTransparencyCheck_Failed"):
+        if "LoggerComputesAddLog(" in line:
+            l = [num] + l
+        elif "LoggerPresentsView(" in line:
+            l = [num] + l
+        elif "!KU( ~skCA" in line:
+            l = [num] + l
+        else:
+            continue
+
+    elif lemma == "suff_san_GossipingCheck":
+        if "LoggerComputesAddLog(" in line:
+            h2 = [num] + h2
+        elif "LoggerPresentsView(" in line:
+            h2 = [num] + h2
+        elif "!KU( ~skCA" in line:
+            l = [num] + l
+        elif "StartedLog(" in line:
+            l = [num] + l
+        elif "!Corrupted_Logger" in line:
+            h1 = [num] + h1
+        else:
+            continue
+
+    elif lemma == "T_Gossip_gossip_appendOnly_viol_suff":
+        if "LoggerComputesAddLog(" in line:
+            h1 = [num] + h1
+        elif "LoggerPresentsView(" in line:
+            h1 = [num] + h1
+        elif "!KU( ~skCA" in line:
+            l = [num] + l
+        else:
+            continue
+
+    elif lemma == "T_Gossip_gossip_appendOnly_viol_single":
+        if "LoggerComputesAddLog(" in line:
+            h1 = [num] + h1
+        elif "LoggerPresentsView(" in line:
+            h1 = [num] + h1
+        else:
+            continue
+
+    elif lemma == "transparency_Gossip":
+        if "ClientGossiped(" in line:
+            h1 = [num] + h1
+        elif "AppendOnlyChecked(" in line:
+            h1 = [num] + h1
+        elif "MonitorInclusionFailed(" in line:
+            h1 = [num] + h1
+        elif "STHGossipTransparencyCheck(" in line:
+            h1 = [num] + h1
+        elif "LoggerComputesAddLog(" in line:
+            h2 = [num] + h1
+        elif "LoggerPresentsView(" in line:
+            h2 = [num] + h1
+        elif "StartedLog(" in line:
+            h2 = [num] + h1
+        elif "Log(" in line:
+            h2 = [num] + h1
+        else:
+            continue
+
+    elif (lemma == "A_Gossip_0_verif_empty") or (lemma == "A_Gossip_1_verif_empty"):
+        if "ClientGossiped(" in line:
+            h1 = [num] + h1
+        elif "AppendOnlyChecked(" in line:
+            h1 = [num] + h1
+        elif "MonitorInspected(" in line:
+            h1 = [num] + h1
+        elif "LoggerComputesAddLog(" in line:
+            h2 = [num] + h1
+        elif "LoggerPresentsView(" in line:
+            h2 = [num] + h1
+        elif "StartedLog(" in line:
+            h2 = [num] + h1
+        elif "Log(" in line:
+            h2 = [num] + h1
+        elif "!KU( pk(x)" in line:
+            deprio.append(num)
+        elif ("!Monitor( $L" in line) or ("!Root_CA_s0( $L" in line) or ("!CA_s0( $L" in line) or ("!Monitor( $rootCA" in line) or ("!CA_s0( $rootCA" in line) or ("!Logger_s( $rootCA" in line):
+            h1 = [num] + h1
         else:
             l = [num] + l
 
-    elif lemma == "A_Gossip_1_verif_empty":
-        if "( ~skCA" in line:
+
+    elif lemma == "T_Gossip_verif_empty_helper1":
+        if not ("∀" in line) and ("LoggerComputesAddLog(" in line):
             l = [num] + l
-        elif "!CA_s0( $L" in line:
+        elif "LoggerPresentsView(" in line:
+            h1 = [num] + h1
+        elif "(∀ different_time #t.   (LoggerComputesAddLog(" in line:
+            h2 = [num] + h2
+        else:
+            continue
+
+    elif lemma == "T_Gossip_verif_empty_helper2":
+        if not ("∀" in line) and ("LoggerComputesAddLog(" in line):
             l = [num] + l
-        elif "!Monitor( $L" in line:
+        elif "LoggerPresentsView(" in line:
+            h1 = [num] + h1
+        elif "(∀ different_time #t.   (LoggerComputesAddLog(" in line:
+            h2 = [num] + h2
+        else:
+            continue
+
+    elif lemma == "A_Gossip_helper":
+        if not ("∀" in line) and ("LoggerComputesAddLog(" in line):
             l = [num] + l
-        elif "Corrupted(" in line:
-            l = [num] + l
-        elif "!Root_CA_s0( $L" in line:
-            l = [num] + l
-        elif "!CA_s0( $rootCA" in line:
-            l = [num] + l
-        elif "!Logger_s( $rootCA" in line:
-            l = [num] + l
+        elif "LoggerPresentsView(" in line:
+            h1 = [num] + h1
+        elif "(∀ different_time #t.   (LoggerComputesAddLog(" in line:
+            h2 = [num] + h2
+        elif "Corrupted_Logger" in line:
+            h2 = [num] + h2
+        elif "CompromiseMonitor" in line:
+            h2 = [num] + h2
+        elif "Corrupted( $L" in line:
+            h2 = [num] + h2
         else:
             continue
 
@@ -85,17 +187,33 @@ for line in lines:
         else:
             continue
 
-    # elif lemma == "T_Gossip_verif_empty":
-    #     if "∀ different_time chain #t." in line:
-    #         deprio.append(num)
-    #     else:
-    #         l.append(num)
+    elif lemma == "A_Gossip_1_rootCA_rogue_gossip_mon_honest_verif_nonempty":
+        if "CompromiseMonitor" in line:
+            l = [num] + l
+        elif "CompromiseLogger" in line:
+            l = [num] + l
+        elif "'Blame this CA.'" in line:
+            l = [num] + l
+        elif "MonitorObservesEntry(" in line:
+            l = [num] + l
+        elif "ClientGossiped( $C" in line:
+            l = [num] + l
+        else:
+            continue
 
-    # elif lemma == "T_Gossip_gossip_appendOnly_viol_verif_nonempty":
-    #     if "∀ different_time chain #t." in line:
-    #         deprio.append(num)
-    #     else:
-    #         l.append(num)
+    elif lemma == "A_Gossip_1_rootCA_benign_gossip_mon_honest_verif_nonempty":
+        if "CompromiseMonitor" in line:
+            l = [num] + l
+        elif "CompromiseLogger" in line:
+            l = [num] + l
+        elif "'Blame this CA.'" in line:
+            l = [num] + l
+        elif "MonitorObservesEntry(" in line:
+            l = [num] + l
+        elif "ClientGossiped( $C" in line:
+            l = [num] + l
+        else:
+            continue
 
     else:
         # print(f'[ORACLE] Unknown lemma ({lemma}), using default heuristic')
@@ -108,6 +226,12 @@ for line in lines:
     #     else:
     #         exit(0)
 
+for i in h1: # Top prio (only used for T_Gossip_verif_empty)
+    print(i)
+for i in h2:
+    print(i)
+for i in h3:
+    print(i)
 for i in l:
     print(i)
 for i in deprio:

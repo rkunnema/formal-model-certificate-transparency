@@ -1,11 +1,11 @@
 {
   "task_id": "SUFFICIENCY_PROOF--transparency_SCT_Auditing--default",
   "warnings": [],
-  "tamarin_timing": 50.91,
+  "tamarin_timing": 50.68,
   "wrapper_measures": {
-    "time": 51.122432470321655,
-    "avg_memory": 430.26340379901956,
-    "peak_memory": 966.1484375
+    "time": 50.847798585891724,
+    "avg_memory": 422.24685968137254,
+    "peak_memory": 934.97265625
   },
   "output_spthy": "results/sct_audit/proofs/SUFFICIENCY_PROOF--transparency_SCT_Auditing--default.spthy",
   "verified_lemma": {},

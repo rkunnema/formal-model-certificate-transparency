@@ -1,11 +1,11 @@
 {
   "task_id": "--san_ClientStoresSnapshot--default",
   "warnings": [],
-  "tamarin_timing": 7.93,
+  "tamarin_timing": 12.94,
   "wrapper_measures": {
-    "time": 8.091383695602417,
-    "avg_memory": 156.0859375,
-    "peak_memory": 184.03125
+    "time": 13.072510719299316,
+    "avg_memory": 135.17097355769232,
+    "peak_memory": 207.30078125
   },
   "output_spthy": "results/ct/proofs/--san_ClientStoresSnapshot--default.spthy",
   "verified_lemma": {

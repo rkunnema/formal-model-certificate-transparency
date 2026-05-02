@@ -1,11 +1,11 @@
 {
   "task_id": "--san_ChainValidator_Valid--default",
   "warnings": [],
-  "tamarin_timing": 9.32,
+  "tamarin_timing": 15.74,
   "wrapper_measures": {
-    "time": 9.489381074905396,
-    "avg_memory": 180.80781249999998,
-    "peak_memory": 304.0
+    "time": 15.861555814743042,
+    "avg_memory": 159.88427734375,
+    "peak_memory": 276.33203125
   },
   "output_spthy": "results/ct/proofs/--san_ChainValidator_Valid--default.spthy",
   "verified_lemma": {

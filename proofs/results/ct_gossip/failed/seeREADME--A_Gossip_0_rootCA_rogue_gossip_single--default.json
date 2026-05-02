@@ -1,0 +1,13 @@
+{
+  "task_id": "seeREADME--A_Gossip_0_rootCA_rogue_gossip_single--default",
+  "error_description": "The task timed out. Review the timeout setting for this task.",
+  "wrapper_measures": {
+    "time": 1.5575706958770752,
+    "avg_memory": 0.19140625,
+    "peak_memory": 0.3828125
+  },
+  "return_code": -1,
+  "last_stderr_lines": [
+    "Process timed out"
+  ]
+}

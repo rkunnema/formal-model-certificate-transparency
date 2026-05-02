@@ -99,3 +99,25 @@ To run the proofs in the paper:
 
 4. `batch-tamarin run $FILE` for one of the JSON files in the `proofs` directory. In case individual lemmas unexpectedly fail, batch-tamarin will recommend re-running these.
 
+
+## Manual proofs
+
+For gossiping we had to do some manual proofs, which are marked as such in the model and in the `batch-tamarin` configuration files. These are not yet fully automatically reproducible, unless large amounts of time and memory are available. We provide the proofs in `proofs/manual_proofs/` for reference.
+These lemmas are contained in the manual proof folder:
+- `A_Gossip_0_rootCA_rogue_gossip_suff`
+- `A_Gossip_0_rootCA_benign_gossip_suff`
+- `A_Gossip_0_rootCA_rogue_gossip_single`
+- `A_Gossip_0_rootCA_benign_gossip_single`
+- `A_Gossip_1_rootCA_rogue_gossip_mon_honest_suff`
+- `A_Gossip_1_rootCA_benign_gossip_mon_honest_suff`
+- `A_Gossip_1_rootCA_rogue_gossip_mon_honest_single`
+- `A_Gossip_1_rootCA_benign_gossip_mon_honest_single`
+- `A_Gossip_2_rootCA_rogue_gossip_log_honest_suff`
+- `A_Gossip_2_rootCA_benign_gossip_log_honest_suff`
+- `A_Gossip_2_rootCA_rogue_gossip_log_honest_single`
+- `A_Gossip_2_rootCA_benign_gossip_log_honest_single`
+- `A_Gossip_helper`
+- `T_Gossip_verif_empty_helper1`
+- `T_Gossip_verif_empty_helper2`
+
+`acc_oracle` lists for these proofs some promising tactics that aid the manual proof stepping. But however, these do not suffice for a full automation (yet).
