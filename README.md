@@ -6,18 +6,19 @@
    resides) and that you cloned from 
    https://github.com/rkunnema/formal-model-certificate-transparency
    (so that flake.nix is git-tracked; nix wants this).
-1. `nix develop .` # enters a nix environment with tamarin and batch-tamarin, takes a while because it compiles these tools.
-2. ☕️
+1. `nix develop .` # enters a nix environment with tamarin and batch-tamarin
+2. ☕️  (This takes a while because it compiles these tools.)
 3. `cd proofs` 
 4. (optional) `batch-tamarin check all_pki.json` or any other of the
-   `all_*.json` files. There's one for each model, i.e., row in Table 4.
-5.  `batch-tamarin run all_pki.json` 
+   `all_*.json` files. There's one for each model, i.e., for each of Table 4's rows.
+5. `batch-tamarin run all_pki.json` to really run the proofs.
 6. ☕️
-7.  Inspect results output in table. Compare each model  with the corresponding row in Table 4 from the paper. 
-8. Section 8 claims around five hours for all models so measure time with
+7.  Inspect results in the neat table that batch-tamarin outputs.
+ Compare each model  with the corresponding row in Table 4 from the paper. Click on the links within the table to check which lemma belongs to which statement.
+8. Section 8 claims around five hours for all models. You can check this with 
 `time for model in $(ls *.json); do batch-tamarin check $model; done`
 9. ☕️ ☕️ ☕️ ☕️ ☕️ 
-10. the entry under `real` is the wall-clock time
+10. The entry under `real` is the wall-clock time.
 
 If you don't have nix (but docker, or batch-tamarin, or just tamarin), or want
 to know where the models and manual proofs are, the rest of this file provides these answers.
@@ -143,7 +144,4 @@ These lemmas are contained in the manual proof folder:
 - `T_Gossip_verif_empty_helper2`
 
 `acc_oracle` lists for these proofs some promising tactics that aid the manual proof stepping. But however, these do not suffice for a full automation (yet).
-
-## Expected results:
-
 
