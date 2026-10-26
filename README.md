@@ -16,7 +16,7 @@
 7.  Inspect results in the neat table that batch-tamarin outputs.
  Compare each model  with the corresponding row in Table 4 from the paper. Click on the links within the table to check which lemma belongs to which statement.
 8. Section 8 claims around five hours for all models. You can check this with 
-`time for model in $(ls *.json); do batch-tamarin check $model; done`
+`time for model in $(ls *.json); do batch-tamarin run $model; done`
 9. ☕️ ☕️ ☕️ ☕️ ☕️ 
 10. The entry under `real` is the wall-clock time.
 
@@ -80,8 +80,11 @@ formally which combination of flags is to be used for which lemma.
 
 ```    
 maude tool: 'maude'
-checking version: 2.7.1. OK. checking installation: OK. 
-Generated from: Tamarin version 1.10.0 Maude version 2.7.1 Git revision: UNKNOWN, branch: UNKNOWN Compiled at: 2024-10-30 14:56:23.355649243 UTC
+ checking version: 3.4. OK.
+ checking installation: OK.
+Generated from:
+Tamarin version 1.10.0
+Maude version 3.4
 ```
 
 3. Note that some accountability lemmas might fail, because there are
@@ -109,9 +112,10 @@ To run the proofs in the paper:
     
     - the generic instructions https://nixos.org/download/#nix-install-linux
     - distribution-specific methods, e.g., for Debian https://packages.debian.org/sid/nix-bin
-    - alternatively (but untested) from Docker by doing `docker-make
-      tamarin-1.10-and-batch.Dockerfile` (also taken from the `tamarin-batch`
-      repository) or basically following what this file does 
+    - alternatively (but untested) from Docker by doing 
+        `docker build -f tamarin-1.10-and-batch.Dockerfile .`
+      (also taken from the `tamarin-batch`
+      repository) or basically following what this file does.
 
 2. run `nix develop`. This should re-create a complete environment with
    tamarin, batch-tamarin, and their run-time dependencies. The first time, it
@@ -145,3 +149,4 @@ These lemmas are contained in the manual proof folder:
 
 `acc_oracle` lists for these proofs some promising tactics that aid the manual proof stepping. But however, these do not suffice for a full automation (yet).
 
+We provide a copy of the `ct_gossip.spthy` model in `proofs/manual_proofs/manual_proofs_check.spthy`. The lemmas inside that theory that were manually proven are replaced with the proof. Tamarin can be used to check these proofs against the model. We refer to `proofs/manual_proofs/README.md` for more instructions on how to check these proofs yourself.

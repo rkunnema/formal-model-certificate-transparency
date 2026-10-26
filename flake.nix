@@ -1,5 +1,5 @@
 {
-  description = "Tamarin Prover 1.10.0 and batch-tamarin 1.1.0";
+  description = "Tamarin Prover 1.10.0 and batch-tamarin 1.1.2";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/a421ac6595024edcfbb1ef950a3712b89161c359";
@@ -63,11 +63,8 @@
           default = pkgs.buildEnv {
             name = "tamarin-prover-env";
             paths = with pkgs; [
-              zsh
               tamarin-prover
               graphviz
-              coreutils
-              bash
               batch-tamarin
             ];
           };
